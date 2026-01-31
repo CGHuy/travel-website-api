@@ -1,0 +1,175 @@
+body {
+    font-family: 'Lexend Deca', sans-serif;
+    padding-top: 70px;
+}
+
+/* Search Group */
+.search-group {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-group .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6c757d;
+    font-size: 18px;
+    z-index: 2;
+    cursor: pointer;
+}
+
+.search-group .search-input {
+    width: 100%;
+    padding: 12px 15px 12px 50px;
+    border: 2px solid #dee2e6;
+    border-radius: 25px;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.search-group .search-input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Tour Card */
+.tour-card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tour-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.tour-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.tour-card .card-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 1;
+}
+
+.tour-card .card-badges .badge {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.tour-card .card-body {
+    padding: 15px;
+}
+
+.tour-card .card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.tour-card .card-text {
+    font-size: 14px;
+    color: #6c757d;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.tour-card .card-price {
+    font-size: 14px;
+    color: #495057;
+}
+
+.tour-card .hightlight_price {
+    color: #e74c3c;
+    font-size: 18px;
+    font-weight: 700;
+    margin-left: 5px;
+}
+
+/* Section Titles */
+.section-main-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.region-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #3498db;
+}
+
+.region-title i {
+    margin-right: 8px;
+    color: #3498db;
+}
+
+/* Carousel Controls */
+.carousel-control-prev,
+.carousel-control-next {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.carousel-control-prev {
+    left: -25px;
+}
+
+.carousel-control-next {
+    right: -25px;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Links without decoration */
+a.text-decoration-none {
+    color: inherit;
+}
+
+a.text-decoration-none:hover {
+    color: inherit;
+}
