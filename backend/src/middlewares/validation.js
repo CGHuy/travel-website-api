@@ -15,9 +15,12 @@ const validateRegister = (req, res, next) => {
   // Kiểm tra email
   if (!email || email.trim().length === 0) {
     errors.push('Email không được để trống');
+  } else if (email.length > 255) {
+    errors.push('Email không được vượt quá 255 ký tự');
   } else {
+    // Email regex theo RFC 5322 (simplified)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email.trim())) {
       errors.push('Email không hợp lệ');
     }
   }
@@ -27,6 +30,8 @@ const validateRegister = (req, res, next) => {
     errors.push('Mật khẩu không được để trống');
   } else if (password.length < 6) {
     errors.push('Mật khẩu phải có ít nhất 6 ký tự');
+  } else if (password.length > 128) {
+    errors.push('Mật khẩu không được vượt quá 128 ký tự');
   }
 
   if (errors.length > 0) {
@@ -71,26 +76,38 @@ const validateTour = (req, res, next) => {
 
   if (!name || name.trim().length === 0) {
     errors.push('Tên tour không được để trống');
+  } else if (name.length > 200) {
+    errors.push('Tên tour không được vượt quá 200 ký tự');
   }
 
   if (!description || description.trim().length === 0) {
     errors.push('Mô tả không được để trống');
+  } else if (description.length > 2000) {
+    errors.push('Mô tả không được vượt quá 2000 ký tự');
   }
 
   if (!price || isNaN(price) || price <= 0) {
     errors.push('Giá tour phải là số dương');
+  } else if (price > 999999999) {
+    errors.push('Giá tour không được vượt quá 999,999,999');
   }
 
   if (!region || region.trim().length === 0) {
     errors.push('Vùng miền không được để trống');
+  } else if (region.length > 100) {
+    errors.push('Vùng miền không được vượt quá 100 ký tự');
   }
 
   if (!duration || duration.trim().length === 0) {
     errors.push('Thời gian không được để trống');
+  } else if (duration.length > 100) {
+    errors.push('Thời gian không được vượt quá 100 ký tự');
   }
 
   if (!location || location.trim().length === 0) {
     errors.push('Địa điểm không được để trống');
+  } else if (location.length > 255) {
+    errors.push('Địa điểm không được vượt quá 255 ký tự');
   }
 
   if (errors.length > 0) {

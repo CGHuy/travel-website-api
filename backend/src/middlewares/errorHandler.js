@@ -41,12 +41,25 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // Kiểm tra xem response đã được gửi hay chưa
+  if (res.headersSent) {
+    return next(err);
+  }
+
   // Lỗi mặc định
-  res.status(err.status || 500).json({
+  const statusCode = err.statusCode || err.status || 500;
+  const message = err.message || 'Lỗi server nội bộ';
+  
+  const response = {
     success: false,
-    message: err.message || 'Lỗi server nội bộ',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
+    message: message,
+    ...(process.env.NODE_ENV === 'development' && { 
+      stack: err.stack,
+      error: err.toString()
+    })
+  };
+
+  return res.status(statusCode).json(response);
 };
 
 // Middleware xử lý 404
