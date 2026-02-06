@@ -1,0 +1,43 @@
+body { 
+     font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; 
+     background: #e9f6ff;
+}
+          
+.hero {
+     background-image: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.4)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuC51e84TCIPZTYMq655AazrEd19gy6J5SkPICaV-OsgOfSAQRMAKNGCUK4a6I3_mTz9pnfqYQ6xwqwYJpCDSCHBFbVTcFtqOmbmi2MOTqlc11QtfH_j1w1hmgv8QDP0wyx9J15UAOZdq7OuPV3oOTK85frBtp6XMuZan1uPOyo1VBxgAgH-HiEtsOjBlZepkJ14XdXjx_Ggg5Q_MShc6ZnHDFSc4OBM1NJY0slp0GtyePDeIEGSnOiCwNI3LqO4-Ecgmmqip3HfoWr8');
+     background-size: cover; 
+     background-position: center; 
+     height: 260px; 
+     border-radius: 14px;
+}
+
+.card-floating {
+     margin-top: -50px; 
+     border-radius: 14px;
+}
+
+.input-icon { 
+     flex: 0 0 48px;
+     background:#f1f5f9; 
+     display:flex;
+     align-items:center; 
+     justify-content:center; 
+     border-radius: 999px 0 0 999px;
+}
+
+.rounded-pill-input {
+     border-radius: 0 999px 999px 0;
+}
+
+.rounded-pill-input-password { 
+     border-radius: 0 0 0 0;
+}
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
+button#togglePwd {
+     flex: 0 0 60px;
+}

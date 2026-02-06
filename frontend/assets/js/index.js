@@ -48,9 +48,9 @@ function createTourCard(tour) {
                          </div>
                          </div>
                     </div>
-            </a>
-        </div>
-    `;
+               </a>
+          </div>
+     `;
 }
 
 // Chia mảng tours thành các nhóm (chunks)
