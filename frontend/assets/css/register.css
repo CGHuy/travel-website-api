@@ -4,8 +4,17 @@ body {
      background:#e9f6ff; 
 }
 
-.card-rounded { 
-     border-radius: 14px; 
+.hero {
+     background-image: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.4)), url('https://img.thuthuatphanmem.vn/uploads/2018/10/26/anh-dep-dao-vinh-viet-nam_055419149.jpg');
+     background-size: cover; 
+     background-position: center; 
+     height: 520px; 
+     border-radius: 14px 0 0 14px;
+}
+
+.card-rounded {
+     border-radius: 0 14px 14px 0;
+     height: 520px;
 }
 
 .brand { 
