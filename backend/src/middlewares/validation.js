@@ -1,15 +1,22 @@
 // Validation cho đăng ký user
 const validateRegister = (req, res, next) => {
-  const { username, email, password } = req.body;
+  const { fullname, phone, email, password } = req.body;
   const errors = [];
 
-  // Kiểm tra username
-  if (!username || username.trim().length === 0) {
-    errors.push('Tên người dùng không được để trống');
-  } else if (username.length < 3) {
-    errors.push('Tên người dùng phải có ít nhất 3 ký tự');
-  } else if (username.length > 50) {
-    errors.push('Tên người dùng không được vượt quá 50 ký tự');
+  // Kiểm tra fullname
+  if (!fullname || fullname.trim().length === 0) {
+    errors.push('Họ và tên không được để trống');
+  } else if (fullname.length < 3) {
+    errors.push('Họ và tên phải có ít nhất 3 ký tự');
+  } else if (fullname.length > 255) {
+    errors.push('Họ và tên không được vượt quá 255 ký tự');
+  }
+
+  // Kiểm tra phone
+  if (!phone || phone.trim().length === 0) {
+    errors.push('Số điện thoại không được để trống');
+  } else if (!/^0[0-9]{9}$/.test(phone.trim())) {
+    errors.push('Số điện thoại không hợp lệ (10 chữ số, bắt đầu bằng 0)');
   }
 
   // Kiểm tra email
@@ -51,7 +58,7 @@ const validateLogin = (req, res, next) => {
   const errors = [];
 
   if (!email || email.trim().length === 0) {
-    errors.push('Email không được để trống');
+    errors.push('Email hoặc số điện thoại không được để trống');
   }
 
   if (!password || password.trim().length === 0) {

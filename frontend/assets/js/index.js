@@ -1,17 +1,33 @@
-// API Configuration
 const API_URL = 'http://localhost:3000/api';
 
-// Load external component HTML into placeholder
+// Load header và footer, sau đó load dữ liệu tour
+document.addEventListener('DOMContentLoaded', async () => {
+     await Promise.all([
+          loadComponent('header-placeholder', '../components/header.html'),
+          loadComponent('footer-placeholder', '../components/footer.html'),
+     ]);
+
+     loadTopTours();
+     loadToursByRegion('Miền Bắc', 'mienBacCarousel', 'carouselMienBac');
+     loadToursByRegion('Miền Trung', 'mienTrungCarousel', 'carouselMienTrung');
+     loadToursByRegion('Miền Nam', 'mienNamCarousel', 'carouselMienNam');
+});
+
 async function loadComponent(targetId, filePath) {
      const target = document.getElementById(targetId);
      if (!target) return;
 
      try {
           const res = await fetch(filePath);
+          if (!res.ok) {
+               throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
           const html = await res.text();
           target.innerHTML = html;
      } catch (err) {
           console.error(`Không thể load component ${filePath}:`, err);
+          // Ensure the page doesn't break if component fails to load
+          target.innerHTML = '';
      }
 }
 
@@ -144,17 +160,4 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
 
      // Redirect to search results page or handle inline
      window.location.href = `tours.html?search=${encodeURIComponent(keyword)}`;
-});
-
-// Load header và footer, sau đó load dữ liệu tour
-document.addEventListener('DOMContentLoaded', async () => {
-     await Promise.all([
-          loadComponent('header-placeholder', '../components/header.html'),
-          loadComponent('footer-placeholder', '../components/footer.html'),
-     ]);
-
-     loadTopTours();
-     loadToursByRegion('Miền Bắc', 'mienBacCarousel', 'carouselMienBac');
-     loadToursByRegion('Miền Trung', 'mienTrungCarousel', 'carouselMienTrung');
-     loadToursByRegion('Miền Nam', 'mienNamCarousel', 'carouselMienNam');
 });

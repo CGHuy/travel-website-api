@@ -28,6 +28,10 @@
                return;
           }
 
+          // Disable submit button to prevent multiple submissions
+          const submitBtn = registerForm.querySelector('button[type="submit"]');
+          if (submitBtn) submitBtn.disabled = true;
+
           const formData = new FormData(registerForm);
           const data = {
                fullname: formData.get('fullname'),
@@ -47,8 +51,8 @@
 
                const result = await response.json();
 
-               if (response.ok) {
-                    showMessage(result.message || 'Đăng ký thành công!', 'success');
+               if (response.ok && result.success) {
+                    showMessage(result.message || 'Đăng ký thành công! Chuyển hướng đến đăng nhập...', 'success');
 
                     registerForm.reset();
                     registerForm.classList.remove('was-validated');
@@ -61,10 +65,14 @@
                          result.message || 'Đăng ký thất bại. Vui lòng thử lại.',
                          'danger'
                     );
+                    // Re-enable submit button on error
+                    if (submitBtn) submitBtn.disabled = false;
                }
           } catch (error) {
                console.error('Registration error:', error);
-               showMessage('Có lỗi xảy ra. Vui lòng thử lại sau.', 'danger');
+               showMessage('Có lỗi xảy ra: ' + error.message, 'danger');
+               // Re-enable submit button on error
+               if (submitBtn) submitBtn.disabled = false;
           }
      });
 

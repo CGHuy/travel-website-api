@@ -17,7 +17,7 @@ const generateToken = (user) => {
 // Đăng ký user mới
 exports.register = async (req, res) => {
      try {
-          const { username, email, password } = req.body;
+          const { fullname, phone, email, password } = req.body;
 
           // Kiểm tra email đã tồn tại chưa
           const existingUser = await User.findByEmail(email);
@@ -28,12 +28,22 @@ exports.register = async (req, res) => {
                });
           }
 
+          // Kiểm tra phone đã tồn tại chưa
+          const existingPhone = await User.findByPhone(phone);
+          if (existingPhone) {
+               return res.status(409).json({
+               success: false,
+               message: 'Số điện thoại đã được sử dụng!'
+               });
+          }
+
           // Tạo user mới
           const userId = await User.create({
-               username,
+               fullname,
+               phone,
                email,
                password,
-               role: 'user' // Mặc định là user
+               role: 'customer' // Mặc định là customer
           });
 
           // Lấy thông tin user vừa tạo
@@ -48,7 +58,8 @@ exports.register = async (req, res) => {
                data: {
                user: {
                     id: newUser.id,
-                    username: newUser.username,
+                    fullname: newUser.fullname,
+                    phone: newUser.phone,
                     email: newUser.email,
                     role: newUser.role
                },
@@ -70,12 +81,12 @@ exports.login = async (req, res) => {
      try {
           const { email, password } = req.body;
 
-          // Tìm user theo email
-          const user = await User.findByEmail(email);
+          // Tìm user theo email hoặc số điện thoại
+          const user = await User.findByEmailOrPhone(email);
           if (!user) {
                return res.status(401).json({
                success: false,
-               message: 'Email hoặc mật khẩu không đúng!'
+               message: 'Email hoặc số điện thoại không đúng!'
                });
           }
 
@@ -84,7 +95,7 @@ exports.login = async (req, res) => {
           if (!isPasswordValid) {
                return res.status(401).json({
                success: false,
-               message: 'Email hoặc mật khẩu không đúng!'
+               message: 'Mật khẩu không đúng!'
                });
           }
 
@@ -97,7 +108,8 @@ exports.login = async (req, res) => {
                data: {
                user: {
                     id: user.id,
-                    username: user.username,
+                    fullname: user.fullname,
+                    phone: user.phone,
                     email: user.email,
                     role: user.role
                },
@@ -131,7 +143,8 @@ exports.getProfile = async (req, res) => {
                success: true,
                data: {
                id: user.id,
-               username: user.username,
+               fullname: user.fullname,
+               phone: user.phone,
                email: user.email,
                role: user.role,
                created_at: user.created_at
@@ -150,7 +163,7 @@ exports.getProfile = async (req, res) => {
 // Cập nhật profile
 exports.updateProfile = async (req, res) => {
      try {
-          const { username, email } = req.body;
+          const { fullname, phone, email } = req.body;
           const userId = req.user.id;
 
           // Kiểm tra email mới có bị trùng không (nếu thay đổi email)
@@ -166,7 +179,8 @@ exports.updateProfile = async (req, res) => {
 
           // Cập nhật thông tin
           const updated = await User.update(userId, {
-               username: username || req.user.username,
+               fullname: fullname || req.user.fullname,
+               phone: phone || req.user.phone,
                email: email || req.user.email,
                role: req.user.role // Giữ nguyên role
           });
@@ -186,7 +200,8 @@ exports.updateProfile = async (req, res) => {
                message: 'Cập nhật profile thành công!',
                data: {
                id: updatedUser.id,
-               username: updatedUser.username,
+               fullname: updatedUser.fullname,
+               phone: updatedUser.phone,
                email: updatedUser.email,
                role: updatedUser.role
                }

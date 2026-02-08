@@ -20,7 +20,7 @@ const generalLimiter = rateLimit({
 // Giới hạn cho auth (đăng nhập, đăng ký)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 phút
-  max: 5, // 5 attempt/15 phút
+  max: 100, // 5 attempt/15 phút
   message: {
     success: false,
     message: 'Quá nhiều lần đăng nhập/đăng ký không thành công, vui lòng thử lại sau 15 phút'

@@ -12,10 +12,30 @@ class User {
           }
      }
 
+     // Tìm user theo số điện thoại
+     static async findByPhone(phone) {
+          try {
+               const [rows] = await db.query('SELECT * FROM users WHERE phone = ?', [phone]);
+               return rows[0];
+          } catch (error) {
+               throw error;
+          }
+     }
+
+     // Tìm user theo email hoặc phone
+     static async findByEmailOrPhone(emailOrPhone) {
+          try {
+               const [rows] = await db.query('SELECT * FROM users WHERE email = ? OR phone = ?', [emailOrPhone, emailOrPhone]);
+               return rows[0];
+          } catch (error) {
+               throw error;
+          }
+     }
+
      // Tìm user theo ID
      static async findById(id) {
           try {
-               const [rows] = await db.query('SELECT id, username, email, role, created_at FROM users WHERE id = ?', [id]);
+               const [rows] = await db.query('SELECT id, fullname, phone, email, role, created_at FROM users WHERE id = ?', [id]);
                return rows[0];
           } catch (error) {
                throw error;
@@ -25,14 +45,14 @@ class User {
      // Tạo user mới
      static async create(userData) {
           try {
-               const { username, email, password, role = 'user' } = userData;
+               const { fullname, phone, email, password, role = 'customer' } = userData;
                
                // Hash password
                const hashedPassword = await bcrypt.hash(password, 10);
                
                const [result] = await db.query(
-               'INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())',
-               [username, email, hashedPassword, role]);
+               'INSERT INTO users (fullname, phone, email, password, role, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+               [fullname, phone, email, hashedPassword, role]);
                
                return result.insertId;
           } catch (error) {
@@ -48,7 +68,7 @@ class User {
      // Lấy tất cả users (cho admin)
      static async getAll() {
           try {
-               const [rows] = await db.query('SELECT id, username, email, role, created_at FROM users ORDER BY id DESC');
+               const [rows] = await db.query('SELECT id, fullname, phone, email, role, created_at FROM users ORDER BY id DESC');
                return rows;
           } catch (error) {
                throw error;
