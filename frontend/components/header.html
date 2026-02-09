@@ -31,28 +31,38 @@
      <div class="d-flex align-items-center gap-2">
 
           <a id="loginBtn" href="/pages/auth/login.html"
-               class="d-none d-sm-flex btn btn-primary rounded-pill px-4 fw-bold">Đăng nhập</a>
+               class="d-none btn btn-primary rounded-pill px-4 fw-bold">Đăng nhập</a>
 
           <a id="registerBtn" href="/pages/auth/register.html"
-               class="d-none d-sm-flex btn btn-light rounded-pill px-4 fw-bold border">Đăng ký</a>
+               class="d-none btn btn-light rounded-pill px-4 fw-bold border">Đăng ký</a>
+               
+          <div id="userMenu" class="d-none d-flex align-items-center gap-2 position-relative">
 
-          <div id="userMenu" class="d-none d-flex align-items-center gap-2">
-               <div class="dropdown">
-                    <a href="#" class="rounded-circle overflow-hidden dropdown-toggle" 
-                         id="avatarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-                         style="width:40px; height:40px; cursor:pointer;" title="Thông tin cá nhân">
-                         <img id="userAvatar" src="/assets/images/image.png" alt="Avatar"
-                              style="width:100%; height:100%; object-fit:cover;">
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="avatarDropdown">
-                         <li><a class="dropdown-item" href="/pages/user/profile.html">Hồ sơ cá nhân</a></li>
-                         <li><a class="dropdown-item" href="/pages/user/bookings-history.html">Lịch sử đặt tour</a></li>
-                         <li><a class="dropdown-item" href="/pages/user/favorite.html">Tour yêu thích</a></li>
-                         <li><hr class="dropdown-divider"></li>
-                         <li><a class="dropdown-item" id="logoutBtn" href="#">Đăng xuất</a></li>
-                    </ul>
-               </div>
+               <p id="userName" class="d-none text-decoration-none text-body fw-medium px-2 py-1 mb-0"></p>
+
+               <button id="avatarBtn"
+                    type="button"
+                    class="border-0 bg-transparent p-0 rounded-circle overflow-hidden"
+                    style="width:40px; height:40px; cursor:pointer;"
+                    title="Thông tin cá nhân">
+
+                    <img id="userAvatar"
+                         src="/assets/images/image.png"
+                         alt="Avatar"
+                         style="width:40px; height:40px; object-fit:cover;">
+               </button>
+
+               <ul id="userDropdown"
+                    class="dropdown-menu dropdown-menu-end"
+                    style="display:none; position:absolute; top:50px; right:0;">
+                    <li><a class="dropdown-item" href="/pages/user/profile.html">Hồ sơ cá nhân</a></li>
+                    <li><a class="dropdown-item" href="/pages/user/bookings-history.html">Lịch sử đặt tour</a></li>
+                    <li><a class="dropdown-item" href="/pages/user/favorite.html">Tour yêu thích</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" id="logoutBtn" href="#">Đăng xuất</a></li>
+               </ul>
           </div>
+
      </div>
 </header>
 

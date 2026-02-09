@@ -1,18 +1,25 @@
-document.addEventListener('DOMContentLoaded', function () {
-     initHeader();
-});
-
-// KHỞI TẠO HEADER
+// Khởi tạo header
 function initHeader() {
-     updateAuthUI();
-     setupLogout();
+    updateAuthUI();
+    setupLogout();
+    setupAvatarDropdown();
 }
 
-// ĐỒNG BỘ GIỮA NHIỀU TAB
-window.addEventListener('storage', function () {
-     updateAuthUI();
+// Auto init khi script load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeader);
+} else {
+    // DOM đã sẵn sàng, chạy sau 1 tick để đảm bảo HTML đã render
+    setTimeout(initHeader, 0);
+}
+
+// Đồng bộ đăng nhập / đăng xuất giữa nhiều tab
+window.addEventListener('storage', () => {
+    updateAuthUI();
+    closeUserDropdown();
 });
 
+// ================== AUTH UI ==================
 function updateAuthUI() {
      const token = localStorage.getItem('token');
      const user = localStorage.getItem('user');
@@ -20,44 +27,52 @@ function updateAuthUI() {
      const loginBtn = document.getElementById('loginBtn');
      const registerBtn = document.getElementById('registerBtn');
      const userMenu = document.getElementById('userMenu');
+     const userName = document.getElementById('userName');
 
-     // Nếu đã đăng nhập
+     console.log('updateAuthUI - token:', token ? 'có' : 'không');
+     console.log('updateAuthUI - elements:', { loginBtn, registerBtn, userMenu });
+
      if (token && user) {
+          // Đã đăng nhập: Ẩn nút login/register, hiện userMenu
           if (loginBtn) loginBtn.classList.add('d-none');
           if (registerBtn) registerBtn.classList.add('d-none');
           if (userMenu) userMenu.classList.remove('d-none');
+          if (userName) userName.classList.remove('d-none');
 
-          // Cập nhật tên người dùng (nếu có)
           try {
                const userData = JSON.parse(user);
                const avatarImg = document.getElementById('userAvatar');
+               
 
-               if (avatarImg && userData.fullname) {
+               if (avatarImg) {
                     avatarImg.alt = userData.fullname;
-                    avatarImg.title = userData.fullname;
                }
-          } catch (error) {
-               console.error('Không đọc được dữ liệu user');
+
+               if (userName) {
+                    userName.textContent = `Hi! ${userData.fullname}`;
+               }
+          } catch (err) {
+               console.error('Không đọc được dữ liệu user:', err);
           }
-     }
-     // Nếu CHƯA đăng nhập
-     else {
+     } else {
+          // Chưa đăng nhập: Hiện nút login/register, ẩn userMenu
           if (loginBtn) loginBtn.classList.remove('d-none');
           if (registerBtn) registerBtn.classList.remove('d-none');
           if (userMenu) userMenu.classList.add('d-none');
+
+          closeUserDropdown();
      }
 }
 
+// ================== LOGOUT ==================
 function setupLogout() {
      const logoutBtn = document.getElementById('logoutBtn');
-
      if (!logoutBtn) return;
 
-     logoutBtn.addEventListener('click', function (e) {
+     logoutBtn.addEventListener('click', (e) => {
           e.preventDefault();
 
-          const isConfirm = confirm('Bạn có chắc chắn muốn đăng xuất?');
-          if (!isConfirm) return;
+          if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
 
           localStorage.removeItem('token');
           localStorage.removeItem('user');
@@ -66,4 +81,37 @@ function setupLogout() {
      });
 }
 
+// ================== AVATAR DROPDOWN ==================
+function setupAvatarDropdown() {
+     const avatarBtn = document.getElementById('avatarBtn');
+     const userDropdown = document.getElementById('userDropdown');
 
+     if (!avatarBtn || !userDropdown) return;
+
+     avatarBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleUserDropdown();
+     });
+
+     document.addEventListener('click', (e) => {
+          if (
+               !avatarBtn.contains(e.target) &&
+               !userDropdown.contains(e.target)
+          ) {
+               closeUserDropdown();
+          }
+     });
+}
+
+function toggleUserDropdown() {
+     const dropdown = document.getElementById('userDropdown');
+     if (!dropdown) return;
+
+     dropdown.style.display =
+          dropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+function closeUserDropdown() {
+     const dropdown = document.getElementById('userDropdown');
+     if (dropdown) dropdown.style.display = 'none';
+}

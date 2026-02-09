@@ -19,17 +19,29 @@ async function loadComponent(targetId, filePath) {
 
      try {
           const res = await fetch(filePath);
-          if (!res.ok) {
-               throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-          }
           const html = await res.text();
           target.innerHTML = html;
+
+          // Nếu là header, chạy script init sau khi HTML được load
+          if (filePath.includes('header.html')) {
+               // Tìm và execute script tag có trong HTML
+               const scripts = target.querySelectorAll('script');
+               scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                         newScript.src = script.src;
+                    } else {
+                         newScript.textContent = script.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                    script.remove();
+               });
+          }
      } catch (err) {
-          console.error(`Không thể load component ${filePath}:`, err);
-          // Ensure the page doesn't break if component fails to load
-          target.innerHTML = '';
+          console.error(err);
      }
 }
+
 
 // Format giá VNĐ
 function formatPrice(price) {
