@@ -42,7 +42,6 @@ async function loadComponent(targetId, filePath) {
      }
 }
 
-
 // Format giá VNĐ
 function formatPrice(price) {
      return new Intl.NumberFormat('vi-VN').format(price) + ' VNĐ';

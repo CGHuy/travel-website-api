@@ -1,96 +1,150 @@
 (() => {
      const form = document.getElementById('loginForm');
      const message = document.getElementById('loginMessage');
-     const toggleBtn = document.getElementById('togglePwd');
+
+     const username = document.getElementById('username');
      const password = document.getElementById('password');
-     const emailInput = document.getElementById('email');
+     const usernameError = document.getElementById('usernameError');
+     const passwordError = document.getElementById('passwordError');
+
+     const toggleBtn = document.getElementById('togglePwd');
      const API_URL = 'http://localhost:3000/api';
 
-     if (!form || !toggleBtn || !password || !message) {
+     if (!form || !username || !password || !message || !toggleBtn || !API_URL) {
           return;
      }
 
-     toggleBtn.addEventListener('click', () => {
-          const isHidden = password.type === 'password';
-          password.type = isHidden ? 'text' : 'password';
-          toggleBtn.textContent = isHidden ? 'Ẩn' : 'Hiện';
-     });
+     // Kiểm tra dữ liệu form
+     const validateForm = () => {
+          let isValid = true;
+          username.classList.remove('is-invalid');
+          password.classList.remove('is-invalid');
 
+          if (usernameError) usernameError.textContent = '';
+          if (passwordError) passwordError.textContent = '';
+
+          // Kiểm tra username
+          if (!username.value.trim()) {
+               username.classList.add('is-invalid');
+               if (usernameError) {
+                    usernameError.textContent = 'Vui lòng nhập tên đăng nhập';
+                    usernameError.classList.remove('d-none');
+               }
+               isValid = false;
+          }
+
+          // Kiểm tra password
+          if (!password.value.trim()) {
+               password.classList.add('is-invalid');
+               if (passwordError) {
+                    passwordError.textContent = 'Vui lòng nhập mật khẩu';
+                    passwordError.classList.remove('d-none');
+               }
+               isValid = false;
+          }
+
+          return isValid;
+     };
+
+     // Xử lý submit form
      form.addEventListener('submit', async (event) => {
           event.preventDefault();
 
-          if (!form.checkValidity()) {
-               event.stopPropagation();
-               form.classList.add('was-validated');
+          //message.classList.add('d-none');
+
+          // Kiểm tra dữ liệu trước khi gửi request
+          if (!validateForm()) {
                return;
           }
 
-          // Disable submit button to prevent multiple submissions
           const submitBtn = form.querySelector('button[type="submit"]');
           if (submitBtn) submitBtn.disabled = true;
 
-          const email = emailInput.value.trim();
-          const pwd = password.value;
-
           try {
-               // Hiển thị trạng thái loading
-               message.textContent = 'Đang xử lý...';
-               message.classList.remove('d-none', 'alert-danger', 'alert-success');
-               message.classList.add('alert-info');
-
                const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                          'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                         email: email,
-                         password: pwd
+                         username: username.value.trim(),
+                         password: password.value.trim()
                     })
                });
 
                const data = await response.json();
 
+               // SUCCESS
                if (response.ok && data.success) {
-                    message.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
-                    message.classList.remove('alert-danger', 'alert-info');
-                    message.classList.add('alert-success');
-                    
-                    // Xóa dữ liệu cũ trước khi lưu
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    
-                    // Lưu token và thông tin user
-                    if (data.data && data.data.token && data.data.user) {
-                         localStorage.setItem('token', data.data.token);
-                         localStorage.setItem('user', JSON.stringify(data.data.user));
-                         
-                         // Dispatch event để cập nhật UI ở các tab khác
-                         window.dispatchEvent(new Event('storage'));
-                         
-                         // Chuyển hướng sau 1.5 giây
-                         setTimeout(() => {
-                              window.location.href = '/pages/index.html';
-                         }, 1500);
-                    } else {
-                         throw new Error('Dữ liệu không hợp lệ từ server');
-                    }
-               } else {
-                    message.textContent = data.message || 'Đăng nhập thất bại!';
-                    message.classList.remove('alert-info', 'alert-success');
-                    message.classList.add('alert-danger');
-                    
-                    // Re-enable submit button on error
-                    if (submitBtn) submitBtn.disabled = false;
+                    message.textContent = data.message;
+                    message.className = 'alert alert-success';
+
+                    localStorage.setItem('token', data.data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+
+                    setTimeout(() => {
+                         window.location.href = '/pages/index.html';
+                    }, 1000);
+                    return;
                }
+
+               // ERROR
+               message.textContent = data.message;
+               message.className = 'alert alert-danger';
+
+               if (submitBtn) submitBtn.disabled = false;
+
           } catch (error) {
                console.error('Login error:', error);
-               message.textContent = 'Lỗi kết nối: ' + error.message;
-               message.classList.remove('alert-info', 'alert-success');
-               message.classList.add('alert-danger');
-               
-               // Re-enable submit button on error
+               message.textContent = 'Không thể kết nối tới server';
+               message.className = 'alert alert-danger';
                if (submitBtn) submitBtn.disabled = false;
           }
      });
+
+     // Ẩn/hiện mật khẩu
+     toggleBtn.addEventListener('click', () => {
+          const isHidden = password.type === 'password';
+          password.type = isHidden ? 'text' : 'password';
+          toggleBtn.textContent = isHidden ? 'Ẩn' : 'Hiện';
+     });
+
+     // Check input username real-time
+     username.addEventListener('input', () => {
+          const value = username.value.trim();
+          
+          if (!value) {
+               username.classList.add('is-invalid');
+               if (usernameError) {
+                    usernameError.textContent = 'Vui lòng nhập tên đăng nhập';
+                    usernameError.classList.remove('d-none');
+               }
+          } else {
+               username.classList.remove('is-invalid');
+               if (usernameError) {
+                    usernameError.textContent = '';
+                    usernameError.classList.add('d-none');
+               }
+          }
+     });
+
+     // Check input password real-time
+     password.addEventListener('input', () => {
+          const value = password.value.trim();
+          
+          if (!value) {
+               password.classList.add('is-invalid');
+               if (passwordError) {
+                    passwordError.textContent = 'Vui lòng nhập mật khẩu';
+                    passwordError.classList.remove('d-none');
+               }
+          } else {
+               password.classList.remove('is-invalid');
+               if (passwordError) {
+                    passwordError.textContent = '';
+                    passwordError.classList.add('d-none');
+               }
+          }
+     });
+
 })();

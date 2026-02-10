@@ -79,10 +79,10 @@ exports.register = async (req, res) => {
 // Đăng nhập
 exports.login = async (req, res) => {
      try {
-          const { email, password } = req.body;
+          const {username, password } = req.body;
 
           // Tìm user theo email hoặc số điện thoại
-          const user = await User.findByEmailOrPhone(email);
+          const user = await User.findByEmailOrPhone(username);
           if (!user) {
                return res.status(401).json({
                success: false,
@@ -104,7 +104,7 @@ exports.login = async (req, res) => {
 
           res.json({
                success: true,
-               message: 'Đăng nhập thành công!',
+               message: 'Đăng nhập thành công! Đang chuyển hướng...',
                data: {
                user: {
                     id: user.id,

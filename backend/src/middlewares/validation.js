@@ -1,51 +1,51 @@
 // Validation cho đăng ký user
 const validateRegister = (req, res, next) => {
   const { fullname, phone, email, password } = req.body;
-  const errors = [];
+  const errors = {};
 
   // Kiểm tra fullname
   if (!fullname || fullname.trim().length === 0) {
-    errors.push('Họ và tên không được để trống');
+    errors.fullname = 'Họ và tên không được để trống';
   } else if (fullname.length < 3) {
-    errors.push('Họ và tên phải có ít nhất 3 ký tự');
+    errors.fullname = 'Họ và tên phải có ít nhất 3 ký tự';
   } else if (fullname.length > 255) {
-    errors.push('Họ và tên không được vượt quá 255 ký tự');
+    errors.fullname = 'Họ và tên không được vượt quá 255 ký tự';
   }
 
   // Kiểm tra phone
   if (!phone || phone.trim().length === 0) {
-    errors.push('Số điện thoại không được để trống');
+    errors.phone = 'Số điện thoại không được để trống';
   } else if (!/^0[0-9]{9}$/.test(phone.trim())) {
-    errors.push('Số điện thoại không hợp lệ (10 chữ số, bắt đầu bằng 0)');
+    errors.phone = 'Số điện thoại không hợp lệ (10 chữ số, bắt đầu bằng 0)';
   }
 
   // Kiểm tra email
   if (!email || email.trim().length === 0) {
-    errors.push('Email không được để trống');
+    errors.email = 'Email không được để trống';
   } else if (email.length > 255) {
-    errors.push('Email không được vượt quá 255 ký tự');
+    errors.email = 'Email không được vượt quá 255 ký tự';
   } else {
     // Email regex theo RFC 5322 (simplified)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      errors.push('Email không hợp lệ');
+      errors.email = 'Email không hợp lệ';
     }
   }
 
   // Kiểm tra password
   if (!password || password.trim().length === 0) {
-    errors.push('Mật khẩu không được để trống');
+    errors.password = 'Mật khẩu không được để trống';
   } else if (password.length < 6) {
-    errors.push('Mật khẩu phải có ít nhất 6 ký tự');
+    errors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
   } else if (password.length > 128) {
-    errors.push('Mật khẩu không được vượt quá 128 ký tự');
+    errors.password = 'Mật khẩu không được vượt quá 128 ký tự';
   }
 
-  if (errors.length > 0) {
+  if (Object.keys(errors).length > 0) {
     return res.status(400).json({
       success: false,
       message: 'Dữ liệu không hợp lệ',
-      errors: errors
+      errors
     });
   }
 
@@ -54,22 +54,22 @@ const validateRegister = (req, res, next) => {
 
 // Validation cho đăng nhập
 const validateLogin = (req, res, next) => {
-  const { email, password } = req.body;
-  const errors = [];
+  const { username, password } = req.body;
+  const errors = {};
 
-  if (!email || email.trim().length === 0) {
-    errors.push('Email hoặc số điện thoại không được để trống');
+  if (!username || username.trim().length === 0) {
+    errors.username = 'Email hoặc số điện thoại không được để trống';
   }
 
   if (!password || password.trim().length === 0) {
-    errors.push('Mật khẩu không được để trống');
+    errors.password = 'Mật khẩu không được để trống';
   }
 
-  if (errors.length > 0) {
+  if (Object.keys(errors).length > 0) {
     return res.status(400).json({
       success: false,
       message: 'Vui lòng điền đầy đủ thông tin',
-      errors: errors
+      errors
     });
   }
 
