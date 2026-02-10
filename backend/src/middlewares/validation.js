@@ -57,10 +57,12 @@ const validateLogin = (req, res, next) => {
   const { username, password } = req.body;
   const errors = {};
 
+  // Kiểm tra username
   if (!username || username.trim().length === 0) {
     errors.username = 'Email hoặc số điện thoại không được để trống';
   }
-
+  
+  // Kiểm tra password
   if (!password || password.trim().length === 0) {
     errors.password = 'Mật khẩu không được để trống';
   }

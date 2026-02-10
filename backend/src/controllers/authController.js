@@ -54,7 +54,7 @@ exports.register = async (req, res) => {
 
           res.status(201).json({
                success: true,
-               message: 'Đăng ký thành công!',
+               message: 'Đăng ký thành công! Đang chuyển hướng...',
                data: {
                user: {
                     id: newUser.id,

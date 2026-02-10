@@ -4,6 +4,7 @@
 
      const username = document.getElementById('username');
      const password = document.getElementById('password');
+
      const usernameError = document.getElementById('usernameError');
      const passwordError = document.getElementById('passwordError');
 
@@ -14,43 +15,9 @@
           return;
      }
 
-     // Kiểm tra dữ liệu form
-     const validateForm = () => {
-          let isValid = true;
-          username.classList.remove('is-invalid');
-          password.classList.remove('is-invalid');
-
-          if (usernameError) usernameError.textContent = '';
-          if (passwordError) passwordError.textContent = '';
-
-          // Kiểm tra username
-          if (!username.value.trim()) {
-               username.classList.add('is-invalid');
-               if (usernameError) {
-                    usernameError.textContent = 'Vui lòng nhập tên đăng nhập';
-                    usernameError.classList.remove('d-none');
-               }
-               isValid = false;
-          }
-
-          // Kiểm tra password
-          if (!password.value.trim()) {
-               password.classList.add('is-invalid');
-               if (passwordError) {
-                    passwordError.textContent = 'Vui lòng nhập mật khẩu';
-                    passwordError.classList.remove('d-none');
-               }
-               isValid = false;
-          }
-
-          return isValid;
-     };
-
      // Xử lý submit form
      form.addEventListener('submit', async (event) => {
           event.preventDefault();
-
-          //message.classList.add('d-none');
 
           // Kiểm tra dữ liệu trước khi gửi request
           if (!validateForm()) {
@@ -91,7 +58,6 @@
                // ERROR
                message.textContent = data.message;
                message.className = 'alert alert-danger';
-
                if (submitBtn) submitBtn.disabled = false;
 
           } catch (error) {
@@ -109,41 +75,61 @@
           toggleBtn.textContent = isHidden ? 'Ẩn' : 'Hiện';
      });
 
-     // Check input username real-time
+     // Kiểm tra dữ liệu form
+     const validateForm = () => {
+          let isValid = true;
+
+          clearError(username, usernameError);
+          clearError(password, passwordError);
+
+          // Kiểm tra username
+          if (!username.value.trim()) {
+               setError(username, usernameError, 'Vui lòng nhập tên đăng nhập');
+               isValid = false;
+          }
+
+          // Kiểm tra password
+          if (!password.value.trim()) {
+               setError(password, passwordError, 'Vui lòng nhập mật khẩu');
+               isValid = false;
+          }
+
+          return isValid;
+     };
+
+     const clearError = (input, error) => {
+          input.classList.remove('is-invalid');
+          if (error) {
+               error.textContent = '';
+               error.classList.add('d-none');
+          }
+     };
+
+     const setError = (input, error, message) => {
+          input.classList.add('is-invalid');
+          if (error) {
+               error.textContent = message;
+               error.classList.remove('d-none');
+          }
+     };
+
+     // Check input real-time
+
      username.addEventListener('input', () => {
           const value = username.value.trim();
-          
           if (!value) {
-               username.classList.add('is-invalid');
-               if (usernameError) {
-                    usernameError.textContent = 'Vui lòng nhập tên đăng nhập';
-                    usernameError.classList.remove('d-none');
-               }
+               setError(username, usernameError, 'Vui lòng nhập tên đăng nhập');
           } else {
-               username.classList.remove('is-invalid');
-               if (usernameError) {
-                    usernameError.textContent = '';
-                    usernameError.classList.add('d-none');
-               }
+               clearError(username, usernameError);
           }
      });
 
-     // Check input password real-time
      password.addEventListener('input', () => {
           const value = password.value.trim();
-          
           if (!value) {
-               password.classList.add('is-invalid');
-               if (passwordError) {
-                    passwordError.textContent = 'Vui lòng nhập mật khẩu';
-                    passwordError.classList.remove('d-none');
-               }
+               setError(password, passwordError, 'Vui lòng nhập mật khẩu');
           } else {
-               password.classList.remove('is-invalid');
-               if (passwordError) {
-                    passwordError.textContent = '';
-                    passwordError.classList.add('d-none');
-               }
+               clearError(password, passwordError);
           }
      });
 
