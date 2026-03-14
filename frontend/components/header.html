@@ -1,58 +1,46 @@
-<header
-     class="fixed-top d-flex align-items-center justify-content-between border-bottom px-5 py-3 bg-white bg-opacity-80 backdrop-blur-sm">
+<header class="fixed-top d-flex align-items-center justify-content-between border-bottom px-5 py-3 bg-white bg-opacity-80 backdrop-blur-sm">
+    <!-- Logo -->
+    <a href="/pages/index.html" class="d-flex align-items-center gap-2 text-decoration-none text-body">
+        <div style="width: 32px; height: 32px; color: #1976d2">
+            <img src="/assets/images/icon.svg" alt="VietTour logo" style="width: 32px; height: 32px; object-fit: contain"/>
+        </div>
+        <h2 class="fs-4 fw-bold mb-0">VietTour</h2>
+    </a>
 
-     <!-- Logo -->
-     <a href="/pages/index.html" class="d-flex align-items-center gap-2 text-decoration-none text-body">
-          <div style="width: 32px; height: 32px; color: #1976d2;">
-               <img src="/assets/images/icon.svg" alt="VietTour logo" style="width: 32px; height: 32px; object-fit: contain;">
-          </div>
-          <h2 class="fs-4 fw-bold mb-0">VietTour</h2>
-     </a>
+    <!-- Thanh điều hướng -->
+    <nav class="d-none d-lg-flex flex-grow-1 justify-content-center align-items-center gap-4">
+        <a class="text-decoration-none text-body fw-medium px-2 py-1" href="/pages/index.html">Điểm đến</a>
+        <a class="text-decoration-none text-body fw-medium px-2 py-1" href="#">Tour</a>
+        <a class="text-decoration-none text-body fw-medium px-2 py-1" href="#">Liên hệ</a>
+        <a class="text-decoration-none text-body fw-medium px-2 py-1" href="#">Admin</a>
+    </nav>
 
-     <!-- Thanh điều hướng -->
-     <nav class="d-none d-lg-flex flex-grow-1 justify-content-center align-items-center gap-4">
-          <a class="text-decoration-none text-body fw-medium px-2 py-1" href="/pages/index.html">Điểm đến</a>
-          <a class="text-decoration-none text-body fw-medium px-2 py-1" href="#">Tour</a>
-          <a class="text-decoration-none text-body fw-medium px-2 py-1" href="#">Liên hệ</a>
-          <a class="text-decoration-none text-body fw-medium px-2 py-1" href="#">Admin</a>
-     </nav>
+    <div class="d-flex align-items-center gap-2">
+        <a id="loginBtn" href="/pages/auth/login.html" class="d-none btn btn-primary rounded-pill px-4 fw-bold">Đăng nhập</a>
+        <a id="registerBtn" href="/pages/auth/register.html" class="d-none btn btn-light rounded-pill px-4 fw-bold border">Đăng ký</a>
 
-     <div class="d-flex align-items-center gap-2">
+        <div id="userMenu" class="d-none d-flex align-items-center gap-2 position-relative">
+            <p id="userName" class="d-none text-decoration-none text-body fw-medium px-2 py-1 mb-0"></p>
 
-          <a id="loginBtn" href="/pages/auth/login.html"
-               class="d-none btn btn-primary rounded-pill px-4 fw-bold">Đăng nhập</a>
+            <button
+                id="avatarBtn"
+                type="button"
+                class="border-0 bg-transparent p-0 rounded-circle overflow-hidden"
+                style="width: 40px; height: 40px; cursor: pointer"
+                title="Thông tin cá nhân"
+            >
+                <img id="userAvatar" src="/assets/images/image.png" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover"/>
+            </button>
 
-          <a id="registerBtn" href="/pages/auth/register.html"
-               class="d-none btn btn-light rounded-pill px-4 fw-bold border">Đăng ký</a>
-               
-          <div id="userMenu" class="d-none d-flex align-items-center gap-2 position-relative">
-
-               <p id="userName" class="d-none text-decoration-none text-body fw-medium px-2 py-1 mb-0"></p>
-
-               <button id="avatarBtn"
-                    type="button"
-                    class="border-0 bg-transparent p-0 rounded-circle overflow-hidden"
-                    style="width:40px; height:40px; cursor:pointer;"
-                    title="Thông tin cá nhân">
-
-                    <img id="userAvatar"
-                         src="/assets/images/image.png"
-                         alt="Avatar"
-                         style="width:40px; height:40px; object-fit:cover;">
-               </button>
-
-               <ul id="userDropdown"
-                    class="dropdown-menu dropdown-menu-end"
-                    style="display:none; position:absolute; top:50px; right:0;">
-                    <li><a class="dropdown-item" href="/pages/user/profile.html">Hồ sơ cá nhân</a></li>
-                    <li><a class="dropdown-item" href="/pages/user/bookings-history.html">Lịch sử đặt tour</a></li>
-                    <li><a class="dropdown-item" href="/pages/user/favorite.html">Tour yêu thích</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" id="logoutBtn" href="#">Đăng xuất</a></li>
-               </ul>
-          </div>
-
-     </div>
+            <ul id="userDropdown" class="dropdown-menu dropdown-menu-end" style="display: none; position: absolute; top: 50px; right: 0">
+                <li><a class="dropdown-item" href="/pages/user/profile.html">Hồ sơ cá nhân</a></li>
+                <li><a class="dropdown-item" href="/pages/user/bookings-history.html">Lịch sử đặt tour</a></li>
+                <li><a class="dropdown-item" href="/pages/user/favorite.html">Tour yêu thích</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" id="logoutBtn" href="#">Đăng xuất</a></li>
+            </ul>
+        </div>
+    </div>
 </header>
 
 <script src="/assets/js/header.js"></script>

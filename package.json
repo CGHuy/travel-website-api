@@ -1,0 +1,9 @@
+{
+    "name": "travel-website-api",
+    "private": true,
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "cd backend && npx nodemon app.js",
+        "start": "cd backend && node app.js"
+    }
+}

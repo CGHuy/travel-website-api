@@ -1,101 +1,110 @@
-const db = require('../config/database');
-const bcrypt = require('bcryptjs');
+const db = require("../config/database");
+const bcrypt = require("bcryptjs");
 
 class User {
-     // Tìm user theo email
-     static async findByEmail(email) {
-          try {
-               const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-               return rows[0];
-          } catch (error) {
-               throw error;
-          }
-     }
+    // Tìm user theo email
+    static async findByEmail(email) {
+        try {
+            const [rows] = await db.query(`
+                SELECT * FROM users WHERE email = ?`, [email]);
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
 
-     // Tìm user theo số điện thoại
-     static async findByPhone(phone) {
-          try {
-               const [rows] = await db.query('SELECT * FROM users WHERE phone = ?', [phone]);
-               return rows[0];
-          } catch (error) {
-               throw error;
-          }
-     }
+    // Tìm user theo số điện thoại
+    static async findByPhone(phone) {
+        try {
+            const [rows] = await db.query(`
+                SELECT * FROM users WHERE phone = ?`, [phone]);
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
 
-     // Tìm user theo email hoặc phone
-     static async findByEmailOrPhone(emailOrPhone) {
-          try {
-               const [rows] = await db.query('SELECT * FROM users WHERE email = ? OR phone = ?', [emailOrPhone, emailOrPhone]);
-               return rows[0];
-          } catch (error) {
-               throw error;
-          }
-     }
+    // Tìm user theo email hoặc phone
+    static async findByEmailOrPhone(emailOrPhone) {
+        try {
+            const [rows] = await db.query(`
+                SELECT * FROM users WHERE email = ? OR phone = ?`, [emailOrPhone, emailOrPhone]);
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
 
-     // Tìm user theo ID
-     static async findById(id) {
-          try {
-               const [rows] = await db.query('SELECT id, fullname, phone, email, role, created_at FROM users WHERE id = ?', [id]);
-               return rows[0];
-          } catch (error) {
-               throw error;
-          }
-     }
+    // Tìm user theo ID
+    static async findById(id) {
+        try {
+            const [rows] = await db.query(`
+                SELECT id, fullname, phone, email, role, created_at FROM users WHERE id = ?`, [id]);
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
 
-     // Tạo user mới
-     static async create(userData) {
-          try {
-               const { fullname, phone, email, password, role = 'customer' } = userData;
-               
-               // Hash password
-               const hashedPassword = await bcrypt.hash(password, 10);
-               
-               const [result] = await db.query(
-               'INSERT INTO users (fullname, phone, email, password, role, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
-               [fullname, phone, email, hashedPassword, role]);
-               
-               return result.insertId;
-          } catch (error) {
-               throw error;
-          }
-     }
+    // Tạo user mới
+    static async create(userData) {
+        try {
+            const { fullname, phone, email, password, role = "customer" } = userData;
 
-     // Xác thực password
-     static async comparePassword(plainPassword, hashedPassword) {
-          return await bcrypt.compare(plainPassword, hashedPassword);
-     }
+            // Hash password
+            const hashedPassword = await bcrypt.hash(password, 10);
 
-     // Lấy tất cả users (cho admin)
-     static async getAll() {
-          try {
-               const [rows] = await db.query('SELECT id, fullname, phone, email, role, created_at FROM users ORDER BY id DESC');
-               return rows;
-          } catch (error) {
-               throw error;
-          }
-     }
+            const [result] = await db.query(`
+                INSERT INTO users (fullname, phone, email, password, role, created_at) VALUES (?, ?, ?, ?, ?, NOW())`,
+                [fullname, phone, email, hashedPassword, role]
+            );
 
-     // Cập nhật user
-     static async update(id, userData) {
-          try {
-               const { username, email, role } = userData;
-               const [result] = await db.query('UPDATE users SET username = ?, email = ?, role = ? WHERE id = ?',
-               [username, email, role, id]);
-               return result.affectedRows > 0;
-          } catch (error) {
-               throw error;
-          }
-     }
+            return result.insertId;
+        } catch (error) {
+            throw error;
+        }
+    }
 
-     // Xóa user
-     static async delete(id) {
-          try {
-               const [result] = await db.query('DELETE FROM users WHERE id = ?', [id]);
-               return result.affectedRows > 0;
-          } catch (error) {
-               throw error;
-          }
-     }
+    // Xác thực password
+    static async comparePassword(plainPassword, hashedPassword) {
+        return await bcrypt.compare(plainPassword, hashedPassword);
+    }
+
+    // Lấy tất cả users (cho admin)
+    static async getAll() {
+        try {
+            const [rows] = await db.query(`
+                SELECT id, fullname, phone, email, role, created_at FROM users ORDER BY id DESC`);
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Cập nhật user
+    static async update(id, userData) {
+        try {
+            const { username, email, role } = userData;
+            const [result] = await db.query(`
+                UPDATE users SET username = ?, email = ?, role = ? WHERE id = ?`,
+                [username, email, role, id]
+            );
+            return result.affectedRows > 0;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Xóa user
+    static async delete(id) {
+        try {
+            const [result] = await db.query(`
+                DELETE FROM users WHERE id = ?`, [id]);
+            return result.affectedRows > 0;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = User;

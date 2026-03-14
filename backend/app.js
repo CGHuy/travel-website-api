@@ -1,17 +1,17 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+require("dotenv").config();
 
 // Import middlewares
-const requestLogger = require('./src/middlewares/logger');
-const { errorHandler, notFound } = require('./src/middlewares/errorHandler');
+const requestLogger = require("./src/middlewares/logger");
+const { errorHandler, notFound } = require("./src/middlewares/errorHandler");
 const {
-  generalLimiter,
-  authLimiter,
-  createLimiter,
-  searchLimiter
-} = require('./src/middlewares/rateLimiter');
+    generalLimiter,
+    authLimiter,
+    createLimiter,
+    searchLimiter,
+} = require("./src/middlewares/rateLimiter");
 
 const app = express();
 
@@ -24,32 +24,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
 // Rate limiter
-app.use('/api', generalLimiter);
+app.use("/api", generalLimiter);
 
 // Serve static files
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 // API routes
-const tourRoutes = require('./src/routes/tourRoutes');
-const authRoutes = require('./src/routes/authRoutes');
-const bookingRoutes = require('./src/routes/bookingRoutes');
+const tourRoutes = require("./src/routes/tourRoutes");
+const authRoutes = require("./src/routes/authRoutes");
+const bookingRoutes = require("./src/routes/bookingRoutes");
 
-app.use('/api/tours', searchLimiter, tourRoutes);
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/bookings', createLimiter, bookingRoutes);
-
-// FRONTEND routes
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/pages/index.html'));
-});
-
-app.get('/tours', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/pages/admin/tour.html'));
-});
-
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/pages/user/profile.html'));
-});
+app.use("/api/tours", searchLimiter, tourRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/bookings", createLimiter, bookingRoutes);
 
 // ERROR HANDLERS
 // 404 handler - phải đặt sau tất cả routes
@@ -57,5 +44,20 @@ app.use(notFound);
 
 // Error handler - phải đặt cuối cùng
 app.use(errorHandler);
+
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`
+          🚀 VietTour Server đang chạy
+          📍 Website:  http://localhost:${process.env.PORT || 3000}
+          📍 API:      http://localhost:${process.env.PORT || 3000}/api
+          💾 Database: ${process.env.DB_NAME}
+
+          📌 Các trang có thể truy cập:
+               • http://localhost:${process.env.PORT || 3000}/pages/index.html      → Trang chủ    
+          📌 API Endpoints:
+               • GET  http://localhost:${process.env.PORT || 3000}/api/tours        → Lấy tất cả tours
+               • GET  http://localhost:${process.env.PORT || 3000}/api/tours/:id    → Chi tiết tour
+     `);
+});
 
 module.exports = app;
