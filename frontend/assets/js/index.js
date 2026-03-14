@@ -158,17 +158,3 @@ async function loadToursByRegion(region, containerId, carouselId) {
           }
      }
 }
-
-// Search tours
-document.getElementById('searchForm').addEventListener('submit', async (e) => {
-     e.preventDefault();
-     const keyword = document.getElementById('searchInput').value.trim();
-
-     if (!keyword) {
-          alert('Vui lòng nhập từ khóa tìm kiếm!');
-          return;
-     }
-
-     // Redirect to search results page or handle inline
-     window.location.href = `tours.html?search=${encodeURIComponent(keyword)}`;
-});

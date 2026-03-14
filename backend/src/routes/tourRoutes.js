@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const tourController = require('../controllers/tourController');
 const { verifyToken, isAdmin } = require('../middlewares/auth');
-const { validateTour } = require('../middlewares/validation');
+const { validateTour } = require('../middlewares/validation/tour');
 
 // Public routes - Không cần đăng nhập
 router.get('/', tourController.getAllTours);

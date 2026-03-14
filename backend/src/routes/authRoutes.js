@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { verifyToken } = require('../middlewares/auth');
-const { validateRegister, validateLogin } = require('../middlewares/validation');
+const { validateRegister, validateLogin } = require('../middlewares/validation/auth');
 
 // Public routes - Không cần đăng nhập
 router.post('/register', validateRegister, authController.register);

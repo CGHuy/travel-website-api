@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bookingController = require('../controllers/bookingController');
 const { verifyToken, isAdmin, isUser } = require('../middlewares/auth');
-const { validateBooking } = require('../middlewares/validation');
+const { validateBooking } = require('../middlewares/validation/booking');
 
 // User routes - Cần đăng nhập
 router.post('/', verifyToken, isUser, validateBooking, bookingController.createBooking);

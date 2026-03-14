@@ -14,7 +14,7 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
 
-    role ENUM('customer','admin') NOT NULL DEFAULT 'customer',
+    role ENUM('customer','admin','tour-staff','booking-staff') NOT NULL DEFAULT 'customer',
     status TINYINT(1) NOT NULL DEFAULT 1 CHECK (status IN (0,1)),
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
