@@ -14,9 +14,7 @@ class Tour {
     // Lấy tours theo region
     static async getByRegion(region) {
         try {
-            const [rows] = await db.query(`SELECT * FROM tours WHERE region = ? ORDER BY id DESC`,
-                [region],
-            );
+            const [rows] = await db.query(`SELECT * FROM tours WHERE region = ? ORDER BY id DESC`, [region]);
             return rows;
         } catch (error) {
             throw error;
@@ -40,11 +38,11 @@ class Tour {
     // Tạo tour mới
     static async create(tourData) {
         try {
-            const { name, description, price, region, duration, image } = tourData;
+            const { name, description, price, region, duration, location, image } = tourData;
             const [result] = await db.query(
                 `
-                INSERT INTO tours (name, description, price, region, duration, image, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-                [name, description, price, region, duration, image],
+                INSERT INTO tours (name, description, price_default, price_child, region, duration, location, cover_image, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+                [name, description, price_default, price_child, region, duration, location, image],
             );
             return result.insertId;
         } catch (error) {
@@ -55,11 +53,11 @@ class Tour {
     // Cập nhật tour
     static async update(id, tourData) {
         try {
-            const { name, description, price, region, duration, image } = tourData;
+            const { name, description, price_default, price_child, region, duration, location, image } = tourData;
             const [result] = await db.query(
                 `
-                UPDATE tours SET name = ?, description = ?, price = ?, region = ?, duration = ?, image = ?, updated_at = NOW() WHERE id = ?`,
-                [name, description, price, region, duration, image, id],
+                UPDATE tours SET name = ?, description = ?, price_default = ?, price_child = ?, region = ?, duration = ?, location = ?, cover_image = ?, updated_at = NOW() WHERE id = ?`,
+                [name, description, price_default, price_child, region, duration, location, image, id],
             );
             return result.affectedRows > 0;
         } catch (error) {

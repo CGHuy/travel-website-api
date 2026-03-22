@@ -100,15 +100,20 @@ exports.getTourById = async (req, res) => {
 // Tạo tour mới
 exports.createTour = async (req, res) => {
     try {
-        const { name, description, price, region, duration, image } = req.body;
+        const { name, description, price_default, price_child, region, duration, location } = req.body;
+
+        // Lấy URL ảnh từ Cloudinary nếu có file được upload
+        const imageUrl = req.file ? req.file.path : null;
 
         const tourId = await Tour.create({
             name,
             description,
-            price,
+            price_default: Number(price_default),
+            price_child: Number(price_child),
             region,
             duration,
-            image: image || null,
+            location,
+            image: imageUrl,
         });
 
         const createdTour = await Tour.getById(tourId);
@@ -138,15 +143,28 @@ exports.updateTour = async (req, res) => {
             });
         }
 
-        const { name, description, price, region, duration, image } = req.body;
+        const { name, description, price_default, price_child, region, duration, location } = req.body;
+
+        // Giữ ảnh cũ nếu không upload ảnh mới
+        let imageUrl = null;
+        if (req.file) {
+            imageUrl = req.file.path;
+        } else if (req.body.image || req.body.cover_image || req.body.existing_image) {
+            imageUrl = req.body.image || req.body.cover_image || req.body.existing_image;
+        } else {
+            const existingTour = await Tour.getById(id);
+            imageUrl = existingTour ? existingTour.cover_image || existingTour.image || null : null;
+        }
 
         const updated = await Tour.update(id, {
             name,
             description,
-            price,
+            price_default: Number(price_default),
+            price_child: Number(price_child),
             region,
             duration,
-            image: image || null,
+            location,
+            image: imageUrl,
         });
 
         if (!updated) {

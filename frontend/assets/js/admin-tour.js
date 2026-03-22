@@ -23,18 +23,6 @@ async function initAdminTourPage() {
     await fetchAndRenderTours();
 }
 
-function getAdminToken() {
-    return localStorage.getItem("token") || "";
-}
-
-function ensureAdminToken() {
-    const token = getAdminToken();
-    if (!token) {
-        throw new Error("Bạn cần đăng nhập tài khoản admin để thực hiện thao tác này.");
-    }
-    return token;
-}
-
 function bindAddTourForm() {
     const form = document.getElementById("add-tour-form");
     if (!form || form.dataset.bound === "true") return;
@@ -46,16 +34,15 @@ function bindAddTourForm() {
         setSubmitButtonState(submitBtn, { disabled: true, text: "Đang thêm..." });
 
         try {
-            const token = ensureAdminToken();
-            const payload = await buildTourPayloadFromForm(form, { imageFieldId: "cover_image" });
+            const token = localStorage.getItem("token") || "";
+            const formData = buildTourFormData(form, { imageFieldId: "cover_image" });
 
             const res = await fetch(TOUR_API_URL, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(payload),
+                body: formData,
             });
 
             const data = await parseJsonSafe(res);
@@ -95,19 +82,17 @@ function bindEditTourForm() {
         setSubmitButtonState(submitBtn, { disabled: true, text: "Đang lưu..." });
 
         try {
-            const token = ensureAdminToken();
-            const payload = await buildTourPayloadFromForm(form, {
+            const token = localStorage.getItem("token") || "";
+            const formData = buildTourFormData(form, {
                 imageFieldId: "edit_cover_image",
-                existingImageFieldName: "existing_image",
             });
 
             const res = await fetch(`${TOUR_API_URL}/${tourId}`, {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(payload),
+                body: formData,
             });
 
             const data = await parseJsonSafe(res);
@@ -146,7 +131,7 @@ function bindDeleteTourForm() {
         setSubmitButtonState(submitBtn, { disabled: true, text: "Đang xóa..." });
 
         try {
-            const token = ensureAdminToken();
+            const token = localStorage.getItem("token") || "";
             const res = await fetch(`${TOUR_API_URL}/${id}`, {
                 method: "DELETE",
                 headers: {
@@ -217,11 +202,13 @@ async function fetchAndRenderTours() {
         const payload = await parseJsonSafe(res);
         adminTourCache = payload.success && Array.isArray(payload.data) ? payload.data : [];
 
-        updateTourTotal(adminTourCache.length);
+        const totalEl = document.getElementById("tour-total-count");
+        if (totalEl) totalEl.textContent = String(adminTourCache.length);
         renderTourList(adminTourCache);
     } catch (error) {
         listEl.innerHTML = LIST_LOAD_ERROR_HTML;
-        updateTourTotal(0);
+        const totalEl = document.getElementById("tour-total-count");
+        if (totalEl) totalEl.textContent = "0";
         console.error("Lỗi tải tour:", error);
     }
 }
@@ -247,11 +234,6 @@ function isTourMatchedKeyword(tour, keyword) {
     const nameText = String(tour.name ?? "").toLowerCase();
     const regionText = String(tour.region ?? "").toLowerCase();
     return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword) || regionText.includes(keyword);
-}
-
-function updateTourTotal(total) {
-    const totalEl = document.getElementById("tour-total-count");
-    if (totalEl) totalEl.textContent = String(total);
 }
 
 // Render danh sách tour từ template để tách UI khỏi logic lấy dữ liệu.
@@ -290,7 +272,8 @@ function buildTourListItemNode(template, tour) {
         code: tour.tour_code || `ID-${tour.id ?? "N/A"}`,
         region: tour.region || "Chưa cập nhật",
         duration: tour.duration || "Chưa cập nhật",
-        price: formatVnd(tour.price ?? tour.price_default ?? 0),
+        price_default: formatVnd(tour.price_default ?? 0),
+        price_child: formatVnd(tour.price_child ?? 0),
         imageSrc: normalizeImage(tour),
     };
 
@@ -299,7 +282,8 @@ function buildTourListItemNode(template, tour) {
     const codeEl = node.querySelector(".tour-item-code");
     const regionEl = node.querySelector(".tour-item-region");
     const durationEl = node.querySelector(".tour-item-duration");
-    const priceEl = node.querySelector(".tour-item-price");
+    const priceDefaultEl = node.querySelector(".tour-item-price-default");
+    const priceChildEl = node.querySelector(".tour-item-price-child");
     const editBtn = node.querySelector(".js-edit-tour");
     const deleteBtn = node.querySelector(".js-delete-tour");
 
@@ -311,7 +295,8 @@ function buildTourListItemNode(template, tour) {
     if (codeEl) codeEl.textContent = viewModel.code;
     if (regionEl) regionEl.textContent = viewModel.region;
     if (durationEl) durationEl.textContent = viewModel.duration;
-    if (priceEl) priceEl.textContent = viewModel.price;
+    if (priceDefaultEl) priceDefaultEl.textContent = viewModel.price_default;
+    if (priceChildEl) priceChildEl.textContent = viewModel.price_child;
 
     if (editBtn) {
         editBtn.dataset.tourId = viewModel.id;
@@ -337,11 +322,21 @@ function populateEditTourForm(tourId) {
     form.elements.id.value = String(tour.id ?? "");
     form.elements.name.value = String(tour.name || "");
     form.elements.location.value = String(tour.location || "");
-    form.elements.price.value = String(tour.price ?? tour.price_default ?? "");
+    form.elements.price_default.value = String(tour.price_default ?? "");
+    form.elements.price_child.value = String(tour.price_child ?? "");
     form.elements.description.value = String(tour.description || "");
     form.elements.region.value = String(tour.region || "");
     form.elements.duration.value = String(tour.duration || "");
-    form.elements.existing_image.value = getRawImageData(tour);
+
+    const rawImageValue = typeof tour.image === "string" && tour.image.length > 0 ? tour.image : typeof tour.cover_image === "string" ? tour.cover_image : "";
+    let existingImage = "";
+    if (rawImageValue.startsWith("data:")) {
+        const parts = rawImageValue.split(",");
+        existingImage = parts.length > 1 ? parts[1] : "";
+    } else {
+        existingImage = rawImageValue;
+    }
+    form.elements.existing_image.value = existingImage;
 
     const preview = document.getElementById("edit_preview");
     if (preview) {
@@ -352,16 +347,6 @@ function populateEditTourForm(tourId) {
     if (fileInput) {
         fileInput.value = "";
     }
-}
-
-function getRawImageData(tour) {
-    const imageValue = typeof tour.image === "string" && tour.image.length > 0 ? tour.image : typeof tour.cover_image === "string" ? tour.cover_image : "";
-    if (!imageValue.startsWith("data:")) {
-        return imageValue;
-    }
-
-    const parts = imageValue.split(",");
-    return parts.length > 1 ? parts[1] : "";
 }
 
 function bindEditImagePreview() {
@@ -395,30 +380,29 @@ function bindEditModalReset() {
     modalEl.dataset.boundReset = "true";
 }
 
-async function buildTourPayloadFromForm(form, options = {}) {
+function buildTourFormData(form, options = {}) {
     const imageFieldId = options.imageFieldId || "cover_image";
-    const existingImageFieldName = options.existingImageFieldName || "";
+    const formData = new FormData();
 
+    // Thêm các trường text
+    formData.append("name", String(form.elements.name.value || "").trim());
+    formData.append("description", String(form.elements.description.value || "").trim());
+
+    // Xử lý price - có thể từ "price" hoặc "price_default"
+    const priceValue = form.elements.price ? form.elements.price.value : form.elements.price_default ? form.elements.price_default.value : 0;
+    formData.append("price", Number(priceValue));
+
+    formData.append("region", String(form.elements.region.value || ""));
+    formData.append("duration", String(form.elements.duration.value || "").trim());
+    formData.append("location", String(form.elements.location.value || "").trim());
+
+    // Thêm file ảnh nếu có
     const fileInput = form.querySelector(`#${imageFieldId}`);
-    const selectedFile = fileInput && fileInput.files ? fileInput.files[0] : null;
-
-    let image = "";
-    if (existingImageFieldName && form.elements[existingImageFieldName]) {
-        image = String(form.elements[existingImageFieldName].value || "");
-    }
-    if (selectedFile) {
-        image = await fileToBase64(selectedFile);
+    if (fileInput && fileInput.files && fileInput.files[0]) {
+        formData.append("image", fileInput.files[0]);
     }
 
-    return {
-        name: String(form.elements.name.value || "").trim(),
-        description: String(form.elements.description.value || "").trim(),
-        price: Number(form.elements.price ? form.elements.price.value : form.elements.price_default.value),
-        region: String(form.elements.region.value || ""),
-        duration: String(form.elements.duration.value || "").trim(),
-        location: String(form.elements.location.value || "").trim(),
-        image,
-    };
+    return formData;
 }
 
 function hideModalById(modalId) {
@@ -454,37 +438,19 @@ function getApiErrorMessage(data, fallbackMessage) {
     return fallbackMessage;
 }
 
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            const result = String(reader.result || "");
-            const parts = result.split(",");
-            resolve(parts.length > 1 ? parts[1] : result);
-        };
-        reader.onerror = () => reject(reader.error || new Error("Không đọc được file ảnh"));
-        reader.readAsDataURL(file);
-    });
-}
-
 function normalizeImage(tour) {
-    const imageValue = getFirstAvailableImage(tour);
-    if (!imageValue) return DEFAULT_TOUR_IMAGE;
+    let imageValue = "";
+    if (typeof tour.image === "string" && tour.image.trim() !== "") {
+        imageValue = tour.image;
+    } else if (typeof tour.cover_image === "string" && tour.cover_image.trim() !== "") {
+        imageValue = tour.cover_image;
+    }
 
+    if (!imageValue) return DEFAULT_TOUR_IMAGE;
     if (imageValue.startsWith("http") || imageValue.startsWith("data:")) {
         return imageValue;
     }
     return `data:image/jpeg;base64,${imageValue}`;
-}
-
-function getFirstAvailableImage(tour) {
-    if (typeof tour.image === "string" && tour.image.trim() !== "") {
-        return tour.image;
-    }
-    if (typeof tour.cover_image === "string" && tour.cover_image.trim() !== "") {
-        return tour.cover_image;
-    }
-    return "";
 }
 
 function formatVnd(value) {
