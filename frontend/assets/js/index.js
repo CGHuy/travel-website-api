@@ -2,7 +2,10 @@ const API_URL = "http://localhost:3000/api";
 
 // Load header và footer, sau đó load dữ liệu tour
 document.addEventListener("DOMContentLoaded", async () => {
-    await Promise.all([loadComponent("header-placeholder", "../components/header.html"), loadComponent("footer-placeholder", "../components/footer.html")]);
+    await Promise.all([
+        loadComponent("header-placeholder", "../components/header.html"), 
+        loadComponent("footer-placeholder", "../components/footer.html")
+    ]);
 
     loadTopTours();
     loadToursByRegion("Miền Bắc", "mienBacCarousel", "carouselMienBac");

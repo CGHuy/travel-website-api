@@ -6,12 +6,7 @@ require("dotenv").config();
 // Import middlewares
 const requestLogger = require("./src/middlewares/logger");
 const { errorHandler, notFound } = require("./src/middlewares/errorHandler");
-const {
-    generalLimiter,
-    authLimiter,
-    createLimiter,
-    searchLimiter,
-} = require("./src/middlewares/rateLimiter");
+const { generalLimiter, authLimiter, createLimiter, searchLimiter } = require("./src/middlewares/rateLimiter");
 
 const app = express();
 
@@ -48,15 +43,9 @@ app.use(errorHandler);
 app.listen(process.env.PORT || 3000, () => {
     console.log(`
           🚀 VietTour Server đang chạy
-          📍 Website:  http://localhost:${process.env.PORT || 3000}
+          📍 Website:  http://localhost:${process.env.PORT || 3000}/pages/index.html
           📍 API:      http://localhost:${process.env.PORT || 3000}/api
           💾 Database: ${process.env.DB_NAME}
-
-          📌 Các trang có thể truy cập:
-               • http://localhost:${process.env.PORT || 3000}/pages/index.html      → Trang chủ    
-          📌 API Endpoints:
-               • GET  http://localhost:${process.env.PORT || 3000}/api/tours        → Lấy tất cả tours
-               • GET  http://localhost:${process.env.PORT || 3000}/api/tours/:id    → Chi tiết tour
      `);
 });
 

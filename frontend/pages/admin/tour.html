@@ -1,0 +1,207 @@
+<div class="d-flex justify-content-between align-items-center px-3">
+    <div>
+        <h5 class="card-title mb-0"><i class="fa-solid fa-map me-2"></i>Quản lý Tour</h5>
+    </div>
+    <div class="text-end">
+        <span class="badge bg-info">Tổng: <span id="tour-total-count">0</span> tour</span>
+    </div>
+</div>
+
+<div class="card-body">
+    <div class="input-group search-group mb-3">
+        <span class="input-group-text search-icon">
+            <i class="fa-solid fa-magnifying-glass fa-sm"></i>
+        </span>
+        <input id="tour-search-input" class="form-control search-input" placeholder="Tìm kiếm tour theo id, tên, vùng miền..." aria-label="Tìm kiếm" />
+    </div>
+
+    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addTourModal">Thêm Tour Mới</button>
+
+    <div id="tour-list-container" class="list-group">
+        <div class="text-center p-4 text-muted">Đang tải danh sách tour...</div>
+    </div>
+</div>
+
+<template id="tour-list-item-template">
+    <div class="list-group-item mb-3 p-3 border rounded shadow-sm d-flex align-items-center">
+        <img class="tour-item-image" src="../../assets/images/image.png" alt="Tour image" style="width: 150px; height: 120px; object-fit: cover; border-radius: 8px" />
+        <div class="flex-grow-1 ms-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5 class="mb-1 fw-bold tour-item-name">Chưa có tên</h5>
+                    <small class="text-muted">Mã: <span class="tour-item-code">N/A</span></small>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye me-1"></i>Xem</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary js-edit-tour" data-bs-toggle="modal" data-bs-target="#editTourModal"><i class="fa-solid fa-pen-to-square me-1"></i>Sửa</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger js-delete-tour" data-bs-toggle="modal" data-bs-target="#deleteTourModal"><i class="fa-solid fa-trash me-1"></i>Xóa</button>
+                </div>
+            </div>
+            <hr class="my-2" />
+            <div class="d-flex justify-content-between text-muted small">
+                <span class="d-flex align-items-center"><i class="fa-solid fa-map me-2"></i><strong class="me-1">Miền:</strong><span class="tour-item-region">Chưa cập nhật</span></span>
+                <span class="d-flex align-items-center"><i class="fa-solid fa-clock me-2"></i><strong class="me-1">Thời lượng:</strong><span class="tour-item-duration">Chưa cập nhật</span></span>
+                <span class="d-flex align-items-center"><i class="fa-solid fa-tag me-2"></i><strong class="me-1">Giá:</strong><span class="tour-item-price">0 VNĐ</span></span>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Modal thêm Tour -->
+<div class="modal fade" id="addTourModal" tabindex="-1" aria-labelledby="addTourModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTourModalLabel">Thêm Tour Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="add-tour-form">
+                <div class="modal-body row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Tên Tour</label>
+                            <input type="text" class="form-control" id="name" name="name" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Địa điểm</label>
+                            <input type="text" class="form-control" id="location" name="location" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="price_default" class="form-label">Giá</label>
+                            <input type="number" class="form-control" id="price_default" name="price_default" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">Slug</label>
+                            <input type="text" class="form-control" id="slug" name="slug" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="region" class="form-label">Miền</label>
+                            <select class="form-control" id="region" name="region" required>
+                                <option value="">Chọn miền</option>
+                                <option value="Miền Bắc">Miền Bắc</option>
+                                <option value="Miền Trung">Miền Trung</option>
+                                <option value="Miền Nam">Miền Nam</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price_child" class="form-label">Giá Trẻ Em</label>
+                            <input type="number" class="form-control" id="price_child" name="price_child" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="duration" class="form-label">Thời gian</label>
+                            <input type="text" class="form-control" id="duration" name="duration" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cover_image" class="form-label">Ảnh Bìa</label>
+                            <input type="file" class="form-control" id="cover_image" name="cover_image" accept="image/*" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer p-3">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa Tour -->
+<div class="modal fade" id="editTourModal" tabindex="-1" aria-labelledby="editTourModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTourModalLabel">Sửa Tour</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="edit-tour-form">
+                    <input type="hidden" name="id" id="edit_id" />
+                    <input type="hidden" name="existing_image" id="edit_existing_image" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_name" class="form-label">Tên Tour</label>
+                                <input type="text" class="form-control" id="edit_name" name="name" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_location" class="form-label">Địa điểm</label>
+                                <input type="text" class="form-control" id="edit_location" name="location" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_price" class="form-label">Giá</label>
+                                <input type="number" class="form-control" id="edit_price" name="price" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_description" class="form-label">Mô tả</label>
+                                <textarea class="form-control" id="edit_description" name="description" rows="4" required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_region" class="form-label">Miền</label>
+                                <select class="form-control" id="edit_region" name="region" required>
+                                    <option value="">Chọn miền</option>
+                                    <option value="Miền Bắc">Miền Bắc</option>
+                                    <option value="Miền Trung">Miền Trung</option>
+                                    <option value="Miền Nam">Miền Nam</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_duration" class="form-label">Thời gian</label>
+                                <input type="text" class="form-control" id="edit_duration" name="duration" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_cover_image" class="form-label">Ảnh Bìa</label>
+                                <input type="file" class="form-control" id="edit_cover_image" name="cover_image" accept="image/*" />
+                                <img id="edit_preview" class="img-fluid rounded mt-3 d-block mx-auto" style="max-height: 200px" src="../../assets/images/image.png" alt="Preview ảnh tour" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer p-0 pt-3">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xóa Tour -->
+<div class="modal fade" id="deleteTourModal" tabindex="-1" aria-labelledby="deleteTourModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title text-white" id="deleteTourModalLabel">Xác nhận xóa tour</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post" id="delete-tour-form">
+                <input type="hidden" name="id" id="delete_id" />
+
+                <div class="modal-body">
+                    <p class="m-0 p-2">Bạn có chắc chắn muốn xóa tour:</p>
+                    <strong id="delete_name" class="p-2"></strong>
+                    <p class="text-danger m-0 p-2"><strong>Hành động này không thể hoàn tác.</strong></p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
