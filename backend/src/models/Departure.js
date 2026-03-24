@@ -11,6 +11,16 @@ class Departure {
         }
     }
 
+    //Lấy departures theo tour_id
+    static async getByTourId(tour_id) {
+        try {
+            const [rows] = await db.query(`SELECT * FROM departures WHERE tour_id = ? ORDER BY departure_date DESC`, [tour_id]);
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     // Lấy departure theo ID
     static async getById(id) {
         try {
