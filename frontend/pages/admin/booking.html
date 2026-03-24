@@ -1,0 +1,298 @@
+<div class="d-flex justify-content-between align-items-center px-3">
+	<div>
+		<h5 class="card-title mb-0">
+			<i class="fa-solid fa-calendar-days me-2"></i>Quản lý Booking
+		</h5>
+		<small class="text-muted">Danh sách các booking mà khách hàng đã đặt</small>
+	</div>
+	<div class="text-end">
+		<span class="badge bg-info"
+			>Tổng: <span id="booking-total-count">0</span> booking</span
+		>
+	</div>
+</div>
+
+<div class="card-body">
+	<div class="row mb-3">
+		<div class="col-md-8">
+			<div class="input-group search-group">
+				<span class="input-group-text search-icon"
+					><i class="fa-solid fa-magnifying-glass fa-sm"></i
+				></span>
+				<input
+					id="booking-search-input"
+					class="form-control search-input"
+					placeholder="Tìm kiếm booking theo mã, tên khách, tên tour..."
+					aria-label="Tìm kiếm booking"
+				/>
+			</div>
+		</div>
+		<div class="col-md-4 text-end">
+			<div class="btn-group">
+				<button id="refresh-bookings" class="btn btn-outline-secondary btn-sm">
+					Làm mới
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="table-responsive" style="max-height: 600px; overflow: auto">
+		<table class="table table-borderless">
+			<thead class="table-light text-muted small">
+				<tr>
+					<th>Mã Booking</th>
+					<th>Tên khách hàng</th>
+					<th>Tên Tour</th>
+					<th>Ngày khởi hành</th>
+					<th>Tổng tiền</th>
+					<th>Trạng thái</th>
+					<th>Ngày đặt</th>
+					<th>Hành động</th>
+				</tr>
+			</thead>
+			<tbody id="booking-list-body">
+				<tr>
+					<td colspan="7" class="text-center text-muted p-4">
+						Đang tải danh sách booking...
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<template id="booking-row-template">
+	<tr>
+		<td class="booking-code">BOK000</td>
+		<td class="booking-customer">Khách</td>
+		<td class="booking-tour">Tour name</td>
+		<td class="booking-date">--/--/----</td>
+		<td class="booking-total">0 VNĐ</td>
+		<td class="booking-status">
+			<span class="badge bg-secondary">pending</span>
+		</td>
+		<td class="booking-created">--/--/----</td>
+		<td class="booking-actions text-nowrap">
+			<div class="btn-group btn-group-sm" role="group">
+				<button class="btn btn-success btn-sm js-confirm-booking" data-id="">
+					Xác nhận
+				</button>
+				<button class="btn btn-danger btn-sm js-cancel-booking" data-id="">
+					Hủy
+				</button>
+				<button
+					class="btn btn-outline-danger btn-sm js-delete-booking"
+					data-id=""
+				>
+					Xóa
+				</button>
+			</div>
+		</td>
+	</tr>
+</template>
+
+<script>
+	// Generic init function called by admin-dashboard loader
+	window.initAdminPage = async function initAdminBookingPage() {
+		const bodyEl = document.getElementById("booking-list-body");
+		const totalEl = document.getElementById("booking-total-count");
+		const searchInput = document.getElementById("booking-search-input");
+		const refreshBtn = document.getElementById("refresh-bookings");
+
+		function formatCurrency(v) {
+			try {
+				return new Intl.NumberFormat("vi-VN").format(Number(v)) + " đ";
+			} catch (e) {
+				return v;
+			}
+		}
+
+		function formatDateTime(s) {
+			if (!s) return "";
+			const d = new Date(s);
+			return (
+				d.toLocaleDateString("vi-VN") +
+				(isNaN(d.getHours())
+					? ""
+					: " " +
+						d.toLocaleTimeString("vi-VN", {
+							hour: "2-digit",
+							minute: "2-digit",
+						}))
+			);
+		}
+
+		async function loadBookings() {
+			bodyEl.innerHTML =
+				'<tr><td colspan="7" class="text-center text-muted p-4">Đang tải danh sách booking...</td></tr>';
+			try {
+				const token = localStorage.getItem("token") || "";
+				let isStaff = false;
+				// If we have a token, verify user role
+				if (token) {
+					try {
+						const ver = await fetch("/api/auth/verify", {
+							headers: { Authorization: "Bearer " + token },
+						});
+						if (ver.ok) {
+							const vd = await ver.json();
+							const role = vd && vd.data && vd.data.user && vd.data.user.role;
+							if (role === "booking_staff" || role === "admin") isStaff = true;
+						}
+					} catch (e) {
+						console.warn("Không thể xác minh token:", e);
+					}
+				}
+				// Nếu có token, thử gọi endpoint admin; nếu không hoặc bị 401/403, fallback về public
+				let api = token ? "/api/bookings" : "/api/bookings/public";
+				let headers = {};
+				if (token) headers["Authorization"] = "Bearer " + token;
+
+				let res = await fetch(api, { headers });
+
+				if (
+					(res.status === 401 || res.status === 403) &&
+					api === "/api/bookings"
+				) {
+					// fallback to public endpoint
+					api = "/api/bookings/public";
+					res = await fetch(api);
+				}
+
+				if (!res.ok) throw new Error("HTTP " + res.status);
+
+				const data = await res.json();
+				const rows = data.data || [];
+				totalEl.textContent = rows.length;
+
+				if (rows.length === 0) {
+					bodyEl.innerHTML =
+						'<tr><td colspan="7" class="text-center text-muted p-4">Không có booking nào.</td></tr>';
+					return;
+				}
+
+				const template = document.getElementById("booking-row-template");
+				bodyEl.innerHTML = "";
+				for (const r of rows) {
+					const tr = template.content.cloneNode(true);
+					tr.querySelector(".booking-code").textContent =
+						r.code || "BOK" + String(r.id).padStart(4, "0");
+					tr.querySelector(".booking-customer").textContent =
+						r.username || r.email || "Khách vãng lai";
+					tr.querySelector(".booking-tour").textContent = r.tour_name || "";
+					tr.querySelector(".booking-date").textContent = r.booking_date
+						? new Date(r.booking_date).toLocaleDateString("vi-VN")
+						: "";
+					tr.querySelector(".booking-total").textContent = formatCurrency(
+						r.total_price || r.total,
+					);
+					const statusEl = tr.querySelector(".booking-status span");
+					const status = r.status || r.status_name || "pending";
+					statusEl.textContent =
+						status === "confirmed"
+							? "Đã xác nhận"
+							: status === "cancelled"
+								? "Đã hủy"
+								: "Đang chờ";
+					statusEl.className =
+						"badge " +
+						(status === "confirmed"
+							? "bg-success"
+							: status === "cancelled"
+								? "bg-danger"
+								: "bg-secondary");
+					tr.querySelector(".booking-created").textContent = formatDateTime(
+						r.created_at || r.created,
+					);
+					// If user is booking staff (or admin), wire action buttons and show them
+					const actionsCell = tr.querySelector(".booking-actions");
+					if (!isStaff) {
+						// hide actions cell
+						if (actionsCell) actionsCell.style.display = "none";
+					} else {
+						if (actionsCell) actionsCell.style.display = "";
+						const id = r.id;
+						const confirmBtn = tr.querySelector(".js-confirm-booking");
+						const cancelBtn = tr.querySelector(".js-cancel-booking");
+						const deleteBtn = tr.querySelector(".js-delete-booking");
+						if (confirmBtn) {
+							confirmBtn.dataset.id = id;
+							confirmBtn.addEventListener("click", async () => {
+								try {
+									await fetch("/api/bookings/" + id + "/status", {
+										method: "PUT",
+										headers: {
+											"Content-Type": "application/json",
+											Authorization: "Bearer " + token,
+										},
+										body: JSON.stringify({ status: "confirmed" }),
+									});
+									await loadBookings();
+								} catch (e) {
+									console.error(e);
+									alert("Lỗi khi xác nhận");
+								}
+							});
+						}
+						if (cancelBtn) {
+							cancelBtn.dataset.id = id;
+							cancelBtn.addEventListener("click", async () => {
+								try {
+									await fetch("/api/bookings/" + id + "/status", {
+										method: "PUT",
+										headers: {
+											"Content-Type": "application/json",
+											Authorization: "Bearer " + token,
+										},
+										body: JSON.stringify({ status: "cancelled" }),
+									});
+									await loadBookings();
+								} catch (e) {
+									console.error(e);
+									alert("Lỗi khi hủy");
+								}
+							});
+						}
+						if (deleteBtn) {
+							deleteBtn.dataset.id = id;
+							deleteBtn.addEventListener("click", async () => {
+								if (!confirm("Bạn có chắc muốn xóa booking này?")) return;
+								try {
+									await fetch("/api/bookings/" + id, {
+										method: "DELETE",
+										headers: { Authorization: "Bearer " + token },
+									});
+									await loadBookings();
+								} catch (e) {
+									console.error(e);
+									alert("Lỗi khi xóa");
+								}
+							});
+						}
+					}
+
+					bodyEl.appendChild(tr);
+				}
+			} catch (err) {
+				console.error("Lỗi load bookings", err);
+				bodyEl.innerHTML =
+					'<tr><td colspan="7" class="text-center text-danger p-4">Lỗi khi tải danh sách. Kiểm tra console.</td></tr>';
+				totalEl.textContent = "0";
+			}
+		}
+
+		// Simple client-side search
+		searchInput.addEventListener("input", () => {
+			const q = searchInput.value.trim().toLowerCase();
+			const trs = bodyEl.querySelectorAll("tr");
+			trs.forEach((tr) => {
+				const txt = tr.textContent.toLowerCase();
+				tr.style.display = q === "" || txt.includes(q) ? "" : "none";
+			});
+		});
+
+		refreshBtn.addEventListener("click", loadBookings);
+
+		await loadBookings();
+	};
+</script>
