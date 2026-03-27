@@ -155,9 +155,41 @@ const isOwner = (paramName = "userId") => {
     };
 };
 
+// Middleware kiểm tra quyền admin hoặc quản lý booking
+const isBookingManager = (req, res, next) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({
+                success: false,
+                message: "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!",
+            });
+        }
+
+        if (
+            req.user.role !== "admin" &&
+            req.user.role !== "booking_manager" &&
+            req.user.role !== "booking-staff"
+        ) {
+            return res.status(403).json({
+                success: false,
+                message: "Quyền truy cập bị từ chối. Chỉ admin hoặc nhân viên booking mới được phép!",
+            });
+        }
+
+        next();
+    } catch (error) {
+        console.error("Lỗi trong isBookingManager middleware:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ nội bộ khi kiểm tra quyền truy cập",
+        });
+    }
+};
+
 module.exports = {
     verifyToken,
     isAdmin,
     isUser,
     isOwner,
+    isBookingManager,
 };
