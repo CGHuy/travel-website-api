@@ -31,11 +31,13 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 
 // API routes
 const tourRoutes = require("./src/routes/tourRoutes");
+const listTourRoutes = require("./src/routes/ListTourRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const bookingRoutes = require("./src/routes/bookingRoutes");
 const userRoutes = require("./src/routes/userRoutes");
 
 app.use("/api/tours", searchLimiter, tourRoutes);
+app.use("/api/list-tours", listTourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);
