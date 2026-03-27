@@ -25,8 +25,9 @@ router.get(
 );
 router.put("/:id/cancel", verifyToken, isUser, bookingController.cancelBooking);
 
-// Admin / Booking Manager routes - Cần quyền quản lý
+// Booking Staff routes - Cần quyền quản lý
 router.get("/", verifyToken, isBookingStaff, bookingController.getAllBookings);
+
 router.put(
 	"/:id/status",
 	verifyToken,
