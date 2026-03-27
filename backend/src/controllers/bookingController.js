@@ -1,53 +1,59 @@
 const Booking = require("../models/Booking");
-const Tour = require("../models/Tour");
+const db = require("../config/database"); // Cần db để check tồn tại/tính giá
 
 // Tạo booking mới
 exports.createBooking = async (req, res) => {
     try {
-        const { tour_id, booking_date, number_of_people } = req.body;
+        const { 
+            departure_id, adults, children = 0, 
+            contact_name, contact_phone, contact_email, note 
+        } = req.body;
         const user_id = req.user.id;
 
-        // Kiểm tra tour có tồn tại không
-        const tour = await Tour.getById(tour_id);
-        if (!tour) {
-            return res.status(404).json({
-                success: false,
-                message: "Không tìm thấy tour",
-            });
+        // 1. Kiểm tra tour departure có tồn tại và còn chỗ không
+        const [departures] = await db.query(`
+            SELECT td.*, t.price_default, t.price_child 
+            FROM tour_departures td 
+            JOIN tours t ON td.tour_id = t.id 
+            WHERE td.id = ?`, [departure_id]);
+        
+        const departure = departures[0];
+        if (!departure) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy lịch khởi hành" });
         }
 
-        // Tính tổng tiền
-        const total_price = tour.price * number_of_people;
+        if (departure.seats_available < (parseInt(adults) + parseInt(children))) {
+            return res.status(400).json({ success: false, message: "Không đủ chỗ trống cho số lượng người đã chọn" });
+        }
 
-        // Tạo booking
+        // 2. Tính tổng tiền
+        const total_price = (adults * departure.price_default) + (children * departure.price_child);
+
+        // 3. Tạo booking
         const bookingId = await Booking.create({
             user_id,
-            tour_id,
-            booking_date,
-            number_of_people,
+            departure_id,
+            adults,
+            children,
             total_price,
-            status: "pending",
+            contact_name,
+            contact_phone,
+            contact_email,
+            note
         });
+
+        // 4. Cập nhật số chỗ trống (Optionally, should be in a transaction)
+        await db.query(`UPDATE tour_departures SET seats_available = seats_available - ? WHERE id = ?`, 
+            [(parseInt(adults) + parseInt(children)), departure_id]);
 
         res.status(201).json({
             success: true,
             message: "Đặt tour thành công!",
-            data: {
-                id: bookingId,
-                tour_name: tour.name,
-                booking_date,
-                number_of_people,
-                total_price,
-                status: "pending",
-            },
+            data: { id: bookingId, total_price },
         });
     } catch (error) {
         console.error("Create booking error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Lỗi khi đặt tour",
-            error: error.message,
-        });
+        res.status(500).json({ success: false, message: "Lỗi khi đặt tour", error: error.message });
     }
 };
 
@@ -56,153 +62,78 @@ exports.getMyBookings = async (req, res) => {
     try {
         const userId = req.user.id;
         const bookings = await Booking.getByUserId(userId);
-
-        res.json({
-            success: true,
-            count: bookings.length,
-            data: bookings,
-        });
+        res.json({ success: true, count: bookings.length, data: bookings });
     } catch (error) {
-        console.error("Get my bookings error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Lỗi khi lấy danh sách đặt tour",
-            error: error.message,
-        });
+        res.status(500).json({ success: false, message: "Lỗi khi lấy danh sách", error: error.message });
     }
 };
 
-// Hủy booking (chỉ hủy được booking của mình)
+// Hủy booking (Người dùng tự hủy)
 exports.cancelBooking = async (req, res) => {
     try {
         const bookingId = req.params.id;
         const userId = req.user.id;
-
-        // Lấy booking để kiểm tra quyền sở hữu
         const booking = await Booking.getById(bookingId);
 
         if (!booking) {
-            return res.status(404).json({
-                success: false,
-                message: "Không tìm thấy booking",
-            });
+            return res.status(404).json({ success: false, message: "Không tìm thấy booking" });
         }
 
-        // Kiểm tra quyền sở hữu
-        if (booking.user_id !== userId && req.user.role !== "admin") {
-            return res.status(403).json({
-                success: false,
-                message: "Bạn không có quyền hủy booking này",
-            });
+        if (booking.user_id !== userId) {
+            return res.status(403).json({ success: false, message: "Không có quyền" });
         }
 
-        // Chỉ được hủy booking đang pending
-        if (booking.status !== "pending") {
-            return res.status(400).json({
-                success: false,
-                message: "Chỉ có thể hủy booking đang chờ xác nhận",
-            });
+        if (booking.status === "cancelled") {
+            return res.status(400).json({ success: false, message: "Booking đã được hủy trước đó" });
         }
 
-        // Cập nhật status thành cancelled
-        await Booking.updateStatus(bookingId, "cancelled");
+        await Booking.updateStatus(bookingId, "status", "cancelled");
 
-        res.json({
-            success: true,
-            message: "Hủy booking thành công",
-        });
+        // Hoàn lại chỗ trống
+        await db.query(`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`, 
+            [(booking.adults + booking.children), booking.departure_id]);
+
+        res.json({ success: true, message: "Hủy thành công" });
     } catch (error) {
-        console.error("Cancel booking error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Lỗi khi hủy booking",
-            error: error.message,
-        });
+        res.status(500).json({ success: false, message: "Lỗi khi hủy", error: error.message });
     }
 };
 
-// Lấy tất cả bookings (Admin only)
+// Admin: Lấy tất cả
 exports.getAllBookings = async (req, res) => {
     try {
         const bookings = await Booking.getAll();
-
-        res.json({
-            success: true,
-            count: bookings.length,
-            data: bookings,
-        });
+        res.json({ success: true, count: bookings.length, data: bookings });
     } catch (error) {
-        console.error("Get all bookings error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Lỗi khi lấy danh sách bookings",
-            error: error.message,
-        });
+        res.status(500).json({ success: false, message: "Lỗi server", error: error.message });
     }
 };
 
-// Cập nhật trạng thái booking (Admin only)
+// Admin: Cập nhật status
 exports.updateStatus = async (req, res) => {
     try {
         const bookingId = req.params.id;
-        const { status } = req.body;
+        const { status, payment_status } = req.body;
 
-        // Validate status
-        const validStatuses = ["pending", "confirmed", "cancelled"];
-        if (!validStatuses.includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: "Trạng thái không hợp lệ. Chỉ chấp nhận: pending, confirmed, cancelled",
-            });
+        if (status) {
+            await Booking.updateStatus(bookingId, "status", status);
+        }
+        if (payment_status) {
+            await Booking.updateStatus(bookingId, "payment_status", payment_status);
         }
 
-        const updated = await Booking.updateStatus(bookingId, status);
-
-        if (!updated) {
-            return res.status(404).json({
-                success: false,
-                message: "Không tìm thấy booking",
-            });
-        }
-
-        res.json({
-            success: true,
-            message: "Cập nhật trạng thái thành công",
-        });
+        res.json({ success: true, message: "Cập nhật thành công" });
     } catch (error) {
-        console.error("Update booking status error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Lỗi khi cập nhật trạng thái",
-            error: error.message,
-        });
+        res.status(500).json({ success: false, message: "Lỗi khi cập nhật", error: error.message });
     }
 };
 
-// Xóa booking (Admin only)
+// Xóa booking
 exports.deleteBooking = async (req, res) => {
     try {
-        const bookingId = req.params.id;
-
-        const deleted = await Booking.delete(bookingId);
-
-        if (!deleted) {
-            return res.status(404).json({
-                success: false,
-                message: "Không tìm thấy booking",
-            });
-        }
-
-        res.json({
-            success: true,
-            message: "Xóa booking thành công",
-        });
+        await Booking.delete(req.params.id);
+        res.json({ success: true, message: "Xóa thành công" });
     } catch (error) {
-        console.error("Delete booking error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Lỗi khi xóa booking",
-            error: error.message,
-        });
+        res.status(500).json({ success: false, message: "Lỗi khi xóa", error: error.message });
     }
 };

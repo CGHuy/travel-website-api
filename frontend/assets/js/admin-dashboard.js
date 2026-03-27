@@ -42,8 +42,17 @@ async function setActiveMenu(page, menuItems) {
             }
             contentEl.innerHTML = await res.text();
 
-            if (filePath === "tour.html" && typeof window.initAdminTourPage === "function") {
-                await window.initAdminTourPage();
+            // Convention: "booking" -> initAdminBookingPage()
+            // "tour-service" -> initAdminTourServicePage()
+            const camelCaseStr = page.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+            const initFunctionName = `initAdmin${camelCaseStr}Page`;
+
+            if (typeof window[initFunctionName] === "function") {
+                await window[initFunctionName]();
+            } else if (typeof window.initAdminPage === "function") {
+                // Fallback for older inline scripts (if any remain)
+                await window.initAdminPage();
+                window.initAdminPage = null; 
             }
         } catch (error) {
             contentEl.innerHTML = `<div class="alert alert-warning">Chưa có file <strong>${filePath}</strong> hoặc không thể tải nội dung.</div>`;
