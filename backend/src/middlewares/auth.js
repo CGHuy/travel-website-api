@@ -156,7 +156,7 @@ const isOwner = (paramName = "userId") => {
 	};
 };
 
-// Middleware kiểm tra quyền admin hoặc quản lý booking
+// Middleware kiểm tra quyền quản lý booking
 const isBookingStaff = (req, res, next) => {
 	try {
 		if (!req.user || !req.user.id) {
@@ -166,11 +166,11 @@ const isBookingStaff = (req, res, next) => {
 			});
 		}
 
-		if (req.user.role !== "admin" && req.user.role !== "booking-staff") {
+		if (req.user.role !== "booking-staff") {
 			return res.status(403).json({
 				success: false,
 				message:
-					"Quyền truy cập bị từ chối. Chỉ admin hoặc nhân viên booking mới được phép!",
+					"Quyền truy cập bị từ chối. Chỉ nhân viên booking mới được phép!",
 			});
 		}
 
@@ -184,10 +184,38 @@ const isBookingStaff = (req, res, next) => {
 	}
 };
 
+// Middleware kiểm tra quyền quản lý tour
+const isTourStaff = (req, res, next) => {
+	try {
+		if (!req.user || !req.user.id) {
+			return res.status(401).json({
+				success: false,
+				message: "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!",
+			});
+		}
+
+		if (req.user.role !== "tour-staff") {
+			return res.status(403).json({
+				success: false,
+				message: "Quyền truy cập bị từ chối. Chỉ nhân viên tour mới được phép!",
+			});
+		}
+
+		next();
+	} catch (error) {
+		console.error("Lỗi trong isTourStaff middleware:", error);
+		return res.status(500).json({
+			success: false,
+			message: "Lỗi máy chủ nội bộ khi kiểm tra quyền truy cập",
+		});
+	}
+};
+
 module.exports = {
 	verifyToken,
 	isAdmin,
 	isUser,
 	isOwner,
 	isBookingStaff,
+	isTourStaff,
 };
