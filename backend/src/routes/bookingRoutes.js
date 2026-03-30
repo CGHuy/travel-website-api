@@ -41,4 +41,6 @@ router.delete(
 	bookingController.deleteBooking,
 );
 
+router.get("/:id", verifyToken, bookingController.getBookingDetails);
+
 module.exports = router;
