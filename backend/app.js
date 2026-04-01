@@ -7,10 +7,10 @@ require("dotenv").config();
 const requestLogger = require("./src/middlewares/logger");
 const { errorHandler, notFound } = require("./src/middlewares/errorHandler");
 const {
-	generalLimiter,
-	authLimiter,
-	createLimiter,
-	searchLimiter,
+     generalLimiter,
+     authLimiter,
+     createLimiter,
+     searchLimiter,
 } = require("./src/middlewares/rateLimiter");
 
 const app = express();
@@ -34,11 +34,13 @@ const tourRoutes = require("./src/routes/tourRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const bookingRoutes = require("./src/routes/bookingRoutes");
 const userRoutes = require("./src/routes/userRoutes");
+const servicesRoute = require("./src/routes/servicesRouter");
 
 app.use("/api/tours", searchLimiter, tourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);
+app.use("/api/services", createLimiter, servicesRoute);
 
 // ERROR HANDLERS
 // 404 handler - phải đặt sau tất cả routes
@@ -48,7 +50,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 app.listen(process.env.PORT || 3000, () => {
-	console.log(`
+     console.log(`
           🚀 VietTour Server đang chạy
           📍 Website:  http://localhost:${process.env.PORT || 3000}/pages/index.html
           📍 API:      http://localhost:${process.env.PORT || 3000}/api
