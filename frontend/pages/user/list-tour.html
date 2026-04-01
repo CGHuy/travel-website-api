@@ -118,23 +118,13 @@
 
                     <div class="mb-4">
                         <label class="form-label fw-bold mb-3 text-dark">Dịch vụ</label>
-                        <div class="d-flex flex-column gap-3">
-                            <div class="form-check custom-checkbox">
-                                <input class="form-check-input rounded border-secondary" type="checkbox" id="svc1">
-                                <label class="form-check-label fw-medium text-secondary" for="svc1">Khách sạn 5 sao</label>
-                            </div>
-                            <div class="form-check custom-checkbox">
-                                <input class="form-check-input rounded border-secondary" type="checkbox" id="svc2">
-                                <label class="form-check-label fw-medium text-secondary" for="svc2">Hướng dẫn viên</label>
-                            </div>
-                            <div class="form-check custom-checkbox">
-                                <input class="form-check-input rounded border-secondary" type="checkbox" id="svc3">
-                                <label class="form-check-label fw-medium text-secondary" for="svc3">Bảo hiểm du lịch</label>
-                            </div>
+                        <div id="service-filter-container" class="d-flex flex-column gap-3">
+                            <!-- Services will be loaded here dynamically -->
+                            <div class="text-muted small">Đang tải dịch vụ...</div>
                         </div>
                     </div>
 
-                    <button class="btn btn-primary w-100 mt-3 py-3 rounded-pill fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2 transition" style="font-size: 1.05rem;">
+                    <button id="applyFilterBtn" class="btn btn-primary w-100 mt-3 py-3 rounded-pill fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2 transition" style="font-size: 1.05rem;">
                         <i class="fa-solid fa-check"></i> Áp dụng bộ lọc
                     </button>
                 </div>
@@ -149,7 +139,7 @@
                         <div class="ps-4 pe-3 text-muted d-flex align-items-center justify-content-center">
                             <i class="fa-solid fa-magnifying-glass fs-6"></i>
                         </div>
-                        <input type="text" class="search-input border-0 bg-transparent py-2 fw-medium w-100 h-100 text-dark" style="outline: none; box-shadow: none; font-size: 0.95rem;" placeholder="Nhập tên tour, địa điểm bạn muốn đến...">
+                        <input id="searchInput" type="text" class="search-input border-0 bg-transparent py-2 fw-medium w-100 h-100 text-dark" style="outline: none; box-shadow: none; font-size: 0.95rem;" placeholder="Nhập tên tour, địa điểm bạn muốn đến...">
                     </div>
 
                     <!-- Sort -->
@@ -176,150 +166,12 @@
                     }
                 </style>
                 <div id="tour-list" class="d-flex flex-column gap-4">
-                    <!-- Horizontal Card 1 -->
-                    <div class="card border border-light shadow-sm overflow-hidden bg-white tour-horizontal-card" style="border-radius: 12px; transition: all 0.2s ease;">
-                        <div class="row g-0 flex-column flex-md-row h-100">
-                            <!-- Image Section -->
-                            <div class="col-md-5 col-xl-4 position-relative h-100">
-                                <img src="https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070" class="img-fluid w-100 h-100 object-fit-cover" style="min-height: 260px;" alt="Thái Lan">
-                                <!-- Heart icon -->
-                                <button class="btn btn-icon position-absolute top-0 start-0 m-3 p-0 bg-transparent border-0 text-white fs-4" style="text-shadow: 0 2px 4px rgba(0,0,0,0.6);">
-                                    <i class="fa-solid fa-heart opacity-75"></i>
-                                </button>
-                                <!-- Badge -->
-                                <span class="badge bg-danger position-absolute bottom-0 start-0 m-3 px-3 py-2 fs-6 rounded-1">
-                                    <i class="fa-regular fa-gem me-1"></i> Cao cấp
-                                </span>
-                            </div>
-                            <!-- Content Section -->
-                            <div class="col-md-7 col-xl-8">
-                                <div class="card-body p-4 pt-3 pb-3 d-flex flex-column h-100">
-                                    <h4 class="card-title fw-bold mb-3 text-dark line-clamp-2" style="font-size: 1.25rem; line-height: 1.4;">
-                                        Thái Lan: Phuket - Đảo Phi Phi & Vịnh Phang Nga (Khách sạn 5 sao) | Trải nghiệm ẩm thực Michelin và...
-                                    </h4>
-                                    
-                                    <!-- Info Grid -->
-                                    <div class="row g-2 mb-3 text-dark" style="font-size: 0.9rem;">
-                                        <div class="col-sm-6 d-flex align-items-center gap-2">
-                                            <i class="fa-solid fa-ticket text-muted" style="width: 18px; text-align: center;"></i>
-                                            <span class="text-secondary">Mã tour:</span> 
-                                            <span class="fw-bold">NNSGN85</span>
-                                        </div>
-                                        <div class="col-sm-6 d-flex align-items-center gap-2">
-                                            <i class="fa-solid fa-location-dot text-muted" style="width: 18px; text-align: center;"></i>
-                                            <span class="text-secondary">Khởi hành:</span> 
-                                            <a href="#" class="text-primary text-decoration-none fw-medium">TP. Hồ Chí Minh</a>
-                                        </div>
-                                        <div class="col-sm-6 d-flex align-items-center gap-2">
-                                            <i class="fa-regular fa-clock text-muted" style="width: 18px; text-align: center;"></i>
-                                            <span class="text-secondary">Thời gian:</span> 
-                                            <span class="fw-bold">4N3Đ</span>
-                                        </div>
-                                        <div class="col-sm-6 d-flex align-items-center gap-2">
-                                            <i class="fa-solid fa-plane text-muted" style="width: 18px; text-align: center;"></i>
-                                            <span class="text-secondary">Phương tiện:</span> 
-                                            <span class="fw-medium">Máy bay</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Departure dates -->
-                                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom border-light flex-wrap">
-                                        <i class="fa-regular fa-calendar-days text-muted"></i>
-                                        <span class="fw-medium text-dark text-nowrap">Ngày khởi hành:</span>
-                                        <i class="fa-solid fa-arrow-left text-muted opacity-50 ms-1 d-none d-sm-inline"></i>
-                                        <div class="d-flex gap-2 flex-nowrap overflow-hidden">
-                                            <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;">16/04</span>
-                                            <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;">30/04</span>
-                                            <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;">14/05</span>
-                                            <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;">28/05</span>
-                                        </div>
-                                        <button class="btn btn-light rounded-circle p-0 ms-auto d-flex align-items-center justify-content-center bg-light border-0 shadow-sm" style="width: 28px; height: 28px;"><i class="fa-solid fa-arrow-right text-dark fs-7"></i></button>
-                                    </div>
-
-                                    <!-- Price and action -->
-                                    <div class="d-flex justify-content-between align-items-end mt-auto pt-1">
-                                        <div>
-                                            <span class="text-dark d-block mb-1" style="font-size: 0.9rem;">Giá từ:</span>
-                                            <span class="fw-bold text-danger" style="font-size: 1.5rem;">24.990.000 <span class="text-decoration-underline" style="font-size: 1.2rem;">đ</span></span>
-                                        </div>
-                                        <a href="#" class="btn btn-primary px-4 shadow-sm rounded-2" style="font-weight: 500; font-size: 0.95rem; padding-top: 8px; padding-bottom: 8px; background-color: #0b5ed7;">Xem chi tiết</a>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Tours will be rendered here dynamically -->
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
                         </div>
-                    </div>
-
-                    <!-- Horizontal Card 2 -->
-                    <div class="card border border-light shadow-sm overflow-hidden bg-white tour-horizontal-card" style="border-radius: 12px; transition: all 0.2s ease;">
-                        <div class="row g-0 flex-column flex-md-row h-100">
-                            <!-- Image Section -->
-                            <div class="col-md-5 col-xl-4 position-relative h-100">
-                                <img src="https://images.unsplash.com/photo-1555448248-2571daf6344b?q=80&w=1887" class="img-fluid w-100 h-100 object-fit-cover" style="min-height: 260px;" alt="Quy Nhơn">
-                                <!-- Heart icon -->
-                                <button class="btn btn-icon position-absolute top-0 start-0 m-3 p-0 bg-transparent border-0 text-white fs-4" style="text-shadow: 0 2px 4px rgba(0,0,0,0.6);">
-                                    <i class="fa-solid fa-heart opacity-75"></i>
-                                </button>
-                                <!-- Badge -->
-                                <span class="badge bg-danger position-absolute bottom-0 start-0 m-3 px-3 py-2 fs-6 rounded-1">
-                                    <i class="fa-regular fa-gem me-1"></i> Cao cấp
-                                </span>
-                            </div>
-                            <!-- Content Section -->
-                            <div class="col-md-7 col-xl-8">
-                                <div class="card-body p-4 pt-3 pb-3 d-flex flex-column h-100">
-                                    <h4 class="card-title fw-bold mb-3 text-dark line-clamp-2" style="font-size: 1.25rem; line-height: 1.4;">
-                                        Miền Trung: Hội An - Quy Nhơn (The Vietage - Chuyến Tàu Hỏa Sang Trọng)
-                                    </h4>
-                                    
-                                    <!-- Info Grid -->
-                                    <div class="row g-2 mb-3 text-dark" style="font-size: 0.9rem;">
-                                        <div class="col-sm-6 d-flex align-items-center gap-2">
-                                            <i class="fa-solid fa-ticket text-muted" style="width: 18px; text-align: center;"></i>
-                                            <span class="text-secondary">Mã tour:</span> 
-                                            <span class="fw-bold">NDSGN95</span>
-                                        </div>
-                                        <div class="col-sm-6 d-flex align-items-center gap-2">
-                                            <i class="fa-solid fa-location-dot text-muted" style="width: 18px; text-align: center;"></i>
-                                            <span class="text-secondary">Khởi hành:</span> 
-                                            <a href="#" class="text-primary text-decoration-none fw-medium">TP. Hồ Chí Minh</a>
-                                        </div>
-                                        <div class="col-sm-6 d-flex align-items-center gap-2">
-                                            <i class="fa-regular fa-clock text-muted" style="width: 18px; text-align: center;"></i>
-                                            <span class="text-secondary">Thời gian:</span> 
-                                            <span class="fw-bold">4N3Đ</span>
-                                        </div>
-                                        <div class="col-sm-6 d-flex align-items-center gap-2">
-                                            <i class="fa-solid fa-plane text-muted" style="width: 18px; text-align: center;"></i>
-                                            <span class="text-secondary">Phương tiện:</span> 
-                                            <span class="fw-medium">Máy bay</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Departure dates -->
-                                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom border-light flex-wrap">
-                                        <i class="fa-regular fa-calendar-days text-muted"></i>
-                                        <span class="fw-medium text-dark text-nowrap">Ngày khởi hành:</span>
-                                        <i class="fa-solid fa-arrow-left text-muted opacity-50 ms-1 d-none d-sm-inline"></i>
-                                        <div class="d-flex gap-2 flex-nowrap overflow-hidden">
-                                            <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;">17/04</span>
-                                            <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;">30/04</span>
-                                            <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;">15/05</span>
-                                            <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;">29/05</span>
-                                        </div>
-                                        <button class="btn btn-light rounded-circle p-0 ms-auto d-flex align-items-center justify-content-center bg-light border-0 shadow-sm" style="width: 28px; height: 28px;"><i class="fa-solid fa-arrow-right text-dark fs-7"></i></button>
-                                    </div>
-
-                                    <!-- Price and action -->
-                                    <div class="d-flex justify-content-between align-items-end mt-auto pt-1">
-                                        <div>
-                                            <span class="text-dark d-block mb-1" style="font-size: 0.9rem;">Giá từ:</span>
-                                            <span class="fw-bold text-danger" style="font-size: 1.5rem;">57.990.000 <span class="text-decoration-underline" style="font-size: 1.2rem;">đ</span></span>
-                                        </div>
-                                        <a href="#" class="btn btn-primary px-4 shadow-sm rounded-2" style="font-weight: 500; font-size: 0.95rem; padding-top: 8px; padding-bottom: 8px; background-color: #0b5ed7;">Xem chi tiết</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <p class="mt-2 text-muted fw-medium">Đang tải danh sách tour...</p>
                     </div>
                 </div>
 
@@ -347,7 +199,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Fake loading of header and footer for simulation in static environment
+        // Load common components
         document.addEventListener('DOMContentLoaded', () => {
             fetch('/components/header.html')
                 .then(res => res.text())
@@ -356,15 +208,10 @@
             fetch('/components/footer.html')
                 .then(res => res.text())
                 .then(html => document.getElementById('footer-placeholder').innerHTML = html);
-                
-            // Price range display update
-            const priceRange = document.getElementById('priceRange');
-            const priceMin = document.getElementById('priceMin');
-            priceRange.oninput = function() {
-                priceMin.innerText = parseInt(this.value).toLocaleString('vi-VN') + 'đ';
-            };
         });
     </script>
+    <!-- Page Specific Script -->
+    <script src="/assets/js/ListTour.js"></script>
 </body>
 
 </html>

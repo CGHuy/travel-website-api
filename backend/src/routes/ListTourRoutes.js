@@ -5,8 +5,9 @@ const listTourController = require("../controllers/ListTourController");
 // Route để lấy danh sách tour
 router.get("/", listTourController.getAllTours);
 
-// Route để truy cập giao diện danh sách tour
-router.get("/view", listTourController.renderListPage);
+// Route để lấy danh sách dịch vụ (cho bộ lọc)
+router.get("/services", listTourController.getServices);
+
 
 
 module.exports = router;
