@@ -1,4 +1,5 @@
 const Tour = require("../models/Tour");
+const path = require("path");
 
 exports.getAllTours = async (req, res) => {
     try {
@@ -16,4 +17,8 @@ exports.getAllTours = async (req, res) => {
             error: error.message })
     }
 };
-    
+
+// Render giao diện danh sách tour
+exports.renderListPage = (req, res) => {
+    res.sendFile(path.join(__dirname, "../../../frontend/pages/user/list-tour.html"));
+};

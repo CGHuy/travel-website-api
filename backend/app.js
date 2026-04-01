@@ -42,6 +42,32 @@ app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);
 
+// -------- DYNAMIC VIEW ROUTER --------
+// Tự động tìm và trả về file HTML cho các đường dẫn ngắn (VD: /list-tour, /login)
+const fs = require('fs');
+
+app.get("/:pageName", (req, res, next) => {
+	const pageName = req.params.pageName;
+	
+	// Các thư mục có thể chứa file giao diện
+	const possiblePaths = [
+		`../frontend/pages/${pageName}.html`,
+		`../frontend/pages/user/${pageName}.html`,
+		`../frontend/pages/auth/${pageName}.html`,
+		`../frontend/pages/admin/${pageName}.html`
+	];
+
+	for (let p of possiblePaths) {
+		const fullPath = path.join(__dirname, p);
+		if (fs.existsSync(fullPath)) {
+			return res.sendFile(fullPath);
+		}
+	}
+	// Nếu không tìm thấy file nào, tiếp tục qua middleware khác (như 404 handler)
+	next();
+});
+// -------------------------------------
+
 // ERROR HANDLERS
 // 404 handler - phải đặt sau tất cả routes
 app.use(notFound);

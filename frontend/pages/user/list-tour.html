@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Tour - VietTour</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Essential CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/AppStyle.css">
+    <link rel="stylesheet" href="/assets/css/ListTourStyle.css">
+    <style>
+        body {
+            padding-top: 80px; /* Space for fixed header */
+            background-color: #f8fafc;
+        }
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .search-group {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header will be loaded here -->
+    <div id="header-placeholder"></div>
+
+    <main class="main-container">
+        <!-- Title & Sort -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="fw-bold mb-0" style="font-size: 2rem; color: #0f172a;">Khám Phá Các Tour Du Lịch</h1>
+            <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 text-muted small fw-medium" for="sort">Sắp xếp:</label>
+                <select id="sort" class="form-select border-0 shadow-sm rounded-pill px-3" style="width: 180px;">
+                    <option value="">Tất cả</option>
+                    <option value="price_asc">Giá: Thấp đến cao</option>
+                    <option value="price_desc">Giá: Cao đến thấp</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sidebar Filter -->
+            <aside class="col-lg-3">
+                <div class="card border-0 shadow-sm p-4 filter-sidebar">
+                    <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-filter text-primary"></i> Bộ lọc
+                    </h5>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-3">Khoảng giá</label>
+                        <input type="range" class="form-range" min="500000" max="10000000" step="500000" id="priceRange">
+                        <div class="d-flex justify-content-between text-muted small mt-2">
+                            <span id="priceMin">500.000đ</span>
+                            <span>10.000.000đ+</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-3">Khu vực</label>
+                        <select class="form-select border-light bg-light" id="regionSelect">
+                            <option value="">Tất cả khu vực</option>
+                            <option value="Miền Bắc">Miền Bắc</option>
+                            <option value="Miền Trung">Miền Trung</option>
+                            <option value="Miền Nam">Miền Nam</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-3">Thời lượng</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="duration" id="dur_all" checked>
+                                <label class="form-check-label" for="dur_all">Tất cả</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="duration" id="dur_short">
+                                <label class="form-check-label" for="dur_short">1-3 ngày</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="duration" id="dur_long">
+                                <label class="form-check-label" for="dur_long">4+ ngày</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-3">Dịch vụ</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="svc1">
+                                <label class="form-check-label" for="svc1">Khách sạn 5 sao</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="svc2">
+                                <label class="form-check-label" for="svc2">Hướng dẫn viên</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="svc3">
+                                <label class="form-check-label" for="svc3">Bảo hiểm du lịch</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary w-100 mt-2 py-2 fw-bold">Áp dụng bộ lọc</button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <!-- Search Bar -->
+                <div class="search-group mb-4">
+                    <div class="search-icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <input type="text" class="search-input" placeholder="Tìm kiếm tour theo tên, địa điểm...">
+                </div>
+
+                <!-- Tour List Grid -->
+                <div id="tour-list" class="row g-4 overflow-hidden">
+                    <!-- Placeholder Tours -->
+                    <div class="col-md-6 col-xl-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                            <div class="position-relative">
+                                <img src="https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070" class="card-img-top" alt="Hạ Long">
+                                <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
+                                    <span class="badge bg-white text-primary shadow-sm px-3 py-2 rounded-pill">3 Ngày 2 Đêm</span>
+                                    <span class="badge bg-primary shadow-sm px-3 py-2 rounded-pill">Miền Bắc</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <h5 class="card-title mb-2">Vịnh Hạ Long - Kỳ Quan Thế Giới</h5>
+                                <p class="card-text text-muted small mb-4">Khám phá vẻ đẹp huyền ảo của Vịnh Hạ Long với du thuyền 5 sao sang trọng...</p>
+                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                    <div class="price-tag">
+                                        <span class="text-muted small d-block">Giá từ</span>
+                                        <span class="fw-bold text-primary fs-4">3.500.000đ</span>
+                                    </div>
+                                    <a href="#" class="btn btn-primary rounded-pill px-4">Chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-xl-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                            <div class="position-relative">
+                                <img src="https://images.unsplash.com/photo-1555448248-2571daf6344b?q=80&w=1887" class="card-img-top" alt="Đà Nẵng">
+                                <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
+                                    <span class="badge bg-white text-primary shadow-sm px-3 py-2 rounded-pill">4 Ngày 3 Đêm</span>
+                                    <span class="badge bg-primary shadow-sm px-3 py-2 rounded-pill">Miền Trung</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <h5 class="card-title mb-2">Đà Nẵng - Hội An - Bà Nà Hills</h5>
+                                <p class="card-text text-muted small mb-4">Trải nghiệm cáp treo Bà Nà và dạo bước trong phố cổ Hội An thơ mộng...</p>
+                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                    <div class="price-tag">
+                                        <span class="text-muted small d-block">Giá từ</span>
+                                        <span class="fw-bold text-primary fs-4">4.200.000đ</span>
+                                    </div>
+                                    <a href="#" class="btn btn-primary rounded-pill px-4">Chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-xl-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                            <div class="position-relative">
+                                <img src="https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=2070" class="card-img-top" alt="Phú Quốc">
+                                <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
+                                    <span class="badge bg-white text-primary shadow-sm px-3 py-2 rounded-pill">3 Ngày 2 Đêm</span>
+                                    <span class="badge bg-primary shadow-sm px-3 py-2 rounded-pill">Miền Nam</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <h5 class="card-title mb-2">Phú Quốc - Thiên Đường Nghỉ Dưỡng</h5>
+                                <p class="card-text text-muted small mb-4">Tận hưởng nắng vàng biển xanh và lặn ngắm san hô tại hòn đảo ngọc...</p>
+                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                    <div class="price-tag">
+                                        <span class="text-muted small d-block">Giá từ</span>
+                                        <span class="fw-bold text-primary fs-4">2.900.000đ</span>
+                                    </div>
+                                    <a href="#" class="btn btn-primary rounded-pill px-4">Chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- More cards would go here -->
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" class="mt-5">
+                    <ul class="pagination justify-content-center gap-2">
+                        <li class="page-item disabled">
+                            <a class="page-link border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center" href="#" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-left"></i></a>
+                        </li>
+                        <li class="page-item active"><a class="page-link border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center mx-1" href="#" style="width: 40px; height: 40px;">1</a></li>
+                        <li class="page-item"><a class="page-link border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center mx-1" href="#" style="width: 40px; height: 40px;">2</a></li>
+                        <li class="page-item"><a class="page-link border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center mx-1" href="#" style="width: 40px; height: 40px;">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center" href="#" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded here -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fake loading of header and footer for simulation in static environment
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/components/header.html')
+                .then(res => res.text())
+                .then(html => document.getElementById('header-placeholder').innerHTML = html);
+            
+            fetch('/components/footer.html')
+                .then(res => res.text())
+                .then(html => document.getElementById('footer-placeholder').innerHTML = html);
+                
+            // Price range display update
+            const priceRange = document.getElementById('priceRange');
+            const priceMin = document.getElementById('priceMin');
+            priceRange.oninput = function() {
+                priceMin.innerText = parseInt(this.value).toLocaleString('vi-VN') + 'đ';
+            };
+        });
+    </script>
+</body>
+
+</html>
