@@ -137,6 +137,20 @@ class User {
 			throw error;
 		}
 	}
+
+	// Lấy thông tin user hiện tại - Che
+	static async getProfile(id) {
+		try {
+			const [rows] = await db.query(
+				`
+				SELECT id, fullname, phone, email, role, created_at FROM users WHERE id = ?`,
+				[id],
+			);
+			return rows[0];
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 module.exports = User;

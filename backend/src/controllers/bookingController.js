@@ -187,3 +187,38 @@ exports.updateStatus = async (req, res) => {
 		});
 	}
 };
+
+// Xóa booking (Admin)
+exports.deleteBooking = async (req, res) => {
+	try {
+		const bookingId = req.params.id;
+		const booking = await Booking.getById(bookingId);
+
+		if (!booking) {
+			return res
+				.status(404)
+				.json({ success: false, message: "Không tìm thấy booking" });
+		}
+
+		// Nếu booking chưa bị hủy, hoàn lại chỗ
+		if (booking.status !== "cancelled") {
+			await db.query(
+				`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`,
+				[booking.adults + booking.children, booking.departure_id],
+			);
+		}
+
+		await db.query(`DELETE FROM bookings WHERE id = ?`, [bookingId]);
+
+		res.json({ success: true, message: "Xóa booking thành công" });
+	} catch (error) {
+		console.error("Delete booking error:", error);
+		res
+			.status(500)
+			.json({
+				success: false,
+				message: "Lỗi khi xóa booking",
+				error: error.message,
+			});
+	}
+};
