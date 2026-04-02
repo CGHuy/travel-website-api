@@ -134,6 +134,8 @@ class Booking {
 			throw error;
 		}
 	}
+
+	// Người dùng gửi yêu cầu hủy booking (chuyển trạng thái sang "cancelled")
 }
 
 module.exports = Booking;

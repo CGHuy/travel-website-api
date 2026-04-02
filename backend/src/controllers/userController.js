@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const db = require("../config/database");
+const jwt = require("jsonwebtoken");
 
 // Cập nhật thông tin user hiện tại
 exports.updateProfile = async (req, res) => {
@@ -59,6 +60,61 @@ exports.getProfile = async (req, res) => {
 		return res.status(500).json({
 			success: false,
 			message: "Lỗi khi lấy thông tin user",
+			error: error.message,
+		});
+	}
+};
+
+// Đổi thông tin mật khẩu - Che
+exports.changePassword = async (req, res) => {
+	try {
+		const userId = req.user.id;
+
+		// Các kiểm tra đầu vào (presence/confirm) được xử lý bởi middleware `validateChangePassword`.
+		const { currentPassword, newPassword } = req.body;
+
+		const [rows] = await db.query("SELECT password FROM users WHERE id = ?", [
+			userId,
+		]);
+		const userRow = rows[0];
+		if (!userRow) {
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy người dùng.",
+			});
+		}
+
+		const isMatch = await User.comparePassword(
+			currentPassword,
+			userRow.password,
+		);
+		if (!isMatch) {
+			return res.status(400).json({
+				success: false,
+				message: "Mật khẩu hiện tại không đúng.",
+			});
+		}
+
+		const updated = await User.changePassword(userId, newPassword);
+		if (!updated) {
+			return res.status(500).json({
+				success: false,
+				message: "Cập nhật mật khẩu thất bại.",
+			});
+		}
+
+		const secret = process.env.JWT_SECRET || "change_pwd_secret";
+		const token = jwt.sign({ id: userId }, secret, { expiresIn: "7d" });
+
+		return res.json({
+			success: true,
+			message: "Đổi mật khẩu thành công!",
+			data: { token },
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Lỗi khi đổi mật khẩu",
 			error: error.message,
 		});
 	}

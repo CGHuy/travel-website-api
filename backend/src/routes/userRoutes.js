@@ -4,7 +4,10 @@ const userController = require("../controllers/userController");
 
 const { verifyToken } = require("../middlewares/auth");
 
-const { validateUpdateProfile } = require("../middlewares/validation/user");
+const {
+	validateUpdateProfile,
+	validateChangePassword,
+} = require("../middlewares/validation/user");
 
 // Lấy thông tin user hiện tại - Cần đăng nhập
 router.get("/profile", verifyToken, userController.getProfile);
@@ -14,6 +17,14 @@ router.put(
 	verifyToken,
 	validateUpdateProfile,
 	userController.updateProfile,
+);
+
+// Đổi mật khẩu
+router.put(
+	"/change-password",
+	verifyToken,
+	validateChangePassword,
+	userController.changePassword,
 );
 
 module.exports = router;
