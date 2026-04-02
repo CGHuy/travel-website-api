@@ -55,6 +55,30 @@ exports.getServices = async (req, res) => {
     }
 };
 
+exports.getDetailTour = async (req, res) => {
+    const tourId = req.params.id;
+    try {
+        const tourDetail = await ListTourService.getDetailTour(tourId);
+        if (!tourDetail) {
+            return res.status(404).json({
+                success: false,
+                message: "Tour không tồn tại"
+            });
+        }
+        res.json({
+            success: true,
+            data: tourDetail
+        });
+    } catch (error) {
+        console.error("Lỗi getDetailTour:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi không lấy được chi tiết Tour",
+            error: error.message
+        });
+    }
+};
+
 // Render giao diện danh sách tour
 exports.renderListPage = (req, res) => {
     res.sendFile(path.join(__dirname, "../../../frontend/pages/user/list-tour.html"));

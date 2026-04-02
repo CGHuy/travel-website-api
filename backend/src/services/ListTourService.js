@@ -1,4 +1,8 @@
 const db = require("../config/database");
+const servicesModel = require("../models/Service");
+const tourModel = require("../models/Tour");
+const tourServiceModel = require("../models/TourService");
+const  tourImageModel = require("../models/TourImage");
 
 class ListTourService {
     /**
@@ -116,6 +120,33 @@ class ListTourService {
             throw new Error(`Tour Service GetServices Error: ${error.message}`);
         }
     }
+
+    static async getDetailTour(id) {
+        try {
+            // 1. Lấy thông tin cơ bản của Tour từ bảng tours
+            const tour = await tourModel.getById(id);
+            
+            // Nếu không tìm thấy tour, trả về null ngay
+            if (!tour) return null;
+
+            // 2. Lấy danh sách tất cả hình ảnh của tour này từ bảng tour_images
+            const images = await tourImageModel.getByTourId(id);
+
+            // 3. Lấy danh sách các dịch vụ đi kèm của tour từ bảng tour_services (kèm join với bảng services)
+            const services = await tourServiceModel.getServicesByTourId(id);
+
+            // 4. Trả về đối tượng tour đã được gộp thêm thông tin ảnh và dịch vụ
+            return {
+                ...tour,
+                images: images,
+                services: services
+            };
+        } catch (error) {
+            console.error("Lỗi tại getDetailTour:", error);
+            throw new Error(`Lấy chi tiết tour thất bại: ${error.message}`);
+        }
+    }
+
 }
 
 module.exports = ListTourService;
