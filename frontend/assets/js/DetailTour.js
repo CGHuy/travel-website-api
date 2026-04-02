@@ -208,6 +208,16 @@ document.addEventListener('DOMContentLoaded', () => {
             reviewList.innerHTML = '<div class="col-12 text-center py-4"><p class="text-muted">Chưa có đánh giá nào cho tour này.</p></div>';
             if (showMoreBtn) showMoreBtn.style.display = 'none';
         }
+        // --- Event Listeners cho các nút hành động ---
+        const bookButtons = document.querySelectorAll('.btn-primary, #bookTourBtn');
+        bookButtons.forEach(btn => {
+            if (btn.innerText.includes('Đặt') || btn.innerText.includes('Báo')) {
+                btn.onclick = () => {
+                   window.location.href = `/booking-tour?tour_id=${tour.id}`;
+                };
+            }
+        });
+
     }
 
     function showError(msg) {
