@@ -1,0 +1,534 @@
+/* ====== Modern Details Page Styles ====== */
+
+/* Image Gallery Airbnb Style */
+.tour-gallery {
+    height: 480px;
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+}
+
+.gallery-main {
+    height: 100%;
+}
+
+.gallery-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    cursor: pointer;
+}
+
+.gallery-main:hover img {
+    transform: scale(1.02);
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0.5rem;
+    height: 100%;
+}
+
+/* Header Card Refinement */
+.header-card {
+    border: none !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 10px 40px rgba(0,0,0,0.04) !important;
+    padding: 2.5rem !important; /* Tăng padding để thoáng hơn */
+}
+
+/* Breadcrumb refinement */
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "•" !important;
+    color: #cbd5e1;
+}
+
+/* Nút Action tròn hiện đại */
+.btn-action-round {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-action-round:hover {
+    background: #ffffff;
+    color: #0f172a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.btn-action-round.love:hover {
+    color: #ef4444;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+/* Metadata tag hiện đại */
+.meta-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.92rem;
+    color: #64748b;
+    padding-right: 1.2rem;
+    border-right: 1px solid #e2e8f0;
+    line-height: 1;
+}
+
+.meta-tag:last-child {
+    border-right: none;
+}
+
+.meta-tag i {
+    color: var(--primary);
+    opacity: 0.8;
+}
+
+/* Header Card Refinement & Hover */
+.header-card {
+    border: 1px solid #f1f5f9 !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 10px 40px rgba(0,0,0,0.04) !important;
+    padding: 2.5rem !important;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.header-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.06) !important;
+    border-color: rgba(19, 127, 236, 0.1) !important;
+}
+
+/* Content Card Hover */
+.content-card {
+    background: #ffffff !important;
+    border: 1px solid #f1f5f9 !important;
+    border-radius: 24px !important;
+    padding: 2.5rem !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.01), 0 12px 30px rgba(0,0,0,0.03) !important;
+    margin-bottom: 2.5rem !important;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.content-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.05) !important;
+    border-color: rgba(19, 127, 236, 0.1) !important;
+}
+
+/* Booking Card Refinement */
+.booking-card {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 28px !important; /* Bo tròn hơn */
+    padding: 2rem !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+}
+
+.price-main {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.02em;
+}
+
+/* Price Summary - Dùng thay thế cho estimation-box */
+.price-summary {
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.price-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.price-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.price-value {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.btn-book-now {
+    background: linear-gradient(135deg, #137fec, #0a58ca);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 1.1rem;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 8px 20px rgba(19, 127, 236, 0.25);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-book-now:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(19, 127, 236, 0.35);
+    background: linear-gradient(135deg, #1688ff, #0d6efd);
+}
+
+.hotline-premium {
+    background: #f0f7ff;
+    border-radius: 20px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.hotline-premium h6 {
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.btn-hotline-pill {
+    background: #ffffff;
+    border: 1px solid #dbeafe;
+    color: #137fec;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1.75rem;
+    border-radius: 99px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(19, 127, 236, 0.05);
+}
+
+.btn-hotline-pill:hover {
+    background: #137fec;
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(19, 127, 236, 0.15);
+}
+
+.content-card h4 {
+    position: relative;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #f8fafc;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+/* Tối ưu Service Card sắc nét hơn */
+.service-card {
+    background: #ffffff !important;
+    border: 1px solid #f1f5f9 !important;
+    padding: 1.5rem !important;
+    border-radius: 20px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(19, 127, 236, 0.3) !important;
+    box-shadow: 0 12px 30px rgba(19, 127, 236, 0.08) !important;
+}
+
+.service-card .icon-box {
+    width: 52px;
+    height: 52px;
+    background: #f0f7ff !important;
+    color: #137fec !important; /* var(--primary) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    border-radius: 14px;
+    margin-bottom: 0;
+    transition: all 0.3s ease;
+}
+
+.service-card:hover .icon-box {
+    background: #137fec !important;
+    color: #ffffff !important;
+    transform: scale(1.1);
+}
+
+/* Tối ưu Itinerary sắc nét hơn */
+.itinerary-number {
+    background: linear-gradient(135deg, #137fec, #0a58ca) !important;
+    color: white !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.9rem !important;
+    box-shadow: 0 4px 10px rgba(19, 127, 236, 0.3);
+    border: 3px solid #ffffff;
+    left: -16px !important;
+}
+
+.itinerary-item {
+    border-left: 2px dashed #e2e8f0 !important;
+    padding-left: 2.5rem !important;
+    margin-left: 1rem !important;
+}
+
+.itinerary-item:last-child {
+    border-left-color: transparent !important;
+}
+
+.itinerary-item .card {
+    border: 1px solid #f1f5f9 !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03) !important;
+    transition: all 0.3s ease;
+}
+
+.itinerary-item .card:hover {
+    border-color: rgba(19, 127, 236, 0.2) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
+}
+
+/* Tối ưu Review Card */
+.review-card {
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 20px;
+    padding: 1.75rem;
+    transition: all 0.3s ease;
+}
+
+.review-card:hover {
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    border-color: #e2e8f0;
+}
+
+.gallery-grid-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.gallery-grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    cursor: pointer;
+}
+
+.gallery-grid-item:hover img {
+    transform: scale(1.05);
+}
+
+/* View all photos button */
+.btn-view-photos {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #0f172a;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: background 0.2s;
+    z-index: 10;
+}
+.btn-view-photos:hover {
+    background: #f8fafc;
+}
+
+/* Interactive Tabs */
+/* Modern Premium Tabs (Non-Sticky) */
+.nav-tabs-premium {
+    display: flex;
+    justify-content: flex-start;
+    gap: 2.5rem;
+    border-bottom: 2px solid #f1f5f9;
+    margin-bottom: 3.5rem;
+    padding: 0;
+    list-style: none;
+}
+
+.nav-tabs-premium .nav-item {
+    margin-bottom: -2px; /* Dính sát vào đường kẻ border-bottom */
+}
+
+.nav-tabs-premium .nav-link {
+    border: none !important;
+    background: transparent !important;
+    color: #64748b;
+    font-weight: 700;
+    padding: 1.2rem 0;
+    position: relative;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.nav-tabs-premium .nav-link i {
+    font-size: 1.1rem;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs-premium .nav-link:hover {
+    color: #137fec; /* var(--primary) */
+}
+
+.nav-tabs-premium .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: #137fec;
+    border-radius: 99px 99px 0 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-tabs-premium .nav-link.active {
+    color: #0f172a !important;
+}
+
+.nav-tabs-premium .nav-link.active i {
+    color: #137fec;
+    opacity: 1;
+}
+
+.nav-tabs-premium .nav-link.active::after {
+    width: 100%;
+}
+
+/* Sticky Booking Card */
+.booking-card-wrapper {
+    position: sticky;
+    top: 100px;
+    z-index: 5;
+}
+
+.booking-card {
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+/* Timeline */
+.itinerary-timeline {
+    position: relative;
+    padding-left: 2.5rem;
+}
+.itinerary-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e2e8f0;
+}
+.itinerary-item {
+    position: relative;
+    margin-bottom: 2rem;
+}
+.itinerary-number {
+    position: absolute;
+    left: -40px;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    background: white;
+    color: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 0 4px white;
+    z-index: 1;
+}
+
+/* Content Blocks */
+.content-block {
+    scroll-margin-top: 120px;
+}
+
+.service-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    height: 100%;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.service-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.icon-box {
+    width: 48px;
+    height: 48px;
+    background: #eff6ff;
+    color: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+/* Reviews */
+.review-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+    .tour-gallery {
+        height: 300px;
+        border-radius: 16px;
+    }
+}

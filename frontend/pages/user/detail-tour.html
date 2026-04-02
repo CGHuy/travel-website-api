@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Tour - VietTour</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@200..900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/AppStyle.css">
+    <link rel="stylesheet" href="/assets/css/DetailTourStyle.css">
+</head>
+
+<body style="padding-top: 80px; background-color: #f8fafc;">
+    <!-- Header Placeholder -->
+    <div id="header-placeholder" class="bg-white fixed-top shadow-sm w-100"></div>
+
+    <main class="container py-4">
+        <!-- Tour Header Card (Breadcrumb + Title + Meta) -->
+        <div class="card header-card rounded-4 mb-4">
+            <!-- Breadcrumb Inside -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2" style="padding-bottom: 0;">
+                    <li class="breadcrumb-item"><a href="/index" class="breadcrumb-link text-muted small">VietTour</a></li>
+                    <li class="breadcrumb-item"><a href="/list-tour" class="breadcrumb-link text-muted small">Tour du lịch</a></li>
+                    <li class="breadcrumb-item breadcrumb-current active small" id="breadcrumb-tour-name" aria-current="page">...</li>
+                </ol>
+            </nav>
+
+            <hr class="text-muted opacity-10 my-3">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-4">
+                <div class="flex-grow-1">
+                    <h1 id="tour-name" class="fw-bold text-dark display-6 mb-3" style="letter-spacing: -0.03em; line-height: 1.2;">Đang tải...</h1>
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <div class="meta-tag"><i class="fa-solid fa-location-dot"></i> <span id="tour-location">...</span></div>
+                        <div class="meta-tag"><i class="fa-regular fa-clock"></i> <span id="tour-duration">...</span></div>
+                        <div class="meta-tag"><i class="fa-solid fa-map"></i> <span id="tour-region">...</span></div>
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 ms-md-2 fw-medium" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-check me-1"></i> Đang mở bán</span>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 align-items-center">
+                    <button class="btn btn-action-round" title="Chia sẻ"><i class="fa-solid fa-share-nodes"></i></button>
+                    <button class="btn btn-action-round love" title="Lưu yêu thích"><i class="fa-regular fa-heart"></i></button>
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-none d-md-block">Đặt Tour ngay</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Gallery (Airbnb Style) -->
+        <div class="tour-gallery mb-5" id="tour-gallery">
+            <!-- Will be populated by JS -->
+            <div class="d-flex justify-content-center align-items-center h-100 bg-secondary bg-opacity-10">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        </div>
+
+        <div class="row g-5">
+            <!-- Left Column: Content (70%) -->
+            <div class="col-lg-8">
+                
+                <!-- Modern Navigation Tabs (Non-Sticky) -->
+                <ul class="nav-tabs-premium">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#overview">
+                            <i class="fa-solid fa-circle-info"></i> Tổng quan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#itinerary">
+                            <i class="fa-solid fa-route"></i> Lịch trình
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#services">
+                            <i class="fa-solid fa-bell-concierge"></i> Dịch vụ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#reviews">
+                            <i class="fa-solid fa-star-half-stroke"></i> Đánh giá
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="sections-content pb-5">
+                    <!-- Overview Section -->
+                    <section id="overview" class="content-card">
+                        <h4 class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-primary"></i> Về chuyến đi này
+                        </h4>
+                        <div id="tour-description" class="text-secondary lh-lg" style="text-align: justify; font-size: 1.05rem;">
+                            Đang tải mô tả...
+                        </div>
+                    </section>
+
+                    <!-- Itinerary Section -->
+                    <section id="itinerary" class="content-card">
+                        <h4 class="mb-5 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-route text-primary"></i> Lịch trình chi tiết
+                        </h4>
+                        <div id="itinerary-list" class="itinerary-timeline">
+                            <p class="text-muted">Đang tải lịch trình...</p>
+                        </div>
+                    </section>
+
+                    <!-- Services Section -->
+                    <section id="services" class="content-card">
+                        <h4 class="mb-5 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-bell-concierge text-primary"></i> Tiện ích & Dịch vụ
+                        </h4>
+                        <div id="service-list" class="row g-4">
+                            <p class="text-muted">Đang tải tiện ích...</p>
+                        </div>
+                    </section>
+
+                    <!-- Reviews Section -->
+                    <section id="reviews" class="content-card">
+                        <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+                            <h4 class="m-0 border-0 p-0 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-star-half-stroke text-primary"></i> Đánh giá từ du khách
+                            </h4>
+                            <div class="badge bg-warning bg-opacity-10 text-dark rounded-pill px-3 py-2 fw-bold" id="avg-rating-text">
+                                <i class="fa-solid fa-star text-warning"></i> 5.0 <span id="total-reviews-count">(24 lượt)</span>
+                            </div>
+                        </div>
+                        <div id="review-list" class="row g-4">
+                            <!-- JS render here -->
+                        </div>
+                        <div class="text-center mt-5">
+                            <button id="show-all-reviews" class="btn btn-outline-primary rounded-pill px-5 py-2 fw-bold">Hiện tất cả đánh giá</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Right Column: Booking Card (30%) -->
+            <div class="col-lg-4">
+                <!-- Booking Card Sidebar -->
+                <div class="booking-card-wrapper sticky-top" style="top: 100px;">
+                    <div class="booking-card">
+                        <div class="mb-4">
+                            <p class="text-muted small fw-bold text-uppercase mb-2 tracking-wide">Giá tour trọn gói</p>
+                            <div class="d-flex align-items-end">
+                                <span id="tour-price" class="price-main text-primary lh-1">0</span>
+                                <span class="price-unit text-primary fw-bold lh-1 mb-1 ms-1">₫</span>
+                                <span class="text-muted small fw-medium ms-2 mb-1">/ khách</span>
+                            </div>
+                        </div>
+
+                        <div class="price-summary mb-4">
+                            <div class="price-item">
+                                <span class="price-label">Người lớn (Từ 12 tuổi)</span>
+                                <span class="price-value" id="tour-price-summary">0 đ</span>
+                            </div>
+                            <div class="price-item">
+                                <span class="price-label">Trẻ em (Từ 5 - 11 tuổi)</span>
+                                <span class="price-value" id="tour-price-child-summary">0 đ</span>
+                            </div>
+                            <div class="price-item">
+                                <span class="price-label">Em bé (Dưới 5 tuổi)</span>
+                                <span class="price-value text-success">Miễn phí</span>
+                            </div>
+                        </div>
+
+                        <button id="bookTourBtn" class="btn btn-book-now mb-2">
+                            Đặt tour ngay <i class="fa-solid fa-arrow-right ms-2 small"></i>
+                        </button>
+
+                        <div class="hotline-premium mt-4">
+                            <h6>Cần tư vấn thêm?</h6>
+                            <p class="text-muted small mb-0">Hỗ trợ miễn phí 24/7</p>
+                            <a href="tel:19001234" class="btn btn-hotline-pill">
+                                <i class="fa-solid fa-phone-volume"></i> 1900 1234
+                            </a>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div class="mt-5" id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/components/header.html').then(r => r.text()).then(h => document.getElementById('header-placeholder').innerHTML = h);
+            fetch('/components/footer.html').then(r => r.text()).then(h => document.getElementById('footer-placeholder').innerHTML = h);
+
+            // Active state link when scrolling
+            const sections = document.querySelectorAll('.content-block');
+            const navLinks = document.querySelectorAll('.nav-pills-custom .nav-link');
+            
+            // Simple smooth scroll and active tab logic
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(sec => {
+                    const secTop = sec.offsetTop;
+                    if(pageYOffset >= secTop - 150) {
+                        current = sec.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+    <!-- Page Specific Script -->
+    <script src="/assets/js/DetailTour.js"></script>
+</body>
+
+</html>

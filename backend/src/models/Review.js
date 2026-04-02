@@ -16,7 +16,7 @@ class Review {
     //Lấy review theo tour_id
     static async getByTourId(tour_id) {
         try {
-            const [rows] = await db.query(`SELECT r.*, u.username FROM reviews r JOIN users u ON r.user_id = u.id WHERE r.tour_id = ? ORDER BY r.created_at DESC`, [tour_id]);
+            const [rows] = await db.query(`SELECT r.*, u.fullname AS user_name FROM reviews r JOIN users u ON r.user_id = u.id WHERE r.tour_id = ? ORDER BY r.created_at DESC`, [tour_id]);
             return rows;
         } catch (error) {
             throw error;
