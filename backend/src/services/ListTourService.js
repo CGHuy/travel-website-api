@@ -3,6 +3,8 @@ const servicesModel = require("../models/Service");
 const tourModel = require("../models/Tour");
 const tourServiceModel = require("../models/TourService");
 const  tourImageModel = require("../models/TourImage");
+const tourItineraryModel = require("../models/TourItinerary");
+const review = require("../models/Review");
 
 class ListTourService {
     /**
@@ -110,13 +112,14 @@ class ListTourService {
         }
     }
     /**
-     * Lấy danh sách tất cả các dịch vụ đang hoạt động
+     * Lấy danh sách tất cả các dịch vụ (Sử dụng Model thay vì viết query thuần)
      */
     static async getAllServices() {
         try {
-            const [rows] = await db.query(`SELECT id, name FROM services WHERE status = 1 ORDER BY name ASC`);
-            return rows;
+            // Thay thế query SQL thô bằng việc gọi hàm từ servicesModel đã import
+            return await servicesModel.getAll();
         } catch (error) {
+            console.error("Lỗi tại getAllServices:", error);
             throw new Error(`Tour Service GetServices Error: ${error.message}`);
         }
     }
@@ -135,11 +138,27 @@ class ListTourService {
             // 3. Lấy danh sách các dịch vụ đi kèm của tour từ bảng tour_services (kèm join với bảng services)
             const services = await tourServiceModel.getServicesByTourId(id);
 
-            // 4. Trả về đối tượng tour đã được gộp thêm thông tin ảnh và dịch vụ
+            // 4. Lấy danh sách lịch trình của tour
+            const itineraries = await tourItineraryModel.getByTourId(id);
+            
+            // 5. Lấy đánh giá của tour
+            const reviews = await review.getByTourId(id);
+
+            // Tự động tính toán tổng số đánh giá và điểm trung bình
+            const total_reviews = reviews.length;
+            const avg_rating = total_reviews > 0 
+                ? (reviews.reduce((acc, rev) => acc + rev.rating, 0) / total_reviews).toFixed(1) 
+                : 0;
+ 
+            // 6. Trả về đối tượng tour đã được gộp đầy đủ thông tin
             return {
                 ...tour,
                 images: images,
-                services: services
+                services: services,
+                itineraries: itineraries,
+                reviews: reviews,
+                total_reviews: total_reviews,
+                avg_rating: avg_rating
             };
         } catch (error) {
             console.error("Lỗi tại getDetailTour:", error);
