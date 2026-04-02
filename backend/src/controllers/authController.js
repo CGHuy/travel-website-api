@@ -10,7 +10,7 @@ const generateToken = (user) => {
             role: user.role,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "1d" }, // Token hết hạn sau 1 ngày
+        { expiresIn: "7d" }, // Token hết hạn sau 7 ngày
     );
 };
 

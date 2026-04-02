@@ -1,0 +1,114 @@
+<div class="d-flex justify-content-between align-items-center px-3">
+    <div>
+        <h5 class="card-title mb-0"><i class="fa-solid fa-route me-2"></i>Quản lý Lịch trình Tour</h5>
+    </div>
+    <div class="text-end">
+        <span class="badge bg-info">Tổng: <span id="itinerary-total-count">0</span> tour đã có lịch trình</span>
+    </div>
+</div>
+
+<div class="card-body">
+    <div class="input-group search-group mb-3">
+        <span class="input-group-text search-icon">
+            <i class="fa-solid fa-magnifying-glass fa-sm"></i>
+        </span>
+        <input id="itinerary-search-input" class="form-control search-input" placeholder="Tìm kiếm tour theo id, tên..." aria-label="Tìm kiếm" />
+    </div>
+
+    <ul class="list-group list-group-flush" id="tour-itinerary-list">
+        <li class="list-group-item text-center p-4 text-muted">Đang tải danh sách tour...</li>
+    </ul>
+</div>
+
+<template id="tour-itinerary-item-template">
+    <li class="list-group-item p-3 hover-shadow">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="badge bg-secondary itinerary-tour-code">TOUR-000</span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 itinerary-tour-name">Tên tour</h6>
+                        <small class="text-muted itinerary-status-wrap">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            <span class="itinerary-status text-warning"><i class="fas fa-exclamation-circle me-1"></i>Chưa có lịch trình</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-sm btn-primary open-itinerary-modal" data-tour-id="" data-tour-name="" data-action-name="Thêm" data-bs-toggle="modal" data-bs-target="#itineraryModal"><i class="fas fa-plus"></i> <span class="itinerary-action-text">Thêm mới</span></button>
+            </div>
+        </div>
+    </li>
+</template>
+
+<template id="tour-itinerary-empty-template">
+    <li class="list-group-item text-center py-5">
+        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+        <p class="text-muted mb-0">Chưa có tour nào. Vui lòng thêm tour trước.</p>
+    </li>
+</template>
+
+<div class="modal fade" id="itineraryModal" tabindex="-1" aria-labelledby="itineraryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="itineraryModalLabel">Lịch trình Tour</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pb-0" id="itinerary-modal-body">
+                <form action="#" method="POST" id="itinerary-form">
+                    <input type="hidden" name="tour_id" id="form-tour-id" value="" />
+                    <div id="itinerary-days-container">
+                        <div class="itinerary-day-item card mb-3 shadow-sm">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center px-3 py-2">
+                                <h6 class="day-title mb-0"><i class="fas fa-calendar-day text-primary me-2"></i>Ngày 1</h6>
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-day-btn" title="Xóa ngày này">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <div class="card-body p-3">
+                                <input type="hidden" class="day-number-input" name="days[0][day_number]" value="1" />
+
+                                <div class="form-group">
+                                    <label class="form-label fw-bold"><i class="fas fa-align-left text-secondary me-1"></i>Mô tả</label>
+                                    <textarea class="form-control day-description-textarea" name="days[0][description]" rows="3" placeholder="Nhập mô tả chi tiết các hoạt động trong ngày này..." required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center my-3">
+                        <button type="button" class="btn btn-success" id="add-day-btn"><i class="fas fa-plus-circle me-1"></i> Thêm Ngày Mới</button>
+                    </div>
+                    <div class="modal-footer p-3">
+                        <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-1"></i> Lưu Lịch Trình</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i> Hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template ngày -->
+<template id="itinerary-day-template">
+    <div class="itinerary-day-item card mb-3 shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center px-3 py-2">
+            <h6 class="day-title mb-0"><i class="fas fa-calendar-day text-primary me-2"></i>Ngày</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-day-btn" title="Xóa ngày này">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+        <div class="card-body p-3">
+            <input type="hidden" class="day-number-input" value="" />
+
+            <div class="form-group">
+                <label class="form-label fw-bold"> <i class="fas fa-align-left text-secondary me-1"></i>Mô tả </label>
+                <textarea class="form-control day-description-textarea" rows="3" placeholder="Nhập mô tả chi tiết các hoạt động trong ngày này..." required> </textarea>
+            </div>
+        </div>
+    </div>
+</template>

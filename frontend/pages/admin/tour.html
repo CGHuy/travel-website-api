@@ -22,6 +22,7 @@
     </div>
 </div>
 
+<!-- Template item tour -->
 <template id="tour-list-item-template">
     <div class="list-group-item mb-3 p-3 border rounded shadow-sm d-flex align-items-center">
         <img class="tour-item-image" src="../../assets/images/image.png" alt="Tour image" style="width: 150px; height: 120px; object-fit: cover; border-radius: 8px" />
@@ -41,7 +42,7 @@
             <div class="d-flex justify-content-between text-muted small">
                 <span class="d-flex align-items-center"><i class="fa-solid fa-map me-2"></i><strong class="me-1">Miền:</strong><span class="tour-item-region">Chưa cập nhật</span></span>
                 <span class="d-flex align-items-center"><i class="fa-solid fa-clock me-2"></i><strong class="me-1">Thời lượng:</strong><span class="tour-item-duration">Chưa cập nhật</span></span>
-                <span class="d-flex align-items-center"><i class="fa-solid fa-tag me-2"></i><strong class="me-1">Giá:</strong><span class="tour-item-price">0 VNĐ</span></span>
+                <span class="d-flex align-items-center"><i class="fa-solid fa-tag me-2"></i><strong class="me-1">Giá:</strong><span class="tour-item-price-default">0 VNĐ</span></span>
             </div>
         </div>
     </div>
@@ -67,7 +68,7 @@
                             <input type="text" class="form-control" id="location" name="location" required />
                         </div>
                         <div class="mb-3">
-                            <label for="price_default" class="form-label">Giá</label>
+                            <label for="price_default" class="form-label">Giá người lớn</label>
                             <input type="number" class="form-control" id="price_default" name="price_default" required />
                         </div>
 
@@ -91,7 +92,7 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="price_child" class="form-label">Giá Trẻ Em</label>
+                            <label for="price_child" class="form-label">Giá trẻ em</label>
                             <input type="number" class="form-control" id="price_child" name="price_child" required />
                         </div>
                         <div class="mb-3">
@@ -139,7 +140,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="edit_price_default" class="form-label">Giá Người Lớn</label>
-                                <input type="number" class="form-control" id="edit_price" name="price" required />
+                                <input type="number" class="form-control" id="edit_price_default" name="price_default" required />
                             </div>
                             <div class="mb-3">
                                 <label for="edit_description" class="form-label">Mô tả</label>
@@ -148,6 +149,10 @@
                         </div>
 
                         <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_slug" class="form-label">Slug</label>
+                                <input type="text" class="form-control" id="edit_slug" name="slug" />
+                            </div>
                             <div class="mb-3">
                                 <label for="edit_region" class="form-label">Miền</label>
                                 <select class="form-control" id="edit_region" name="region" required>
@@ -206,6 +211,24 @@
                     <button type="submit" class="btn btn-danger">Xóa</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Dialog thông báo -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">Thông báo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="notificationMessage" class="mb-0"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đóng</button>
+            </div>
         </div>
     </div>
 </div>

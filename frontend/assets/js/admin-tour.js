@@ -1,9 +1,5 @@
 const TOUR_API_URL = "http://localhost:3000/api/tours";
 const DEFAULT_TOUR_IMAGE = "../../assets/images/image.png";
-const LIST_LOADING_HTML = '<div class="text-center p-4 text-muted">Đang tải danh sách tour...</div>';
-const LIST_EMPTY_HTML = '<div class="text-center p-4 text-muted border rounded">Không có tour nào.</div>';
-const LIST_MISSING_TEMPLATE_HTML = '<div class="alert alert-warning m-0">Thiếu template hiển thị danh sách tour.</div>';
-const LIST_LOAD_ERROR_HTML = '<div class="alert alert-warning m-0">Không tải được dữ liệu tour từ API.</div>';
 
 let adminTourCache = [];
 
@@ -53,9 +49,8 @@ function bindAddTourForm() {
             form.reset();
             hideModalById("addTourModal");
             await fetchAndRenderTours();
-            alert("Thêm tour thành công");
+            showNotification("Thông báo", "Thêm tour thành công", "green");
         } catch (error) {
-            alert(error.message || "Không thể thêm tour");
             console.error("Lỗi thêm tour:", error);
         } finally {
             setSubmitButtonState(submitBtn, { disabled: false, text: "Thêm" });
@@ -74,7 +69,6 @@ function bindEditTourForm() {
 
         const tourId = toFiniteNumber(form.elements.id.value);
         if (!Number.isFinite(tourId)) {
-            alert("ID tour không hợp lệ");
             return;
         }
 
@@ -102,9 +96,8 @@ function bindEditTourForm() {
 
             hideModalById("editTourModal");
             await fetchAndRenderTours();
-            alert("Cập nhật tour thành công");
+            showNotification("Thông báo", "Cập nhật tour thành công", "blue");
         } catch (error) {
-            alert(error.message || "Không thể cập nhật tour");
             console.error("Lỗi cập nhật tour:", error);
         } finally {
             setSubmitButtonState(submitBtn, { disabled: false, text: "Lưu" });
@@ -123,7 +116,6 @@ function bindDeleteTourForm() {
 
         const id = toFiniteNumber(form.elements.id.value);
         if (!Number.isFinite(id)) {
-            alert("ID tour không hợp lệ");
             return;
         }
 
@@ -147,9 +139,8 @@ function bindDeleteTourForm() {
             hideModalById("deleteTourModal");
             form.reset();
             await fetchAndRenderTours();
-            alert("Xóa tour thành công");
+            showNotification("Thông báo", "Xóa tour thành công", "red");
         } catch (error) {
-            alert(error.message || "Không thể xóa tour");
             console.error("Lỗi xóa tour:", error);
         } finally {
             setSubmitButtonState(submitBtn, { disabled: false, text: "Xóa" });
@@ -194,7 +185,8 @@ async function fetchAndRenderTours() {
     if (!listEl) return;
 
     try {
-        listEl.innerHTML = LIST_LOADING_HTML;
+        console.log("Đang tải danh sách tour...");
+        listEl.innerHTML = "";
 
         const res = await fetch(TOUR_API_URL);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -206,10 +198,9 @@ async function fetchAndRenderTours() {
         if (totalEl) totalEl.textContent = String(adminTourCache.length);
         renderTourList(adminTourCache);
     } catch (error) {
-        listEl.innerHTML = LIST_LOAD_ERROR_HTML;
+        console.error("Không tải được dữ liệu tour từ API.", error);
         const totalEl = document.getElementById("tour-total-count");
         if (totalEl) totalEl.textContent = "0";
-        console.error("Lỗi tải tour:", error);
     }
 }
 
@@ -243,12 +234,14 @@ function renderTourList(tours) {
     if (!listEl) return;
 
     if (!Array.isArray(tours) || tours.length === 0) {
-        listEl.innerHTML = LIST_EMPTY_HTML;
+        console.log("Không có tour nào.");
+        listEl.innerHTML = "";
         return;
     }
 
     if (!(template instanceof HTMLTemplateElement)) {
-        listEl.innerHTML = LIST_MISSING_TEMPLATE_HTML;
+        console.warn("Thiếu template hiển thị danh sách tour.");
+        listEl.innerHTML = "";
         return;
     }
 
@@ -315,18 +308,21 @@ function populateEditTourForm(tourId) {
 
     const tour = adminTourCache.find((item) => Number(item.id) === Number(tourId));
     if (!tour) {
-        alert("Không tìm thấy dữ liệu tour để chỉnh sửa.");
+        console.error("Không tìm thấy dữ liệu tour để chỉnh sửa.");
         return;
     }
 
-    form.elements.id.value = String(tour.id ?? "");
-    form.elements.name.value = String(tour.name || "");
-    form.elements.location.value = String(tour.location || "");
-    form.elements.price_default.value = String(tour.price_default ?? "");
-    form.elements.price_child.value = String(tour.price_child ?? "");
-    form.elements.description.value = String(tour.description || "");
-    form.elements.region.value = String(tour.region || "");
-    form.elements.duration.value = String(tour.duration || "");
+    setFormElementValue(form, "id", String(tour.id ?? ""));
+    setFormElementValue(form, "name", String(tour.name || ""));
+    setFormElementValue(form, "description", String(tour.description || ""));
+    setFormElementValue(form, "slug", String(tour.slug || ""));
+
+    setFormElementValue(form, "location", String(tour.location || ""));
+    setFormElementValue(form, "region", String(tour.region || ""));
+    setFormElementValue(form, "duration", String(tour.duration || ""));
+
+    setFormElementValue(form, "price_default", String(tour.price_default ?? ""));
+    setFormElementValue(form, "price_child", String(tour.price_child ?? ""));
 
     const rawImageValue = typeof tour.image === "string" && tour.image.length > 0 ? tour.image : typeof tour.cover_image === "string" ? tour.cover_image : "";
     let existingImage = "";
@@ -336,7 +332,7 @@ function populateEditTourForm(tourId) {
     } else {
         existingImage = rawImageValue;
     }
-    form.elements.existing_image.value = existingImage;
+    setFormElementValue(form, "existing_image", existingImage);
 
     const preview = document.getElementById("edit_preview");
     if (preview) {
@@ -346,6 +342,13 @@ function populateEditTourForm(tourId) {
     const fileInput = document.getElementById("edit_cover_image");
     if (fileInput) {
         fileInput.value = "";
+    }
+}
+
+function setFormElementValue(form, fieldName, value) {
+    const field = form.elements[fieldName];
+    if (field) {
+        field.value = value;
     }
 }
 
@@ -386,11 +389,11 @@ function buildTourFormData(form, options = {}) {
 
     // Thêm các trường text
     formData.append("name", String(form.elements.name.value || "").trim());
+    formData.append("slug", String(form.elements.slug ? form.elements.slug.value : "").trim());
     formData.append("description", String(form.elements.description.value || "").trim());
 
-    // Xử lý price - có thể từ "price" hoặc "price_default"
-    const priceValue = form.elements.price ? form.elements.price.value : form.elements.price_default ? form.elements.price_default.value : 0;
-    formData.append("price", Number(priceValue));
+    formData.append("price_default", Number(form.elements.price_default ? form.elements.price_default.value : 0));
+    formData.append("price_child", Number(form.elements.price_child ? form.elements.price_child.value : 0));
 
     formData.append("region", String(form.elements.region.value || ""));
     formData.append("duration", String(form.elements.duration.value || "").trim());
@@ -411,6 +414,23 @@ function hideModalById(modalId) {
 
     const modalInstance = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
     modalInstance.hide();
+}
+
+function showNotification(title, message, color) {
+    const modalEl = document.getElementById("notificationModal");
+    const titleEl = document.getElementById("notificationModalLabel");
+    const messageEl = document.getElementById("notificationMessage");
+
+    if (!modalEl || !messageEl) return;
+
+    if (titleEl) {
+        titleEl.textContent = title;
+    }
+    messageEl.textContent = message;
+    messageEl.style.color = color || "inherit";
+
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modalInstance.show();
 }
 
 function setSubmitButtonState(button, state) {

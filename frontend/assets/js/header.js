@@ -63,7 +63,7 @@ function updateAuthUI() {
     }
 }
 
-// ================== LOGOUT ==================
+// LOGOUT
 function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     if (!logoutBtn) return;
@@ -80,7 +80,7 @@ function setupLogout() {
     });
 }
 
-// ================== AVATAR DROPDOWN ==================
+// AVATAR DROPDOWN
 function setupAvatarDropdown() {
     const avatarBtn = document.getElementById("avatarBtn");
     const userDropdown = document.getElementById("userDropdown");

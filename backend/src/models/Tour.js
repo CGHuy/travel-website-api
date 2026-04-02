@@ -38,11 +38,11 @@ class Tour {
     // Tạo tour mới
     static async create(tourData) {
         try {
-            const { name, description, price, region, duration, location, image } = tourData;
+            const { name, slug, description, price_default, price_child, region, duration, location, image } = tourData;
             const [result] = await db.query(
                 `
-                INSERT INTO tours (name, description, price_default, price_child, region, duration, location, cover_image, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-                [name, description, price_default, price_child, region, duration, location, image],
+                INSERT INTO tours (name, slug, description, price_default, price_child, region, duration, location, cover_image, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+                [name, slug, description, price_default, price_child, region, duration, location, image],
             );
             return result.insertId;
         } catch (error) {
