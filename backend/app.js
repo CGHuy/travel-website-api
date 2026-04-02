@@ -35,26 +35,28 @@ const listTourRoutes = require("./src/routes/ListTourRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const bookingRoutes = require("./src/routes/bookingRoutes");
 const userRoutes = require("./src/routes/userRoutes");
+const wishlistRoutes = require("./src/routes/wishlistRoutes");
 
 app.use("/api/tours", searchLimiter, tourRoutes);
 app.use("/api/list-tours", listTourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 // -------- DYNAMIC VIEW ROUTER --------
 // Tự động tìm và trả về file HTML cho các đường dẫn ngắn (VD: /list-tour, /login)
-const fs = require('fs');
+const fs = require("fs");
 
 app.get("/:pageName", (req, res, next) => {
 	const pageName = req.params.pageName;
-	
+
 	// Các thư mục có thể chứa file giao diện
 	const possiblePaths = [
 		`../frontend/pages/${pageName}.html`,
 		`../frontend/pages/user/${pageName}.html`,
 		`../frontend/pages/auth/${pageName}.html`,
-		`../frontend/pages/admin/${pageName}.html`
+		`../frontend/pages/admin/${pageName}.html`,
 	];
 
 	for (let p of possiblePaths) {
