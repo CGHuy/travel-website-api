@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <span class="text-dark d-block mb-1" style="font-size: 0.9rem;">Giá từ:</span>
                                     <span class="fw-bold text-danger" style="font-size: 1.5rem;">${parseInt(tour.price_default).toLocaleString('vi-VN')} <span class="text-decoration-underline" style="font-size: 1.2rem;">đ</span></span>
                                 </div>
-                                <a href="/tour-detail/${tour.slug}" class="btn btn-primary px-4 shadow-sm rounded-2" style="font-weight: 500; font-size: 0.95rem; padding-top: 8px; padding-bottom: 8px; background-color: #0b5ed7;">Xem chi tiết</a>
+                                <a href="/detail-tour?id=${tour.id}" class="btn btn-primary px-4 shadow-sm rounded-2" style="font-weight: 500; font-size: 0.95rem; padding-top: 8px; padding-bottom: 8px; background-color: #0b5ed7;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
