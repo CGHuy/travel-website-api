@@ -6,6 +6,7 @@ const {
 	isAdmin,
 	isUser,
 	isBookingStaff,
+	isOwner,
 } = require("../middlewares/auth");
 const { validateBooking } = require("../middlewares/validation/booking");
 
@@ -27,10 +28,9 @@ router.get(
 router.get(
 	"/:id/details",
 	verifyToken,
-	isUser,
+	isOwner,
 	bookingController.getBookingDetailsByUserId,
 );
-
 
 // Booking Staff routes - Cần quyền quản lý
 router.get("/", verifyToken, isBookingStaff, bookingController.getAllBookings);
@@ -41,7 +41,6 @@ router.put(
 	isBookingStaff,
 	bookingController.updateStatus,
 );
-
 
 router.get("/:id", verifyToken, bookingController.getBookingDetails);
 
