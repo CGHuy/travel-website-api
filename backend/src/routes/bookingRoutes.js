@@ -23,7 +23,14 @@ router.get(
 	isUser,
 	bookingController.getMyBookings,
 );
-router.put("/:id/cancel", verifyToken, isUser, bookingController.cancelBooking);
+
+router.get(
+	"/:id/details",
+	verifyToken,
+	isUser,
+	bookingController.getBookingDetailsByUserId,
+);
+
 
 // Booking Staff routes - Cần quyền quản lý
 router.get("/", verifyToken, isBookingStaff, bookingController.getAllBookings);
@@ -34,12 +41,7 @@ router.put(
 	isBookingStaff,
 	bookingController.updateStatus,
 );
-router.delete(
-	"/:id",
-	verifyToken,
-	isBookingStaff,
-	bookingController.deleteBooking,
-);
+
 
 router.get("/:id", verifyToken, bookingController.getBookingDetails);
 

@@ -151,6 +151,21 @@ class User {
 			throw error;
 		}
 	}
+
+	// Đổi mật khẩu - Che
+	static async changePassword(id, newPassword) {
+		try {
+			const hashedPassword = await bcrypt.hash(newPassword, 10);
+			const [result] = await db.query(
+				`
+				UPDATE users SET password = ? WHERE id = ?`,
+				[hashedPassword, id],
+			);
+			return result.affectedRows > 0;
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 module.exports = User;
