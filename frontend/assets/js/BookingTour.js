@@ -14,8 +14,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // State
     let tourData = null;
-    let adultPrice = 0;
-    let childPrice = 0;
+    let baseAdultPrice = 0;
+    let baseChildPrice = 0;
+    let movingAdultPrice = 0;
+    let movingChildPrice = 0;
 
     // Phase 1: Fetch Tour Data
     const fetchTourAndDepartures = async () => {
@@ -26,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (result.success && result.data) {
                 tourData = result.data;
                 renderTourSummary(tourData);
-                renderDepartures(tourData.itineraries || []); // Placeholder departures for now
+                renderDepartures(); 
             } else {
                 alert("Lỗi tải thông tin tour!");
             }
@@ -44,25 +46,26 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("tour-img").src = tour.cover_image;
         document.getElementById("tour-duration").innerText = tour.duration;
 
-        adultPrice = parseFloat(tour.price_default);
-        childPrice = parseFloat(tour.price_child);
+        baseAdultPrice = parseFloat(tour.price_default);
+        baseChildPrice = parseFloat(tour.price_child);
 
-        document.getElementById("price-adult").innerText = adultPrice.toLocaleString("vi-VN") + " ₫";
-        document.getElementById("price-child").innerText = childPrice.toLocaleString("vi-VN") + " ₫";
+        document.getElementById('price-adult').innerText = adultPrice.toLocaleString('vi-VN') + ' ₫';
+        document.getElementById('price-child').innerText = childPrice.toLocaleString('vi-VN') + ' ₫';
 
         calculateTotal();
     };
 
     const renderDepartures = (itineraries) => {
-        const select = document.getElementById("departure_id");
+        const select = document.getElementById('departure_id');
         // Simulating some next 3 dates for the demo if real departures don't exist in API
         const dates = [
-            { id: 1, date: "15/05/2026", location: "Sân bay Tân Sơn Nhất" },
-            { id: 2, date: "22/05/2026", location: "Ga Sài Gòn" },
-            { id: 3, date: "01/06/2026", location: "Sân bay Nội Bài" },
+            { id: 1, date: '15/05/2026', location: 'Sân bay Tân Sơn Nhất' },
+            { id: 2, date: '22/05/2026', location: 'Ga Sài Gòn' },
+            { id: 3, date: '01/06/2026', location: 'Sân bay Nội Bài' }
         ];
 
-        select.innerHTML = '<option value="">-- Chọn lịch khởi hành phù hợp --</option>' + dates.map((d) => `<option value="${d.id}">${d.date} - Khởi hành từ ${d.location}</option>`).join("");
+        select.innerHTML = '<option value="">-- Chọn lịch khởi hành phù hợp --</option>' + 
+            dates.map(d => `<option value="${d.id}">${d.date} - Khởi hành từ ${d.location}</option>`).join('');
     };
 
     // Phase 2: Quantity & Calculation Logic
@@ -82,10 +85,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const adults = parseInt(document.getElementById("adults").value);
         const children = parseInt(document.getElementById("children").value);
 
-        const total = adults * adultPrice + children * childPrice;
-
-        document.getElementById("sum-passengers").innerText = `${adults + children} người`;
-        document.getElementById("total-amount").innerText = total.toLocaleString("vi-VN") + " ₫";
+        const total = (adults * adultPrice) + (children * childPrice);
+        
+        document.getElementById('sum-passengers').innerText = `${adults + children} người`;
+        document.getElementById('total-amount').innerText = total.toLocaleString('vi-VN') + ' ₫';
     };
 
     // Phase 3: Submit Booking Form
