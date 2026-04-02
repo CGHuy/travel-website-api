@@ -188,33 +188,6 @@
     <div class="mt-5" id="footer-placeholder"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            fetch('/components/header.html').then(r => r.text()).then(h => document.getElementById('header-placeholder').innerHTML = h);
-            fetch('/components/footer.html').then(r => r.text()).then(h => document.getElementById('footer-placeholder').innerHTML = h);
-
-            // Active state link when scrolling
-            const sections = document.querySelectorAll('.content-block');
-            const navLinks = document.querySelectorAll('.nav-pills-custom .nav-link');
-            
-            // Simple smooth scroll and active tab logic
-            window.addEventListener('scroll', () => {
-                let current = '';
-                sections.forEach(sec => {
-                    const secTop = sec.offsetTop;
-                    if(pageYOffset >= secTop - 150) {
-                        current = sec.getAttribute('id');
-                    }
-                });
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if(link.getAttribute('href').includes(current)) {
-                        link.classList.add('active');
-                    }
-                });
-            });
-        });
-    </script>
     <!-- Page Specific Script -->
     <script src="/assets/js/DetailTour.js"></script>
 </body>

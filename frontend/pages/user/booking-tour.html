@@ -1,288 +1,277 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đặt Tour - VietTour</title>
-    <!-- Google Fonts: Lexend Deca -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome 6 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/assets/css/DetailTourStyle.css">
-    <style>
-        body {
-            font-family: 'Lexend Deca', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
-        }
-        .booking-header-banner {
-            background: linear-gradient(135deg, #137fec, #0a58ca);
-            padding: 4rem 0;
-            color: white;
-            margin-bottom: -3rem;
-        }
-        .card-booking {
-            border: none;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
-            overflow: hidden;
-            background: white;
-        }
-        .card-booking .card-header {
-            background: #ffffff;
-            border-bottom: 2px solid #f8fafc;
-            padding: 1.5rem 2rem;
-        }
-        .card-booking .card-header h4 {
-            margin: 0;
-            font-weight: 800;
-            color: #1e293b;
-        }
-        .card-booking .card-body {
-            padding: 2rem;
-        }
-        .form-label {
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 0.75rem;
-        }
-        .form-control, .form-select {
-            padding: 0.875rem 1.25rem;
-            border-radius: 14px;
-            border: 1px solid #e2e8f0;
-            background-color: #fcfdfe;
-            transition: all 0.3s ease;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: #137fec;
-            box-shadow: 0 0 0 4px rgba(19, 127, 236, 0.1);
-        }
-        .sidebar-tour-info {
-            position: sticky;
-            top: 100px;
-        }
-        .tour-sum-card {
-            background: #f0f7ff;
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-        }
-        .total-amount-box {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 1.75rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            margin-top: 2rem;
-        }
-        .btn-confirm-booking {
-            background: linear-gradient(135deg, #137fec, #0a58ca);
-            color: white;
-            border: none;
-            padding: 1.25rem;
-            border-radius: 18px;
-            font-weight: 800;
-            font-size: 1.1rem;
-            box-shadow: 0 10px 25px rgba(19, 127, 236, 0.25);
-            transition: all 0.3s ease;
-        }
-        .btn-confirm-booking:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 35px rgba(19, 127, 236, 0.35);
-            color: white;
-        }
-        .step-indicator {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 3rem;
-        }
-        .step-num {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-        }
-        .step-active .step-num {
-            background: #ffffff;
-            color: #137fec;
-        }
-    </style>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Đặt Tour - VietTour</title>
+        <!-- Google Fonts: Lexend Deca -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" rel="stylesheet" />
+        <!-- Bootstrap 5 -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <!-- Font Awesome 6 -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/assets/css/DetailTourStyle.css" />
+        <style>
+            body {
+                font-family: "Lexend Deca", sans-serif;
+                background-color: #f8fafc;
+                color: #1e293b;
+            }
+            .booking-header-banner {
+                background: linear-gradient(135deg, #137fec, #0a58ca);
+                padding: 4rem 0;
+                color: white;
+                margin-bottom: -3rem;
+            }
+            .card-booking {
+                border: none;
+                border-radius: 24px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+                overflow: hidden;
+                background: white;
+            }
+            .card-booking .card-header {
+                background: #ffffff;
+                border-bottom: 2px solid #f8fafc;
+                padding: 1.5rem 2rem;
+            }
+            .card-booking .card-header h4 {
+                margin: 0;
+                font-weight: 800;
+                color: #1e293b;
+            }
+            .card-booking .card-body {
+                padding: 2rem;
+            }
+            .form-label {
+                font-weight: 600;
+                color: #475569;
+                margin-bottom: 0.75rem;
+            }
+            .form-control,
+            .form-select {
+                padding: 0.875rem 1.25rem;
+                border-radius: 14px;
+                border: 1px solid #e2e8f0;
+                background-color: #fcfdfe;
+                transition: all 0.3s ease;
+            }
+            .form-control:focus,
+            .form-select:focus {
+                border-color: #137fec;
+                box-shadow: 0 0 0 4px rgba(19, 127, 236, 0.1);
+            }
+            .sidebar-tour-info {
+                position: sticky;
+                top: 100px;
+            }
+            .tour-sum-card {
+                background: #f0f7ff;
+                border-radius: 20px;
+                padding: 1.5rem;
+                margin-top: 1.5rem;
+            }
+            .total-amount-box {
+                background: #ffffff;
+                border-radius: 20px;
+                padding: 1.75rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                margin-top: 2rem;
+            }
+            .btn-confirm-booking {
+                background: linear-gradient(135deg, #137fec, #0a58ca);
+                color: white;
+                border: none;
+                padding: 1.25rem;
+                border-radius: 18px;
+                font-weight: 800;
+                font-size: 1.1rem;
+                box-shadow: 0 10px 25px rgba(19, 127, 236, 0.25);
+                transition: all 0.3s ease;
+            }
+            .btn-confirm-booking:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 15px 35px rgba(19, 127, 236, 0.35);
+                color: white;
+            }
+            .step-indicator {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 3rem;
+            }
+            .step-num {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 800;
+            }
+            .step-active .step-num {
+                background: #ffffff;
+                color: #137fec;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="header-placeholder"></div>
 
-    <div id="header-placeholder"></div>
+        <header class="booking-header-banner">
+            <div class="container mt-5">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-4">
+                                <li class="breadcrumb-item"><a href="/index" class="text-white opacity-75 text-decoration-none small">Trang chủ</a></li>
+                                <li class="breadcrumb-item"><a id="bc-tour-name" href="#" class="text-white opacity-75 text-decoration-none small">Chi tiết tour</a></li>
+                                <li class="breadcrumb-item active text-white fw-bold small" aria-current="page">Đặt tour</li>
+                            </ol>
+                        </nav>
+                        <h1 class="fw-bold display-5 mb-4">Hoàn tất đặt tour</h1>
 
-    <header class="booking-header-banner">
-        <div class="container mt-5">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item"><a href="/index" class="text-white opacity-75 text-decoration-none small">Trang chủ</a></li>
-                            <li class="breadcrumb-item"><a id="bc-tour-name" href="#" class="text-white opacity-75 text-decoration-none small">Chi tiết tour</a></li>
-                            <li class="breadcrumb-item active text-white fw-bold small" aria-current="page">Đặt tour</li>
-                        </ol>
-                    </nav>
-                    <h1 class="fw-bold display-5 mb-4">Hoàn tất đặt tour</h1>
-                    
-                    <div class="step-indicator">
-                        <div class="d-flex align-items-center gap-2 step-active">
-                            <div class="step-num">01</div>
-                            <span class="fw-bold fs-5">Thông tin & Đặt chỗ</span>
-                        </div>
-                        <div class="text-white opacity-25">••••</div>
-                        <div class="d-flex align-items-center gap-2 opacity-50">
-                            <div class="step-num">02</div>
-                            <span class="fw-bold fs-5">Thanh toán</span>
+                        <div class="step-indicator">
+                            <div class="d-flex align-items-center gap-2 step-active">
+                                <div class="step-num">01</div>
+                                <span class="fw-bold fs-5">Thông tin & Đặt chỗ</span>
+                            </div>
+                            <div class="text-white opacity-25">••••</div>
+                            <div class="d-flex align-items-center gap-2 opacity-50">
+                                <div class="step-num">02</div>
+                                <span class="fw-bold fs-5">Thanh toán</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <main class="container py-5" style="position: relative; z-index: 10;">
-        <div class="row g-4">
-            <!-- Left Column: Form Info -->
-            <div class="col-lg-7">
-                <form id="booking-form">
-                    <!-- Contact Information -->
-                    <div class="card-booking mb-4 animate-up">
-                        <div class="card-header">
-                            <h4><i class="fa-solid fa-address-book text-primary me-2"></i> THÔNG TIN LIÊN LẠC</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-6 text-start">
-                                    <label for="contact_name" class="form-label">Tên người liên hệ <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="contact_name" name="contact_name" placeholder="VD: Nguyễn Văn A" required>
-                                </div>
-                                <div class="col-md-6 text-start">
-                                    <label for="contact_phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control" id="contact_phone" name="contact_phone" placeholder="VD: 0912345678" required>
-                                </div>
-                                <div class="col-12 text-start">
-                                    <label for="contact_email" class="form-label">Email <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="contact_email" name="contact_email" placeholder="VD: email@example.com" required>
-                                </div>
-                                <div class="col-12 text-start">
-                                    <label for="note" class="form-label">Ghi chú thêm</label>
-                                    <textarea class="form-control" id="note" name="note" rows="3" placeholder="Yêu cầu đặc biệt về chỗ ngồi, ăn uống..."></textarea>
-                                </div>
+        <main class="container py-5" style="position: relative; z-index: 10">
+            <div class="row g-4">
+                <!-- Left Column: Form Info -->
+                <div class="col-lg-7">
+                    <form id="booking-form">
+                        <!-- Contact Information -->
+                        <div class="card-booking mb-4 animate-up">
+                            <div class="card-header">
+                                <h4><i class="fa-solid fa-address-book text-primary me-2"></i> THÔNG TIN LIÊN LẠC</h4>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Booking Details -->
-                    <div class="card-booking">
-                        <div class="card-header">
-                            <h4><i class="fa-solid fa-list-check text-primary me-2"></i> CHI TIẾT ĐẶT CHỖ</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-4">
-                                <div class="col-12 text-start">
-                                    <label for="departure_id" class="form-label">Ngày khởi hành & Điểm đón <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="departure_id" name="departure_id" required>
-                                        <option value="">-- Chọn lịch khởi hành phù hợp --</option>
-                                        <!-- JS render options here -->
-                                    </select>
-                                </div>
-                                <div class="col-md-6 text-start">
-                                    <label for="adults" class="form-label">Số lượng người lớn <span class="text-primary small">(Từ 12 tuổi)</span></label>
-                                    <div class="input-group">
-                                        <button type="button" class="btn btn-outline-secondary px-3" onclick="updateQty('adults', -1)" style="border-radius: 12px 0 0 12px;">-</button>
-                                        <input type="number" class="form-control text-center fw-bold" id="adults" name="adults" value="1" min="1" readonly>
-                                        <button type="button" class="btn btn-outline-secondary px-3" onclick="updateQty('adults', 1)" style="border-radius: 0 12px 12px 0;">+</button>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6 text-start">
+                                        <label for="contact_name" class="form-label">Tên người liên hệ <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="contact_name" name="contact_name" placeholder="VD: Nguyễn Văn A" required />
                                     </div>
-                                </div>
-                                <div class="col-md-6 text-start">
-                                    <label for="children" class="form-label">Số lượng trẻ em <span class="text-primary small">(Từ 5 - 11 tuổi)</span></label>
-                                    <div class="input-group">
-                                        <button type="button" class="btn btn-outline-secondary px-3" onclick="updateQty('children', -1)" style="border-radius: 12px 0 0 12px;">-</button>
-                                        <input type="number" class="form-control text-center fw-bold" id="children" name="children" value="0" min="0" readonly>
-                                        <button type="button" class="btn btn-outline-secondary px-3" onclick="updateQty('children', 1)" style="border-radius: 0 12px 12px 0;">+</button>
+                                    <div class="col-md-6 text-start">
+                                        <label for="contact_phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                        <input type="tel" class="form-control" id="contact_phone" name="contact_phone" placeholder="VD: 0912345678" required />
+                                    </div>
+                                    <div class="col-12 text-start">
+                                        <label for="contact_email" class="form-label">Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="contact_email" name="contact_email" placeholder="VD: email@example.com" required />
+                                    </div>
+                                    <div class="col-12 text-start">
+                                        <label for="note" class="form-label">Ghi chú thêm</label>
+                                        <textarea class="form-control" id="note" name="note" rows="3" placeholder="Yêu cầu đặc biệt về chỗ ngồi, ăn uống..."></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </form>
-            </div>
 
-            <!-- Right Column: Summary Card -->
-            <div class="col-lg-5">
-                <div class="sidebar-tour-info">
-                    <div class="card-booking p-4">
-                        <div class="d-flex gap-3 mb-4">
-                            <div style="width: 120px; height: 90px; overflow: hidden; border-radius: 16px;">
-                                <img id="tour-img" src="" class="w-100 h-100 object-fit-cover" alt="Tour image">
+                        <!-- Booking Details -->
+                        <div class="card-booking">
+                            <div class="card-header">
+                                <h4><i class="fa-solid fa-list-check text-primary me-2"></i> CHI TIẾT ĐẶT CHỖ</h4>
                             </div>
-                            <div class="flex-grow-1">
-                                <h5 id="tour-name-display" class="fw-bold text-dark line-clamp-2 mb-2" style="font-size: 1.1rem; line-height: 1.4;">Đang tải...</h5>
-                                <div class="d-flex align-items-center gap-2 text-muted small">
-                                    <i class="fa-solid fa-hashtag"></i> <span id="tour-code">TOUR-000</span>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-12 text-start">
+                                        <label for="departure_id" class="form-label">Ngày khởi hành & Điểm đón <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="departure_id" name="departure_id" required>
+                                            <option value="">-- Chọn lịch khởi hành phù hợp --</option>
+                                            <!-- JS render options here -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 text-start">
+                                        <label for="adults" class="form-label">Số lượng người lớn <span class="text-primary small">(Từ 12 tuổi)</span></label>
+                                        <div class="input-group">
+                                            <button type="button" class="btn btn-outline-secondary px-3" onclick="updateQty('adults', -1)" style="border-radius: 12px 0 0 12px">-</button>
+                                            <input type="number" class="form-control text-center fw-bold" id="adults" name="adults" value="1" min="1" readonly />
+                                            <button type="button" class="btn btn-outline-secondary px-3" onclick="updateQty('adults', 1)" style="border-radius: 0 12px 12px 0">+</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-start">
+                                        <label for="children" class="form-label">Số lượng trẻ em <span class="text-primary small">(Từ 5 - 11 tuổi)</span></label>
+                                        <div class="input-group">
+                                            <button type="button" class="btn btn-outline-secondary px-3" onclick="updateQty('children', -1)" style="border-radius: 12px 0 0 12px">-</button>
+                                            <input type="number" class="form-control text-center fw-bold" id="children" name="children" value="0" min="0" readonly />
+                                            <button type="button" class="btn btn-outline-secondary px-3" onclick="updateQty('children', 1)" style="border-radius: 0 12px 12px 0">+</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </form>
+                </div>
 
-                        <div class="tour-sum-card">
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="text-secondary fw-medium">Thời lượng:</span>
-                                <span id="tour-duration" class="fw-bold">...</span>
+                <!-- Right Column: Summary Card -->
+                <div class="col-lg-5">
+                    <div class="sidebar-tour-info">
+                        <div class="card-booking p-4">
+                            <div class="d-flex gap-3 mb-4">
+                                <div style="width: 120px; height: 90px; overflow: hidden; border-radius: 16px">
+                                    <img id="tour-img" src="" class="w-100 h-100 object-fit-cover" alt="Tour image" />
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 id="tour-name-display" class="fw-bold text-dark line-clamp-2 mb-2" style="font-size: 1.1rem; line-height: 1.4">Đang tải...</h5>
+                                    <div class="d-flex align-items-center gap-2 text-muted small"><i class="fa-solid fa-hashtag"></i> <span id="tour-code">TOUR-000</span></div>
+                                </div>
                             </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="text-secondary fw-medium">Đơn giá người lớn:</span>
-                                <span id="price-adult" class="text-primary fw-bold">...</span>
+
+                            <div class="tour-sum-card">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="text-secondary fw-medium">Thời lượng:</span>
+                                    <span id="tour-duration" class="fw-bold">...</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="text-secondary fw-medium">Đơn giá người lớn:</span>
+                                    <span id="price-adult" class="text-primary fw-bold">...</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary fw-medium">Đơn giá trẻ em:</span>
+                                    <span id="price-child" class="text-primary fw-bold">...</span>
+                                </div>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-secondary fw-medium">Đơn giá trẻ em:</span>
-                                <span id="price-child" class="text-primary fw-bold">...</span>
+
+                            <div class="total-amount-box text-start">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="text-secondary fw-bold">Số lượng hành khách:</span>
+                                    <span id="sum-passengers" class="fw-bold fs-5">1 người</span>
+                                </div>
+                                <hr class="my-3 opacity-25" />
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-dark fw-bold fs-5">TỔNG TIỀN</span>
+                                    <span id="total-amount" class="text-primary fw-bold display-6" style="font-size: 1.8rem">0 ₫</span>
+                                </div>
                             </div>
+
+                            <button id="submitBooking" class="btn btn-confirm-booking w-100 mt-4">XÁC NHẬN ĐẶT TOUR <i class="fa-solid fa-circle-check ms-2"></i></button>
+
+                            <p class="text-muted small text-center mt-3 mb-0"><i class="fa-solid fa-lock me-1 text-success"></i> Thanh toán an tâm & bảo mật</p>
                         </div>
-
-                        <div class="total-amount-box text-start">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="text-secondary fw-bold">Số lượng hành khách:</span>
-                                <span id="sum-passengers" class="fw-bold fs-5">1 người</span>
-                            </div>
-                            <hr class="my-3 opacity-25">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-dark fw-bold fs-5">TỔNG TIỀN</span>
-                                <span id="total-amount" class="text-primary fw-bold display-6" style="font-size: 1.8rem;">0 ₫</span>
-                            </div>
-                        </div>
-
-                        <button id="submitBooking" class="btn btn-confirm-booking w-100 mt-4">
-                            XÁC NHẬN ĐẶT TOUR <i class="fa-solid fa-circle-check ms-2"></i>
-                        </button>
-
-                        <p class="text-muted small text-center mt-3 mb-0">
-                            <i class="fa-solid fa-lock me-1 text-success"></i> Thanh toán an tâm & bảo mật
-                        </p>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
 
-    <div id="footer-placeholder"></div>
+        <div id="footer-placeholder"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/BookingTour.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-             fetch('/components/header.html').then(r => r.text()).then(h => document.getElementById('header-placeholder').innerHTML = h);
-             fetch('/components/footer.html').then(r => r.text()).then(h => document.getElementById('footer-placeholder').innerHTML = h);
-        });
-    </script>
-</body>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="/assets/js/BookingTour.js"></script>
+    </body>
 </html>
