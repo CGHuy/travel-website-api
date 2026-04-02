@@ -13,7 +13,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // State
-    let tourData = null;
+    let tourInfo = null;
+    let departuresInfo = [];
     let baseAdultPrice = 0;
     let baseChildPrice = 0;
     let movingAdultPrice = 0;
@@ -22,13 +23,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Phase 1: Fetch Tour Data
     const fetchTourAndDepartures = async () => {
         try {
-            const response = await fetch(`/api/list-tours/${tourId}`);
+            const response = await fetch(`/api/list-tours/tour-departures/${tourId}`);
             const result = await response.json();
 
             if (result.success && result.data) {
-                tourData = result.data;
-                renderTourSummary(tourData);
-                renderDepartures(); 
+                tourInfo = result.data.tour;
+                departuresInfo = result.data.departures;
+                renderTourSummary(tourInfo);
+                renderDepartures(departuresInfo);
             } else {
                 alert("Lỗi tải thông tin tour!");
             }
@@ -42,30 +44,67 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Display tour info
         document.getElementById("bc-tour-name").innerText = tour.name;
         document.getElementById("tour-name-display").innerText = tour.name;
-        document.getElementById("tour-code").innerText = `TOUR-${tour.id.toString().padStart(3, "0")}`;
+        document.getElementById("tour-code").innerText = `TOUR-${tourId.toString().padStart(3, "0")}`;
         document.getElementById("tour-img").src = tour.cover_image;
         document.getElementById("tour-duration").innerText = tour.duration;
 
         baseAdultPrice = parseFloat(tour.price_default);
         baseChildPrice = parseFloat(tour.price_child);
 
-        document.getElementById('price-adult').innerText = adultPrice.toLocaleString('vi-VN') + ' ₫';
-        document.getElementById('price-child').innerText = childPrice.toLocaleString('vi-VN') + ' ₫';
-
         calculateTotal();
     };
 
-    const renderDepartures = (itineraries) => {
-        const select = document.getElementById('departure_id');
-        // Simulating some next 3 dates for the demo if real departures don't exist in API
-        const dates = [
-            { id: 1, date: '15/05/2026', location: 'Sân bay Tân Sơn Nhất' },
-            { id: 2, date: '22/05/2026', location: 'Ga Sài Gòn' },
-            { id: 3, date: '01/06/2026', location: 'Sân bay Nội Bài' }
-        ];
+    const renderDepartures = (departures) => {
+        const select = document.getElementById("departure_id");
+        if (!departures || departures.length === 0) {
+            select.innerHTML = '<option value="">-- Hiện chưa có lịch khởi hành --</option>';
+            return;
+        }
 
-        select.innerHTML = '<option value="">-- Chọn lịch khởi hành phù hợp --</option>' + 
-            dates.map(d => `<option value="${d.id}">${d.date} - Khởi hành từ ${d.location}</option>`).join('');
+        select.innerHTML =
+            '<option value="">-- Chọn lịch khởi hành phù hợp --</option>' +
+            departures
+                .map((d) => {
+                    const date = new Date(d.departure_date).toLocaleDateString("vi-VN");
+                    return `<option value="${d.id}">${date} - Khởi hành từ ${d.departure_location}</option>`;
+                })
+                .join("");
+
+        // Event listener selection change
+        select.addEventListener("change", (e) => {
+            const selectedId = e.target.value;
+            const dep = departures.find((d) => d.id == selectedId);
+
+            const extraInfoDiv = document.getElementById("departure-info-extra");
+            const avaiSeatsCount = document.getElementById("available-seats-count");
+            const rowMovingAdult = document.getElementById("row-moving-adult");
+            const rowMovingChild = document.getElementById("row-moving-child");
+            const priceMovingAdultText = document.getElementById("price-moving-adult");
+            const priceMovingChildText = document.getElementById("price-moving-child");
+
+            if (dep) {
+                movingAdultPrice = parseFloat(dep.price_moving) || 0;
+                movingChildPrice = parseFloat(dep.price_moving_child) || 0;
+
+                // Cập nhật số chỗ khả dụng
+                if (avaiSeatsCount) avaiSeatsCount.innerText = dep.seats_available;
+                if (extraInfoDiv) extraInfoDiv.style.display = "block";
+
+                // Hiển thị phụ phí di chuyển
+                if (priceMovingAdultText) priceMovingAdultText.innerText = `+ ${movingAdultPrice.toLocaleString("vi-VN")} ₫`;
+                if (priceMovingChildText) priceMovingChildText.innerText = `+ ${movingChildPrice.toLocaleString("vi-VN")} ₫`;
+
+                if (rowMovingAdult) rowMovingAdult.setAttribute("style", "display: flex !important;");
+                if (rowMovingChild) rowMovingChild.setAttribute("style", "display: flex !important;");
+            } else {
+                movingAdultPrice = 0;
+                movingChildPrice = 0;
+                if (extraInfoDiv) extraInfoDiv.style.display = "none";
+                if (rowMovingAdult) rowMovingAdult.setAttribute("style", "display: none !important;");
+                if (rowMovingChild) rowMovingChild.setAttribute("style", "display: none !important;");
+            }
+            calculateTotal();
+        });
     };
 
     // Phase 2: Quantity & Calculation Logic
@@ -79,16 +118,85 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         input.value = newVal;
         calculateTotal();
+        renderPassengerFields();
     };
 
     const calculateTotal = () => {
-        const adults = parseInt(document.getElementById("adults").value);
-        const children = parseInt(document.getElementById("children").value);
+        const adults = parseInt(document.getElementById("adults").value) || 0;
+        const children = parseInt(document.getElementById("children").value) || 0;
 
-        const total = (adults * adultPrice) + (children * childPrice);
-        
-        document.getElementById('sum-passengers').innerText = `${adults + children} người`;
-        document.getElementById('total-amount').innerText = total.toLocaleString('vi-VN') + ' ₫';
+        const currentAdultPrice = baseAdultPrice + movingAdultPrice;
+        const currentChildPrice = baseChildPrice + movingChildPrice;
+
+        const total = adults * currentAdultPrice + children * currentChildPrice;
+
+        document.getElementById("price-adult").innerText = currentAdultPrice.toLocaleString("vi-VN") + " ₫";
+        document.getElementById("price-child").innerText = currentChildPrice.toLocaleString("vi-VN") + " ₫";
+
+        document.getElementById("sum-passengers").innerText = `${adults + children} người`;
+        document.getElementById("total-amount").innerText = total.toLocaleString("vi-VN") + " ₫";
+    };
+
+    const renderPassengerFields = () => {
+        const adults = parseInt(document.getElementById("adults").value) || 0;
+        const children = parseInt(document.getElementById("children").value) || 0;
+        const container = document.getElementById("passengers-container");
+        const wrapper = document.getElementById("passengers-detail-wrapper");
+
+        const totalCount = adults + children;
+
+        if (!container || !wrapper) return;
+
+        // Nếu chỉ có 1 người (người liên hệ), mặc định không hiện bảng này
+        if (totalCount <= 1) {
+            wrapper.style.display = "none";
+            return;
+        }
+
+        // Hiện bảng từ người thứ 2
+        wrapper.style.display = "block";
+        let html = "";
+        let currentIdx = 2; // Người liên hệ mặc định là Passenger 1
+
+        // Render adult fields (trừ người đầu tiên)
+        for (let i = 1; i < adults; i++) {
+            html += generatePassengerRow(currentIdx++, "Người lớn", "adult");
+        }
+
+        // Render child fields
+        for (let i = 0; i < children; i++) {
+            html += generatePassengerRow(currentIdx++, "Trẻ em", "child");
+        }
+
+        container.innerHTML = html;
+    };
+
+    const generatePassengerRow = (index, label, type) => {
+        return `
+            <div class="passenger-row mb-3 p-3 rounded-4 border-1" style="background: #fcfdfe; border: 1px solid #f1f5f9;">
+                <div class="row g-3 text-start">
+                    <div class="col-12">
+                        <span class="badge ${type === "adult" ? "bg-primary-subtle text-primary" : "bg-info-subtle text-info"} rounded-pill px-3">Hành khách ${index} (${label})</span>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label small fw-bold text-secondary">Họ tên *</label>
+                        <input type="text" class="form-control form-control-sm" name="ps_name_${index}" placeholder="Nhập họ tên" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-secondary">Giới tính</label>
+                        <select class="form-select form-select-sm" name="ps_gender_${index}">
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-secondary">Ngày sinh *</label>
+                        <input type="date" class="form-control form-control-sm" name="ps_dob_${index}" required>
+                    </div>
+                </div>
+            </div>
+        `;
     };
 
     // Phase 3: Submit Booking Form
@@ -120,6 +228,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Start
     fetchTourAndDepartures();
+    renderPassengerFields();
 });
 
 async function loadComponent(targetId, filePath) {

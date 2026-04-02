@@ -79,6 +79,25 @@ exports.getDetailTour = async (req, res) => {
     }
 };
 
+exports.getTourandDepartures = async (req, res) => {
+    const tourId = req.params.id;
+    try {
+        const result = await ListTourService.getTourAndDepartures(tourId);
+        res.json({
+            success: true,
+            data: result
+        });
+    }
+    catch (error) {
+        console.error("Lỗi getTourAndDepartures:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi không lấy được thông tin tour và ngày khởi hành",
+            error: error.message
+        });
+    }
+};
+
 // Render giao diện danh sách tour
 exports.renderListPage = (req, res) => {
     res.sendFile(path.join(__dirname, "../../../frontend/pages/user/list-tour.html"));

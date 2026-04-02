@@ -196,6 +196,11 @@
                                             <option value="">-- Chọn lịch khởi hành phù hợp --</option>
                                             <!-- JS render options here -->
                                         </select>
+                                        <div id="departure-info-extra" class="mt-2" style="display: none;">
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+                                                <i class="fa-solid fa-users-check me-1"></i> Số chỗ còn nhận: <span id="available-seats-count" class="fw-bold">0</span> chỗ
+                                            </span>
+                                        </div>
                                     </div>
                                     <div class="col-md-6 text-start">
                                         <label for="adults" class="form-label">Số lượng người lớn <span class="text-primary small">(Từ 12 tuổi)</span></label>
@@ -212,6 +217,17 @@
                                             <input type="number" class="form-control text-center fw-bold" id="children" name="children" value="0" min="0" readonly />
                                             <button type="button" class="btn btn-outline-secondary px-3" onclick="updateQty('children', 1)" style="border-radius: 0 12px 12px 0">+</button>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <!-- Passengers Info Section (Dynamic) -->
+                                <div id="passengers-detail-wrapper" class="mt-5 pt-4" style="border-top: 2px dashed #f1f5f9;">
+                                    <h5 class="fw-bold mb-4 text-dark d-flex align-items-center">
+                                        <i class="fa-solid fa-user-friends text-primary me-3 bg-primary-subtle p-2 rounded-3" style="font-size: 1.1rem;"></i> 
+                                        THÔNG TIN HÀNH KHÁCH
+                                    </h5>
+                                    <div id="passengers-container">
+                                        <!-- JS will render individual passenger input rows here -->
                                     </div>
                                 </div>
                             </div>
@@ -238,13 +254,21 @@
                                     <span class="text-secondary fw-medium">Thời lượng:</span>
                                     <span id="tour-duration" class="fw-bold">...</span>
                                 </div>
-                                <div class="d-flex justify-content-between mb-3">
+                                <div id="row-base-adult" class="d-flex justify-content-between mb-3">
                                     <span class="text-secondary fw-medium">Đơn giá người lớn:</span>
                                     <span id="price-adult" class="text-primary fw-bold">...</span>
                                 </div>
-                                <div class="d-flex justify-content-between">
+                                <div id="row-base-child" class="d-flex justify-content-between mb-3">
                                     <span class="text-secondary fw-medium">Đơn giá trẻ em:</span>
                                     <span id="price-child" class="text-primary fw-bold">...</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3" id="row-moving-adult" style="display: none !important;">
+                                    <span class="text-secondary fw-medium">Phụ phí di chuyển (N.Lớn):</span>
+                                    <span id="price-moving-adult" class="text-primary fw-bold">+ 0 ₫</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3" id="row-moving-child" style="display: none !important;">
+                                    <span class="text-secondary fw-medium">Phụ phí di chuyển (Trẻ em):</span>
+                                    <span id="price-moving-child" class="text-primary fw-bold">+ 0 ₫</span>
                                 </div>
                             </div>
 

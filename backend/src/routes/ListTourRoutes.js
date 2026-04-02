@@ -11,6 +11,8 @@ router.get("/services", listTourController.getServices);
 // Route để lấy chi tiết tour
 router.get("/:id", listTourController.getDetailTour);
 
+//Route để lấy thông tin tour và các ngày khởi hành còn trống chỗ
+router.get("/tour-departures/:id", listTourController.getTourandDepartures);
 
 
 module.exports = router;
