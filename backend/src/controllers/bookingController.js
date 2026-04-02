@@ -133,6 +133,68 @@ exports.updateStatus = async (req, res) => {
 	}
 };
 
+// Gửi yêu cầu hủy booking (User)
+exports.cancelBooking = async (req, res) => {
+	try {
+		const bookingId = req.params.id;
+		const userId = req.user.id;
+
+		const booking = await Booking.getById(bookingId);
+
+		if (!booking) {
+			return res
+				.status(404)
+				.json({ success: false, message: "Không tìm thấy booking" });
+		}
+
+		// Kiểm tra quyền
+		if (booking.user_id !== userId) {
+			return res
+				.status(403)
+				.json({
+					success: false,
+					message: "Bạn không có quyền thao tác trên booking này",
+				});
+		}
+
+		if (booking.status === "pending") {
+			return res
+				.status(400)
+				.json({ success: false, message: "Yêu cầu hủy đang được chờ xử lý" });
+		}
+
+		if (booking.status === "cancelled") {
+			return res
+				.status(400)
+				.json({ success: false, message: "Booking này đã bị hủy" });
+		}
+
+		if (booking.status !== "confirmed") {
+			return res
+				.status(400)
+				.json({
+					success: false,
+					message: "Chỉ có thể yêu cầu hủy khi booking đã xác nhận",
+				});
+		}
+
+		// Đổi trạng thái sang pending để chờ Admin/Staff duyệt
+		await Booking.updateStatus(bookingId, "status", "pending");
+
+		res.json({
+			success: true,
+			message: "Đã gửi yêu cầu hủy booking thành công",
+		});
+	} catch (error) {
+		console.error("Cancel booking error:", error);
+		res.status(500).json({
+			success: false,
+			message: "Lỗi khi gửi yêu cầu hủy booking",
+			error: error.message,
+		});
+	}
+};
+
 // Lấy danh sách bookings của user hiện tại
 exports.getMyBookings = async (req, res) => {
 	try {
@@ -166,6 +228,33 @@ exports.getBookingDetailsByUserId = async (req, res) => {
 		res.status(500).json({
 			success: false,
 			message: "Lỗi khi lấy chi tiết",
+			error: error.message,
+		});
+	}
+};
+
+// User gửi yêu cầu hủy booking (chuyển trạng thái sang pending)
+
+exports.requestCancellation = async (req, res) => {
+	try {
+		const bookingId = req.params.id;
+		const userId = req.user.id;
+
+		const booking = await Booking.getById(bookingId);
+		if (!booking) {
+			return res
+				.status(404)
+				.json({ success: false, message: "Không tìm thấy booking" });
+		}
+		if (booking.status === "pending") {
+			return res
+				.status(400)
+				.json({ success: true, message: "Gửi yêu cầu hủy thành công" });
+		}
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			message: "Lỗi khi gửi yêu cầu hủy booking",
 			error: error.message,
 		});
 	}
