@@ -28,8 +28,15 @@ router.get(
 router.get(
 	"/:id/details",
 	verifyToken,
-	isOwner,
+	isUser,
 	bookingController.getBookingDetailsByUserId,
+);
+
+router.put(
+	"/:id/cancel",
+	verifyToken,
+	isUser,
+	bookingController.requestCancellation,
 );
 
 // Booking Staff routes - Cần quyền quản lý
