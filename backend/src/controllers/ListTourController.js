@@ -10,15 +10,23 @@ exports.getAllTours = async (req, res) => {
             region: req.query.region || '',
             duration_type: req.query.duration || '',
             sort: req.query.sort || '',
-            service_ids: req.query.services ? req.query.services.split(',') : []
+            service_ids: req.query.services ? req.query.services.split(',').map(id => id.trim()).filter(id => id !== '') : [],
+            page: req.query.page || 1,
+            limit: req.query.limit || 6
         };
 
-        const tours = await ListTourService.getFilteredTours(filters);
+        const result = await ListTourService.getFilteredTours(filters);
 
         res.json({
             success: true,
-            message: "Lọc danh sách tour thành công!",
-            data: tours,
+            message: "Lấy danh sách tour thành công!",
+            data: result.tours,
+            pagination: {
+                totalCount: result.totalCount,
+                currentPage: result.currentPage,
+                totalPages: result.totalPages,
+                limit: filters.limit
+            }
         });
     } catch (error) {
         console.error("Lỗi getFilteredTours:", error);

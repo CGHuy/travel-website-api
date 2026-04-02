@@ -1,22 +1,31 @@
 // Main logic to fetch and render tours for list-tour page
 document.addEventListener('DOMContentLoaded', () => {
-    // Price range display update
+    // DOM Elements
     const priceRange = document.getElementById('priceRange');
     const priceMin = document.getElementById('priceMin');
-    if (priceRange && priceMin) {
-        priceRange.oninput = function() {
-            priceMin.innerText = parseInt(this.value).toLocaleString('vi-VN') + 'đ';
-        };
-    }
-
     const tourListContainer = document.getElementById('tour-list');
     const searchInput = document.getElementById('searchInput');
     const regionSelect = document.getElementById('regionSelect');
     const sortSelect = document.getElementById('sort');
     const applyFilterBtn = document.getElementById('applyFilterBtn');
     const serviceFilterContainer = document.getElementById('service-filter-container');
+    const paginationContainer = document.getElementById('pagination-container');
+
+    let currentFilters = {
+        page: 1,
+        limit: 6
+    };
 
     if (!tourListContainer) return;
+
+    // Debounce function to limit API calls during rapid input
+    const debounce = (func, delay) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    };
 
     // Phase 1: Fetch and Render Services for Filter Sidebar
     const fetchServices = async () => {
@@ -37,17 +46,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderServiceFilters = (services) => {
         serviceFilterContainer.innerHTML = services.map(service => `
             <div class="form-check custom-checkbox">
-                <input class="form-check-input rounded border-secondary service-checkbox" type="checkbox" id="svc${service.id}" value="${service.id}">
+                <input class="form-check-input rounded border-secondary service-checkbox auto-filter" type="checkbox" id="svc${service.id}" value="${service.id}">
                 <label class="form-check-label fw-medium text-secondary" for="svc${service.id}">${service.name}</label>
             </div>
         `).join('');
+
+        // Add listeners to newly created service checkboxes
+        document.querySelectorAll('.service-checkbox').forEach(cb => {
+            cb.addEventListener('change', () => fetchTours(1));
+        });
     };
 
     // Phase 2: Fetch and Render Tours
-    const fetchTours = async () => {
+    const fetchTours = async (page = 1) => {
+        currentFilters.page = page;
+        
         // Show loading state
         tourListContainer.innerHTML = `
-            <div class="text-center py-5">
+            <div class="text-center py-5 w-100">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
@@ -57,6 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Collect filter values
         const params = new URLSearchParams();
+        params.append('page', currentFilters.page);
+        params.append('limit', currentFilters.limit);
+
         if (searchInput && searchInput.value) params.append('search', searchInput.value);
         if (priceRange && priceRange.value) params.append('max_price', priceRange.value);
         if (regionSelect && regionSelect.value) params.append('region', regionSelect.value);
@@ -68,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             params.append('duration', selectedDuration.id);
         }
 
-        // Get selected services (Dynamically from checked inputs)
+        // Get selected services
         const selectedServices = Array.from(document.querySelectorAll('.service-checkbox:checked'))
                                      .map(cb => cb.value);
         if (selectedServices.length > 0) params.append('services', selectedServices.join(','));
@@ -79,19 +98,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success && result.data.length > 0) {
                 renderTours(result.data);
+                renderPagination(result.pagination);
             } else {
                 tourListContainer.innerHTML = `
-                    <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light">
+                    <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light w-100">
                         <img src="https://illustrations.popsy.co/amber/no-results.svg" style="width: 200px; opacity: 0.8;" alt="No results">
                         <h4 class="fw-bold text-dark mt-4">Không tìm thấy tour nào</h4>
                         <p class="text-muted mx-auto" style="max-width: 400px;">Rất tiếc, chúng tôi không tìm thấy kết quả phù hợp với tiêu chí của bạn. Vui lòng thử lại với bộ lọc khác.</p>
-                        <button class="btn btn-outline-primary rounded-pill px-4 mt-2" onclick="location.reload()">Xóa tất cả bộ lọc</button>
+                        <button class="btn btn-outline-primary rounded-pill px-4 mt-2" onclick="clearFilters()">Xóa tất cả bộ lọc</button>
                     </div>
                 `;
+                paginationContainer.innerHTML = '';
             }
         } catch (error) {
             console.error('Error fetching tours:', error);
-            tourListContainer.innerHTML = '<div class="alert alert-danger">Đã có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</div>';
+            tourListContainer.innerHTML = '<div class="alert alert-danger w-100">Đã có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</div>';
         }
     };
 
@@ -162,15 +183,101 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     };
 
-    // Event Listeners
-    if (applyFilterBtn) applyFilterBtn.addEventListener('click', fetchTours);
-    if (sortSelect) sortSelect.addEventListener('change', fetchTours);
-    if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') fetchTours();
+    const renderPagination = (pagination) => {
+        const { currentPage, totalPages } = pagination;
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+        let html = '';
+
+        // Previous button
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center ${currentPage === 1 ? 'text-muted' : 'text-dark'}" 
+                   href="javascript:void(0)" onclick="changePage(${currentPage - 1})" style="width: 45px; height: 45px;">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+            </li>
+        `;
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            html += `
+                <li class="page-item ${currentPage === i ? 'active' : ''}">
+                    <a class="page-link border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center fw-bold fs-6 ${currentPage === i ? '' : 'text-dark'}" 
+                       href="javascript:void(0)" onclick="changePage(${i})" style="width: 45px; height: 45px;">
+                        ${i}
+                    </a>
+                </li>
+            `;
+        }
+
+        // Next button
+        html += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center ${currentPage === totalPages ? 'text-muted' : 'text-dark'}" 
+                   href="javascript:void(0)" onclick="changePage(${currentPage + 1})" style="width: 45px; height: 45px;">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </li>
+        `;
+
+        paginationContainer.innerHTML = html;
+    };
+
+    // Global helper functions
+    window.changePage = (page) => {
+        fetchTours(page);
+        window.scrollTo({ top: document.querySelector('.main-container').offsetTop - 100, behavior: 'smooth' });
+    };
+
+    window.clearFilters = () => {
+        if (searchInput) searchInput.value = '';
+        if (priceRange) {
+            priceRange.value = 10000000;
+            priceMin.innerText = '10.000.000đ';
+        }
+        if (regionSelect) regionSelect.value = '';
+        if (sortSelect) sortSelect.value = '';
+        document.getElementById('dur_all').checked = true;
+        document.querySelectorAll('.service-checkbox').forEach(cb => cb.checked = false);
+        fetchTours(1);
+    };
+
+    // Event Listeners with Debounce and Auto-Trigger
+    const debouncedFetch = debounce(() => fetchTours(1), 500);
+
+    if (priceRange && priceMin) {
+        priceRange.addEventListener('input', function() {
+            priceMin.innerText = parseInt(this.value).toLocaleString('vi-VN') + 'đ';
+            debouncedFetch();
         });
     }
 
+    if (regionSelect) {
+        regionSelect.addEventListener('change', () => fetchTours(1));
+    }
+
+    if (sortSelect) {
+        sortSelect.addEventListener('change', () => fetchTours(1));
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => debouncedFetch());
+    }
+
+    // Listen to duration radio buttons
+    document.querySelectorAll('input[name="duration"]').forEach(radio => {
+        radio.addEventListener('change', () => fetchTours(1));
+    });
+
+    if (applyFilterBtn) {
+        applyFilterBtn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Làm mới bộ lọc';
+        applyFilterBtn.classList.replace('btn-primary', 'btn-outline-secondary');
+        applyFilterBtn.addEventListener('click', clearFilters);
+    }
+
     // Initial sequence
-    fetchServices().then(() => fetchTours());
+    fetchServices().then(() => fetchTours(1));
 });

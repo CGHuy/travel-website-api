@@ -2,13 +2,18 @@ const db = require("../config/database");
 
 class ListTourService {
     /**
-     * Lấy danh sách tour dựa trên nhiều tiêu chí lọc
-     * @param {Object} filters Gồm { search, max_price, region, duration_type, service_ids, sort }
+     * Lấy danh sách tour dựa trên nhiều tiêu chí lọc và phân trang
+     * @param {Object} filters Gồm { search, max_price, region, duration_type, service_ids, sort, page, limit }
      */
     static async getFilteredTours(filters) {
+        const page = parseInt(filters.page) || 1;
+        const limit = parseInt(filters.limit) || 6;
+        const offset = (page - 1) * limit;
+
         // Query cơ bản lấy tours kèm ngày khởi hành sắp tới
+        // Thêm SQL_CALC_FOUND_ROWS để lấy tổng số hàng khớp bộ lọc mà không cần query lại lần 2 (tối ưu performance)
         let baseSql = `
-            SELECT 
+            SELECT SQL_CALC_FOUND_ROWS
                 t.*,
                 (
                     SELECT GROUP_CONCAT(DATE_FORMAT(departure_date, '%d/%m')) 
@@ -20,19 +25,18 @@ class ListTourService {
             WHERE 1=1
         `;
         
-        // Mảng chứa các chuỗi điều kiện WHERE và Data (Values) mapping
         let whereClauses = [];
         let queryValues = [];
 
         const { search, max_price, region, duration_type, service_ids, sort } = filters;
 
-        // 1. TÌM KIẾM (Search Name, Location, hoặc Mã Tour dạng TOUR001)
+        // 1. TÌM KIẾM
         if (search) {
             whereClauses.push(`(t.name LIKE ? OR t.location LIKE ? OR CONCAT('TOUR', LPAD(t.id, 3, '0')) LIKE ?)`);
             queryValues.push(`%${search}%`, `%${search}%`, `%${search}%`);
         }
 
-        // 2. KHU VỰC (Vùng miền)
+        // 2. KHU VỰC
         if (region) {
             whereClauses.push(`t.region = ?`);
             queryValues.push(region);
@@ -44,17 +48,18 @@ class ListTourService {
             queryValues.push(Number(max_price));
         }
 
-        // 4. THỜI LƯỢNG ("short" cho 1-3 ngày, "long" cho 4+ ngày)
-        // Vì CSDL là VARCHAR (VD: 4N3Đ) nên map điều kiện LIKE tạm thời. 
+        // 4. THỜI LƯỢNG
         if (duration_type) {
+            // Trích xuất số ngày từ đầu chuỗi duration (ví dụ: "3 ngày 2 đêm" -> 3)
+            const daysSql = `CAST(t.duration AS UNSIGNED)`; 
             if (duration_type === 'dur_short') {
-                whereClauses.push(`(t.duration LIKE '%1N%' OR t.duration LIKE '%2N%' OR t.duration LIKE '%3N%')`);
+                whereClauses.push(`${daysSql} BETWEEN 1 AND 3`);
             } else if (duration_type === 'dur_long') {
-                whereClauses.push(`(t.duration NOT LIKE '%1N%' AND t.duration NOT LIKE '%2N%' AND t.duration NOT LIKE '%3N%')`);
+                whereClauses.push(`${daysSql} >= 4`);
             }
         }
 
-        // 5. DỊCH VỤ ĐẶC BIỆT (Multi Select - Check Many-To-Many Table)
+        // 5. DỊCH VỤ ĐẶC BIỆT (Logic AND: Tour phải có đủ tất cả dịch vụ đã chọn)
         if (service_ids && service_ids.length > 0) {
             const placeholders = service_ids.map(() => '?').join(',');
             whereClauses.push(`
@@ -62,29 +67,40 @@ class ListTourService {
                     SELECT tour_id FROM tour_services 
                     WHERE service_id IN (${placeholders})
                     GROUP BY tour_id
+                    HAVING COUNT(DISTINCT service_id) = ${service_ids.length}
                 )
             `);
             queryValues.push(...service_ids);
         }
 
-        // Nối mảng Query lại bằng AND
         if (whereClauses.length > 0) {
             baseSql += ` AND ` + whereClauses.join(' AND ');
         }
 
-        // 6. SẮP XẾP (Giá vs Timestamp)
+        // 6. SẮP XẾP
         if (sort === 'price_asc') {
             baseSql += ` ORDER BY t.price_default ASC`;
         } else if (sort === 'price_desc') {
             baseSql += ` ORDER BY t.price_default DESC`;
         } else {
-            baseSql += ` ORDER BY t.created_at DESC`; // Mặc định hiển thị Mới hơn trước tiên
+            baseSql += ` ORDER BY t.created_at DESC`;
         }
 
+        // 7. PHÂN TRANG
+        baseSql += ` LIMIT ? OFFSET ?`;
+        queryValues.push(limit, offset);
+
         try {
-            // Đưa vào thư viện MySQL Query
             const [rows] = await db.query(baseSql, queryValues);
-            return rows;
+            // Lấy tổng số bản ghi khớp điều kiện (không tính LIMIT)
+            const [[{ total }]] = await db.query('SELECT FOUND_ROWS() as total');
+            
+            return {
+                tours: rows,
+                totalCount: total,
+                currentPage: page,
+                totalPages: Math.ceil(total / limit)
+            };
         } catch (error) {
             throw new Error(`Tour Service Filter Error: ${error.message}`);
         }
