@@ -5,18 +5,7 @@ class Booking {
 	static async getAll() {
 		try {
 			const [rows] = await db.query(`
-                SELECT 
-                    b.*, 
-                    u.fullname, 
-                    u.email as user_email, 
-                    t.name as tour_name, 
-                    t.price_default,
-                    td.departure_date
-                FROM bookings b
-                LEFT JOIN users u ON b.user_id = u.id
-                JOIN tour_departures td ON b.departure_id = td.id
-                JOIN tours t ON td.tour_id = t.id
-                ORDER BY b.created_at DESC
+                SELECT * FROM bookings ORDER BY created_at DESC
             `);
 			return rows;
 		} catch (error) {
@@ -30,21 +19,7 @@ class Booking {
 		try {
 			const [rows] = await db.query(
 				`
-				SELECT b.*, 
-                    u.fullname, 
-                    u.email as user_email, 
-					u.phone as user_phone,
-					t.id as tour_id,
-                    t.name as tour_name, 
-                    t.price_default,
-                    td.departure_date,
-                    td.departure_location
-				FROM bookings b
-                LEFT JOIN users u ON b.user_id = u.id
-                JOIN tour_departures td ON b.departure_id = td.id
-                JOIN tours t ON td.tour_id = t.id
-                WHERE b.id = ?
-				LIMIT 1`,
+				SELECT * FROM bookings WHERE id = ? LIMIT 1`,
 				[id],
 			);
 			return rows[0] || null;
@@ -58,17 +33,7 @@ class Booking {
 		try {
 			const [rows] = await db.query(
 				`
-                SELECT 
-                    b.*, 
-                    t.name as tour_name, 
-                    t.cover_image,
-                    td.departure_date,
-                    td.departure_location
-                FROM bookings b
-                JOIN tour_departures td ON b.departure_id = td.id
-                JOIN tours t ON td.tour_id = t.id
-                WHERE b.user_id = ?
-                ORDER BY b.created_at DESC
+               SELECT * FROM bookings WHERE user_id = ? ORDER BY created_at DESC
             `,
 				[userId],
 			);

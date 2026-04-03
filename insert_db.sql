@@ -4,14 +4,14 @@ USE db_viet_tour;
 -- 1. USERS
 -- =========================
 INSERT INTO users (fullname, phone, address, email, password, role) VALUES
-('Nguyễn Văn Hùng', '0987654321', '123 Lê Lợi, Quận 1, TP.HCM', 'hung@gmail.com', '123456', 'admin'),
-('Trần Thị Mai', '0912345678', '456 Nguyễn Trãi, Thanh Xuân, Hà Nội', 'mai@gmail.com', '123456', 'tour-staff'),
-('Lê Quốc Bảo', '0934567890', '789 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', 'bao.staff@gmail.com', '123456', 'booking-staff'),
-('Phạm Minh Tuấn', '0978123456', '12 Trần Phú, Ngô Quyền, Hải Phòng', 'tuan@gmail.com', '123456', 'customer'),
-('Đỗ Thị Ngọc Anh', '0967123456', '88 Lý Thường Kiệt, TP. Đà Nẵng', 'ngocanh@gmail.com', '123456', 'customer'),
-('Võ Hoàng Nam', '0945123789', '234 Hùng Vương, TP. Cần Thơ', 'nam@gmail.com', '123456', 'customer'),
-('Bùi Thanh Trúc', '0923456789', '56 Phan Chu Trinh, TP. Huế', 'truc@gmail.com', '123456', 'customer'),
-('Nguyễn Thị Hồng Nhung', '0398765432', '101 Cách Mạng Tháng 8, Quận 3, TP.HCM', 'nhung@gmail.com', '123456', 'customer');
+('Nguyễn Văn Hùng', '0987654321', '123 Lê Lợi, Quận 1, TP.HCM', 'hung@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'admin'),
+('Trần Thị Mai', '0912345678', '456 Nguyễn Trãi, Thanh Xuân, Hà Nội', 'mai@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'tour-staff'),
+('Lê Quốc Bảo', '0934567890', '789 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', 'bao.staff@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'booking-staff'),
+('Phạm Minh Tuấn', '0978123456', '12 Trần Phú, Ngô Quyền, Hải Phòng', 'tuan@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Đỗ Thị Ngọc Anh', '0967123456', '88 Lý Thường Kiệt, TP. Đà Nẵng', 'ngocanh@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Võ Hoàng Nam', '0945123789', '234 Hùng Vương, TP. Cần Thơ', 'nam@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Bùi Thanh Trúc', '0923456789', '56 Phan Chu Trinh, TP. Huế', 'truc@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Nguyễn Thị Hồng Nhung', '0398765432', '101 Cách Mạng Tháng 8, Quận 3, TP.HCM', 'nhung@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer');
 
 
 

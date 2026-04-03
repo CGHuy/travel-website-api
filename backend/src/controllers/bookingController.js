@@ -82,7 +82,7 @@ exports.createBooking = async (req, res) => {
 exports.getBookingDetails = async (req, res) => {
 	try {
 		const bookingId = req.params.id;
-		const booking = await Booking.getById(bookingId);
+		const booking = await bookingService.getById(bookingId);
 		if (!booking) {
 			return res
 				.status(404)
@@ -101,7 +101,7 @@ exports.getBookingDetails = async (req, res) => {
 // Admin: Lấy tất cả
 exports.getAllBookings = async (req, res) => {
 	try {
-		const bookings = await Booking.getAll();
+		const bookings = await bookingService.getAll();
 		res.json({ success: true, count: bookings.length, data: bookings });
 	} catch (error) {
 		res
@@ -139,7 +139,7 @@ exports.cancelBooking = async (req, res) => {
 		const bookingId = req.params.id;
 		const userId = req.user.id;
 
-		const booking = await Booking.getById(bookingId);
+		const booking = await bookingService.getById(bookingId);
 
 		if (!booking) {
 			return res
@@ -149,12 +149,10 @@ exports.cancelBooking = async (req, res) => {
 
 		// Kiểm tra quyền
 		if (booking.user_id !== userId) {
-			return res
-				.status(403)
-				.json({
-					success: false,
-					message: "Bạn không có quyền thao tác trên booking này",
-				});
+			return res.status(403).json({
+				success: false,
+				message: "Bạn không có quyền thao tác trên booking này",
+			});
 		}
 
 		if (booking.status === "pending") {
@@ -170,12 +168,10 @@ exports.cancelBooking = async (req, res) => {
 		}
 
 		if (booking.status !== "confirmed") {
-			return res
-				.status(400)
-				.json({
-					success: false,
-					message: "Chỉ có thể yêu cầu hủy khi booking đã xác nhận",
-				});
+			return res.status(400).json({
+				success: false,
+				message: "Chỉ có thể yêu cầu hủy khi booking đã xác nhận",
+			});
 		}
 
 		// Đổi trạng thái sang pending để chờ Admin/Staff duyệt
@@ -199,7 +195,7 @@ exports.cancelBooking = async (req, res) => {
 exports.getMyBookings = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		const bookings = await Booking.getByUserId(userId);
+		const bookings = await bookingService.getByUserId(userId);
 		res.json({ success: true, count: bookings.length, data: bookings });
 	} catch (error) {
 		res.status(500).json({
