@@ -4,6 +4,12 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Đặt Tour - VietTour</title>
+        <script>
+            // Chặn ngay từ lúc chưa vẽ trang nếu không có token (Fix lỗi nháy giao diện khi back lại)
+            if (!localStorage.getItem("token")) {
+                window.location.replace(`/login?redirect=${encodeURIComponent(window.location.href)}`);
+            }
+        </script>
         <!-- Google Fonts: Lexend Deca -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

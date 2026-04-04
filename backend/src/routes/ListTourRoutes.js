@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const listTourController = require("../controllers/ListTourController");
+const {
+	verifyToken,
+	isUser,
+} = require("../middlewares/auth");
 
 // Route để lấy danh sách tour
 router.get("/", listTourController.getAllTours);
@@ -12,7 +16,7 @@ router.get("/services", listTourController.getServices);
 router.get("/:id", listTourController.getDetailTour);
 
 //Route để lấy thông tin tour và các ngày khởi hành còn trống chỗ
-router.get("/tour-departures/:id", listTourController.getTourandDepartures);
+router.get("/tour-departures/:id", verifyToken, isUser,listTourController.getTourandDepartures);
 
 
 module.exports = router;

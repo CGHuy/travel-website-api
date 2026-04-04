@@ -50,7 +50,13 @@
                 localStorage.setItem("user", JSON.stringify(data.data.user));
 
                 setTimeout(() => {
-                    window.location.href = "/pages/index.html";
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectUrl = urlParams.get('redirect');
+                    if (redirectUrl) {
+                        window.location.href = redirectUrl;
+                    } else {
+                        window.location.href = "/pages/index.html";
+                    }
                 }, 1000);
                 return;
             }

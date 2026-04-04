@@ -23,7 +23,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Phase 1: Fetch Tour Data
     const fetchTourAndDepartures = async () => {
         try {
-            const response = await fetch(`/api/list-tours/tour-departures/${tourId}`);
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.location.replace(`/login?redirect=${encodeURIComponent(window.location.href)}`);
+                return;
+            }
+
+            const response = await fetch(`/api/list-tours/tour-departures/${tourId}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                window.location.replace(`/login?redirect=${encodeURIComponent(window.location.href)}`);
+                return;
+            }
+
             const result = await response.json();
 
             if (result.success && result.data) {
@@ -32,11 +48,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 renderTourSummary(tourInfo);
                 renderDepartures(departuresInfo);
             } else {
-                alert("Lỗi tải thông tin tour!");
+                console.error("Lỗi tải thông tin tour:", result.message);
             }
         } catch (error) {
             console.error("Error fetching tour info:", error);
-            alert("Lỗi kết nối máy chủ!");
         }
     };
 
