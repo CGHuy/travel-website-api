@@ -4,12 +4,6 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Đặt Tour - VietTour</title>
-        <script>
-            // Chặn ngay từ lúc chưa vẽ trang nếu không có token (Fix lỗi nháy giao diện khi back lại)
-            if (!localStorage.getItem("token")) {
-                window.location.replace(`/login?redirect=${encodeURIComponent(window.location.href)}`);
-            }
-        </script>
         <!-- Google Fonts: Lexend Deca -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,110 +14,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
         <!-- Custom CSS -->
         <link rel="stylesheet" href="/assets/css/DetailTourStyle.css" />
-        <style>
-            body {
-                font-family: "Lexend Deca", sans-serif;
-                background-color: #f8fafc;
-                color: #1e293b;
-            }
-            .booking-header-banner {
-                background: linear-gradient(135deg, #137fec, #0a58ca);
-                padding: 4rem 0;
-                color: white;
-                margin-bottom: -3rem;
-            }
-            .card-booking {
-                border: none;
-                border-radius: 24px;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
-                overflow: hidden;
-                background: white;
-            }
-            .card-booking .card-header {
-                background: #ffffff;
-                border-bottom: 2px solid #f8fafc;
-                padding: 1.5rem 2rem;
-            }
-            .card-booking .card-header h4 {
-                margin: 0;
-                font-weight: 800;
-                color: #1e293b;
-            }
-            .card-booking .card-body {
-                padding: 2rem;
-            }
-            .form-label {
-                font-weight: 600;
-                color: #475569;
-                margin-bottom: 0.75rem;
-            }
-            .form-control,
-            .form-select {
-                padding: 0.875rem 1.25rem;
-                border-radius: 14px;
-                border: 1px solid #e2e8f0;
-                background-color: #fcfdfe;
-                transition: all 0.3s ease;
-            }
-            .form-control:focus,
-            .form-select:focus {
-                border-color: #137fec;
-                box-shadow: 0 0 0 4px rgba(19, 127, 236, 0.1);
-            }
-            .sidebar-tour-info {
-                position: sticky;
-                top: 100px;
-            }
-            .tour-sum-card {
-                background: #f0f7ff;
-                border-radius: 20px;
-                padding: 1.5rem;
-                margin-top: 1.5rem;
-            }
-            .total-amount-box {
-                background: #ffffff;
-                border-radius: 20px;
-                padding: 1.75rem;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-                margin-top: 2rem;
-            }
-            .btn-confirm-booking {
-                background: linear-gradient(135deg, #137fec, #0a58ca);
-                color: white;
-                border: none;
-                padding: 1.25rem;
-                border-radius: 18px;
-                font-weight: 800;
-                font-size: 1.1rem;
-                box-shadow: 0 10px 25px rgba(19, 127, 236, 0.25);
-                transition: all 0.3s ease;
-            }
-            .btn-confirm-booking:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 15px 35px rgba(19, 127, 236, 0.35);
-                color: white;
-            }
-            .step-indicator {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                margin-bottom: 3rem;
-            }
-            .step-num {
-                width: 40px;
-                height: 40px;
-                border-radius: 12px;
-                background: rgba(255, 255, 255, 0.2);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: 800;
-            }
-            .step-active .step-num {
-                background: #ffffff;
-                color: #137fec;
-            }
-        </style>
+        <link rel="stylesheet" href="/assets/css/BookingTourStyle.css" />
     </head>
     <body>
         <div id="header-placeholder"></div>

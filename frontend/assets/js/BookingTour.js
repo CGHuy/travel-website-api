@@ -1,4 +1,12 @@
 // BookingTour.js - Logic for booking-tour.html
+
+// 0. Xác thực ngay khi script được tải để tránh nháy giao diện hoặc truy cập trái phép
+(function() {
+    if (!localStorage.getItem("token")) {
+        window.location.replace(`/login?redirect=${encodeURIComponent(window.location.href)}`);
+    }
+})();
+
 document.addEventListener("DOMContentLoaded", async () => {
     await Promise.all([loadComponent("header-placeholder", "../../components/header.html"), loadComponent("footer-placeholder", "../../components/footer.html")]);
 
