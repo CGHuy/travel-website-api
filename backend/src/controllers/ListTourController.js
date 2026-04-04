@@ -1,4 +1,4 @@
-const ListTourService = require("../services/ListTourService");
+const ListTourService = require("../services/listTourService");
 const path = require("path");
 
 exports.getAllTours = async (req, res) => {
