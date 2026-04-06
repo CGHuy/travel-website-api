@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <div class="row g-0 flex-column flex-md-row h-100">
                     <div class="col-md-5 col-xl-4 position-relative h-100">
                         <img src="${tour.cover_image || "https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070"}" class="img-fluid w-100 h-100 object-fit-cover" style="min-height: 260px;" alt="${tour.name}">
-                        <button class="btn btn-icon position-absolute top-0 start-0 m-3 p-0 bg-transparent border-0 text-white fs-4" style="text-shadow: 0 2px 4px rgba(0,0,0,0.6);" onclick="event.stopPropagation()">
+                        <button class="btn btn-icon position-absolute top-0 start-0 m-3 p-0 bg-transparent border-0 text-white fs-4" style="text-shadow: 0 2px 4px rgba(0,0,0,0.6);" onclick="addToWishlist(${tour.id}, event)">
                             <i class="fa-solid fa-heart opacity-75"></i>
                         </button>
                         ${
@@ -251,6 +251,51 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.changePage = (page) => {
         fetchTours(page);
         window.scrollTo({ top: document.querySelector(".main-container").offsetTop - 100, behavior: "smooth" });
+    };
+
+    window.addToWishlist = async (tourId, event) => {
+        event.stopPropagation();
+        
+        const token = localStorage.getItem("token");
+        if (!token) {
+            showToast("Thông báo", "Vui lòng đăng nhập để thực hiện thao tác này!", "warning");
+            setTimeout(() => {
+                window.location.href = `/pages/auth/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+            }, 2000);
+            return;
+        }
+
+        try {
+            const btn = event.currentTarget;
+            const icon = btn.querySelector("i");
+            
+            const response = await fetch(`/api/list-tours/wishlist/${tourId}`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Change icon to solid and red
+                icon.classList.remove("opacity-75");
+                icon.style.color = "#ef4444";
+                icon.classList.add("animate-heart");
+                showToast("Thành công", "Đã thêm tour vào danh sách yêu thích!", "success");
+            } else {
+                showToast("Thông báo", result.message || "Không thể thêm vào danh sách yêu thích.", "info");
+                if (result.message === "Tour đã có trong wishlist") {
+                    icon.classList.remove("opacity-75");
+                    icon.style.color = "#ef4444";
+                }
+            }
+        } catch (error) {
+            console.error("Error adding to wishlist:", error);
+            showToast("Lỗi", "Đã có lỗi xảy ra. Vui lòng thử lại sau.", "error");
+        }
     };
 
     window.clearFilters = () => {

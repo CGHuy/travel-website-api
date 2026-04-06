@@ -20,4 +20,16 @@ router.get(
 	listTourController.getTourandDepartures,
 );
 
+//Route thêm tour vào wishlist
+router.post(
+	"/wishlist/:id",
+	verifyToken,
+	isUser,
+	listTourController.addWishList,
+);
+
+router.get("/wishlist/:id", verifyToken, isUser, listTourController.checkWishList);
+
+router.delete("/wishlist/:id", verifyToken, isUser, listTourController.removeWishList);
+
 module.exports = router;
