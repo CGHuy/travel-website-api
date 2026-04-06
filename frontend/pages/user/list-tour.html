@@ -1,186 +1,209 @@
 <!doctype html>
 <html lang="vi">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Danh Sách Tour - VietTour</title>
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" />
-        <!-- Essential CSS -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-        <link rel="stylesheet" href="/assets/css/AppStyle.css" />
-        <link rel="stylesheet" href="/assets/css/ListTourStyle.css" />
-        <style>
-            body {
-                font-family: "Lexend Deca", sans-serif;
-                padding-top: 73px; /* Space for fixed header */
-                background-color: #f8fafc;
-            }
-            .main-container {
-                max-width: 1400px;
-                margin: 0 auto;
-                padding: 2rem;
-            }
-            .search-group {
-                max-width: 600px;
-                margin: 0 auto 2rem;
-            }
-        </style>
-    </head>
 
-    <body>
-        <!-- Header will be loaded here -->
-        <div id="header-placeholder"></div>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh Sách Tour - VietTour</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" />
+    <!-- Essential CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="/assets/css/AppStyle.css" />
+    <link rel="stylesheet" href="/assets/css/listTourStyle.css" />
+    <style>
+        body {
+            font-family: "Lexend Deca", sans-serif;
+            padding-top: 73px;
+            /* Space for fixed header */
+            background-color: #f8fafc;
+        }
 
-        <!-- Hero Banner Full Width Carousel -->
-        <div class="position-relative w-100 mb-5 shadow-sm overflow-hidden" style="height: 380px">
-            <!-- Carousel Background Wrapper -->
-            <div id="heroCarousel" class="carousel slide carousel-fade w-100 h-100 position-absolute top-0 start-0" data-bs-ride="carousel" data-bs-interval="4000" style="z-index: -2">
-                <div class="carousel-inner w-100 h-100">
-                    <div class="carousel-item active w-100 h-100">
-                        <img src="https://images.unsplash.com/photo-1506929562872-bb421503ef21?q=80&w=2068" class="d-block w-100 h-100 object-fit-cover" alt="Banner 1" />
-                    </div>
-                    <div class="carousel-item w-100 h-100">
-                        <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070" class="d-block w-100 h-100 object-fit-cover" alt="Banner 2" />
-                    </div>
-                    <div class="carousel-item w-100 h-100">
-                        <img src="https://images.unsplash.com/photo-1513326738677-b964603b136d?q=80&w=2070" class="d-block w-100 h-100 object-fit-cover" alt="Banner 3" />
-                    </div>
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .search-group {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header will be loaded here -->
+    <div id="header-placeholder"></div>
+
+    <!-- Hero Banner Full Width Carousel -->
+    <div class="position-relative w-100 mb-5 shadow-sm overflow-hidden" style="height: 380px">
+        <!-- Carousel Background Wrapper -->
+        <div id="heroCarousel" class="carousel slide carousel-fade w-100 h-100 position-absolute top-0 start-0"
+            data-bs-ride="carousel" data-bs-interval="4000" style="z-index: -2">
+            <div class="carousel-inner w-100 h-100">
+                <div class="carousel-item active w-100 h-100">
+                    <img src="https://images.unsplash.com/photo-1506929562872-bb421503ef21?q=80&w=2068"
+                        class="d-block w-100 h-100 object-fit-cover" alt="Banner 1" />
                 </div>
-            </div>
-
-            <!-- Dark Overlay -->
-            <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)); z-index: -1"></div>
-
-            <!-- Content -->
-            <div class="container h-100 d-flex flex-column justify-content-center align-items-center text-center px-4 position-relative z-1">
-                <span class="badge bg-primary bg-opacity-75 px-3 py-2 rounded-pill mb-3 border border-light border-opacity-25" style="font-weight: 500; letter-spacing: 1px">VIETTOUR PREMIUM</span>
-                <h1 class="fw-bold text-white mb-3" style="font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3)">Du Lịch Tiêu Chuẩn Đặc Biệt</h1>
-                <p class="text-white mx-auto text-opacity-75 mb-0" style="max-width: 900px; line-height: 1.7; font-size: 1.05rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5)">Dòng tour tiêu chuẩn đặc biệt và là niềm tự hào của VietTour. Xuyên suốt hành trình Du Khách sẽ được tận hưởng chuyến du lịch độc đáo được thiết kế chọn lọc tinh tế cùng hệ thống dịch vụ đẳng cấp nhằm đem lại những cảm xúc thăng hoa, gia tăng giá trị và hài lòng tuyệt đối về chuyến đi.</p>
+                <div class="carousel-item w-100 h-100">
+                    <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070"
+                        class="d-block w-100 h-100 object-fit-cover" alt="Banner 2" />
+                </div>
+                <div class="carousel-item w-100 h-100">
+                    <img src="https://images.unsplash.com/photo-1513326738677-b964603b136d?q=80&w=2070"
+                        class="d-block w-100 h-100 object-fit-cover" alt="Banner 3" />
+                </div>
             </div>
         </div>
 
-        <main class="main-container pt-0">
-            <div class="row g-4">
-                <!-- Sidebar Filter -->
-                <aside class="col-lg-3">
-                    <!-- Filter Card -->
-                    <div class="card border border-light shadow-sm p-4 filter-sidebar rounded-4 bg-white">
-                        <h5 class="fw-bold mb-4 d-flex align-items-center gap-2 fs-5 border-bottom border-light pb-3 text-dark"><i class="fa-solid fa-filter text-primary"></i> Bộ lọc</h5>
+        <!-- Dark Overlay -->
+        <div class="position-absolute top-0 start-0 w-100 h-100"
+            style="background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8)); z-index: -1">
+        </div>
 
-                        <div class="mb-4 pb-3 border-bottom border-light">
-                            <label class="form-label fw-bold mb-3 text-dark">Khoảng giá</label>
-                            <input type="range" class="form-range" min="500000" max="10000000" step="500000" id="priceRange" />
-                            <div class="d-flex justify-content-between text-muted small mt-2 fw-medium">
-                                <span id="priceMin">500.000đ</span>
-                                <span>10.000.000đ+</span>
-                            </div>
-                        </div>
+        <!-- Content -->
+        <div
+            class="container h-100 d-flex flex-column justify-content-center align-items-center text-center px-4 position-relative z-1">
+            <span
+                class="badge bg-primary bg-opacity-75 px-3 py-2 rounded-pill mb-3 border border-light border-opacity-25"
+                style="font-weight: 500; letter-spacing: 1px">VIETTOUR PREMIUM</span>
+            <h1 class="fw-bold text-white mb-3"
+                style="font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3)">
+                Du Lịch Tiêu Chuẩn Đặc Biệt</h1>
+            <p class="text-white mx-auto text-opacity-75 mb-0"
+                style="max-width: 900px; line-height: 1.7; font-size: 1.05rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5)">
+                Dòng tour tiêu chuẩn đặc biệt và là niềm tự hào của VietTour. Xuyên suốt hành trình Du Khách sẽ được tận
+                hưởng chuyến du lịch độc đáo được thiết kế chọn lọc tinh tế cùng hệ thống dịch vụ đẳng cấp nhằm đem lại
+                những cảm xúc thăng hoa, gia tăng giá trị và hài lòng tuyệt đối về chuyến đi.</p>
+        </div>
+    </div>
 
-                        <div class="mb-4 pb-3 border-bottom border-light">
-                            <label class="form-label fw-bold mb-3 text-dark">Khu vực</label>
-                            <select class="form-select border-0 bg-light rounded-3 py-2 fw-medium" id="regionSelect" style="cursor: pointer">
-                                <option value="">Tất cả khu vực</option>
-                                <option value="Miền Bắc">Miền Bắc</option>
-                                <option value="Miền Trung">Miền Trung</option>
-                                <option value="Miền Nam">Miền Nam</option>
-                            </select>
-                        </div>
+    <main class="main-container pt-0">
+        <div class="row g-4">
+            <!-- Sidebar Filter -->
+            <aside class="col-lg-3">
+                <!-- Filter Card -->
+                <div class="card border border-light shadow-sm p-4 filter-sidebar rounded-4 bg-white">
+                    <h5
+                        class="fw-bold mb-4 d-flex align-items-center gap-2 fs-5 border-bottom border-light pb-3 text-dark">
+                        <i class="fa-solid fa-filter text-primary"></i> Bộ lọc</h5>
 
-                        <div class="mb-4 pb-3 border-bottom border-light">
-                            <label class="form-label fw-bold mb-3 text-dark">Thời lượng</label>
-                            <div class="d-flex flex-column gap-3">
-                                <div class="form-check custom-radio">
-                                    <input class="form-check-input" type="radio" name="duration" id="dur_all" checked />
-                                    <label class="form-check-label fw-medium text-secondary" for="dur_all">Tất cả</label>
-                                </div>
-                                <div class="form-check custom-radio">
-                                    <input class="form-check-input" type="radio" name="duration" id="dur_short" />
-                                    <label class="form-check-label fw-medium text-secondary" for="dur_short">1-3 ngày</label>
-                                </div>
-                                <div class="form-check custom-radio">
-                                    <input class="form-check-input" type="radio" name="duration" id="dur_long" />
-                                    <label class="form-check-label fw-medium text-secondary" for="dur_long">4+ ngày</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold mb-3 text-dark">Dịch vụ</label>
-                            <div id="service-filter-container" class="d-flex flex-column gap-3">
-                                <!-- Services will be loaded here dynamically -->
-                                <div class="text-muted small">Đang tải dịch vụ...</div>
-                            </div>
-                        </div>
-
-                        <button id="applyFilterBtn" class="btn btn-primary w-100 mt-3 py-3 rounded-pill fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2 transition" style="font-size: 1.05rem"><i class="fa-solid fa-check"></i> Áp dụng bộ lọc</button>
-                    </div>
-                </aside>
-
-                <!-- Main Content -->
-                <div class="col-lg-9">
-                    <!-- Inner Header & Sort -->
-                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm border border-light border-opacity-50 gap-3">
-                        <!-- Search Bar -->
-                        <div class="shadow-sm rounded-pill border border-light d-flex align-items-center flex-grow-1" style="max-width: 600px; height: 50px; background-color: #f8fafc; overflow: hidden; transition: all 0.3s ease">
-                            <div class="ps-4 pe-3 text-muted d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-magnifying-glass fs-6"></i>
-                            </div>
-                            <input id="searchInput" type="text" class="search-input border-0 bg-transparent py-2 fw-medium w-100 h-100 text-dark" style="outline: none; box-shadow: none; font-size: 0.95rem" placeholder="Nhập tên tour, địa điểm bạn muốn đến..." />
-                        </div>
-
-                        <!-- Sort -->
-                        <div class="d-flex align-items-center gap-2 bg-light px-3 py-2 rounded-pill border border-light">
-                            <label class="form-label mb-0 text-muted small fw-medium text-nowrap" for="sort">Sắp xếp:</label>
-                            <select id="sort" class="form-select border-0 shadow-none bg-transparent fw-bold text-dark p-0 pe-4" style="width: auto; outline: none; box-shadow: none; cursor: pointer; background-position: right 0.25rem center">
-                                <option value="">Tất cả</option>
-                                <option value="price_asc">Giá: Thấp đến cao</option>
-                                <option value="price_desc">Giá: Cao đến thấp</option>
-                            </select>
+                    <div class="mb-4 pb-3 border-bottom border-light">
+                        <label class="form-label fw-bold mb-3 text-dark">Khoảng giá</label>
+                        <input type="range" class="form-range" min="500000" max="10000000" step="500000"
+                            id="priceRange" />
+                        <div class="d-flex justify-content-between text-muted small mt-2 fw-medium">
+                            <span id="priceMin">500.000đ</span>
+                            <span>10.000.000đ+</span>
                         </div>
                     </div>
 
-                    <!-- Tour List -->
-                    <style>
-                        /* Custom class for equal height horizontal cards */
-                        @media (min-width: 768px) {
-                            .tour-horizontal-card {
-                                height: 280px;
-                            }
-                        }
-                        .tour-horizontal-card .card-body {
-                            overflow: hidden;
-                        }
-                    </style>
-                    <div id="tour-list" class="d-flex flex-column gap-4">
-                        <!-- Tours will be rendered here dynamically -->
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                    <div class="mb-4 pb-3 border-bottom border-light">
+                        <label class="form-label fw-bold mb-3 text-dark">Khu vực</label>
+                        <select class="form-select border-0 bg-light rounded-3 py-2 fw-medium" id="regionSelect"
+                            style="cursor: pointer">
+                            <option value="">Tất cả khu vực</option>
+                            <option value="Miền Bắc">Miền Bắc</option>
+                            <option value="Miền Trung">Miền Trung</option>
+                            <option value="Miền Nam">Miền Nam</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4 pb-3 border-bottom border-light">
+                        <label class="form-label fw-bold mb-3 text-dark">Thời lượng</label>
+                        <div class="d-flex flex-column gap-3">
+                            <div class="form-check custom-radio">
+                                <input class="form-check-input" type="radio" name="duration" id="dur_all" checked />
+                                <label class="form-check-label fw-medium text-secondary" for="dur_all">Tất cả</label>
                             </div>
-                            <p class="mt-2 text-muted fw-medium">Đang tải danh sách tour...</p>
+                            <div class="form-check custom-radio">
+                                <input class="form-check-input" type="radio" name="duration" id="dur_short" />
+                                <label class="form-check-label fw-medium text-secondary" for="dur_short">1-3
+                                    ngày</label>
+                            </div>
+                            <div class="form-check custom-radio">
+                                <input class="form-check-input" type="radio" name="duration" id="dur_long" />
+                                <label class="form-check-label fw-medium text-secondary" for="dur_long">4+ ngày</label>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Pagination -->
-                    <nav aria-label="Page navigation" class="mt-5 mb-3">
-                        <ul id="pagination-container" class="pagination justify-content-center gap-2">
-                            <!-- Dynamic pagination here -->
-                        </ul>
-                    </nav>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-3 text-dark">Dịch vụ</label>
+                        <div id="service-filter-container" class="d-flex flex-column gap-3">
+                            <!-- Services will be loaded here dynamically -->
+                            <div class="text-muted small">Đang tải dịch vụ...</div>
+                        </div>
+                    </div>
+
+                    <button id="applyFilterBtn"
+                        class="btn btn-primary w-100 mt-3 py-3 rounded-pill fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2 transition"
+                        style="font-size: 1.05rem"><i class="fa-solid fa-check"></i> Áp dụng bộ lọc</button>
                 </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <!-- Inner Header & Sort -->
+                <div
+                    class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm border border-light border-opacity-50 gap-3">
+                    <!-- Search Bar -->
+                    <div class="shadow-sm rounded-pill border border-light d-flex align-items-center flex-grow-1"
+                        style="max-width: 600px; height: 50px; background-color: #f8fafc; overflow: hidden; transition: all 0.3s ease">
+                        <div class="ps-4 pe-3 text-muted d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-magnifying-glass fs-6"></i>
+                        </div>
+                        <input id="searchInput" type="text"
+                            class="search-input border-0 bg-transparent py-2 fw-medium w-100 h-100 text-dark"
+                            style="outline: none; box-shadow: none; font-size: 0.95rem"
+                            placeholder="Nhập tên tour, địa điểm bạn muốn đến..." />
+                    </div>
+
+                    <!-- Sort -->
+                    <div class="d-flex align-items-center gap-2 bg-light px-3 py-2 rounded-pill border border-light">
+                        <label class="form-label mb-0 text-muted small fw-medium text-nowrap" for="sort">Sắp
+                            xếp:</label>
+                        <select id="sort"
+                            class="form-select border-0 shadow-none bg-transparent fw-bold text-dark p-0 pe-4"
+                            style="width: auto; outline: none; box-shadow: none; cursor: pointer; background-position: right 0.25rem center">
+                            <option value="">Tất cả</option>
+                            <option value="price_asc">Giá: Thấp đến cao</option>
+                            <option value="price_desc">Giá: Cao đến thấp</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="tour-list" class="d-flex flex-column gap-4">
+                    <!-- Tours will be rendered here dynamically -->
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted fw-medium">Đang tải danh sách tour...</p>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" class="mt-5 mb-3">
+                    <ul id="pagination-container" class="pagination justify-content-center gap-2">
+                        <!-- Dynamic pagination here -->
+                    </ul>
+                </nav>
             </div>
-        </main>
+        </div>
+    </main>
 
-        <!-- Footer will be loaded here -->
-        <div id="footer-placeholder"></div>
+    <!-- Footer will be loaded here -->
+    <div id="footer-placeholder"></div>
 
-        <!-- Scripts -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Page Specific Script -->
-        <script src="/assets/js/ListTour.js"></script>
-    </body>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Page Specific Script -->
+    <script src="/assets/js/listTour.js"></script>
+</body>
+
 </html>

@@ -222,10 +222,105 @@ document.addEventListener("DOMContentLoaded", async () => {
         bookButtons.forEach((btn) => {
             if (btn.innerText.includes("Đặt") || btn.innerText.includes("Báo")) {
                 btn.onclick = () => {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        showToast("Thông báo", "Vui lòng đăng nhập để tiến hành đặt tour!", "warning");
+                        setTimeout(() => {
+                            window.location.href = `/pages/auth/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                        }, 2000);
+                        return;
+                    }
                     window.location.href = `/booking-tour?tour_id=${tour.id}`;
                 };
             }
         });
+
+        // --- Wishlist Logic ---
+        const wishlistBtn = document.querySelector(".btn-action-round.love");
+        if (wishlistBtn) {
+            // Check ban đầu nếu đã đăng nhập
+            const token = localStorage.getItem("token");
+            if (token) {
+                checkWishlistStatus(tour.id, token, wishlistBtn);
+            }
+
+            wishlistBtn.onclick = async () => {
+                if (!token) {
+                    showToast("Thông báo", "Vui lòng đăng nhập để thực hiện thao tác này!", "warning");
+                    setTimeout(() => {
+                        window.location.href = `/pages/auth/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                    }, 2000);
+                    return;
+                }
+
+                const icon = wishlistBtn.querySelector("i");
+                const isInWishlist = icon.classList.contains("fa-solid");
+
+                try {
+                    const method = isInWishlist ? "DELETE" : "POST";
+                    const response = await fetch(`/api/list-tours/wishlist/${tour.id}`, {
+                        method: method,
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        if (isInWishlist) {
+                            // Xoá thành công
+                            icon.classList.remove("fa-solid");
+                            icon.classList.add("fa-regular");
+                            icon.style.color = ""; // Reset color
+                            showToast("Thành công", "Đã xóa tour khỏi danh sách yêu thích!", "success");
+                        } else {
+                            // Thêm thành công
+                            icon.classList.remove("fa-regular");
+                            icon.classList.add("fa-solid");
+                            icon.style.color = "#ef4444";
+                            showToast("Thành công", "Đã thêm tour vào danh sách yêu thích!", "success");
+                        }
+                    } else {
+                        showToast("Lỗi", result.message || "Đã có lỗi xảy ra.", "error");
+                        // Đồng bộ lại icon nếu backend báo lỗi "đã có" hoặc "không có"
+                        if (result.message === "Tour đã có trong wishlist") {
+                            icon.classList.remove("fa-regular");
+                            icon.classList.add("fa-solid");
+                            icon.style.color = "#ef4444";
+                        } else if (result.message === "Tour không có trong wishlist") {
+                            icon.classList.remove("fa-solid");
+                            icon.classList.add("fa-regular");
+                            icon.style.color = "";
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error toggling wishlist:", error);
+                    showToast("Lỗi", "Đã có lỗi xảy ra. Vui lòng thử lại sau.", "error");
+                }
+            };
+        }
+    }
+
+    async function checkWishlistStatus(tourId, token, btn) {
+        try {
+            const response = await fetch(`/api/list-tours/wishlist/${tourId}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            const result = await response.json();
+            if (result.success && result.inWishlist) {
+                const icon = btn.querySelector("i");
+                icon.classList.remove("fa-regular");
+                icon.classList.add("fa-solid");
+                icon.style.color = "#ef4444";
+            }
+        } catch (error) {
+            console.error("Error checking wishlist status:", error);
+        }
     }
 
     function showError(msg) {

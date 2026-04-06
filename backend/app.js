@@ -31,7 +31,7 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 
 // API routes
 const tourRoutes = require("./src/routes/tourRoutes");
-const listTourRoutes = require("./src/routes/ListTourRoutes");
+const listTourRoutes = require("./src/routes/listTourRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const bookingRoutes = require("./src/routes/bookingRoutes");
 const userRoutes = require("./src/routes/userRoutes");

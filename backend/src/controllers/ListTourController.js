@@ -1,4 +1,5 @@
-const ListTourService = require("../services/ListTourService");
+const ListTourService = require("../services/listTourService");
+const WishList = require("../models/Wishlist");
 const path = require("path");
 
 exports.getAllTours = async (req, res) => {
@@ -78,6 +79,99 @@ exports.getDetailTour = async (req, res) => {
         });
     }
 };
+
+exports.getTourandDepartures = async (req, res) => {
+    const tourId = req.params.id;
+    try {
+        const result = await ListTourService.getTourAndDepartures(tourId);
+        res.json({
+            success: true,
+            data: result
+        });
+    }
+    catch (error) {
+        console.error("Lỗi getTourAndDepartures:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi không lấy được thông tin tour và ngày khởi hành",
+            error: error.message
+        });
+    }
+};
+
+exports.addWishList = async (req, res) => {
+    const tourId = req.params.id;
+    const userId = req.user.id; // Lấy userId từ token đã xác thực
+    try {
+        const checkWishList = await WishList.exists(userId, tourId);
+        if (checkWishList) {
+            return res.status(400).json({
+                success: false,
+                message: "Tour đã có trong wishlist"
+            });
+        }
+        await WishList.add(userId, tourId);
+        res.json({
+            success: true,
+            message: "Thêm tour vào wishlist thành công"
+        });
+    } catch (error) {
+        console.error("Lỗi addWishList:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi không thêm được tour vào wishlist",
+            error: error.message
+        });
+    }
+}
+
+exports.checkWishList = async (req, res) => {
+    const tourId = req.params.id;
+    const userId = req.user.id;
+    try {
+        const checkWishList = await WishList.exists(userId, tourId);
+        res.json({
+            success: true,
+            inWishlist: checkWishList
+        });
+    }
+    catch (error) {
+        console.error("Lỗi checkWishList:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi không kiểm tra được wishlist",
+            error: error.message
+        });
+    }
+}
+
+exports.removeWishList = async (req, res) => {
+    const tourId = req.params.id;
+    const userId = req.user.id;
+    try {
+        const removed = await WishList.remove(userId, tourId);
+        if (!removed) {
+            return res.status(400).json({
+                success: false,
+                message: "Tour không có trong wishlist"
+            });
+        }
+        res.json({
+            success: true,
+            message: "Xóa tour khỏi wishlist thành công"
+        });
+    }
+    catch (error) {
+        console.error("Lỗi removeWishList:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi không xóa được tour khỏi wishlist",
+            error: error.message
+        });
+    }
+}
+
+
 
 // Render giao diện danh sách tour
 exports.renderListPage = (req, res) => {

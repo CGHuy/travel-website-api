@@ -1,39 +1,69 @@
 /* CSS riêng cho component ListTour */
-.card-img-top.p-3 {
-    object-fit: cover;
-    height: 300px;
-    border-radius: 24px;
-}
 
-.card-title {
-    white-space: nowrap;
+/* Tour Horizontal Card Styles */
+.tour-horizontal-card {
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid #f1f5f9 !important;
+    background-color: #fff;
+    border-radius: 12px !important;
     overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 1.1rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+    cursor: pointer;
 }
 
-.card-text {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
+.tour-horizontal-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(13, 110, 253, 0.3) !important;
+}
+
+/* Image Zoom Effect */
+.tour-horizontal-card .img-fluid {
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.tour-horizontal-card:hover .img-fluid {
+    transform: scale(1.08);
+}
+
+/* Like Button Hover */
+.tour-horizontal-card .btn-icon i {
+    transition: all 0.3s ease;
+}
+
+.tour-horizontal-card .btn-icon:hover i {
+    color: #ef4444 !important;
+    transform: scale(1.2);
+    opacity: 1 !important;
+}
+
+/* Detail Button Hover */
+.tour-horizontal-card .btn-primary {
+    transition: all 0.3s ease;
+}
+
+.tour-horizontal-card:hover .btn-primary {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+/* Date Badge Hover */
+.tour-horizontal-card .border-danger {
+    transition: all 0.2s ease;
+}
+
+.tour-horizontal-card .border-danger:hover {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    .tour-horizontal-card {
+        height: 280px;
+    }
+}
+
+.tour-horizontal-card .card-body {
     overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 0.5rem;
-}
-
-.list-tour .card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: none;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-
-.list-tour .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-.filter-sidebar {
 }

@@ -2,9 +2,10 @@ const db = require("../config/database");
 const servicesModel = require("../models/Service");
 const tourModel = require("../models/Tour");
 const tourServiceModel = require("../models/TourService");
-const  tourImageModel = require("../models/TourImage");
+const tourImageModel = require("../models/TourImage");
 const tourItineraryModel = require("../models/TourItinerary");
 const review = require("../models/Review");
+const departureModel = require("../models/Departure");
 
 class ListTourService {
     /**
@@ -30,7 +31,7 @@ class ListTourService {
             FROM tours t
             WHERE 1=1
         `;
-        
+
         let whereClauses = [];
         let queryValues = [];
 
@@ -57,7 +58,7 @@ class ListTourService {
         // 4. THỜI LƯỢNG
         if (duration_type) {
             // Trích xuất số ngày từ đầu chuỗi duration (ví dụ: "3 ngày 2 đêm" -> 3)
-            const daysSql = `CAST(t.duration AS UNSIGNED)`; 
+            const daysSql = `CAST(t.duration AS UNSIGNED)`;
             if (duration_type === 'dur_short') {
                 whereClauses.push(`${daysSql} BETWEEN 1 AND 3`);
             } else if (duration_type === 'dur_long') {
@@ -100,7 +101,7 @@ class ListTourService {
             const [rows] = await db.query(baseSql, queryValues);
             // Lấy tổng số bản ghi khớp điều kiện (không tính LIMIT)
             const [[{ total }]] = await db.query('SELECT FOUND_ROWS() as total');
-            
+
             return {
                 tours: rows,
                 totalCount: total,
@@ -128,7 +129,7 @@ class ListTourService {
         try {
             // 1. Lấy thông tin cơ bản của Tour từ bảng tours
             const tour = await tourModel.getById(id);
-            
+
             // Nếu không tìm thấy tour, trả về null ngay
             if (!tour) return null;
 
@@ -140,16 +141,16 @@ class ListTourService {
 
             // 4. Lấy danh sách lịch trình của tour
             const itineraries = await tourItineraryModel.getByTourId(id);
-            
+
             // 5. Lấy đánh giá của tour
             const reviews = await review.getByTourId(id);
 
             // Tự động tính toán tổng số đánh giá và điểm trung bình
             const total_reviews = reviews.length;
-            const avg_rating = total_reviews > 0 
-                ? (reviews.reduce((acc, rev) => acc + rev.rating, 0) / total_reviews).toFixed(1) 
+            const avg_rating = total_reviews > 0
+                ? (reviews.reduce((acc, rev) => acc + rev.rating, 0) / total_reviews).toFixed(1)
                 : 0;
- 
+
             // 6. Trả về đối tượng tour đã được gộp đầy đủ thông tin
             return {
                 ...tour,
@@ -163,6 +164,23 @@ class ListTourService {
         } catch (error) {
             console.error("Lỗi tại getDetailTour:", error);
             throw new Error(`Lấy chi tiết tour thất bại: ${error.message}`);
+        }
+    }
+
+    //Hàm lấy thông tin để hiển thị lên giao diện đặt tour
+    static async getTourAndDepartures(tourId) {
+        try {
+            // Lấy thông tin tour
+            const tour = await tourModel.getTourInfoForBookingById(tourId);
+            if (!tour) {
+                throw new Error("Tour không tồn tại");
+            }
+            // Lấy danh sách các ngày khởi hành của tour
+            const departures = await departureModel.getByTourIdAndAvailable(tourId);
+            return { tour, departures };
+        } catch (error) {
+            console.error("Lỗi tại getTourAndDepartures:", error);
+            throw new Error(`Lấy thông tin tour và ngày khởi hành thất bại: ${error.message}`);
         }
     }
 
