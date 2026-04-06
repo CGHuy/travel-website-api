@@ -71,6 +71,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("tour-img").src = tour.cover_image;
         document.getElementById("tour-duration").innerText = tour.duration;
 
+        // Cập nhật background header banner
+        const headerBanner = document.querySelector(".booking-header-banner");
+        if (headerBanner) {
+            headerBanner.style.setProperty("--header-bg", `url(${tour.cover_image})`);
+        }
+
         baseAdultPrice = parseFloat(tour.price_default);
         baseChildPrice = parseFloat(tour.price_child);
 

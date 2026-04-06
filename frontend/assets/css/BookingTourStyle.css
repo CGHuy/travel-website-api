@@ -4,10 +4,44 @@ body {
     color: #1e293b;
 }
 .booking-header-banner {
-    background: linear-gradient(135deg, #137fec, #0a58ca);
-    padding: 4rem 0;
+    position: relative;
+    padding: 7rem 0 10rem 0;
     color: white;
-    margin-bottom: -3rem;
+    margin-bottom: -6rem;
+    overflow: hidden;
+    background-color: #1e293b;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.booking-header-banner::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--header-bg, none);
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px) brightness(0.5);
+    transform: scale(1.1); /* Prevent white edges from blur */
+    z-index: 0;
+}
+
+.booking-header-banner .container {
+    position: relative;
+    z-index: 1;
+}
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "•" !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+.breadcrumb-link {
+    transition: all 0.2s ease;
+}
+.breadcrumb-link:hover {
+    color: #ffffff !important;
+    opacity: 1 !important;
 }
 .card-booking {
     border: none;
@@ -18,8 +52,8 @@ body {
 }
 .card-booking .card-header {
     background: #ffffff;
-    border-bottom: 2px solid #f8fafc;
-    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 2rem 2.5rem 1.5rem 2.5rem;
 }
 .card-booking .card-header h4 {
     margin: 0;
@@ -27,16 +61,16 @@ body {
     color: #1e293b;
 }
 .card-booking .card-body {
-    padding: 2rem;
+    padding: 1.5rem 2.5rem 2.5rem 2.5rem;
 }
 .form-label {
     font-weight: 600;
     color: #475569;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.85rem;
 }
 .form-control,
 .form-select {
-    padding: 0.875rem 1.25rem;
+    padding: 1rem 1.25rem;
     border-radius: 14px;
     border: 1px solid #e2e8f0;
     background-color: #fcfdfe;
