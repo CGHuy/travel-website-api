@@ -51,7 +51,7 @@ function formatPrice(price) {
 function createTourCard(tour) {
     return `
           <div class="col-12 col-md-6 col-lg-3">
-               <a href="tour-detail.html?id=${tour.id}" class="text-decoration-none">
+               <a href="/detail-tour?id=${tour.id}" class="text-decoration-none">
                     <div class="card h-100 tour-card">
                          <img src="${tour.image || tour.cover_image || "assets/images/default-tour.jpg"}" 
                               class="card-img-top" 
