@@ -95,8 +95,8 @@ class bookingService {
                     t.name as tour_name, 
                     t.price_default,
                     td.departure_date,
-                    td.departure_location
-					c.name as customer_name,
+                    td.departure_location,
+					c.fullname as customer_name,
 					c.dob as customer_dob,
 					c.gender as customer_gender,
 					c.passenger_type as customer_passenger_type
@@ -104,7 +104,7 @@ class bookingService {
                 LEFT JOIN users u ON b.user_id = u.id
                 JOIN tour_departures td ON b.departure_id = td.id
                 JOIN tours t ON td.tour_id = t.id
-				JOIN customers c ON b.booking_id = c.booking_id
+				LEFT JOIN customers c ON b.id = c.booking_id
                 WHERE b.id = ?
 				LIMIT 1`,
 				[id],
@@ -134,6 +134,50 @@ class bookingService {
             `,
 				[userId],
 			);
+			return rows;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	// Tìm kiếm booking theo mã booking , user id và lọc trạng thái
+
+	static async searchBooking(userId, tourId, status) {
+		try {
+			let query = `
+				SELECT 
+                    b.*, 
+                    u.fullname, 
+                    u.email as user_email, 
+                    t.name as tour_name, 
+                    t.price_default,
+                    td.departure_date
+                FROM bookings b
+                LEFT JOIN users u ON b.user_id = u.id
+                JOIN tour_departures td ON b.departure_id = td.id
+                JOIN tours t ON td.tour_id = t.id
+                WHERE 1=1
+			`;
+			const params = [];
+
+			if (userId) {
+				query += " AND b.user_id = ?";
+				params.push(userId);
+			}
+
+			if (tourId) {
+				query += " AND t.id = ?";
+				params.push(tourId);
+			}
+
+			if (status) {
+				query += " AND b.status = ?";
+				params.push(status);
+			}
+
+			query += " ORDER BY b.created_at DESC";
+
+			const [rows] = await db.query(query, params);
 			return rows;
 		} catch (error) {
 			throw error;
