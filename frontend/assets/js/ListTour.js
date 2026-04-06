@@ -128,11 +128,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         tourListContainer.innerHTML = tours
             .map(
                 (tour) => `
-            <div class="card border border-light shadow-sm overflow-hidden bg-white tour-horizontal-card mb-4" style="border-radius: 12px; transition: all 0.2s ease;">
+            <div class="card border border-light shadow-sm overflow-hidden bg-white tour-horizontal-card mb-4" onclick="window.location.href='/detail-tour?id=${tour.id}'">
                 <div class="row g-0 flex-column flex-md-row h-100">
                     <div class="col-md-5 col-xl-4 position-relative h-100">
                         <img src="${tour.cover_image || "https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070"}" class="img-fluid w-100 h-100 object-fit-cover" style="min-height: 260px;" alt="${tour.name}">
-                        <button class="btn btn-icon position-absolute top-0 start-0 m-3 p-0 bg-transparent border-0 text-white fs-4" style="text-shadow: 0 2px 4px rgba(0,0,0,0.6);">
+                        <button class="btn btn-icon position-absolute top-0 start-0 m-3 p-0 bg-transparent border-0 text-white fs-4" style="text-shadow: 0 2px 4px rgba(0,0,0,0.6);" onclick="event.stopPropagation()">
                             <i class="fa-solid fa-heart opacity-75"></i>
                         </button>
                         ${
@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                         .split(",")
                                         .map(
                                             (date) => `
-                                        <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;">${date}</span>
+                                        <span class="border border-danger text-danger px-2 py-1 rounded bg-white" style="font-size: 0.8rem; cursor: pointer;" onclick="event.stopPropagation()">${date}</span>
                                     `,
                                         )
                                         .join("")}
