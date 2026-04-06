@@ -169,7 +169,25 @@ exports.removeWishList = async (req, res) => {
             error: error.message
         });
     }
-}
+};
+
+exports.getWishListByUser = async (req, res) => {
+    const userId = req.user.id;
+    try {
+        const wishlist = await WishList.getByUserId(userId);
+        res.status(200).json({
+            success: true,
+            data: wishlist
+        });
+    } catch (error) {
+        console.error("Lỗi getWishListByUser:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi không lấy được danh sách wishlist của người dùng",
+            error: error.message
+        });
+    }
+};
 
 
 

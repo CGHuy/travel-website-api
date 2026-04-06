@@ -105,7 +105,24 @@ document.addEventListener("DOMContentLoaded", async () => {
             const result = await response.json();
 
             if (result.success && result.data.length > 0) {
-                renderTours(result.data);
+                // If logged in, fetch user's wishlist to mark icons
+                const token = localStorage.getItem("token");
+                let wishlistTourIds = [];
+                if (token) {
+                    try {
+                        const wishlistRes = await fetch("/api/list-tours/wishlist/all", {
+                            headers: { "Authorization": `Bearer ${token}` }
+                        });
+                        const wishlistData = await wishlistRes.json();
+                        if (wishlistData.success) {
+                            wishlistTourIds = wishlistData.data.map(item => item.tour_id);
+                        }
+                    } catch (e) {
+                        console.error("Error fetching wishlist for marking:", e);
+                    }
+                }
+
+                renderTours(result.data, wishlistTourIds);
                 renderPagination(result.pagination);
             } else {
                 tourListContainer.innerHTML = `
@@ -124,16 +141,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     };
 
-    const renderTours = (tours) => {
+    const renderTours = (tours, wishlistTourIds) => {
         tourListContainer.innerHTML = tours
             .map(
-                (tour) => `
+                (tour) => {
+                    const isInWishlist = wishlistTourIds.includes(tour.id);
+                    return `
             <div class="card border border-light shadow-sm overflow-hidden bg-white tour-horizontal-card mb-4" onclick="window.location.href='/detail-tour?id=${tour.id}'">
                 <div class="row g-0 flex-column flex-md-row h-100">
                     <div class="col-md-5 col-xl-4 position-relative h-100">
                         <img src="${tour.cover_image || "https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070"}" class="img-fluid w-100 h-100 object-fit-cover" style="min-height: 260px;" alt="${tour.name}">
-                        <button class="btn btn-icon position-absolute top-0 start-0 m-3 p-0 bg-transparent border-0 text-white fs-4" style="text-shadow: 0 2px 4px rgba(0,0,0,0.6);" onclick="addToWishlist(${tour.id}, event)">
-                            <i class="fa-solid fa-heart opacity-75"></i>
+                        <button class="position-absolute top-0 start-0 m-3 p-0 bg-transparent border-0 fs-3 d-flex align-items-center justify-content-center" 
+                                style="text-shadow: 0 2px 4px rgba(0,0,0,0.6); color: ${isInWishlist ? '#ef4444' : 'white'}; cursor: pointer; width: 40px; height: 40px; z-index: 10;" 
+                                onclick="addToWishlist(${tour.id}, event)">
+                            <i class="fa-solid fa-heart ${isInWishlist ? '' : 'opacity-75'}"></i>
                         </button>
                         ${
                             tour.price_default > 10000000
@@ -198,8 +219,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                         </div>
                     </div>
                 </div>
-            </div>
-        `,
+            </div>`;
+                }
             )
             .join("");
     };
@@ -265,12 +286,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
+        const btn = event.currentTarget;
+        const icon = btn.querySelector("i");
+        // Kiểm tra trạng thái hiện tại qua màu sắc hoặc class (ở bản này ta dùng màu sắc inline style hoặc opacity)
+        const isCurrentlyLiked = btn.style.color === 'rgb(239, 68, 68)' || btn.style.color === '#ef4444';
+
         try {
-            const btn = event.currentTarget;
-            const icon = btn.querySelector("i");
-            
+            const method = isCurrentlyLiked ? "DELETE" : "POST";
             const response = await fetch(`/api/list-tours/wishlist/${tourId}`, {
-                method: "POST",
+                method: method,
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
@@ -280,20 +304,23 @@ document.addEventListener("DOMContentLoaded", async () => {
             const result = await response.json();
 
             if (result.success) {
-                // Change icon to solid and red
-                icon.classList.remove("opacity-75");
-                icon.style.color = "#ef4444";
-                icon.classList.add("animate-heart");
-                showToast("Thành công", "Đã thêm tour vào danh sách yêu thích!", "success");
-            } else {
-                showToast("Thông báo", result.message || "Không thể thêm vào danh sách yêu thích.", "info");
-                if (result.message === "Tour đã có trong wishlist") {
+                if (isCurrentlyLiked) {
+                    // Xóa thành công
+                    btn.style.color = "white";
+                    icon.classList.add("opacity-75");
+                    showToast("Thành công", "Đã xóa tour khỏi danh sách yêu thích!", "success");
+                } else {
+                    // Thêm thành công
+                    btn.style.color = "#ef4444";
                     icon.classList.remove("opacity-75");
-                    icon.style.color = "#ef4444";
+                    icon.classList.add("animate-heart");
+                    showToast("Thành công", "Đã thêm tour vào danh sách yêu thích!", "success");
                 }
+            } else {
+                showToast("Thông báo", result.message || "Đã có lỗi xảy ra.", "info");
             }
         } catch (error) {
-            console.error("Error adding to wishlist:", error);
+            console.error("Error toggling wishlist:", error);
             showToast("Lỗi", "Đã có lỗi xảy ra. Vui lòng thử lại sau.", "error");
         }
     };
