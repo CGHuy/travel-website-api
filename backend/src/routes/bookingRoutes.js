@@ -11,20 +11,16 @@ const {
 const { validateBooking } = require("../middlewares/validation/booking");
 
 // User routes - Cần đăng nhập
-router.post(
-	"/",
-	verifyToken,
-	isUser,
-	validateBooking,
-	bookingController.createBooking,
-);
+
+// Xem danh sach booking ma user da dat
 router.get(
 	"/my-bookings",
 	verifyToken,
 	isUser,
-	bookingController.getMyBookings,
+	bookingController.getBookingsByUserId,
 );
 
+// Xem chi tiết booking ma user da dat
 router.get(
 	"/:id/details",
 	verifyToken,
@@ -32,13 +28,15 @@ router.get(
 	bookingController.getBookingDetailsByUserId,
 );
 
+// User gui yeu cau huy booking
 router.put(
 	"/:id/cancel",
 	verifyToken,
 	isUser,
-	bookingController.requestCancellation,
+	bookingController.cancelBooking,
 );
 
+///===================================================================
 // Booking Staff routes - Cần quyền quản lý
 router.get("/", verifyToken, isBookingStaff, bookingController.getAllBookings);
 
@@ -47,6 +45,13 @@ router.put(
 	verifyToken,
 	isBookingStaff,
 	bookingController.updateStatus,
+);
+
+router.get(
+	"/search",
+	verifyToken,
+	isBookingStaff,
+	bookingController.searchBookings,
 );
 
 router.get("/:id", verifyToken, bookingController.getBookingDetails);

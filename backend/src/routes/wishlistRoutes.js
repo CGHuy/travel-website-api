@@ -5,7 +5,14 @@ const { verifyToken, isOwner } = require("../middlewares/auth");
 
 // Lấy danh sách tour yêu thích của người dùng (chỉ owner )
 router.get("/:id", verifyToken, isOwner("id"), wishlistController.getWishlist);
-module.exports = router;
+
+// Thêm tour vào wishlist
+router.post(
+	"/:id",
+	verifyToken,
+	isOwner("id"),
+	wishlistController.addToWishlist,
+);
 
 // Xóa tour khỏi wishlist (chỉ owner )
 router.delete(
@@ -14,3 +21,5 @@ router.delete(
 	isOwner("id"),
 	wishlistController.removeFromWishlist,
 );
+
+module.exports = router;
