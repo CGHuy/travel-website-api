@@ -11,8 +11,7 @@ router.get("/search", tourController.searchTours);
 router.get("/region/:region", tourController.getToursByRegion);
 router.get("/:id", tourController.getTourById);
 
-// Admin routes - Cần đăng nhập + quyền admin
-// Thêm middleware upload.single("image") để xử lý upload file ảnh
+// Admin routes - Cần đăng nhập và có quyền admin
 router.post("/", verifyToken, isAdmin, upload.single("image"), validateTour, tourController.createTour);
 router.put("/:id", verifyToken, isAdmin, upload.single("image"), validateTour, tourController.updateTour);
 router.delete("/:id", verifyToken, isAdmin, tourController.deleteTour);

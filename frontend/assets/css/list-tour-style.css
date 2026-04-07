@@ -1,0 +1,69 @@
+/* CSS riêng cho component ListTour */
+
+/* Tour Horizontal Card Styles */
+.tour-horizontal-card {
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid #f1f5f9 !important;
+    background-color: #fff;
+    border-radius: 12px !important;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.tour-horizontal-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(13, 110, 253, 0.3) !important;
+}
+
+/* Image Zoom Effect */
+.tour-horizontal-card .img-fluid {
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.tour-horizontal-card:hover .img-fluid {
+    transform: scale(1.08);
+}
+
+/* Like Button Hover */
+.tour-horizontal-card .btn-icon i {
+    transition: all 0.3s ease;
+}
+
+.tour-horizontal-card .btn-icon:hover i {
+    color: #ef4444 !important;
+    transform: scale(1.2);
+    opacity: 1 !important;
+}
+
+/* Detail Button Hover */
+.tour-horizontal-card .btn-primary {
+    transition: all 0.3s ease;
+}
+
+.tour-horizontal-card:hover .btn-primary {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+/* Date Badge Hover */
+.tour-horizontal-card .border-danger {
+    transition: all 0.2s ease;
+}
+
+.tour-horizontal-card .border-danger:hover {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    .tour-horizontal-card {
+        height: 280px;
+    }
+}
+
+.tour-horizontal-card .card-body {
+    overflow: hidden;
+}

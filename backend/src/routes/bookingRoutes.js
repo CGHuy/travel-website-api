@@ -1,20 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const bookingController = require("../controllers/bookingController");
+const { validateBookingTour } = require("../middlewares/validation/booking");
 const {
 	verifyToken,
 	isAdmin,
 	isUser,
 	isBookingStaff,
+	isOwner,
 } = require("../middlewares/auth");
-const { validateBooking } = require("../middlewares/validation/booking");
 
 // User routes - Cần đăng nhập
 router.post(
 	"/",
 	verifyToken,
 	isUser,
-	validateBooking,
+	validateBookingTour,
 	bookingController.createBooking,
 );
 router.get(
@@ -23,7 +24,20 @@ router.get(
 	isUser,
 	bookingController.getMyBookings,
 );
-router.put("/:id/cancel", verifyToken, isUser, bookingController.cancelBooking);
+
+router.get(
+	"/:id/details",
+	verifyToken,
+	isUser,
+	bookingController.getBookingDetailsByUserId,
+);
+
+router.put(
+	"/:id/cancel",
+	verifyToken,
+	isUser,
+	bookingController.requestCancellation,
+);
 
 // Booking Staff routes - Cần quyền quản lý
 router.get("/", verifyToken, isBookingStaff, bookingController.getAllBookings);
@@ -33,12 +47,6 @@ router.put(
 	verifyToken,
 	isBookingStaff,
 	bookingController.updateStatus,
-);
-router.delete(
-	"/:id",
-	verifyToken,
-	isBookingStaff,
-	bookingController.deleteBooking,
 );
 
 router.get("/:id", verifyToken, bookingController.getBookingDetails);

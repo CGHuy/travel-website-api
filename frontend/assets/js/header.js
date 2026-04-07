@@ -63,7 +63,7 @@ function updateAuthUI() {
     }
 }
 
-// ================== LOGOUT ==================
+// LOGOUT
 function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     if (!logoutBtn) return;
@@ -80,7 +80,7 @@ function setupLogout() {
     });
 }
 
-// ================== AVATAR DROPDOWN ==================
+// AVATAR DROPDOWN
 function setupAvatarDropdown() {
     const avatarBtn = document.getElementById("avatarBtn");
     const userDropdown = document.getElementById("userDropdown");
@@ -109,4 +109,72 @@ function toggleUserDropdown() {
 function closeUserDropdown() {
     const dropdown = document.getElementById("userDropdown");
     if (dropdown) dropdown.style.display = "none";
+}
+// ================== TOAST NOTIFICATIONS (FLASH MESSAGES) ==================
+/**
+ * Hiển thị thông báo kiểu Flash Message
+ * @param {string} title - Tiêu đề
+ * @param {string} message - Nội dung tóm tắt
+ * @param {string} type - success | error | warning | info
+ * @param {number} duration - Thời gian hiển thị (ms)
+ */
+window.showToast = function(title, message = "", type = "success", duration = 5000) {
+    const container = document.getElementById("toast-container");
+    if (!container) {
+        console.warn("Toast container not found!");
+        // Fallback to alert if container is missing
+        alert(`${title}: ${message}`);
+        return;
+    }
+
+    const icons = {
+        success: "fa-solid fa-circle-check",
+        error: "fa-solid fa-circle-xmark",
+        warning: "fa-solid fa-triangle-exclamation",
+        info: "fa-solid fa-circle-info"
+    };
+
+    const toast = document.createElement("div");
+    toast.className = `toast-message toast-${type}`;
+    
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <i class="${icons[type] || icons.info}"></i>
+        </div>
+        <div class="toast-content">
+            <span class="toast-title">${title}</span>
+            ${message ? `<div class="toast-body">${message}</div>` : ""}
+        </div>
+        <button class="toast-close" title="Đóng">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    `;
+
+    container.appendChild(toast);
+
+    // Đóng bằng nút X
+    const closeBtn = toast.querySelector(".toast-close");
+    closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeToast(toast);
+    };
+
+    // Tự động đóng sau n giây
+    const timer = setTimeout(() => {
+        removeToast(toast);
+    }, duration);
+
+    // Dừng timer nếu hover vào (giống Krayin/Admin dashboard)
+    toast.onmouseenter = () => clearTimeout(timer);
+    toast.onmouseleave = () => {
+        setTimeout(() => removeToast(toast), 2000); // Đợi thêm 2s khi rời chuột
+    };
+};
+
+function removeToast(toast) {
+    if (toast.classList.contains("closing")) return;
+    toast.classList.add("closing");
+    toast.addEventListener("animationend", () => {
+        toast.remove();
+    });
 }

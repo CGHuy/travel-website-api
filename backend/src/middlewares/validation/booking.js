@@ -36,6 +36,51 @@ const validateBooking = (req, res, next) => {
     next();
 };
 
+const validateBookingTour = (req, res, next) => {
+    const { departure_id, adults, children,
+            contact_name, contact_phone, contact_email,
+            contact_dob, passengers } = req.body;
+    const errors = [];
+
+    // Kiểm tra thông tin cơ bản
+    if (!departure_id || isNaN(departure_id))
+        errors.push("departure_id không hợp lệ");
+    if (!adults || isNaN(adults) || parseInt(adults) < 1)
+        errors.push("Số người lớn phải ít nhất là 1");
+    if (children === undefined || isNaN(children) || parseInt(children) < 0)
+        errors.push("Số trẻ em không hợp lệ");
+    if (!contact_name?.trim())
+        errors.push("Tên người liên hệ không được trống");
+    if (!contact_phone?.trim())
+        errors.push("Số điện thoại không được trống");
+    if (!contact_email?.trim())
+        errors.push("Email không được trống");
+    if (contact_email && !contact_email.includes("@"))
+        errors.push("Email không hợp lệ");
+
+    // Kiểm tra ngày sinh người liên hệ (bắt buộc)
+    if (!contact_dob)
+        errors.push("Ngày sinh người liên hệ không được để trống");
+
+    // Kiểm tra ngày sinh của từng hành khách phụ
+    if (passengers && Array.isArray(passengers)) {
+        passengers.forEach((p, i) => {
+            if (!p.dob)
+                errors.push(`Hành khách thứ ${i + 2}: Ngày sinh không được để trống`);
+            if (!p.name?.trim())
+                errors.push(`Hành khách thứ ${i + 2}: Họ tên không được để trống`);
+            if (!p.type || !["adult", "child"].includes(p.type))
+                errors.push(`Hành khách thứ ${i + 2}: Loại hành khách không hợp lệ (adult/child)`);
+        });
+    }
+
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+    next();
+};
+
 module.exports = {
     validateBooking,
+    validateBookingTour
 };

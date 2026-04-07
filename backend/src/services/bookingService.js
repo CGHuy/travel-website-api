@@ -1,0 +1,220 @@
+const db = require("../config/database");
+const Departure = require("../models/Departure");
+const Tour = require("../models/Tour");
+const Booking = require("../models/Booking");
+
+class bookingService {
+	//================== USER ===================
+
+	// Lấy danh sách booking đã đặt của người dùng
+	static async getBookingsByUserId(userId) {
+		try {
+			const [rows] = await db.query(
+				`SELECT 
+                    b.id,
+                    t.name as tour_name,
+                    td.departure_date,
+                    b.total_price,
+                    b.status as booking_status,
+                    b.created_at
+                FROM bookings b
+                JOIN tour_departures td ON b.departure_id = td.id
+                JOIN tours t ON td.tour_id = t.id
+                WHERE b.user_id = ?
+                ORDER BY b.created_at DESC`,
+				[userId],
+			);
+			return rows;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	// Xem chi tiết booking mà người dùng đã đặt
+	static async getBookingDetailsByUserId(bookingId, userId) {
+		try {
+			// Lấy chi tiết booking kèm theo thông tin tour, lịch trình
+			const [rows] = await db.query(
+				`SELECT 
+                    b.*,
+                    t.name as tour_name,
+                    td.departure_date,
+                    td.departure_location,
+                    (
+                        SELECT GROUP_CONCAT(s.name SEPARATOR ', ')
+                        FROM tour_services ts
+                        JOIN services s ON ts.service_id = s.id
+                        WHERE ts.tour_id = t.id
+                    ) as service_names
+                FROM bookings b
+                JOIN tour_departures td ON b.departure_id = td.id
+                JOIN tours t ON td.tour_id = t.id
+                WHERE b.id = ? AND b.user_id = ?
+                LIMIT 1`,
+				[bookingId, userId],
+			);
+			return rows[0] || null;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	//================== ADMIN ===================
+
+	// 1. Lấy tất cả bookings (Dành cho Admin) - Che
+	static async getAll() {
+		try {
+			const [rows] = await db.query(`
+                SELECT 
+                    b.*, 
+                    u.fullname, 
+                    u.email as user_email, 
+                    t.name as tour_name, 
+                    t.price_default,
+                    td.departure_date
+                FROM bookings b
+                LEFT JOIN users u ON b.user_id = u.id
+                JOIN tour_departures td ON b.departure_id = td.id
+                JOIN tours t ON td.tour_id = t.id
+                ORDER BY b.created_at DESC
+            `);
+			return rows;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	// 1.5 Lấy booking theo ID (Dành cho xem chi tiết, Danh cho Admin)
+	static async getById(id) {
+		// Che
+		try {
+			const [rows] = await db.query(
+				`
+				SELECT b.*, 
+                    u.fullname, 
+                    u.email as user_email, 
+					u.phone as user_phone,
+					t.id as tour_id,
+                    t.name as tour_name, 
+                    t.price_default,
+                    td.departure_date,
+                    td.departure_location
+					c.name as customer_name,
+					c.dob as customer_dob,
+					c.gender as customer_gender,
+					c.passenger_type as customer_passenger_type
+				FROM bookings b
+                LEFT JOIN users u ON b.user_id = u.id
+                JOIN tour_departures td ON b.departure_id = td.id
+                JOIN tours t ON td.tour_id = t.id
+				JOIN customers c ON b.booking_id = c.booking_id
+                WHERE b.id = ?
+				LIMIT 1`,
+				[id],
+			);
+			return rows[0] || null;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	// 2. Lấy bookings theo user ID (Dành cho khách hàng xem lịch sử) - Che
+	static async getByUserId(userId) {
+		try {
+			const [rows] = await db.query(
+				`
+                SELECT 
+                    b.*, 
+                    t.name as tour_name, 
+                    t.cover_image,
+                    td.departure_date,
+                    td.departure_location
+                FROM bookings b
+                JOIN tour_departures td ON b.departure_id = td.id
+                JOIN tours t ON td.tour_id = t.id
+                WHERE b.user_id = ?
+                ORDER BY b.created_at DESC
+            `,
+				[userId],
+			);
+			return rows;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	static async createBooking(user_id, bookingData) {
+		const { departure_id, adults, children = 0, contact_name,
+			contact_phone, contact_email, contact_dob, note, passengers } = bookingData;
+		//Kiểm tra trước khi tạo booking
+		const totalPax = parseInt(adults) + parseInt(children);
+		const dep = await Departure.getById(departure_id);
+		if (!dep) {
+			throw new Error("Lịch khởi hành không tồn tại");
+		}
+
+		if (totalPax > dep.seats_available) {
+			throw new Error("Số lượng khách vượt quá chỗ trống hiện tại");
+		}
+
+		// Gọi qua bảng Tour để lấy giá gốc
+		const tour = await Tour.getById(dep.tour_id);
+		if (!tour) {
+			throw new Error("Không tìm thấy thông tin Tour");
+		}
+
+		// Tính tổng giá
+		const adultUnitPrice = parseFloat(tour.price_default) + parseFloat(dep.price_moving);
+		const childUnitPrice = parseFloat(tour.price_child) + parseFloat(dep.price_moving_child);
+		const total_price = (parseInt(adults) * adultUnitPrice) + (parseInt(children) * childUnitPrice);
+
+		// Sử dụng Transaction
+		const conn = await db.getConnection();
+		try {
+			await conn.beginTransaction();
+
+			// 2.1 Tạo booking (contact_dob không lưu ở đây, lưu ở bảng customers)
+			const [bookingResult] = await conn.query(
+				`INSERT INTO bookings (user_id, departure_id, adults, children, total_price, contact_name, contact_phone, contact_email, note)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				[user_id, departure_id, adults, children, total_price, contact_name, contact_phone, contact_email, note]
+			);
+			const bookingId = bookingResult.insertId;
+
+			// 2.2 Insert người liên hệ là hành khách đầu tiên (adult)
+			await conn.query(
+				`INSERT INTO customers (booking_id, fullname, gender, dob, passenger_type)
+				VALUES (?, ?, ?, ?, 'adult')`,
+				[bookingId, contact_name, null, contact_dob || null]
+			);
+
+			// 2.3 Insert các hành khách còn lại (từ người thứ 2 trở đi)
+			if (passengers && passengers.length > 0) {
+				for (const p of passengers) {
+					await conn.query(
+						`INSERT INTO customers (booking_id, fullname, gender, dob, passenger_type)
+						VALUES (?, ?, ?, ?, ?)`,
+						[bookingId, p.name, p.gender || null, p.dob || null, p.type]
+					);
+				}
+			}
+
+			// 2.3 Trừ số chỗ trống của departure
+			await conn.query(
+				`UPDATE tour_departures SET seats_available = seats_available - ? WHERE id = ?`,
+				[totalPax, departure_id]
+			);
+
+			await conn.commit();
+			return { bookingId, total_price };
+
+		} catch (error) {
+			await conn.rollback();
+			throw error;
+		} finally {
+			conn.release();
+		}
+	}
+}
+
+module.exports = bookingService;

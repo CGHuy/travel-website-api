@@ -8,15 +8,13 @@ USE db_viet_tour;
 -- 1. USERS
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-
     fullname VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL UNIQUE,
+    address VARCHAR(255), 
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-
     role ENUM('customer','admin','tour-staff','booking-staff') NOT NULL DEFAULT 'customer',
     status TINYINT(1) NOT NULL DEFAULT 1 CHECK (status IN (0,1)),
-
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -124,7 +122,7 @@ CREATE TABLE bookings (
     total_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
 
     payment_status ENUM('paid','refunded') NOT NULL DEFAULT 'paid',
-    status ENUM('confirmed','cancelled') NOT NULL DEFAULT 'confirmed',
+    status ENUM('confirmed','pending','cancelled') NOT NULL DEFAULT 'confirmed',
 
     contact_name VARCHAR(255) NOT NULL,
     contact_phone VARCHAR(20) NOT NULL,
@@ -169,4 +167,21 @@ CREATE TABLE wishlist (
     FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE,
 
     UNIQUE KEY uk_wishlist (user_id, tour_id)
+);
+
+-- 11.  CUSTOMERS
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    booking_id INT NOT NULL,
+
+    fullname VARCHAR(255) NOT NULL,
+    gender ENUM('Nam', 'Nữ', 'Khác') DEFAULT 'Khác',
+    dob DATE NOT NULL,
+    passenger_type ENUM('adult', 'child') NOT NULL DEFAULT 'adult',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
 );

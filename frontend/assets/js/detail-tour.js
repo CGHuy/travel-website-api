@@ -1,0 +1,427 @@
+document.addEventListener("DOMContentLoaded", async () => {
+    await Promise.all([loadComponent("header-placeholder", "../../components/header.html"), loadComponent("footer-placeholder", "../../components/footer.html")]);
+
+    // 1. Lấy ID từ URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tourId = urlParams.get("id");
+
+    if (!tourId) {
+        showError("Không tìm thấy mã tour!");
+        return;
+    }
+
+    // 2. Tải chi tiết tour
+    fetchTourDetail(tourId);
+
+    async function fetchTourDetail(id) {
+        try {
+            const response = await fetch(`/api/list-tours/${id}`);
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                renderTourDetail(result.data);
+            } else {
+                showError(result.message || "Không tìm thấy thông tin tour");
+            }
+        } catch (error) {
+            console.error("Error fetching tour detail:", error);
+            showError("Lỗi kết nối máy chủ!");
+        }
+    }
+
+    function renderTourDetail(tour) {
+        // --- Thông tin cơ bản ---
+        document.title = `${tour.name} - VietTour`;
+        document.getElementById("tour-name").innerText = tour.name;
+        document.getElementById("breadcrumb-tour-name").innerText = tour.name;
+        document.getElementById("tour-location").innerText = tour.location;
+        document.getElementById("tour-duration").innerText = tour.duration;
+        document.getElementById("tour-region").innerText = tour.region;
+        document.getElementById("tour-description").innerHTML = tour.description.replace(/\n/g, "<br><br>");
+
+        // Giá tiền chính
+        const adultPrice = parseInt(tour.price_default).toLocaleString("vi-VN");
+        const childPrice = parseInt(tour.price_child).toLocaleString("vi-VN");
+
+        document.getElementById("tour-price").innerText = adultPrice;
+
+        // Cập nhật bảng biểu giá (Sidebar)
+        if (document.getElementById("tour-price-summary")) {
+            document.getElementById("tour-price-summary").innerText = adultPrice + " ₫";
+        }
+        if (document.getElementById("tour-price-child-summary")) {
+            document.getElementById("tour-price-child-summary").innerText = childPrice + " ₫";
+        }
+
+        // --- Render Image Gallery kiểu Airbnb ---
+        const galleryContainer = document.getElementById("tour-gallery");
+        let allImages = [];
+
+        // Gộp ảnh cover và các ảnh thành phần
+        if (tour.cover_image) allImages.push(tour.cover_image);
+        if (tour.images && tour.images.length > 0) {
+            tour.images.forEach((i) => {
+                if (i.image !== tour.cover_image) allImages.push(i.image); // Tránh trùng lặp 100% (nếu có)
+            });
+        }
+
+        if (allImages.length === 0) allImages.push("https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070"); // Fallback
+
+        // Render
+        if (allImages.length === 1) {
+            // Có 1 ảnh duy nhất
+            galleryContainer.innerHTML = `<img src="${allImages[0]}" class="w-100 h-100 object-fit-cover rounded-4" alt="${tour.name}">`;
+        } else {
+            // Có nhiều ảnh
+            let gridHtml = "";
+            const subImages = allImages.slice(1, 5); // Tối đa 4 ảnh phụ
+
+            subImages.forEach((img, idx) => {
+                gridHtml += `
+                    <div class="gallery-grid-item">
+                        <img src="${img}" alt="Gallery image ${idx + 1}">
+                    </div>
+                `;
+            });
+
+            galleryContainer.innerHTML = `
+                <div class="row g-2 h-100 position-relative">
+                    <div class="col-12 col-md-6 h-100">
+                        <div class="gallery-main">
+                            <img src="${allImages[0]}" alt="${tour.name} main cover">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 h-100 d-none d-md-block">
+                        <div class="gallery-grid">
+                            ${gridHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Render Services ---
+        const serviceList = document.getElementById("service-list");
+        if (tour.services && tour.services.length > 0) {
+            // Chọn ngẫu nhiên vài icon bootstrap cho sinh động nếu không có trường icon
+            const icons = ["fa-solid fa-utensils", "fa-solid fa-car", "fa-solid fa-wifi", "fa-solid fa-spa", "fa-solid fa-ticket", "fa-solid fa-person-hiking"];
+
+            serviceList.innerHTML = tour.services
+                .map(
+                    (svc, idx) => `
+                <div class="col-md-6">
+                    <div class="service-card d-flex gap-3">
+                        <div class="icon-box flex-shrink-0">
+                            <i class="${icons[idx % icons.length]}"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark">${svc.name}</h6>
+                            <p class="text-muted small mb-0">${svc.description || "Tiện ích tiêu chuẩn"}</p>
+                        </div>
+                    </div>
+                </div>
+            `,
+                )
+                .join("");
+        } else {
+            serviceList.innerHTML = '<p class="text-muted">Đang cập nhật dịch vụ...</p>';
+        }
+
+        // --- Render Lịch trình (Itineraries) ---
+        const itineraryList = document.getElementById("itinerary-list");
+        if (tour.itineraries && tour.itineraries.length > 0) {
+            itineraryList.innerHTML = tour.itineraries
+                .map((item, idx) => {
+                    let desc = item.description || "";
+                    let lines = desc.split('\n');
+                    let title = item.title;
+                    let remainingDesc = desc;
+
+                    // Trích xuất dòng đầu tiên làm tiêu đề
+                    if (!title) {
+                        if (lines.length > 0) {
+                            title = lines[0].trim().replace(/^NGÀY\s*[0-9]+:\s*/i, '');
+                            lines.shift();
+                            remainingDesc = lines.join('\n').trim();
+                        } else {
+                            title = `Trải nghiệm khám phá`;
+                        }
+                    }
+
+                    // Format phần còn lại của mô tả
+                    const descLines = remainingDesc.split('\n').filter(l => l.trim().length > 0);
+                    let formattedDesc = descLines.map((line) => {
+                        // Regex tìm thời gian hoặc buổi ở đầu câu (kết thúc bằng dấu : )
+                        // Hỗ trợ cả định dạng khoảng thời gian như "08:00 - 12:00:"
+                        const timeMatch = line.match(/^(([0-9]{1,2}:[0-9]{2}\s*-\s*[0-9]{1,2}:[0-9]{2})|[0-9]{1,2}:[0-9]{2}|[\p{L}\s\/]+(?:\([^)]+\))?)\s*:/iu);
+                        
+                        if (timeMatch && timeMatch[0].length < 45) { 
+                            const rawTime = timeMatch[1].trim();
+                            const restOfLine = line.substring(timeMatch[0].length).trim();
+                            let timeHtml = "";
+
+                            // Kiểm tra nếu là mốc thời gian khoảng (có dấu -)
+                            if (rawTime.includes("-")) {
+                                const parts = rawTime.split("-");
+                                timeHtml = `
+                                    <div class="d-flex flex-column lh-1">
+                                        <span class="mb-1">${parts[0].trim()}</span>
+                                        <span class="opacity-50 small mb-1">—</span>
+                                        <span>${parts[1].trim()}</span>
+                                    </div>`;
+                            } else {
+                                timeHtml = `<span>${rawTime}</span>`;
+                            }
+
+                            return `
+                                <div class="mb-4 d-flex flex-column flex-md-row align-items-md-start">
+                                    <div class="flex-shrink-0 mb-1 mb-md-0 me-3" style="width: 80px;">
+                                        <div class="fw-bold text-primary d-flex align-items-center gap-1" style="font-size: 0.85rem; padding-top: 4px; line-height: 1;">
+                                            <i class="fa-regular fa-clock" style="font-size: 0.75rem; margin-top: -1px;"></i>
+                                            ${timeHtml}
+                                        </div>
+                                    </div>
+                                    <div class="text-secondary flex-grow-1" style="line-height: 1.6; text-align: justify; font-size: 0.95rem;">
+                                        ${restOfLine}
+                                    </div>
+                                </div>`;
+                        } else {
+                            return `
+                                <div class="mb-4 d-flex flex-column flex-md-row align-items-md-baseline">
+                                    <div class="flex-shrink-0 mb-1 mb-md-0 me-2" style="width: 110px;">
+                                        <!-- No icon for generic steps -->
+                                    </div>
+                                    <div class="text-secondary flex-grow-1" style="line-height: 1.6; text-align: justify; font-size: 0.95rem;">
+                                        ${line}
+                                    </div>
+                                </div>`;
+                        }
+                    }).join('');
+
+                    return `
+                <div class="itinerary-item">
+                    <span class="itinerary-number">${item.day_number}</span>
+                    <div class="card border-0 shadow-sm p-4 rounded-4 bg-white" style="border: 1px solid #e2e8f0 !important;">
+                        <h5 class="fw-bold text-dark mb-4 pb-3 border-bottom border-light" style="font-size: 1.15rem;">
+                            <i class="fa-solid fa-map-location-dot text-primary me-2"></i> Ngày ${item.day_number}: ${title}
+                        </h5>
+                        <div class="itinerary-content">
+                            ${formattedDesc}
+                        </div>
+                    </div>
+                </div>
+            `;
+                })
+                .join("");
+        } else {
+            itineraryList.innerHTML = '<p class="text-muted">Lịch trình đang được liên hệ trực tiếp.</p>';
+        }
+
+        // --- Render Đánh giá (Reviews) ---
+        const reviewList = document.getElementById("review-list");
+        const totalReviewsSpan = document.getElementById("total-reviews-count");
+        const avgRatingSpan = document.getElementById("avg-rating-text");
+        const showMoreBtn = document.getElementById("show-all-reviews");
+
+        // Cập nhật thông số thật
+        if (totalReviewsSpan) totalReviewsSpan.innerText = `(${tour.total_reviews} lượt)`;
+        if (avgRatingSpan) avgRatingSpan.innerHTML = `<i class="fa-solid fa-star text-warning"></i> ${tour.avg_rating}`;
+
+        if (tour.reviews && tour.reviews.length > 0) {
+            const initialCount = 2; // Chỉ hiện 2 cái đầu
+
+            const renderReviewItem = (rev) => {
+                let stars = "";
+                for (let i = 1; i <= 5; i++) {
+                    stars += `<i class="fa-solid fa-star ${i <= rev.rating ? "text-warning" : "text-muted opacity-25"}"></i>`;
+                }
+
+                return `
+                <div class="col-12 review-item-wrapper">
+                    <div class="review-card shadow-sm">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px;">
+                                    ${rev.user_name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1 text-dark">${rev.user_name}</h6>
+                                    <div class="d-flex gap-1" style="font-size: 0.8rem;">
+                                        ${stars}
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="text-muted small">${new Date(rev.created_at).toLocaleDateString("vi-VN")}</span>
+                        </div>
+                        <p class="text-secondary mb-0 lh-base" style="font-size: 0.95rem;">
+                            ${rev.comment}
+                        </p>
+                    </div>
+                </div>`;
+            };
+
+            // Render ban đầu
+            reviewList.innerHTML = tour.reviews.slice(0, initialCount).map(renderReviewItem).join("");
+
+            // Ẩn/hiện nút "Xem thêm"
+            if (tour.reviews.length <= initialCount) {
+                if (showMoreBtn) showMoreBtn.style.display = "none";
+            } else {
+                if (showMoreBtn) {
+                    showMoreBtn.style.display = "inline-block";
+                    showMoreBtn.innerText = `Hiện tất cả ${tour.reviews.length} đánh giá`;
+
+                    showMoreBtn.onclick = () => {
+                        reviewList.innerHTML = tour.reviews.map(renderReviewItem).join("");
+                        showMoreBtn.style.display = "none";
+                    };
+                }
+            }
+        } else {
+            reviewList.innerHTML = '<div class="col-12 text-center py-4"><p class="text-muted">Chưa có đánh giá nào cho tour này.</p></div>';
+            if (showMoreBtn) showMoreBtn.style.display = "none";
+        }
+        // --- Event Listeners cho các nút hành động ---
+        const bookButtons = document.querySelectorAll(".btn-primary, #bookTourBtn");
+        bookButtons.forEach((btn) => {
+            if (btn.innerText.includes("Đặt") || btn.innerText.includes("Báo")) {
+                btn.onclick = () => {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                        showToast("Thông báo", "Vui lòng đăng nhập để tiến hành đặt tour!", "warning");
+                        setTimeout(() => {
+                            window.location.href = `/pages/auth/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                        }, 2000);
+                        return;
+                    }
+                    window.location.href = `/booking-tour?tour_id=${tour.id}`;
+                };
+            }
+        });
+
+        // --- Wishlist Logic ---
+        const wishlistBtn = document.querySelector(".btn-action-round.love");
+        if (wishlistBtn) {
+            // Check ban đầu nếu đã đăng nhập
+            const token = localStorage.getItem("token");
+            if (token) {
+                checkWishlistStatus(tour.id, token, wishlistBtn);
+            }
+
+            wishlistBtn.onclick = async () => {
+                if (!token) {
+                    showToast("Thông báo", "Vui lòng đăng nhập để thực hiện thao tác này!", "warning");
+                    setTimeout(() => {
+                        window.location.href = `/pages/auth/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+                    }, 2000);
+                    return;
+                }
+
+                const icon = wishlistBtn.querySelector("i");
+                const isInWishlist = icon.classList.contains("fa-solid");
+
+                try {
+                    const method = isInWishlist ? "DELETE" : "POST";
+                    const response = await fetch(`/api/list-tours/wishlist/${tour.id}`, {
+                        method: method,
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        if (isInWishlist) {
+                            // Xoá thành công
+                            icon.classList.remove("fa-solid");
+                            icon.classList.add("fa-regular");
+                            icon.style.color = ""; // Reset color
+                            showToast("Thành công", "Đã xóa tour khỏi danh sách yêu thích!", "success");
+                        } else {
+                            // Thêm thành công
+                            icon.classList.remove("fa-regular");
+                            icon.classList.add("fa-solid");
+                            icon.style.color = "#ef4444";
+                            showToast("Thành công", "Đã thêm tour vào danh sách yêu thích!", "success");
+                        }
+                    } else {
+                        showToast("Lỗi", result.message || "Đã có lỗi xảy ra.", "error");
+                        // Đồng bộ lại icon nếu backend báo lỗi "đã có" hoặc "không có"
+                        if (result.message === "Tour đã có trong wishlist") {
+                            icon.classList.remove("fa-regular");
+                            icon.classList.add("fa-solid");
+                            icon.style.color = "#ef4444";
+                        } else if (result.message === "Tour không có trong wishlist") {
+                            icon.classList.remove("fa-solid");
+                            icon.classList.add("fa-regular");
+                            icon.style.color = "";
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error toggling wishlist:", error);
+                    showToast("Lỗi", "Đã có lỗi xảy ra. Vui lòng thử lại sau.", "error");
+                }
+            };
+        }
+    }
+
+    async function checkWishlistStatus(tourId, token, btn) {
+        try {
+            const response = await fetch(`/api/list-tours/wishlist/${tourId}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            const result = await response.json();
+            if (result.success && result.inWishlist) {
+                const icon = btn.querySelector("i");
+                icon.classList.remove("fa-regular");
+                icon.classList.add("fa-solid");
+                icon.style.color = "#ef4444";
+            }
+        } catch (error) {
+            console.error("Error checking wishlist status:", error);
+        }
+    }
+
+    function showError(msg) {
+        document.querySelector("main").innerHTML = `
+            <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                <img src="https://illustrations.popsy.co/amber/no-results.svg" style="width: 300px; max-width: 100%;" alt="Lỗi">
+                <h3 class="fw-bold mt-4 text-dark">${msg}</h3>
+                <p class="text-muted text-center" style="max-width: 500px;">Vui lòng kiểm tra lại đường dẫn hoặc quay trở về trang danh sách tour.</p>
+                <a href="/list-tour" class="btn btn-primary btn-lg rounded-pill px-5 mt-3 fw-bold">Trở về Danh Sách Tour</a>
+            </div>
+        `;
+    }
+});
+
+async function loadComponent(targetId, filePath) {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    try {
+        const res = await fetch(filePath);
+        const html = await res.text();
+        target.innerHTML = html;
+
+        if (filePath.includes("header.html")) {
+            const scripts = target.querySelectorAll("script");
+            scripts.forEach((script) => {
+                const newScript = document.createElement("script");
+                if (script.src) {
+                    newScript.src = script.src;
+                } else {
+                    newScript.textContent = script.textContent;
+                }
+                document.body.appendChild(newScript);
+                script.remove();
+            });
+        }
+    } catch (error) {
+        console.error("Không thể tải component:", error);
+    }
+}
