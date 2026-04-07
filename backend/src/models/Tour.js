@@ -28,8 +28,7 @@ class Tour {
 	static async getById(id) {
 		try {
 			const [rows] = await db.query(
-				`
-                SELECT * FROM tours WHERE id = ?`,
+				`SELECT * FROM tours WHERE id = ?`,
 				[id],
 			);
 			return rows[0];
@@ -43,9 +42,8 @@ class Tour {
         try {
             const { name, slug, description, price_default, price_child, region, duration, location, image } = tourData;
             const [result] = await db.query(
-                `
-                INSERT INTO tours (name, slug, description, price_default, price_child, region, duration, location, cover_image, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-                [name, slug, description, price_default, price_child, region, duration, location, image],
+                `INSERT INTO tours (name, slug, description, price_default, price_child, region, duration, location, cover_image, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+                [name, slug, description, price_default, price_child, region, duration, location, image]
             );
             return result.insertId;
         } catch (error) {
@@ -56,30 +54,10 @@ class Tour {
 	// Cập nhật tour
 	static async update(id, tourData) {
 		try {
-			const {
-				name,
-				description,
-				price_default,
-				price_child,
-				region,
-				duration,
-				location,
-				image,
-			} = tourData;
+			const { name, description, price_default, price_child, region, duration, location, image } = tourData;
 			const [result] = await db.query(
-				`
-                UPDATE tours SET name = ?, description = ?, price_default = ?, price_child = ?, region = ?, duration = ?, location = ?, cover_image = ?, updated_at = NOW() WHERE id = ?`,
-				[
-					name,
-					description,
-					price_default,
-					price_child,
-					region,
-					duration,
-					location,
-					image,
-					id,
-				],
+				`UPDATE tours SET name = ?, description = ?, price_default = ?, price_child = ?, region = ?, duration = ?, location = ?, cover_image = ?, updated_at = NOW() WHERE id = ?`,
+				[name, description, price_default, price_child, region, duration, location, image, id]
 			);
 			return result.affectedRows > 0;
 		} catch (error) {
