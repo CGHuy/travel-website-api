@@ -189,6 +189,8 @@ exports.getWishListByUser = async (req, res) => {
     }
 };
 
+exports.demo = async (req, res) => {};
+
 
 
 // Render giao diện danh sách tour
