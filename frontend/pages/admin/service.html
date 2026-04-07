@@ -1,0 +1,148 @@
+<div class="card-header d-flex justify-content-between align-items-center p-0 px-4">
+    <div>
+        <h5 class="card-title">
+            <i class="fa-solid fa-concierge-bell me-2"></i>Quản lý Dịch vụ
+        </h5>
+    </div>
+</div>
+<div class="card-body">
+    <div class="input-group search-group mb-3">
+        <span class="input-group-text search-icon">
+            <i class="fa-solid fa-magnifying-glass fa-sm"></i>
+        </span>
+        <input class="form-control search-input" placeholder="Tìm kiếm dịch vụ theo id, tên..." value=""
+            aria-label="Tìm kiếm" />
+    </div>
+    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addServiceModal">Thêm
+        Dịch vụ Mới</button>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Mã dịch vụ</th>
+                    <th>Tên Dịch vụ</th>
+                    <th>Mô tả</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="align-middle">
+                <?php if (!empty($services)): ?>
+                <?php foreach ($services as $service): ?>
+                <tr>
+                    <td class="find_id">
+                        <?= htmlspecialchars($service['service_code'] ?? '') ?>
+                    </td>
+                    <td class="find_name">
+                        <?= htmlspecialchars($service['name']) ?>
+                    </td>
+                    <?php
+                                $desc = $service['description'] ?? '';
+                                $short = mb_substr($desc, 0, 50);
+                                ?>
+                    <td>
+                        <?= htmlspecialchars($short) ?>
+                        <?= mb_strlen($desc) > 50 ? '...' : '' ?>
+                    </td>
+
+                    <td>
+                        <?php if (($service['status'] ?? 0) == 1): ?>
+                        <span class="badge bg-success">Hoạt động</span>
+                        <?php else: ?>
+                        <span class="badge bg-secondary">Ngưng</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                            data-bs-target="#editServiceModal" data-id="<?= $service['id'] ?>">
+                            <i class="fa-solid fa-pen-to-square me-1"></i> Sửa
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                            data-bs-target="#deleteServiceModal" data-id="<?= $service['id'] ?>"
+                            data-name="<?= htmlspecialchars($service['name']) ?>">
+                            <i class="fa-solid fa-trash me-1"></i> Xóa
+                        </button>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                <?php else: ?>
+                <tr>
+                    <td colspan="6" class="text-center">Không có dịch vụ nào.</td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Thêm Dịch vụ -->
+<div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addServiceModalLabel">Thêm Dịch vụ Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <!-- Nội dung form sẽ được load động -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Đang tải form...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa Dịch vụ -->
+<div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editServiceModalLabel">Sửa Dịch vụ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <!-- Nội dung form sẽ được load động -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Đang tải form...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xóa Dịch vụ -->
+<div class="modal fade" id="deleteServiceModal" tabindex="-1" aria-labelledby="deleteServiceModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title text-white" id="deleteServiceModalLabel">Xác nhận xóa dịch vụ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post" action="?controller=Service&action=delete">
+                <input type="hidden" name="id" id="delete_service_id">
+
+                <div class="modal-body">
+                    <p class="m-0 p-2">Bạn có chắc chắn muốn xóa dịch vụ:</p>
+                    <strong id="delete_service_name" class="p-2"></strong>
+                    <p class="text-danger m-0 p-2"><strong>Hành động này không thể hoàn tác.</strong></p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/web_du_lich/public/js/admin/QuanLyDichVu.js"></script>
