@@ -34,11 +34,14 @@ const tourRoutes = require("./src/routes/tourRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const bookingRoutes = require("./src/routes/bookingRoutes");
 const userRoutes = require("./src/routes/userRoutes");
+const depatureRoutes = require("./src/routes/depatureRoutes");
 
 app.use("/api/tours", searchLimiter, tourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);
+app.use("/api/depatures", searchLimiter, depatureRoutes);
+
 
 // ERROR HANDLERS
 // 404 handler - phải đặt sau tất cả routes

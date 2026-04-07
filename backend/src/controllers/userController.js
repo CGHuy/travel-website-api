@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const db = require("../config/database");
 
-// Cập nhật thông tin user hiện tại
+// Cập nhật thông tin user hiện tại - Che
 exports.updateProfile = async (req, res) => {
 	try {
 		const userId = req.user.id;
@@ -39,7 +39,7 @@ exports.updateProfile = async (req, res) => {
 	}
 };
 
-// Lấy thông tin user hiện tại
+// Lấy thông tin user hiện tại - Che
 exports.getProfile = async (req, res) => {
 	try {
 		const userId = req.user.id;
@@ -59,6 +59,179 @@ exports.getProfile = async (req, res) => {
 		return res.status(500).json({
 			success: false,
 			message: "Lỗi khi lấy thông tin user",
+			error: error.message,
+		});
+	}
+};
+
+// Lay danh sach tat ca user (dành cho admin) 
+exports.getAllUsers = async (req, res) => {
+	try {
+		const users = await User.getAll();
+		return res.json({
+			success: true,
+			message: "Lấy danh sách users thành công!",
+			data: users,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,							
+			message: "Lỗi khi lấy danh sách users",
+			error: error.message,
+		});
+	}		
+};
+
+// Tìm kiếm users với nhiều tiêu chí (dành cho admin)
+exports.searchUsers = async (req, res) => {
+	try {
+		const { id, phone, role, status, fullname } = req.query;
+		const filters = {};
+
+		if (id) filters.id = id;
+		if (phone) filters.phone = phone;
+		if (role) filters.role = role;
+		if (status !== undefined) filters.status = parseInt(status);
+		if (fullname) filters.fullname = fullname;
+
+		const users = await User.searchUsers(filters);
+		return res.json({
+			success: true,
+			message: "Tìm kiếm users thành công!",
+			data: users,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Lỗi khi tìm kiếm users",
+			error: error.message,
+		});
+	}
+};
+
+// Xóa user (dành cho admin)
+exports.deleteUser = async (req, res) => {
+	try {
+		const userId = req.params.id;
+
+		// Lấy thông tin user để kiểm tra role
+		const user = await User.findById(userId);
+		if (!user) {
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy user để xóa",
+			});
+		}
+
+		// Kiểm tra role admin : status = 1 không được phép xóa
+		if (user.role === "admin"|| user.role === "tour-staff" || user.role === "booking-staff" || user.status === 1) {
+			return res.status(403).json({
+				success: false,
+				message: "Không được phép xóa user có vai trò admin hoặc có trạng thái đang hoạt động",
+			});
+		}
+
+		const success = await User.delete(userId);
+		if (!success) {
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy user để xóa",
+			});
+		}
+		return res.json({
+			success: true,
+			message: "Xóa user thành công!",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,	
+			message: "Lỗi khi xóa user",
+			error: error.message,
+		});
+	}	
+};
+
+// Cập nhật thông tin user (dành cho admin)
+exports.updateUser = async (req, res) => {
+	try {
+		const userId = req.params.id;
+		const { fullname, phone, email, role, status } = req.body;
+
+		// Lấy thông tin user hiện tại để kiểm tra role
+		const currentUser = await User.findById(userId);
+		if (!currentUser) {
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy user để cập nhật",
+			});
+		}
+
+		// Kiểm tra xem role có bị thay đổi không
+		if (role && role !== currentUser.role) {
+			return res.status(400).json({
+				success: false,
+				message: "Không được phép thay đổi vai trò của user",
+			});
+		}
+
+		const userData = { id: userId, fullname, phone, email, role: currentUser.role, status };
+		const success = await User.updateUser(userId, userData);
+		if (!success) {
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy user để cập nhật",
+			});
+		}
+		return res.json({
+			success: true,
+			message: "Cập nhật user thành công!",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Lỗi khi cập nhật user",
+			error: error.message,
+		});
+	}
+};
+
+// Cập nhật trạng thái user (dành cho admin)
+exports.updateUserStatus = async (req, res) => {
+	try {
+		const userId = req.params.id;
+		const { status } = req.body;	
+
+		// Lấy thông tin user hiện tại để kiểm tra role
+		const currentUser = await User.findById(userId);
+		if (!currentUser) {		
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy user để cập nhật trạng thái",
+			});
+		}			
+		// Kiểm tra xem user có phải là admin không
+		if (currentUser.role === "admin") {
+			return res.status(400).json({
+				success: false,
+				message: "Không được phép thay đổi trạng thái của user có vai trò admin",
+			});
+		}
+		const success = await User.updateUserStatus(userId, status);
+		if (!success) {
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy user để cập nhật trạng thái",
+			});
+		}
+		return res.json({
+			success: true,
+			message: "Cập nhật trạng thái user thành công!",
+		});
+	} 
+	catch (error) {
+		return res.status(500).json({
+			success: false,	
+			message: "Lỗi khi cập nhật trạng thái user",
 			error: error.message,
 		});
 	}
