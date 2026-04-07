@@ -63,6 +63,36 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     };
 
+    // Phase 1.5: Fetch User Profile
+    const fetchUserProfile = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            const response = await fetch("/api/users/profile", {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            const result = await response.json();
+            if (result.success && result.data) {
+                const user = result.data;
+                if (document.getElementById("contact_name")) {
+                    document.getElementById("contact_name").value = user.fullname || "";
+                }
+                if (document.getElementById("contact_phone")) {
+                    document.getElementById("contact_phone").value = user.phone || "";
+                }
+                if (document.getElementById("contact_email")) {
+                    document.getElementById("contact_email").value = user.email || "";
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+        }
+    };
+
     const renderTourSummary = (tour) => {
         // Display tour info
         document.getElementById("bc-tour-name").innerText = tour.name;
@@ -257,6 +287,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Start
     fetchTourAndDepartures();
+    fetchUserProfile();
     renderPassengerFields();
 });
 
