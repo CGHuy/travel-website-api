@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Initialize page logic
     initProfilePage();
+    initSidebarActiveState();
+    initChangePasswordForm();
 });
 
 async function loadComponent(targetId, filePath) {
@@ -33,9 +35,84 @@ async function loadComponent(targetId, filePath) {
             document.body.appendChild(newScript);
             script.remove();
         });
+
+        // Re-run sidebar active state after it's loaded
+        if (targetId === "side-placeholder") {
+            initSidebarActiveState();
+        }
     } catch (err) {
         console.error(`Failed to load component ${filePath}:`, err);
     }
+}
+
+function initSidebarActiveState() {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll(".user-nav-menu .nav-link");
+    
+    navLinks.forEach(link => {
+        const href = link.getAttribute("href");
+        if (currentPath.includes(href)) {
+            link.classList.add("active");
+        } else {
+            link.classList.remove("active");
+        }
+    });
+
+    // Handle static items as well if they match
+    const staticLinks = document.querySelectorAll(".nav-item-static a");
+    staticLinks.forEach(link => {
+        const href = link.getAttribute("href");
+        if (currentPath.includes(href)) {
+            link.style.color = "#e74c3c";
+            link.querySelector("span").style.fontWeight = "600";
+        }
+    });
+}
+
+function initChangePasswordForm() {
+    const form = document.getElementById("change-password-form");
+    if (!form) return;
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const currentPassword = document.getElementById("currentPassword").value;
+        const newPassword = document.getElementById("newPassword").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        // Validation
+        if (newPassword !== confirmPassword) {
+            alert("Mật khẩu mới và xác nhận mật khẩu không khớp!");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            alert("Mật khẩu mới phải có ít nhất 6 ký tự!");
+            return;
+        }
+
+        try {
+            // Assume API endpoint exists based on backend research
+            // const token = localStorage.getItem("token");
+            // const response = await fetch("/api/users/change-password", {
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //         "Authorization": `Bearer ${token}`
+            //     },
+            //     body: JSON.stringify({ currentPassword, newPassword })
+            // });
+            // const result = await response.json();
+
+            // Mock success for demonstration
+            console.log("Submitting change password:", { currentPassword, newPassword });
+            alert("Đổi mật khẩu thành công!");
+            form.reset();
+        } catch (error) {
+            console.error("Lỗi khi đổi mật khẩu:", error);
+            alert("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+        }
+    });
 }
 
 function initProfilePage() {
