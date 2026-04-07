@@ -49,7 +49,7 @@ window.initAdminServicePage = async function () {
                         : '<span class="badge bg-secondary">Ngưng</span>';
 
                 tr.innerHTML = `
-                    <td class="find_id">${escapeHtml(service.service_code || "")}</td>
+                    <td class="find_id">SVC${String(service.id).padStart(3, "0")}</td>
                     <td class="find_name">${escapeHtml(service.name)}</td>
                     <td>${escapeHtml(shortDesc)}</td>
                     <td>${statusBadge}</td>
