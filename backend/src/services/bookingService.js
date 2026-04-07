@@ -1,4 +1,7 @@
 const db = require("../config/database");
+const Departure = require("../models/Departure");
+const Tour = require("../models/Tour");
+const Booking = require("../models/Booking");
 
 class bookingService {
 	//================== USER ===================
@@ -137,6 +140,79 @@ class bookingService {
 			return rows;
 		} catch (error) {
 			throw error;
+		}
+	}
+
+	static async createBooking(user_id, bookingData) {
+		const { departure_id, adults, children = 0, contact_name,
+			contact_phone, contact_email, contact_dob, note, passengers } = bookingData;
+		//Kiểm tra trước khi tạo booking
+		const totalPax = parseInt(adults) + parseInt(children);
+		const dep = await Departure.getById(departure_id);
+		if (!dep) {
+			throw new Error("Lịch khởi hành không tồn tại");
+		}
+
+		if (totalPax > dep.seats_available) {
+			throw new Error("Số lượng khách vượt quá chỗ trống hiện tại");
+		}
+
+		// Gọi qua bảng Tour để lấy giá gốc
+		const tour = await Tour.getById(dep.tour_id);
+		if (!tour) {
+			throw new Error("Không tìm thấy thông tin Tour");
+		}
+
+		// Tính tổng giá
+		const adultUnitPrice = parseFloat(tour.price_default) + parseFloat(dep.price_moving);
+		const childUnitPrice = parseFloat(tour.price_child) + parseFloat(dep.price_moving_child);
+		const total_price = (parseInt(adults) * adultUnitPrice) + (parseInt(children) * childUnitPrice);
+
+		// Sử dụng Transaction
+		const conn = await db.getConnection();
+		try {
+			await conn.beginTransaction();
+
+			// 2.1 Tạo booking (contact_dob không lưu ở đây, lưu ở bảng customers)
+			const [bookingResult] = await conn.query(
+				`INSERT INTO bookings (user_id, departure_id, adults, children, total_price, contact_name, contact_phone, contact_email, note)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				[user_id, departure_id, adults, children, total_price, contact_name, contact_phone, contact_email, note]
+			);
+			const bookingId = bookingResult.insertId;
+
+			// 2.2 Insert người liên hệ là hành khách đầu tiên (adult)
+			await conn.query(
+				`INSERT INTO customers (booking_id, fullname, gender, dob, passenger_type)
+				VALUES (?, ?, ?, ?, 'adult')`,
+				[bookingId, contact_name, null, contact_dob || null]
+			);
+
+			// 2.3 Insert các hành khách còn lại (từ người thứ 2 trở đi)
+			if (passengers && passengers.length > 0) {
+				for (const p of passengers) {
+					await conn.query(
+						`INSERT INTO customers (booking_id, fullname, gender, dob, passenger_type)
+						VALUES (?, ?, ?, ?, ?)`,
+						[bookingId, p.name, p.gender || null, p.dob || null, p.type]
+					);
+				}
+			}
+
+			// 2.3 Trừ số chỗ trống của departure
+			await conn.query(
+				`UPDATE tour_departures SET seats_available = seats_available - ? WHERE id = ?`,
+				[totalPax, departure_id]
+			);
+
+			await conn.commit();
+			return { bookingId, total_price };
+
+		} catch (error) {
+			await conn.rollback();
+			throw error;
+		} finally {
+			conn.release();
 		}
 	}
 }

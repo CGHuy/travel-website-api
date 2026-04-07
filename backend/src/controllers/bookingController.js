@@ -5,64 +5,9 @@ const db = require("../config/database"); // Cần db để check tồn tại/t�
 // Tạo booking mới
 exports.createBooking = async (req, res) => {
 	try {
-		const {
-			departure_id,
-			adults,
-			children = 0,
-			contact_name,
-			contact_phone,
-			contact_email,
-			note,
-		} = req.body;
 		const user_id = req.user.id;
-
-		// 1. Kiểm tra tour departure có tồn tại và còn chỗ không
-		const [departures] = await db.query(
-			`
-            SELECT td.*, t.price_default, t.price_child 
-            FROM tour_departures td 
-            JOIN tours t ON td.tour_id = t.id 
-            WHERE td.id = ?`,
-			[departure_id],
-		);
-
-		const departure = departures[0];
-		if (!departure) {
-			return res
-				.status(404)
-				.json({ success: false, message: "Không tìm thấy lịch khởi hành" });
-		}
-
-		if (departure.seats_available < parseInt(adults) + parseInt(children)) {
-			return res.status(400).json({
-				success: false,
-				message: "Không đủ chỗ trống cho số lượng người đã chọn",
-			});
-		}
-
-		// 2. Tính tổng tiền
-		const total_price =
-			adults * departure.price_default + children * departure.price_child;
-
-		// 3. Tạo booking
-		const bookingId = await Booking.create({
-			user_id,
-			departure_id,
-			adults,
-			children,
-			total_price,
-			contact_name,
-			contact_phone,
-			contact_email,
-			note,
-		});
-
-		// 4. Cập nhật số chỗ trống (Optionally, should be in a transaction)
-		await db.query(
-			`UPDATE tour_departures SET seats_available = seats_available - ? WHERE id = ?`,
-			[parseInt(adults) + parseInt(children), departure_id],
-		);
-
+		const result = req.body;
+		const { bookingId, total_price } = await bookingService.createBooking(user_id, result);
 		res.status(201).json({
 			success: true,
 			message: "Đặt tour thành công!",
