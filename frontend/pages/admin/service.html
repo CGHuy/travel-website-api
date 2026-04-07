@@ -10,8 +10,8 @@
         <span class="input-group-text search-icon">
             <i class="fa-solid fa-magnifying-glass fa-sm"></i>
         </span>
-        <input class="form-control search-input" placeholder="Tìm kiếm dịch vụ theo id, tên..." value=""
-            aria-label="Tìm kiếm" />
+        <input class="form-control search-input" id="service-search-input"
+            placeholder="Tìm kiếm dịch vụ theo id, tên..." value="" aria-label="Tìm kiếm" />
     </div>
     <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addServiceModal">Thêm
         Dịch vụ Mới</button>
@@ -26,50 +26,10 @@
                     <th>Hành động</th>
                 </tr>
             </thead>
-            <tbody class="align-middle">
-                <?php if (!empty($services)): ?>
-                <?php foreach ($services as $service): ?>
+            <tbody class="align-middle" id="service-table-body">
                 <tr>
-                    <td class="find_id">
-                        <?= htmlspecialchars($service['service_code'] ?? '') ?>
-                    </td>
-                    <td class="find_name">
-                        <?= htmlspecialchars($service['name']) ?>
-                    </td>
-                    <?php
-                                $desc = $service['description'] ?? '';
-                                $short = mb_substr($desc, 0, 50);
-                                ?>
-                    <td>
-                        <?= htmlspecialchars($short) ?>
-                        <?= mb_strlen($desc) > 50 ? '...' : '' ?>
-                    </td>
-
-                    <td>
-                        <?php if (($service['status'] ?? 0) == 1): ?>
-                        <span class="badge bg-success">Hoạt động</span>
-                        <?php else: ?>
-                        <span class="badge bg-secondary">Ngưng</span>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                            data-bs-target="#editServiceModal" data-id="<?= $service['id'] ?>">
-                            <i class="fa-solid fa-pen-to-square me-1"></i> Sửa
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                            data-bs-target="#deleteServiceModal" data-id="<?= $service['id'] ?>"
-                            data-name="<?= htmlspecialchars($service['name']) ?>">
-                            <i class="fa-solid fa-trash me-1"></i> Xóa
-                        </button>
-                    </td>
+                    <td colspan="5" class="text-center text-muted p-4">Đang tải danh sách dịch vụ...</td>
                 </tr>
-                <?php endforeach; ?>
-                <?php else: ?>
-                <tr>
-                    <td colspan="6" class="text-center">Không có dịch vụ nào.</td>
-                </tr>
-                <?php endif; ?>
             </tbody>
         </table>
     </div>
@@ -127,7 +87,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form method="post" action="?controller=Service&action=delete">
+            <form id="delete-service-form">
                 <input type="hidden" name="id" id="delete_service_id">
 
                 <div class="modal-body">
@@ -144,5 +104,3 @@
         </div>
     </div>
 </div>
-
-<script src="/web_du_lich/public/js/admin/QuanLyDichVu.js"></script>
