@@ -136,7 +136,143 @@ body {
     font-size: 28px;
     font-weight: 700;
     color: #2c3e50;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+/* Vietravel-style Top Section Header */
+.top-section-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0056b3;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.title-underline {
+    width: 150px;
+    height: 3px;
+    background-color: #0056b3;
+}
+
+.section-description {
+    font-size: 1.1rem;
+    color: #4a5568;
+    line-height: 1.6;
+    max-width: 95%;
+}
+
+/* Custom Navigation Buttons */
+.custom-carousel-controls {
+    display: flex;
+    align-items: center;
+}
+
+.btn-carousel-ctrl {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+}
+
+.btn-carousel-ctrl:hover {
+    background: #0056b3;
+    color: #fff;
+    border-color: #0056b3;
+    transform: scale(1.1);
+    box-shadow: 0 10px 15px rgba(0, 86, 179, 0.2);
+}
+
+.btn-carousel-ctrl i {
+    font-size: 1.1rem;
+}
+
+/* Top Tour Overlay Card Style */
+.top-tour-card {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    height: 300px;
+    border: none;
+    transition: all 0.4s ease;
+}
+
+.top-tour-card .card-img-top {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.top-tour-card:hover .card-img-top {
+    transform: scale(1.1);
+}
+
+.top-tour-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 25px 15px;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.top-tour-card h5 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    line-height: 1.4;
+}
+
+/* Region Category Card Specifics */
+.region-category-card {
+    height: 380px; /* Taller for 3-col layout */
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.region-category-card .top-tour-overlay {
+    padding: 30px 20px;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+.region-category-card h5 {
+    font-size: 1.8rem; /* Larger font for categories */
+    letter-spacing: 2px;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    transition: opacity 0.3s;
+}
+
+.loading-overlay.d-none {
+    display: none !important;
 }
 
 .region-title {
@@ -362,3 +498,42 @@ a.text-decoration-none:hover {
     }
 }
 
+
+/* Info Features Section Styling */
+.info-features-section {
+    position: relative;
+    z-index: 10;
+}
+
+.mt-n5 {
+    margin-top: -80px !important; /* Pulls it up onto the carousel slightly */
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    transition: transform 0.3s ease;
+}
+
+.feature-item:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+.feature-title {
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+.feature-text {
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+}
+
+/* Background Utilities */
+.bg-light-blue {
+    background-color: #e1effe !important;
+}
+
+.top-featured-section {
+    border-top: 1px solid #e1effe;
+    border-bottom: 1px solid #e1effe;
+}
