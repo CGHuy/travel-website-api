@@ -1,0 +1,106 @@
+/* User Sidebar Styling */
+.user-sidebar-container {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 30px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    height: fit-content;
+}
+
+.user-profile-header {
+    border-bottom: 1px solid #f1f3f5;
+    padding-bottom: 25px;
+}
+
+.avatar-box {
+    width: 60px;
+    height: 60px;
+    background-color: #9c27b0; /* Purple color from image */
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.user-info .user-name {
+    font-size: 18px;
+    color: #2c3e50;
+    line-height: 1.2;
+}
+
+.user-info .user-email {
+    font-size: 13px;
+    color: #7f8c8d;
+    word-break: break-all;
+}
+
+/* Nav Menu */
+.user-nav-menu .nav-section-header {
+    font-size: 16px;
+    color: #2c3e50;
+    transition: all 0.3s;
+}
+
+.user-nav-menu .icon-account {
+    color: #e74c3c;
+    font-size: 18px;
+}
+
+.user-nav-menu .nav-link {
+    color: #495057;
+    font-size: 14px;
+    padding: 8px 0;
+    transition: all 0.2s;
+}
+
+.user-nav-menu .nav-link:hover {
+    color: #e74c3c;
+}
+
+.user-nav-menu .nav-link.active {
+    color: #e74c3c !important;
+    font-weight: 600;
+    background: transparent;
+}
+
+/* Static items */
+.nav-item-static a {
+    color: #2c3e50;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.nav-item-static a:hover {
+    color: #3498db;
+}
+
+.nav-item-static i {
+    font-size: 18px;
+    width: 25px;
+    text-align: center;
+    color: #2c3e50;
+}
+
+.icon-favorites {
+    color: #e74c3c !important;
+}
+
+.icon-bookings {
+    color: #34495e !important;
+}
+
+.icon-reviews {
+    color: #34495e !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .user-sidebar-container {
+        margin-bottom: 30px;
+    }
+}

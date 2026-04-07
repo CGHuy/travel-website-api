@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Thông tin cá nhân | VietTour</title>
+        <link rel="icon" href="/assets/images/icon.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <link rel="stylesheet" href="../../assets/css/index.css" />
+        <link rel="stylesheet" href="../../assets/css/user-sidebar.css" />
+        <style>
+            .profile-form-container {
+                background: #fff;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                padding: 30px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+            .profile-header {
+                border-bottom: 2px solid #f8f9fa;
+                margin-bottom: 30px;
+                padding-bottom: 15px;
+            }
+            .profile-title {
+                color: #2c3e50;
+                font-weight: 700;
+                font-size: 20px;
+                margin-bottom: 5px;
+            }
+            .profile-subtitle {
+                font-size: 14px;
+                color: #7f8c8d;
+            }
+            .profile-field-row {
+                display: flex;
+                flex-wrap: wrap;
+                padding: 15px 0;
+                border-bottom: 1px solid #f8f9fa;
+                align-items: center;
+            }
+            .profile-field-label {
+                flex: 0 0 150px;
+                font-weight: 600;
+                color: #2c3e50;
+                font-size: 15px;
+            }
+            .profile-field-value {
+                flex: 1;
+                color: #34495e;
+                font-size: 15px;
+            }
+            .profile-field-edit {
+                color: #bdc3c7;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+            .profile-field-edit:hover {
+                color: #3498db;
+            }
+            .back-link {
+                color: #2c3e50;
+                text-decoration: none;
+                font-weight: 600;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+            .back-link:hover {
+                color: #3498db;
+            }
+            .main-title {
+                text-align: center;
+                color: #2c3e50;
+                font-weight: 800;
+                font-size: 2.5rem;
+                margin-bottom: 40px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- Header Placeholder (if needed, but usually profile has its own header or use the global one) -->
+        <div id="header-placeholder"></div>
+
+        <div class="container my-5">
+            <a href="../../index.html" class="back-link">
+                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+            </a>
+
+            <h1 class="main-title">Tài khoản của bạn</h1>
+
+            <div class="row">
+                <!-- Sidebar Column -->
+                <div class="col-lg-3 col-md-4">
+                    <div id="side-placeholder" class="user-sidebar-container">
+                        <!-- User Sidebar content will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Content Column -->
+                <div class="col-lg-9 col-md-8">
+                    <div class="profile-form-container">
+                        <div class="profile-header">
+                            <h2 class="profile-title">Thông tin cá nhân</h2>
+                            <p class="profile-subtitle">Cập nhật thông tin của Quý khách và tìm hiểu các thông tin này được sử dụng ra sao</p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Họ tên</div>
+                                    <div class="profile-field-value" id="field-name">Khanh Ngoc</div>
+                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Ngày sinh</div>
+                                    <div class="profile-field-value" id="field-dob">--</div>
+                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Email:</div>
+                                    <div class="profile-field-value" id="field-email">ngockhanh74dctt23@gmail.com</div>
+                                    <div class="profile-field-edit"></div> <!-- Non-editable email usually -->
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Hộ chiếu</div>
+                                    <div class="profile-field-value" id="field-passport">--</div>
+                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Địa chỉ:</div>
+                                    <div class="profile-field-value" id="field-address">--</div>
+                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Loại thẻ:</div>
+                                    <div class="profile-field-value" id="field-card-type">--</div>
+                                    <div class="profile-field-edit"></div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Điểm vàng:</div>
+                                    <div class="profile-field-value" id="field-points">0</div>
+                                    <div class="profile-field-edit"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Giới tính</div>
+                                    <div class="profile-field-value" id="field-gender">Nữ</div>
+                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Điện thoại</div>
+                                    <div class="profile-field-value" id="field-phone">--</div>
+                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">CMND/CCCD</div>
+                                    <div class="profile-field-value" id="field-id-card">--</div>
+                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Quốc tịch:</div>
+                                    <div class="profile-field-value" id="field-nationality">--</div>
+                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Tổng số tour đã đi:</div>
+                                    <div class="profile-field-value" id="field-total-tours-1">0</div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Tổng số tour đã đi:</div>
+                                    <div class="profile-field-value" id="field-total-tours-2">0</div>
+                                </div>
+                                <div class="profile-field-row">
+                                    <div class="profile-field-label">Điểm cần để giữ hạng:</div>
+                                    <div class="profile-field-value" id="field-keep-points">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="footer-placeholder"></div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="../../assets/js/user-profile.js"></script>
+    </body>
+</html>
