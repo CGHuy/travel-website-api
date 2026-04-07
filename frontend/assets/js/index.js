@@ -49,30 +49,44 @@ function formatPrice(price) {
 
 // Tạo HTML cho tour card
 function createTourCard(tour) {
+    const images = [tour.image || tour.cover_image || "assets/images/default-tour.jpg"];
+    if (tour.images && Array.isArray(tour.images) && tour.images.length > 0) {
+        // Lọc bỏ ảnh trùng với cover_image nếu có
+        const otherImages = tour.images.filter(img => img !== tour.image && img !== tour.cover_image);
+        images.push(...otherImages);
+    }
+
+    const firstImage = images[0];
+    const secondImage = images.length > 1 ? images[1] : firstImage;
+
     return `
           <div class="col-12 col-md-6 col-lg-3">
                <a href="tour-detail.html?id=${tour.id}" class="text-decoration-none">
-                    <div class="card h-100 tour-card">
-                         <img src="${tour.image || tour.cover_image || "assets/images/default-tour.jpg"}" 
-                              class="card-img-top" 
-                              alt="${tour.name}">
+                    <div class="card h-100 tour-card" 
+                         onmouseenter="this.querySelector('.tour-main-img').src='${secondImage}'" 
+                         onmouseleave="this.querySelector('.tour-main-img').src='${firstImage}'">
+                         <div class="tour-card-img-wrapper">
+                              <img src="${firstImage}" 
+                                   class="card-img-top tour-main-img" 
+                                   alt="${tour.name}">
+                         </div>
                          <div class="card-badges">
-                         <span class="badge bg-info">
-                              <i class="fa-solid fa-map-location-dot"></i>
-                              ${tour.location || tour.region}
-                         </span>
-                         <span class="badge bg-primary">
-                              <i class="fa-solid fa-calendar-days"></i>
-                              ${tour.duration}
-                         </span>
+                              <span class="badge bg-info">
+                                   <i class="fa-solid fa-map-location-dot"></i>
+                                   ${tour.location || tour.region}
+                              </span>
+                              <span class="badge bg-primary">
+                                   <i class="fa-solid fa-calendar-days"></i>
+                                   ${tour.duration}
+                              </span>
                          </div>
                          <div class="card-body">
-                         <h5 class="card-title">${tour.name}</h5>
-                         <p class="card-text">${tour.description}</p>
-                         <div class="card-price">
-                              <b>Giá:</b>
-                              <span class="hightlight_price">${formatPrice(tour.price || tour.price_default)}</span>
-                         </div>
+                              <h5 class="card-title">${tour.name}</h5>
+                              <p class="card-text">${tour.description}</p>
+                              <div class="card-price">
+                                   <b>Giá:</b>
+                                   <span class="hightlight_price">${formatPrice(tour.price || tour.price_default)}</span>
+                              </div>
                          </div>
                     </div>
                </a>

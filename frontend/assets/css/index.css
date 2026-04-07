@@ -57,6 +57,23 @@ body {
 .tour-card .card-img-top {
     height: 200px;
     object-fit: cover;
+    transition: opacity 0.8s ease-in-out;
+}
+
+.tour-card-img-wrapper {
+    position: relative;
+    overflow: hidden;
+    background-color: #eee;
+}
+
+.tour-card:hover .tour-main-img {
+    opacity: 0.9;
+}
+
+.image-indicators .dot.active {
+    background: #fff;
+    transform: scale(1.2);
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
 .tour-card .card-badges {
@@ -66,7 +83,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    z-index: 1;
+    z-index: 2;
 }
 
 .tour-card .card-badges .badge {
@@ -87,6 +104,7 @@ body {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    line-clamp: 2;
     overflow: hidden;
 }
 
@@ -96,6 +114,7 @@ body {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    line-clamp: 2;
     overflow: hidden;
     margin-bottom: 10px;
 }
@@ -174,3 +193,172 @@ a.text-decoration-none {
 a.text-decoration-none:hover {
     color: inherit;
 }
+
+/* Hero Carousel */
+.hero-carousel {
+    margin-top: -70px; /* Aligns with absolute top behind the fixed header */
+    margin-bottom: 50px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-carousel .carousel-item {
+    height: 600px;
+    background: #000;
+}
+
+.hero-carousel .carousel-item::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+.hero-carousel .carousel-item img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+    transition: transform 10s ease;
+}
+
+.hero-carousel .carousel-item.active img {
+    transform: scale(1.1);
+}
+
+.hero-carousel .carousel-caption {
+    bottom: 25%;
+    text-align: left;
+    max-width: 800px;
+    left: 8%;
+    right: 8%;
+    z-index: 10;
+}
+
+.hero-carousel .carousel-caption h2 {
+    font-size: 4rem;
+    font-weight: 900;
+    line-height: 1.1;
+    text-shadow: 2px 4px 15px rgba(0, 0, 0, 0.6);
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+}
+
+.hero-carousel .carousel-caption p {
+    font-size: 1.5rem;
+    font-weight: 300;
+    text-shadow: 1px 2px 8px rgba(0, 0, 0, 0.5);
+    margin-bottom: 35px;
+    max-width: 600px;
+    color: #e0e0e0;
+}
+
+.hero-carousel .btn-hero {
+    padding: 15px 45px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 50px;
+    background: #3498db;
+    border: none;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hero-carousel .btn-hero:hover {
+    background: #2980b9;
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 10px 25px rgba(52, 152, 219, 0.5);
+    color: white;
+}
+
+.hero-carousel .carousel-indicators {
+    bottom: 40px;
+}
+
+.hero-carousel .carousel-indicators [data-bs-target] {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 8px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.hero-carousel .carousel-indicators .active {
+    background-color: #3498db;
+    width: 35px;
+    border-radius: 10px;
+    opacity: 1;
+}
+
+/* Animations for caption */
+.carousel-item.active .carousel-caption h2 {
+    animation: slideInDown 1s both;
+}
+
+.carousel-item.active .carousel-caption p {
+    animation: slideInUp 1s 0.2s both;
+}
+
+.carousel-item.active .carousel-caption .btn-hero {
+    animation: slideInUp 1s 0.4s both;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Page Spacing Adjustment for Home */
+.home-content-wrapper {
+    margin-top: 20px;
+}
+
+/* Responsiveness */
+@media (max-width: 992px) {
+    .hero-carousel .carousel-item {
+        height: 500px;
+    }
+    .hero-carousel .carousel-caption h2 {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-carousel .carousel-item {
+        height: 450px;
+    }
+    .hero-carousel .carousel-caption h2 {
+        font-size: 2.2rem;
+    }
+    .hero-carousel .carousel-caption p {
+        font-size: 1.1rem;
+    }
+    .hero-carousel .carousel-caption {
+        bottom: 15%;
+        left: 5%;
+    }
+}
+
