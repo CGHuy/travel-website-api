@@ -132,18 +132,82 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (tour.itineraries && tour.itineraries.length > 0) {
             itineraryList.innerHTML = tour.itineraries
                 .map((item, idx) => {
-                    // Formatting title for visual
-                    let title = item.title || `Ngày ${item.day_number}: Trải nghiệm khám phá`;
                     let desc = item.description || "";
+                    let lines = desc.split('\n');
+                    let title = item.title;
+                    let remainingDesc = desc;
+
+                    // Trích xuất dòng đầu tiên làm tiêu đề
+                    if (!title) {
+                        if (lines.length > 0) {
+                            title = lines[0].trim().replace(/^NGÀY\s*[0-9]+:\s*/i, '');
+                            lines.shift();
+                            remainingDesc = lines.join('\n').trim();
+                        } else {
+                            title = `Trải nghiệm khám phá`;
+                        }
+                    }
+
+                    // Format phần còn lại của mô tả
+                    const descLines = remainingDesc.split('\n').filter(l => l.trim().length > 0);
+                    let formattedDesc = descLines.map((line) => {
+                        // Regex tìm thời gian hoặc buổi ở đầu câu (kết thúc bằng dấu : )
+                        // Hỗ trợ cả định dạng khoảng thời gian như "08:00 - 12:00:"
+                        const timeMatch = line.match(/^(([0-9]{1,2}:[0-9]{2}\s*-\s*[0-9]{1,2}:[0-9]{2})|[0-9]{1,2}:[0-9]{2}|[\p{L}\s\/]+(?:\([^)]+\))?)\s*:/iu);
+                        
+                        if (timeMatch && timeMatch[0].length < 45) { 
+                            const rawTime = timeMatch[1].trim();
+                            const restOfLine = line.substring(timeMatch[0].length).trim();
+                            let timeHtml = "";
+
+                            // Kiểm tra nếu là mốc thời gian khoảng (có dấu -)
+                            if (rawTime.includes("-")) {
+                                const parts = rawTime.split("-");
+                                timeHtml = `
+                                    <div class="d-flex flex-column lh-1">
+                                        <span class="mb-1">${parts[0].trim()}</span>
+                                        <span class="opacity-50 small mb-1">—</span>
+                                        <span>${parts[1].trim()}</span>
+                                    </div>`;
+                            } else {
+                                timeHtml = `<span>${rawTime}</span>`;
+                            }
+
+                            return `
+                                <div class="mb-4 d-flex flex-column flex-md-row align-items-md-start">
+                                    <div class="flex-shrink-0 mb-1 mb-md-0 me-3" style="width: 80px;">
+                                        <div class="fw-bold text-primary d-flex align-items-center gap-1" style="font-size: 0.85rem; padding-top: 4px; line-height: 1;">
+                                            <i class="fa-regular fa-clock" style="font-size: 0.75rem; margin-top: -1px;"></i>
+                                            ${timeHtml}
+                                        </div>
+                                    </div>
+                                    <div class="text-secondary flex-grow-1" style="line-height: 1.6; text-align: justify; font-size: 0.95rem;">
+                                        ${restOfLine}
+                                    </div>
+                                </div>`;
+                        } else {
+                            return `
+                                <div class="mb-4 d-flex flex-column flex-md-row align-items-md-baseline">
+                                    <div class="flex-shrink-0 mb-1 mb-md-0 me-2" style="width: 110px;">
+                                        <!-- No icon for generic steps -->
+                                    </div>
+                                    <div class="text-secondary flex-grow-1" style="line-height: 1.6; text-align: justify; font-size: 0.95rem;">
+                                        ${line}
+                                    </div>
+                                </div>`;
+                        }
+                    }).join('');
 
                     return `
                 <div class="itinerary-item">
                     <span class="itinerary-number">${item.day_number}</span>
                     <div class="card border-0 shadow-sm p-4 rounded-4 bg-white" style="border: 1px solid #e2e8f0 !important;">
-                        <h5 class="fw-bold text-dark mb-3">${title}</h5>
-                        <p class="text-secondary mb-0" style="text-align: justify; font-size: 0.95rem; line-height: 1.7;">
-                            ${desc.replace(/\n\n/g, '</p><p class="text-secondary mb-0" style="text-align: justify; font-size: 0.95rem; line-height: 1.7;">').replace(/\n/g, "<br>")}
-                        </p>
+                        <h5 class="fw-bold text-dark mb-4 pb-3 border-bottom border-light" style="font-size: 1.15rem;">
+                            <i class="fa-solid fa-map-location-dot text-primary me-2"></i> Ngày ${item.day_number}: ${title}
+                        </h5>
+                        <div class="itinerary-content">
+                            ${formattedDesc}
+                        </div>
                     </div>
                 </div>
             `;

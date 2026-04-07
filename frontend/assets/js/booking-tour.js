@@ -273,6 +273,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             contact_name: document.getElementById("contact_name").value,
             contact_phone: document.getElementById("contact_phone").value,
             contact_email: document.getElementById("contact_email").value,
+            contact_dob: document.getElementById("contact_dob") ? document.getElementById("contact_dob").value : null,
             note: document.getElementById("note").value,
             departure_id: document.getElementById("departure_id").value,
             adults: document.getElementById("adults").value,
