@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const listTourController = require("../controllers/ListTourController");
+const listTourController = require("../controllers/listTourController");
 const { verifyToken, isUser } = require("../middlewares/auth");
 
 // Route để lấy danh sách tour
