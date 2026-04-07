@@ -4,27 +4,17 @@ class Departure {
     // Lấy tất cả departures
     static async getAll() {
         try {
-            const [rows] = await db.query(`SELECT * FROM departures ORDER BY departure_date DESC`);
+            const [rows] = await db.query(`SELECT * FROM tour_departures ORDER BY departure_date DESC`);
             return rows;
         } catch (error) {
             throw error;
         }
     }
 
-    // Tìm kiếm departures theo tour_id
-    static async getByTourId(tour_id) {
-        try {
-            const [rows] = await db.query(`SELECT * FROM departures WHERE tour_id = ? ORDER BY departure_date DESC`, [tour_id]);
-            return rows;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Tìm kiếm departure theo ID
+    // Tìm departure theo ID
     static async getById(id) {
         try {
-            const [rows] = await db.query(`SELECT * FROM departures WHERE id = ?`, [id]);
+            const [rows] = await db.query(`SELECT * FROM tour_departures WHERE id = ?`, [id]);
             return rows[0];
         } catch (error) {
             throw error;
@@ -38,7 +28,7 @@ class Departure {
             const seats_available = seats_total; // Ban đầu, số chỗ trống bằng tổng số chỗ
             const [result] = await db.query(
                 `
-                INSERT INTO departures (tour_id, departure_location, departure_date, price_moving, price_moving_child, available_seats, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())
+                INSERT INTO tour_departures (tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
                 `,
                 [tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available],
             );
@@ -51,8 +41,8 @@ class Departure {
     // Cập nhật departure
     static async update(id, departureData) {
         try {
-            const { tour_id, departure_location, departure_date, price_moving, price_moving_child, available_seats } = departureData;
-            const [result] = await db.query(`UPDATE departures SET tour_id = ?, departure_location = ?, departure_date = ?, price_moving = ?, price_moving_child = ?, available_seats = ?, updated_at = NOW() WHERE id = ?`, [tour_id, departure_location, departure_date, price_moving, price_moving_child, available_seats, id]);
+            const { tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available } = departureData;
+            const [result] = await db.query(`UPDATE tour_departures SET tour_id = ?, departure_location = ?, departure_date = ?, price_moving = ?, price_moving_child = ?, seats_total = ?, seats_available = ?, updated_at = NOW() WHERE id = ?`, [tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available, id]);
             return result.affectedRows > 0;
         } catch (error) {
             throw error;
@@ -69,7 +59,7 @@ class Departure {
             if (departure.status === 'open' || departure.status === 'full') {
                 throw new Error('Không được phép xóa điểm khởi hành khi đang ở trạng thái Mở hoặc Đầy');
             }
-            const [result] = await db.query(`DELETE FROM departures WHERE id = ?`, [id]);
+            const [result] = await db.query(`DELETE FROM tour_departures WHERE id = ?`, [id]);
             return result.affectedRows > 0;
         } catch (error) {
             throw error;
@@ -78,7 +68,7 @@ class Departure {
     // Quản lý số chỗ ngồi
     static async updateAvailableSeats(id, seatsChange) {
         try {
-            const [result] = await db.query(`UPDATE departures SET available_seats = available_seats + ? WHERE id = ?`, [seatsChange, id]);
+            const [result] = await db.query(`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`, [seatsChange, id]);
             return result.affectedRows > 0;
         } 
         catch (error) {
@@ -88,7 +78,7 @@ class Departure {
     // Quản lý giá vé
     static async updatePrice(id, price_moving, price_moving_child) {
         try {
-            const [result] = await db.query(`UPDATE departures SET price_moving = ?, price_moving_child = ? WHERE id = ?`, [price_moving, price_moving_child, id]);
+            const [result] = await db.query(`UPDATE tour_departures SET price_moving = ?, price_moving_child = ? WHERE id = ?`, [price_moving, price_moving_child, id]);
             return result.affectedRows > 0;
         } 
         catch (error) {
@@ -110,12 +100,12 @@ class Departure {
                 if (!departure) {
                     throw new Error('Không tìm thấy điểm khởi hành');
                 }
-                if (departure.available_seats <= 0) {
+                if (departure.seats_available <= 0) {
                     throw new Error('Không thể mở điểm khởi hành khi đã hết chỗ');
                 }
             }
 
-            const [result] = await db.query(`UPDATE departures SET status = ?, updated_at = NOW() WHERE id = ?`, [status, id]);
+            const [result] = await db.query(`UPDATE tour_departures SET status = ?, updated_at = NOW() WHERE id = ?`, [status, id]);
             return result.affectedRows > 0;
         } 
         catch (error) {
@@ -125,8 +115,12 @@ class Departure {
     // Tìm kiếm departures theo nhiều tiêu chí
     static async searchDepartures(filters) {
         try {
-            let query = `SELECT * FROM departures WHERE 1=1`;
+            let query = `SELECT * FROM tour_departures WHERE 1=1`;
             const params = [];
+            if (filters.id) {
+                query += ` AND id = ?`;
+                params.push(filters.id);
+            }
             if (filters.tour_id) {
                 query += ` AND tour_id = ?`;
                 params.push(filters.tour_id);
@@ -152,6 +146,8 @@ class Departure {
     }
 
 }
+
+module.exports = Departure;
 
 
 

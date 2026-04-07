@@ -113,9 +113,10 @@ exports.deleteDeparture = async (req, res) => {
 // Tìm kiếm departures theo nhiều tiêu chí
 exports.searchDepartures = async (req, res) => {
 	try {
-		const { tour_id, departure_location, departure_date, status } = req.query;
+		const { id, tour_id, departure_location, departure_date, status } = req.query;
 		const filters = {};
 
+		if (id) filters.id = id;
 		if (tour_id) filters.tour_id = tour_id;
 		if (departure_location) filters.departure_location = departure_location;
 		if (departure_date) filters.departure_date = departure_date;

@@ -40,7 +40,7 @@ app.use("/api/tours", searchLimiter, tourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);
-app.use("/api/depatures", searchLimiter, depatureRoutes);
+app.use("/api/departures", searchLimiter, depatureRoutes);
 
 
 // ERROR HANDLERS
