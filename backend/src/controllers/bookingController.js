@@ -234,7 +234,9 @@ exports.createVNPayUrl = async (req, res) => {
 		const { totalPrice: amount, tourName } = await bookingService.infoBooking(
 			req.body,
 		);
-		const orderInfo = `Thanh toan Tour ${tourName}`;
+		// VNPay có thể lỗi nếu nội dung chứa ký tự đặc biệt, nên loại bỏ dấu và ký tự lạ
+		const safeTourName = tourName.replace(/[^\w\s]/gi, '');
+		const orderInfo = `Thanh toan tour ${safeTourName}`.slice(0, 250);
 		const uniqueStr = Math.random().toString(36).substring(2, 10).toUpperCase();
 		const txnRef = `VNPAY_${Date.now()}_${uniqueStr}`;
 
@@ -264,7 +266,13 @@ exports.createVNPayUrl = async (req, res) => {
 			vnp_ExpireDate: dateFormat(expireDate),
 		});
 
-		return res.status(201).json(vnpayResponse);
+		// Tính tương thích: Bọc kết quả vào JSON có format chuẩn để Frontend nhận diện
+		const paymentUrl = typeof vnpayResponse === 'string' ? vnpayResponse : vnpayResponse.url || vnpayResponse.paymentUrl;
+		
+		return res.status(201).json({
+			success: true,
+			vnpayUrl: paymentUrl || vnpayResponse
+		});
 	} catch (error) {
 		console.error("VNPay Error:", error);
 		res.status(500).json({
@@ -313,28 +321,17 @@ exports.vnpayReturn = async (req, res) => {
 				}
 			}
 
-			return res.status(200).json({
-				success: true,
-				message: "Giao dịch thành công",
-				bookingId: newBookingId,
-				paymentDetails: verify,
-			});
+			// Chuyển hướng về trang Kết quả thanh toán trên Frontend
+			return res.redirect(`/payment-result?status=success&bookingId=${newBookingId}`);
 		} else {
 			// Xóa dữ liệu tạm nếu giao dịch thất bại hoặc bị hủy
 			pendingBookingsCache.delete(txnRef);
-
-			return res.status(400).json({
-				success: false,
-				message: "Giao dịch thất bại hoặc không hợp lệ",
-				paymentDetails: verify,
-			});
+			
+			// Chuyển hướng về trang lỗi
+			return res.redirect(`/payment-result?status=error&message=Giao dịch thất bại hoặc bị hủy`);
 		}
 	} catch (error) {
 		console.error("VNPay Return Error:", error);
-		res.status(500).json({
-			success: false,
-			message: "Lỗi xử lý kết quả thanh toán",
-			error: error.message,
-		});
+		return res.redirect(`/payment-result?status=error&message=Lỗi máy chủ khi xử lý thanh toán`);
 	}
 };
