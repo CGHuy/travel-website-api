@@ -7,6 +7,48 @@ function initAdminLayout() {
     const menuItems = document.querySelectorAll(".menu-item[data-page][data-file]");
     if (menuItems.length === 0) return;
 
+    // Logic thu gọn sidebar
+    const sidebarToggle = document.getElementById("sidebar-toggle");
+    const adminShell = document.querySelector(".admin-shell");
+    
+    if (sidebarToggle && adminShell) {
+        if (localStorage.getItem("admin-sidebar-collapsed") === "true") {
+            adminShell.classList.add("collapsed-sidebar");
+        }
+
+        sidebarToggle.addEventListener("click", () => {
+            adminShell.classList.toggle("collapsed-sidebar");
+            const isCollapsed = adminShell.classList.contains("collapsed-sidebar");
+            localStorage.setItem("admin-sidebar-collapsed", isCollapsed);
+            setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 300);
+        });
+    }
+
+    // --- MỚI: Xử lý Click để chuyển tab không load lại trang (SPA) ---
+    menuItems.forEach(item => {
+        const link = item.querySelector("a");
+        if (!link) return;
+
+        link.addEventListener("click", (e) => {
+            e.preventDefault(); // Ngăn trình duyệt load lại trang
+            
+            const page = item.getAttribute("data-page");
+            const newUrl = `${window.location.pathname}?page=${page}`;
+            
+            // Cập nhật URL trên thanh địa chỉ mà không load lại
+            history.pushState({ page }, "", newUrl);
+            
+            // Cập nhật nội dung ngay lập tức
+            setActiveMenu(page, menuItems);
+        });
+    });
+
+    // Xử lý khi nhấn nút Back/Forward của trình duyệt
+    window.addEventListener("popstate", (e) => {
+        const page = getCurrentPageQuery();
+        if (page) setActiveMenu(page, menuItems);
+    });
+
     const initialPage = getCurrentPageQuery();
     if (initialPage) {
         setActiveMenu(initialPage, menuItems);
@@ -35,6 +77,14 @@ async function setActiveMenu(page, menuItems) {
 
     if (contentEl) {
         contentEl.className = "";
+        // Hiện hiệu ứng loading ngay lập tức để người dùng biết tab đang chuyển
+        contentEl.innerHTML = `
+            <div class="d-flex justify-content-center align-items-center" style="min-height: 300px;">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status text-primary">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>`;
+
         try {
             const res = await fetch(`./${filePath}`);
             if (!res.ok) {

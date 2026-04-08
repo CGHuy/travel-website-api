@@ -19,53 +19,76 @@
 
         <div class="container-fluid admin-shell ">
             <div class="row g-4 px-lg-4">
-                <div class="col-12 col-lg-3">
+                <div class="col-12 col-lg-3" id="admin-sidebar-col">
                     <div class="card menu-card">
                         <div class="card-body p-3">
-                            <h5 class="card-title mb-3">Quản lý</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3 menu-header">
+                                <h5 class="card-title mb-0 menu-text">Quản lý</h5>
+                                <button id="sidebar-toggle" class="btn btn-sm btn-light border-0" title="Thu gọn/Mở rộng">
+                                    <i class="fa-solid fa-bars-staggered"></i>
+                                </button>
+                            </div>
                             <ul class="menu-list">
-                                <li class="menu-item" data-page="tour" data-file="tour.html">
-                                    <i class="fa-solid fa-map"></i>
-                                    <a class="menu-link" href="?page=tour">Quản lý tour</a>
+                                <li class="menu-item" data-page="tour" data-file="tour.html" title="Quản lý tour">
+                                    <a class="menu-link d-flex align-items-center gap-2" href="?page=tour">
+                                        <i class="fa-solid fa-map"></i>
+                                        <span class="menu-text">Quản lý tour</span>
+                                    </a>
                                 </li>
-                                <li class="menu-item" data-page="itinerary" data-file="tour-ititerary.html">
-                                    <i class="fa-solid fa-route"></i>
-                                    <a class="menu-link" href="?page=itinerary">Quản lý lịch trình</a>
+                                <li class="menu-item" data-page="itinerary" data-file="tour-ititerary.html" title="Quản lý lịch trình">
+                                    <a class="menu-link d-flex align-items-center gap-2" href="?page=itinerary">
+                                        <i class="fa-solid fa-route"></i>
+                                        <span class="menu-text">Quản lý lịch trình</span>
+                                    </a>
                                 </li>
-                                <li class="menu-item" data-page="departure" data-file="departure.html">
-                                    <i class="fa-solid fa-location-dot"></i>
-                                    <a class="menu-link" href="?page=departure">Quản lý điểm khởi hành</a>
+                                <li class="menu-item" data-page="departure" data-file="departure.html" title="Quản lý điểm khởi hành">
+                                    <a class="menu-link d-flex align-items-center gap-2" href="?page=departure">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        <span class="menu-text">Quản lý điểm khởi hành</span>
+                                    </a>
                                 </li>
-                                <li class="menu-item" data-page="booking" data-file="booking.html">
-                                    <i class="fa-solid fa-calendar-check"></i>
-                                    <a class="menu-link" href="?page=booking">Quản lý booking</a>
+                                <li class="menu-item" data-page="booking" data-file="booking.html" title="Quản lý booking">
+                                    <a class="menu-link d-flex align-items-center gap-2" href="?page=booking">
+                                        <i class="fa-solid fa-calendar-check"></i>
+                                        <span class="menu-text">Quản lý booking</span>
+                                    </a>
                                 </li>
-                                <li class="menu-item" data-page="service" data-file="service.html">
-                                    <i class="fa-solid fa-concierge-bell"></i>
-                                    <a class="menu-link" href="?page=service">Quản lý dịch vụ</a>
+                                <li class="menu-item" data-page="service" data-file="service.html" title="Quản lý dịch vụ">
+                                    <a class="menu-link d-flex align-items-center gap-2" href="?page=service">
+                                        <i class="fa-solid fa-concierge-bell"></i>
+                                        <span class="menu-text">Quản lý dịch vụ</span>
+                                    </a>
                                 </li>
-                                <li class="menu-item" data-page="tour-service" data-file="tour-service.html">
-                                    <i class="fa-solid fa-list"></i>
-                                    <a class="menu-link" href="?page=tour-service">Quản lý dịch vụ tour</a>
+                                <li class="menu-item" data-page="tour-service" data-file="tour-service.html" title="Quản lý dịch vụ tour">
+                                    <a class="menu-link d-flex align-items-center gap-2" href="?page=tour-service">
+                                        <i class="fa-solid fa-list"></i>
+                                        <span class="menu-text">Quản lý dịch vụ tour</span>
+                                    </a>
                                 </li>
-                                <li class="menu-item" data-page="tour-image" data-file="tour-image.html">
-                                    <i class="fa-solid fa-image"></i>
-                                    <a class="menu-link" href="?page=tour-image">Quản lý hình ảnh tour</a>
+                                <li class="menu-item" data-page="tour-image" data-file="tour-image.html" title="Quản lý hình ảnh tour">
+                                    <a class="menu-link d-flex align-items-center gap-2" href="?page=tour-image">
+                                        <i class="fa-solid fa-image"></i>
+                                        <span class="menu-text">Quản lý hình ảnh tour</span>
+                                    </a>
                                 </li>
-                                <li class="menu-item" data-page="user" data-file="user.html">
-                                    <i class="fa-solid fa-users"></i>
-                                    <a class="menu-link" href="?page=user">Quản lý user</a>
+                                <li class="menu-item" data-page="user" data-file="user.html" title="Quản lý user">
+                                    <a class="menu-link d-flex align-items-center gap-2" href="?page=user">
+                                        <i class="fa-solid fa-users"></i>
+                                        <span class="menu-text">Quản lý user</span>
+                                    </a>
                                 </li>
-                                <li class="menu-item" data-page="statistics" data-file="statistics.html">
-                                    <i class="fa-solid fa-chart-column"></i>
-                                    <a class="menu-link" href="?page=statistics">Thống kê</a>
+                                <li class="menu-item" data-page="statistics" data-file="statistics.html" title="Thống kê">
+                                    <a class="menu-link d-flex align-items-center gap-2" href="?page=statistics">
+                                        <i class="fa-solid fa-chart-column"></i>
+                                        <span class="menu-text">Thống kê</span>
+                                    </a>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-lg-9">
+                <div class="col-12 col-lg-9" id="admin-main-col">
                     <div class="card content-card">
                         <div class="card-body p-4">
                             <div id="admin-content"></div>

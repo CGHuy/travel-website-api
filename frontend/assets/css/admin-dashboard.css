@@ -22,26 +22,21 @@ body {
 }
 
 .menu-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     border-radius: 10px;
-    padding: 10px 12px;
+    margin-bottom: 4px;
     color: #1f2937;
     transition: all 0.2s ease;
 }
 
 .menu-link {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    text-align: left;
-    font: inherit;
-    color: inherit;
-    flex: 1;
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
     text-decoration: none;
+    color: inherit;
+    width: 100%;
+    cursor: pointer;
 }
 
 .menu-link:hover,
@@ -94,4 +89,42 @@ body {
     .menu-card {
         position: static;
     }
+}
+
+/* Sidebar Collapse */
+#admin-sidebar-col, #admin-main-col {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsed-sidebar #admin-sidebar-col {
+    width: 80px;
+    flex: 0 0 80px;
+}
+
+.collapsed-sidebar #admin-main-col {
+    width: calc(100% - 80px);
+    flex: 0 0 calc(100% - 80px);
+}
+
+.collapsed-sidebar .menu-text {
+    display: none !important;
+}
+
+.collapsed-sidebar .menu-item i {
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+.collapsed-sidebar .menu-link {
+    justify-content: center;
+    padding: 12px 0;
+    gap: 0;
+}
+
+.collapsed-sidebar .menu-header {
+    justify-content: center !important;
+}
+
+.collapsed-sidebar .menu-card .card-body {
+    padding: 1rem 0.5rem !important;
 }
