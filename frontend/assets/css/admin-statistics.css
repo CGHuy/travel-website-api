@@ -1,0 +1,370 @@
+/* ========================================
+   ADMIN STATISTICS PAGE STYLES
+   ======================================== */
+
+/* Page Header */
+.stats-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.stats-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.stats-title i { color: #3b82f6; }
+.stats-subtitle { color: #64748b; margin: 0; font-size: 0.9rem; }
+
+/* ---- KPI Cards ---- */
+.kpi-card {
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.18);
+}
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    pointer-events: none;
+}
+.kpi-revenue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.kpi-booking { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.kpi-users   { background: linear-gradient(135deg, #10b981, #065f46); }
+.kpi-pending { background: linear-gradient(135deg, #f59e0b, #b45309); }
+
+.kpi-icon {
+    font-size: 1.4rem;
+    opacity: 0.85;
+    margin-bottom: 6px;
+}
+.kpi-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 4px 0;
+}
+.kpi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.2);
+    width: fit-content;
+}
+.kpi-badge-neutral { background: rgba(255,255,255,0.15); }
+.kpi-badge.up   { background: rgba(110,231,183,0.3); }
+.kpi-badge.down { background: rgba(252,165,165,0.3); }
+
+/* ---- Stat Card ---- */
+.stat-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(30,41,59,0.06);
+    transition: box-shadow 0.2s ease;
+}
+.stat-card:hover { box-shadow: 0 8px 28px rgba(30,41,59,0.1); }
+
+.stat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.stat-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.stat-card-title i { color: #3b82f6; font-size: 0.95rem; }
+
+/* ---- Year Control ---- */
+.year-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.year-btn {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: #475569;
+    transition: all 0.15s ease;
+}
+.year-btn:hover { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+.year-display { font-weight: 700; color: #0f172a; font-size: 0.95rem; min-width: 40px; text-align: center; }
+
+/* ---- Chart Wrapper ---- */
+.chart-wrapper {
+    position: relative;
+    height: 260px;
+}
+.chart-wrapper--pie {
+    height: 200px;
+    max-width: 200px;
+    margin: 0 auto 12px;
+}
+
+/* ---- Pie Legend ---- */
+.pie-legend {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #475569;
+    font-weight: 500;
+}
+.legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* ---- Stats Table ---- */
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.stats-table th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.stats-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    vertical-align: middle;
+}
+.stats-table tr:last-child td { border-bottom: none; }
+.stats-table tr:hover td { background: #f8fafc; }
+
+.tour-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+.rank-1 { background: #fef3c7; color: #92400e; }
+.rank-2 { background: #e0e7ff; color: #3730a3; }
+.rank-3 { background: #fce7f3; color: #9d174d; }
+.rank-other { background: #f1f5f9; color: #64748b; }
+
+.region-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #1d4ed8;
+    white-space: nowrap;
+}
+
+.star-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    color: #d97706;
+    font-size: 0.85rem;
+}
+
+/* ---- Rating Bars ---- */
+.rating-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.rating-bar-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    min-width: 28px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.rating-bar-label i { color: #f59e0b; font-size: 0.75rem; }
+.rating-bar-track {
+    flex: 1;
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.rating-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+}
+.rating-bar-count { font-size: 0.78rem; color: #94a3b8; min-width: 24px; text-align: right; }
+
+.avg-rating-badge {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.avg-rating-badge::after {
+    content: '★';
+    font-size: 1.1rem;
+}
+
+/* ---- Top Rated / Customer Lists ---- */
+.top-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.top-item:last-child { border-bottom: none; }
+
+.top-item-rank {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #cbd5e1;
+    min-width: 20px;
+    text-align: center;
+}
+.top-item:nth-child(1) .top-item-rank { color: #f59e0b; }
+.top-item:nth-child(2) .top-item-rank { color: #94a3b8; }
+.top-item:nth-child(3) .top-item-rank { color: #cd7f32; }
+
+.top-item-body { flex: 1; min-width: 0; }
+.top-item-name {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.top-item-meta { font-size: 0.77rem; color: #94a3b8; margin-top: 2px; }
+
+.top-item-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    text-align: right;
+    white-space: nowrap;
+}
+.top-item-value small { display: block; font-size: 0.7rem; color: #94a3b8; font-weight: 400; }
+
+/* ---- Occupancy bar ---- */
+.occupancy-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.occupancy-bar-track {
+    width: 80px;
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.occupancy-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+}
+.occupancy-bar-fill.high  { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+.occupancy-bar-fill.full  { background: #ef4444; }
+
+/* ---- Status badges ---- */
+.status-badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.status-open     { background: #dcfce7; color: #166534; }
+.status-closed   { background: #f1f5f9; color: #64748b; }
+.status-full     { background: #fee2e2; color: #991b1b; }
+.status-confirmed{ background: #dcfce7; color: #166534; }
+.status-pending  { background: #fef3c7; color: #92400e; }
+.status-cancelled{ background: #fee2e2; color: #991b1b; }
+
+/* ---- Loader ---- */
+.stats-loader {
+    width: 32px; height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Responsive ---- */
+@media (max-width: 767px) {
+    .kpi-value { font-size: 1.2rem; }
+    .stats-title { font-size: 1.3rem; }
+    .stat-card { padding: 16px; }
+    .chart-wrapper { height: 220px; }
+}
