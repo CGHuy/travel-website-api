@@ -107,11 +107,26 @@
         </div>
         <div class="card-body p-3">
             <input type="hidden" class="day-number-input" value="" />
-
-            <div class="form-group">
-                <label class="form-label fw-bold"> <i class="fas fa-align-left text-secondary me-1"></i>Mô tả </label>
-                <textarea class="form-control day-description-textarea" rows="3" placeholder="Nhập mô tả chi tiết các hoạt động trong ngày này..." required> </textarea>
-            </div>
+            <textarea class="form-control day-description-textarea" rows="3" placeholder="Nhập mô tả chi tiết các hoạt động trong ngày này..." required> </textarea>
         </div>
     </div>
 </template>
+
+<!-- Dialog xác nhận xóa tất cả lịch trình -->
+<div class="modal fade" id="deleteAllItineraryModal" tabindex="-1" aria-labelledby="deleteAllItineraryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAllItineraryModalLabel">Xác nhận xóa tất cả lịch trình</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa tất cả lịch trình cho tour này không?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-all-itinerary">Xóa tất cả</button>
+            </div>
+        </div>
+    </div>
+</div>

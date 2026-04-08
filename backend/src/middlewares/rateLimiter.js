@@ -7,7 +7,7 @@ const rateLimit = require("express-rate-limit");
 // Giới hạn chung cho tất cả các request
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 phút
-    max: 100, // 100 request/15 phút
+    max: 1000, // 100 request/15 phút
     message: {
         success: false,
         message: "Quá nhiều request từ địa chỉ IP này, vui lòng thử lại sau 15 phút",

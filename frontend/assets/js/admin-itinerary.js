@@ -2,6 +2,7 @@ const ITINERARY_TOUR_API_URL = "/api/tours";
 const ITINERARY_API_URL = "/api/tourItinerary";
 
 let adminItineraryCache = [];
+let pendingDeleteAllTourId = NaN;
 
 async function initAdminItineraryPage() {
     const listEl = document.getElementById("tour-itinerary-list");
@@ -15,6 +16,7 @@ async function initAdminItineraryPage() {
     bindAddDayButton();
     bindRemoveDayButton();
     bindDeleteAllItineraryButton();
+    bindDeleteAllItineraryConfirmButton();
     bindItineraryModalReset();
 
     await fetchAndRenderItineraryTours();
@@ -212,6 +214,7 @@ function renderItineraryDays(days) {
 
     if (!Array.isArray(days) || days.length === 0) {
         appendNewDayItem();
+        updateDayInputs();
         return;
     }
 
@@ -347,23 +350,39 @@ function bindDeleteAllItineraryButton() {
     const deleteAllBtn = document.getElementById("delete-all-itinerary-btn");
     if (!deleteAllBtn || deleteAllBtn.dataset.bound === "true") return;
 
-    deleteAllBtn.addEventListener("click", async () => {
+    deleteAllBtn.addEventListener("click", () => {
         const tourId = Number(deleteAllBtn.dataset.tourId || NaN);
-        const tourName = String(deleteAllBtn.dataset.tourName || "tour này");
         if (!Number.isFinite(tourId)) {
             return;
         }
 
-        const confirmed = window.confirm(`Bạn có chắc muốn xóa toàn bộ lịch trình của ${tourName}?`);
-        if (!confirmed) {
+        pendingDeleteAllTourId = tourId;
+        const confirmModalEl = document.getElementById("deleteAllItineraryModal");
+        if (!confirmModalEl) return;
+
+        setItineraryModalDimState(true);
+        const confirmModal = bootstrap.Modal.getOrCreateInstance(confirmModalEl);
+        confirmModal.show();
+    });
+
+    deleteAllBtn.dataset.bound = "true";
+}
+
+function bindDeleteAllItineraryConfirmButton() {
+    const confirmBtn = document.getElementById("confirm-delete-all-itinerary");
+    const confirmModalEl = document.getElementById("deleteAllItineraryModal");
+    if (!confirmBtn || !confirmModalEl || confirmBtn.dataset.bound === "true") return;
+
+    confirmBtn.addEventListener("click", async () => {
+        if (!Number.isFinite(pendingDeleteAllTourId)) {
             return;
         }
 
-        deleteAllBtn.disabled = true;
+        confirmBtn.disabled = true;
 
         try {
             const token = localStorage.getItem("token") || "";
-            const res = await fetch(`${ITINERARY_API_URL}/${tourId}`, {
+            const res = await fetch(`${ITINERARY_API_URL}/${pendingDeleteAllTourId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -375,16 +394,23 @@ function bindDeleteAllItineraryButton() {
                 throw new Error(getApiErrorMessage(data, `Xóa lịch trình thất bại (HTTP ${res.status})`));
             }
 
+            const confirmModal = bootstrap.Modal.getOrCreateInstance(confirmModalEl);
+            confirmModal.hide();
             hideModalById("itineraryModal");
             await fetchAndRenderItineraryTours();
         } catch (error) {
             window.alert(error.message || "Không thể xóa toàn bộ lịch trình.");
         } finally {
-            deleteAllBtn.disabled = false;
+            confirmBtn.disabled = false;
         }
     });
 
-    deleteAllBtn.dataset.bound = "true";
+    confirmModalEl.addEventListener("hidden.bs.modal", () => {
+        pendingDeleteAllTourId = NaN;
+        setItineraryModalDimState(false);
+    });
+
+    confirmBtn.dataset.bound = "true";
 }
 
 function collectItineraryPayload() {
@@ -413,6 +439,7 @@ function bindItineraryModalReset() {
     if (!modalEl || !form || modalEl.dataset.boundReset === "true") return;
 
     modalEl.addEventListener("hidden.bs.modal", () => {
+        setItineraryModalDimState(false);
         form.reset();
         if (form.elements.tour_id) {
             form.elements.tour_id.value = "";
@@ -426,6 +453,22 @@ function bindItineraryModalReset() {
     });
 
     modalEl.dataset.boundReset = "true";
+}
+
+function setItineraryModalDimState(isDimmed) {
+    const itineraryModalEl = document.getElementById("itineraryModal");
+    if (!itineraryModalEl) return;
+
+    const modalContent = itineraryModalEl.querySelector(".modal-content");
+    if (!modalContent) return;
+
+    modalContent.style.transition = "filter 0.2s ease";
+
+    if (isDimmed) {
+        modalContent.style.filter = "brightness(35%)";
+    } else {
+        modalContent.style.filter = "";
+    }
 }
 
 function hideModalById(modalId) {
