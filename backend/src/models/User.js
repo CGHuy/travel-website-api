@@ -183,6 +183,10 @@ class User {
 				query += ` AND fullname LIKE ?`;
 				params.push(`%${filters.fullname}%`);
 			}
+			if (filters.email) {
+				query += ` AND email LIKE ?`;
+				params.push(`%${filters.email}%`);
+			}
 
 			query += ` ORDER BY id DESC`;
 
