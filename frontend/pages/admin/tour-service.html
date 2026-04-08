@@ -1,11 +1,9 @@
 ﻿<div class="card-header d-flex justify-content-between align-items-center p-0 px-4">
     <div>
-        <h5 class="card-title">
-            <i class="fa-solid fa-list me-2"></i>Quản lý Dịch vụ Tour
-        </h5>
+        <h5 class="card-title"><i class="fa-solid fa-list me-2"></i>Quản lý Dịch vụ Tour</h5>
     </div>
     <div class="text-end mb-2">
-        <span class="badge bg-info">Tổng: 0 tour có dịch vụ</span>
+        <span id="total-tour-has-service" class="badge bg-info">Tổng: 0 tour có dịch vụ</span>
     </div>
 </div>
 <div class="card-body">
@@ -13,70 +11,9 @@
         <span class="input-group-text search-icon">
             <i class="fa-solid fa-magnifying-glass fa-sm"></i>
         </span>
-        <input class="form-control search-input" placeholder="Tìm kiếm tour theo id, tên..." value=""
-            aria-label="Tìm kiếm" />
+        <input class="form-control search-input" placeholder="Tìm kiếm tour theo id, tên..." value="" aria-label="Tìm kiếm" />
     </div>
-    <ul class="list-group list-group-flush" id="tour-service-list">
-        <li class="list-group-item p-3 hover-shadow">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-start align-items-center">
-                        <div class="me-3">
-                            <span class="badge bg-secondary">TR001</span>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1">Tour Mẫu</h6>
-                            <small class="text-muted">
-                                <i class="fas fa-map-marker-alt me-1"></i> Hà Nội
-                            </small>
-                            <br>
-                            <small class="text-muted">
-                                <i class="fas fa-briefcase me-1"></i>
-                                <span class="text-success"><i class="fas fa-check-circle me-1"></i> Đã có dịch vụ</span>
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 text-end">
-                    <button class="btn btn-sm btn-outline-primary open-service-modal" data-tour-id="1"
-                        data-tour-name="Tour Mẫu" data-action-name="Sửa" data-bs-toggle="modal"
-                        data-bs-target="#serviceModal">
-                        <i class="fas fa-edit"></i> Chỉnh sửa
-                    </button>
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item p-3 hover-shadow">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-start align-items-center">
-                        <div class="me-3">
-                            <span class="badge bg-secondary">TR002</span>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1">Tour Mẫu 2</h6>
-                            <small class="text-muted">
-                                <i class="fas fa-map-marker-alt me-1"></i> Đà Nẵng
-                            </small>
-                            <br>
-                            <small class="text-muted">
-                                <i class="fas fa-briefcase me-1"></i>
-                                <span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i> Chưa có dịch
-                                    vụ</span>
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 text-end">
-                    <button class="btn btn-sm btn-primary open-service-modal" data-tour-id="2"
-                        data-tour-name="Tour Mẫu 2" data-action-name="Thêm" data-bs-toggle="modal"
-                        data-bs-target="#serviceModal">
-                        <i class="fas fa-plus"></i> Thêm mới
-                    </button>
-                </div>
-            </div>
-        </li>
-    </ul>
+    <ul class="list-group list-group-flush" id="tour-service-list"></ul>
 </div>
 
 <div class="modal fade" id="serviceModal" tabindex="-1" aria-labelledby="serviceModalLabel" aria-hidden="true">
@@ -87,49 +24,19 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="#" method="POST" id="service-form">
-                <input type="hidden" name="tour_id" id="form-tour-id" value="">
+                <input type="hidden" name="tour_id" id="form-tour-id" value="" />
                 <div class="modal-body pt-0">
                     <div class="input-group search-group mb-3">
                         <span class="input-group-text search-icon">
                             <i class="fa-solid fa-magnifying-glass fa-sm"></i>
                         </span>
-                        <input id="service-search-input" class="form-control"
-                            placeholder="Tìm kiếm dịch vụ theo id, tên..." value="" aria-label="Tìm kiếm" />
+                        <input id="service-search-input" class="form-control" placeholder="Tìm kiếm dịch vụ theo id, tên..." value="" aria-label="Tìm kiếm" />
                     </div>
-                    <div id="services-container">
-                        <div class="form-check mb-3 p-3 border rounded bg-light service-item" data-service-id="SV001"
-                            data-service-name="Ăn uống">
-                            <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="1"
-                                id="service1">
-                            <label class="form-check-label w-100 cursor-pointer" for="service1">
-                                <strong>Ăn uống</strong>
-                                <br>
-                                <small class="text-muted">Mã dịch vụ: SV001</small>
-                                <br>
-                                <small class="text-muted">Bao gồm ăn sáng, trưa và tối.</small>
-                            </label>
-                        </div>
-                        <div class="form-check mb-3 p-3 border rounded bg-light service-item" data-service-id="SV002"
-                            data-service-name="Vận chuyển">
-                            <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="2"
-                                id="service2">
-                            <label class="form-check-label w-100 cursor-pointer" for="service2">
-                                <strong>Vận chuyển</strong>
-                                <br>
-                                <small class="text-muted">Mã dịch vụ: SV002</small>
-                                <br>
-                                <small class="text-muted">Xe đưa đón sân bay và tham quan.</small>
-                            </label>
-                        </div>
-                    </div>
+                    <div id="services-container"></div>
                 </div>
                 <div class="modal-footer p-3 pb-0">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="fas fa-save me-1"></i> Lưu Dịch vụ
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Hủy
-                    </button>
+                    <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-1"></i> Lưu Dịch vụ</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i> Hủy</button>
                 </div>
             </form>
         </div>

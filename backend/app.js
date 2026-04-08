@@ -32,6 +32,7 @@ const authRoutes = require("./src/routes/authRoutes");
 const bookingRoutes = require("./src/routes/bookingRoutes");
 const userRoutes = require("./src/routes/userRoutes");
 const servicesRoute = require("./src/routes/servicesRouter");
+const tourServiceRoutes = require("./src/routes/tourServiceRoutes");
 const wishlistRoutes = require("./src/routes/wishlistRoutes");
 
 // Lịch trình chỉ gắn với 1 tour, nên mount riêng theo tourId
@@ -42,6 +43,7 @@ app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);
 app.use("/api/services", createLimiter, servicesRoute);
+app.use("/api/tour-services", tourServiceRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 
 // DYNAMIC VIEW ROUTER
