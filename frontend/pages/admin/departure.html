@@ -341,7 +341,7 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    window.initAdminDeparturePage = async function() {
         const departureList = document.getElementById('departureList');
 
         // Hàm format currency
@@ -367,7 +367,7 @@
                     return;
                 }
 
-                const response = await fetch('http://localhost:3000/api/departures/all', {
+                const response = await fetch('/api/departures/all', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -475,5 +475,5 @@
 
         // Thực thi việc fetch dữ liệu
         fetchDepartures();
-    });
+    };
 </script>
