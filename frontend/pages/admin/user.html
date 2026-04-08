@@ -56,48 +56,99 @@
         transform: translateY(0);
     }
 
-    .search-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
+    .filter-wrapper {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        border: 1px solid #f3f4f6;
         margin-bottom: 24px;
     }
-    
-    .search-wrapper i {
-        position: absolute;
-        left: 20px;
-        color: #9ca3af;
-        font-size: 1.1rem;
-        pointer-events: none;
-        transition: color 0.3s;
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
     }
 
-    .search-input-modern {
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .filter-item label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        margin-left: 4px;
+    }
+
+    .filter-input, .filter-select {
         width: 100%;
-        padding: 16px 20px 16px 52px;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-        background-color: #f9fafb;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
         font-size: 0.95rem;
-        color: #1f2937;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset;
+        color: #1e293b;
+        transition: all 0.3s ease;
     }
 
-    .search-input-modern::placeholder {
-        color: #9ca3af;
-    }
-
-    .search-input-modern:focus {
+    .filter-input:focus, .filter-select:focus {
         outline: none;
         border-color: #3b82f6;
         background-color: #ffffff;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
-    
-    .search-input-modern:focus + i,
-    .search-input-modern:focus ~ i {
-        color: #3b82f6;
+
+    .filter-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        align-items: center;
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 16px;
+    }
+
+    .btn-search-advanced {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-search-advanced:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-reset-advanced {
+        background: #f8fafc;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-reset-advanced:hover {
+        background: #e2e8f0;
+        color: #1e293b;
     }
 
     .table-container {
@@ -238,9 +289,47 @@
         </button>
     </div>
 
-    <div class="search-wrapper">
-        <input type="text" class="search-input-modern" placeholder="Tìm kiếm user theo id, tên, email, số điện thoại..." />
-        <i class="fa-solid fa-magnifying-glass"></i>
+    <div class="filter-wrapper">
+        <div class="filter-grid">
+            <div class="filter-item">
+                <label for="filterId">User ID</label>
+                <input type="text" id="filterId" class="filter-input" placeholder="Ví dụ: 7" />
+            </div>
+            <div class="filter-item">
+                <label for="filterFullname">Họ và tên</label>
+                <input type="text" id="filterFullname" class="filter-input" placeholder="Nhập tên..." />
+            </div>
+            <div class="filter-item">
+                <label for="filterPhone">Số điện thoại</label>
+                <input type="text" id="filterPhone" class="filter-input" placeholder="Nhập SĐT..." />
+            </div>
+            <div class="filter-item">
+                <label for="filterRole">Vai trò</label>
+                <select id="filterRole" class="filter-select">
+                    <option value="">Tất cả</option>
+                    <option value="admin">Admin</option>
+                    <option value="customer">Khách hàng</option>
+                    <option value="tour-staff">Nhân viên Tour</option>
+                    <option value="booking-staff">Nhân viên Booking</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="filterStatus">Trạng thái</label>
+                <select id="filterStatus" class="filter-select">
+                    <option value="">Tất cả</option>
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Đã khóa</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button id="resetFilterBtn" class="btn-reset-advanced">
+                <i class="fa-solid fa-rotate-right"></i> Làm mới
+            </button>
+            <button id="searchBtn" class="btn-search-advanced">
+                <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm
+            </button>
+        </div>
     </div>
 
     <div class="table-container">
@@ -270,6 +359,13 @@
 <script>
     window.initAdminUserPage = async function() {
         const userTableBody = document.getElementById('userTableBody');
+        const filterId = document.getElementById('filterId');
+        const filterFullname = document.getElementById('filterFullname');
+        const filterPhone = document.getElementById('filterPhone');
+        const filterRole = document.getElementById('filterRole');
+        const filterStatus = document.getElementById('filterStatus');
+        const searchBtn = document.getElementById('searchBtn');
+        const resetFilterBtn = document.getElementById('resetFilterBtn');
 
         // Hàm lấy chữ cái đầu tiên của tên để làm avatar
         function getAvatarLetter(fullname) {
@@ -358,5 +454,67 @@
 
         // Thực thi việc fetch dữ liệu
         await fetchUsers();
+
+        // Xử lý sự kiện tìm kiếm
+        const handleSearch = async () => {
+            const params = new URLSearchParams();
+            if (filterId.value.trim()) params.append('id', filterId.value.trim());
+            if (filterFullname.value.trim()) params.append('fullname', filterFullname.value.trim());
+            if (filterPhone.value.trim()) params.append('phone', filterPhone.value.trim());
+            if (filterRole.value) params.append('role', filterRole.value);
+            if (filterStatus.value !== '') params.append('status', filterStatus.value);
+
+            const queryString = params.toString();
+            if (!queryString) {
+                return fetchUsers();
+            }
+
+            await doSearchUser(queryString);
+        };
+
+        searchBtn.addEventListener('click', handleSearch);
+        
+        [filterId, filterFullname, filterPhone].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+        });
+
+        resetFilterBtn.addEventListener('click', () => {
+            filterId.value = '';
+            filterFullname.value = '';
+            filterPhone.value = '';
+            filterRole.value = '';
+            filterStatus.value = '';
+            fetchUsers();
+        });
+
+        // Hàm gọi API tìm kiếm
+        async function doSearchUser(queryString) {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tìm kiếm...</td></tr>`;
+
+            try {
+                const response = await fetch(`/api/users/search?${queryString}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const dataToRender = Array.isArray(result.data) ? result.data : [result.data];
+                    renderUsers(dataToRender);
+                } else {
+                    userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #6b7280;">Không tìm thấy người dùng phù hợp.</td></tr>`;
+                }
+            } catch (error) {
+                console.error('Lỗi khi tìm kiếm:', error);
+                userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Đã xảy ra lỗi khi tìm kiếm.</td></tr>`;
+            }
+        }
     };
 </script>
