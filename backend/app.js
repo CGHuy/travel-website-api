@@ -38,7 +38,7 @@ const userRoutes = require("./src/routes/userRoutes");
 const wishlistRoutes = require("./src/routes/wishlistRoutes");
 
 app.use("/api/tours", searchLimiter, tourRoutes);
-app.use("/api/list-tours", listTourRoutes);
+app.use("/api/list-tours", searchLimiter, listTourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);

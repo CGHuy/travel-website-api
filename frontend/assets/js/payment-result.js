@@ -15,16 +15,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const resultContainer = document.getElementById("result-container");
 
-    if (status === "success") {
+    if (bookingId) {
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch(`/api/bookings/${bookingId}`, {
+            if (!token) throw new Error("Vui lòng đăng nhập");
+
+            // Chỉ lấy thông tin booking của ĐÚNG MÌNH. URL an toàn.
+            const response = await fetch(`/api/bookings/${bookingId}/details`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             const resData = await response.json();
             
             if (resData.success && resData.data) {
                 const booking = resData.data;
+
+                // LOGIC BẢO MẬT: Kiểm tra cứng trạng thái từ DB, bỏ qua thao túng URL
+                if (booking.payment_status !== 'paid') {
+                    showError("Giao dịch chưa được thanh toán thành công hoặc đã bị hủy.");
+                    return;
+                }
+
                 const formattedPrice = new Intl.NumberFormat('vi-VN').format(booking.total_price) + " ₫";
                 const depDate = new Date(booking.departure_date).toLocaleDateString('vi-VN');
 
@@ -65,39 +75,30 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                 `;
                 return;
+            } else {
+                showError("Không thể tìm thấy thông tin đơn hàng này.");
+                return;
             }
         } catch (error) {
             console.error("Lỗi khi tải thông tin đơn hàng:", error);
+            showError("Lỗi hệ thống khi tải dữ liệu đơn hàng.");
+            return;
         }
+    }
 
-        // Fallback nếu không lấy được data chi tiết
-        resultContainer.innerHTML = `
-            <div class="icon-box success-icon animate-up">
-                <i class="fa-solid fa-check"></i>
-            </div>
-            <h2 class="fw-bold mb-3 text-dark">Thanh Toán Thành Công!</h2>
-            <p class="text-muted mb-4">Cảm ơn bạn đã lựa chọn VietTour. Chuyến đi của bạn đã được xác nhận.</p>
-            
-            <div class="bg-light p-3 rounded-4 mb-4 text-start">
-                <p class="mb-1 text-secondary small">Mã đơn đặt tour:</p>
-                <p class="mb-0 fw-bold fs-5 text-dark">#${bookingId}</p>
-            </div>
+    // Nếu không có id hoặc có lỗi chung chung trên URL
+    showError(message);
 
-            <div class="d-flex flex-column gap-2">
-                <a href="/my-bookings" class="btn btn-home">Xem chi tiết đơn hàng</a>
-                <a href="/index" class="btn btn-link text-muted text-decoration-none">Về trang chủ</a>
-            </div>
-        `;
-    } else {
+    function showError(msg) {
         resultContainer.innerHTML = `
             <div class="icon-box error-icon animate-up">
                 <i class="fa-solid fa-xmark"></i>
             </div>
-            <h2 class="fw-bold mb-3 text-dark">Giao Dịch Thất Bại</h2>
-            <p class="text-muted mb-4">${decodeURIComponent(message)}</p>
+            <h2 class="fw-bold mb-3 text-dark">Nhắc Nhở Giao Dịch</h2>
+            <p class="text-muted mb-4">${decodeURIComponent(msg)}</p>
             
             <div class="d-flex flex-column gap-2">
-                <button onclick="window.history.back()" class="btn btn-outline-danger" style="border-radius: 12px; font-weight: 600; padding: 12px 24px;">Quay lại thử lại</button>
+                <a href="/my-bookings" class="btn btn-outline-danger" style="border-radius: 12px; font-weight: 600; padding: 12px 24px;">Xem đơn hàng của tôi</a>
                 <a href="/index" class="btn btn-link text-muted text-decoration-none">Về trang chủ</a>
             </div>
         `;
