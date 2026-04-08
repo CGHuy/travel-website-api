@@ -11,13 +11,6 @@ const {
 } = require("../middlewares/auth");
 
 // User routes - Cần đăng nhập
-router.post(
-	"/",
-	verifyToken,
-	isUser,
-	validateBookingTour,
-	bookingController.createBooking,
-);
 router.get(
 	"/my-bookings",
 	verifyToken,
@@ -48,6 +41,16 @@ router.put(
 	isBookingStaff,
 	bookingController.updateStatus,
 );
+
+// Integrations
+router.post(
+	"/create-payment-url",
+	verifyToken,
+	isUser,
+	validateBookingTour,
+	bookingController.createVNPayUrl,
+);
+router.get("/vnpay-return", bookingController.vnpayReturn);
 
 router.get("/:id", verifyToken, bookingController.getBookingDetails);
 

@@ -87,6 +87,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (document.getElementById("contact_email")) {
                     document.getElementById("contact_email").value = user.email || "";
                 }
+                if (document.getElementById("contact_dob") && user.dob) {
+                    // Flatpickr sẽ tự nhận diện định dạng yyyy-mm-dd từ database
+                    const contactDobInput = document.getElementById("contact_dob");
+                    if (contactDobInput._flatpickr) {
+                        contactDobInput._flatpickr.setDate(user.dob);
+                    }
+                }
             }
         } catch (error) {
             console.error("Error fetching user profile:", error);
@@ -149,6 +156,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (avaiSeatsCount) avaiSeatsCount.innerText = dep.seats_available;
                 if (extraInfoDiv) extraInfoDiv.style.display = "block";
 
+                // Kiểm tra nếu số người hiện tại vượt quá số chỗ mới chọn
+                validateSeats(dep.seats_available);
+
                 // Hiển thị phụ phí di chuyển
                 if (priceMovingAdultText) priceMovingAdultText.innerText = `+ ${movingAdultPrice.toLocaleString("vi-VN")} ₫`;
                 if (priceMovingChildText) priceMovingChildText.innerText = `+ ${movingChildPrice.toLocaleString("vi-VN")} ₫`;
@@ -166,14 +176,72 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     };
 
+    // Hàm kiểm tra và giới hạn số chỗ
+    const validateSeats = (maxSeats) => {
+        const adultsInput = document.getElementById("adults");
+        const childrenInput = document.getElementById("children");
+        
+        let adults = parseInt(adultsInput.value) || 0;
+        let children = parseInt(childrenInput.value) || 0;
+
+        if (adults + children > maxSeats) {
+            alert(`Rất tiếc, lịch khởi hành này chỉ còn ${maxSeats} chỗ trống.`);
+            
+            // Ưu tiên giữ người lớn, giảm trẻ em trước
+            if (adults > maxSeats) {
+                adultsInput.value = maxSeats;
+                childrenInput.value = 0;
+            } else {
+                childrenInput.value = maxSeats - adults;
+            }
+            
+            calculateTotal();
+            renderPassengerFields();
+        }
+    };
+
+    // Lắng nghe sự kiện nhập từ bàn phím
+    document.getElementById("adults").addEventListener("input", (e) => {
+        let val = parseInt(e.target.value);
+        if (isNaN(val) || val < 1) {
+            e.target.value = 1;
+        }
+        const depId = document.getElementById("departure_id").value;
+        const dep = departuresInfo.find(d => d.id == depId);
+        if (dep) validateSeats(dep.seats_available);
+        calculateTotal();
+        renderPassengerFields();
+    });
+
+    document.getElementById("children").addEventListener("input", (e) => {
+        const depId = document.getElementById("departure_id").value;
+        const dep = departuresInfo.find(d => d.id == depId);
+        if (dep) validateSeats(dep.seats_available);
+        calculateTotal();
+        renderPassengerFields();
+    });
+
     // Phase 2: Quantity & Calculation Logic
     window.updateQty = (type, change) => {
         const input = document.getElementById(type);
-        let current = parseInt(input.value);
+        let current = parseInt(input.value) || 0;
         let newVal = current + change;
 
         if (type === "adults" && newVal < 1) newVal = 1;
         if (type === "children" && newVal < 0) newVal = 0;
+
+        // Kiểm tra tổng số chỗ nếu đã chọn lịch khởi hành
+        const depId = document.getElementById("departure_id").value;
+        const dep = departuresInfo.find(d => d.id == depId);
+        
+        if (dep) {
+            const otherType = type === "adults" ? "children" : "adults";
+            const otherVal = parseInt(document.getElementById(otherType).value) || 0;
+            if (newVal + otherVal > dep.seats_available) {
+                alert(`Lịch trình này chỉ còn tối đa ${dep.seats_available} chỗ.`);
+                return;
+            }
+        }
 
         input.value = newVal;
         calculateTotal();
@@ -191,6 +259,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         document.getElementById("price-adult").innerText = currentAdultPrice.toLocaleString("vi-VN") + " ₫";
         document.getElementById("price-child").innerText = currentChildPrice.toLocaleString("vi-VN") + " ₫";
+
+        // Ẩn/Hiện các dòng liên quan đến trẻ em
+        const rowBaseChild = document.getElementById("row-base-child");
+        const rowMovingChild = document.getElementById("row-moving-child");
+        
+        if (children > 0) {
+            if (rowBaseChild) rowBaseChild.setAttribute("style", "display: flex !important;");
+            // Chỉ hiện dòng phụ phí nếu đã chọn lịch khởi hành (có movingChildPrice)
+            if (rowMovingChild && movingChildPrice > 0) {
+                rowMovingChild.setAttribute("style", "display: flex !important;");
+            } else if (rowMovingChild) {
+                rowMovingChild.setAttribute("style", "display: none !important;");
+            }
+        } else {
+            if (rowBaseChild) rowBaseChild.setAttribute("style", "display: none !important;");
+            if (rowMovingChild) rowMovingChild.setAttribute("style", "display: none !important;");
+        }
 
         document.getElementById("sum-passengers").innerText = `${adults + children} người`;
         document.getElementById("total-amount").innerText = total.toLocaleString("vi-VN") + " ₫";
@@ -228,6 +313,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         container.innerHTML = html;
+        initDatePickers();
+    };
+
+    const initDatePickers = () => {
+        flatpickr(".datepicker", {
+            locale: "vn",
+            dateFormat: "Y-m-d", // Định dạng lưu trữ/gửi server
+            altInput: true,
+            altFormat: "d/m/Y", // Định dạng hiển thị cho người dùng
+            allowInput: true
+        });
     };
 
     const generatePassengerRow = (index, label, type) => {
@@ -251,14 +347,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-secondary">Ngày sinh *</label>
-                        <input type="date" class="form-control form-control-sm" name="ps_dob_${index}" required>
+                        <input type="text" class="form-control form-control-sm datepicker" name="ps_dob_${index}" placeholder="dd/mm/yyyy" required>
                     </div>
                 </div>
             </div>
         `;
     };
 
-    // Phase 3: Submit Booking Form
+    // Phase 3: Submit Booking Form & VNPay Redirect
     document.getElementById("submitBooking").addEventListener("click", async (e) => {
         e.preventDefault();
 
@@ -268,25 +364,71 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        const formData = {
-            tour_id: tourId,
-            contact_name: document.getElementById("contact_name").value,
-            contact_phone: document.getElementById("contact_phone").value,
-            contact_email: document.getElementById("contact_email").value,
-            contact_dob: document.getElementById("contact_dob") ? document.getElementById("contact_dob").value : null,
-            note: document.getElementById("note").value,
-            departure_id: document.getElementById("departure_id").value,
-            adults: document.getElementById("adults").value,
-            children: document.getElementById("children").value,
-        };
+        const btn = e.currentTarget;
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Đang xử lý...';
 
-        // TODO: Call API for saving booking
-        console.log("Sending booking data:", formData);
-        alert("Cảm ơn bạn! Đã nhận yêu cầu đặt chỗ. Chuyển sang phần thanh toán...");
-        // window.location.href = `/payment?booking_id=...`;
+        try {
+            const token = localStorage.getItem("token");
+            const adults = parseInt(document.getElementById("adults").value);
+            const children = parseInt(document.getElementById("children").value);
+            
+            // Thu thập thông tin hành khách đi cùng
+            const passengers = [];
+            const totalCount = adults + children;
+            if (totalCount > 1) {
+                for (let i = 2; i <= totalCount; i++) {
+                    passengers.push({
+                        name: document.querySelector(`[name="ps_name_${i}"]`).value,
+                        gender: document.querySelector(`[name="ps_gender_${i}"]`).value,
+                        dob: document.querySelector(`[name="ps_dob_${i}"]`).value,
+                        type: i <= adults ? "adult" : "child"
+                    });
+                }
+            }
+
+            const bookingData = {
+                departure_id: document.getElementById("departure_id").value,
+                adults: adults,
+                children: children,
+                contact_name: document.getElementById("contact_name").value,
+                contact_phone: document.getElementById("contact_phone").value,
+                contact_email: document.getElementById("contact_email").value,
+                contact_dob: document.getElementById("contact_dob").value,
+                note: document.getElementById("note").value,
+                passengers: passengers
+            };
+
+            const response = await fetch("/api/bookings/create-payment-url", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(bookingData)
+            });
+
+            const result = await response.json();
+
+            if (result.vnpayUrl) {
+                // Chuyển hướng sang trang thanh toán của VNPay
+                window.location.href = result.vnpayUrl;
+            } else {
+                alert("Lỗi: " + (result.message || "Không thể tạo liên kết thanh toán."));
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        } catch (error) {
+            console.error("Booking Error:", error);
+            alert("Đã có lỗi xảy ra trong quá trình kết nối thanh toán.");
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+        }
     });
 
     // Start
+    initDatePickers();
     fetchTourAndDepartures();
     fetchUserProfile();
     renderPassengerFields();

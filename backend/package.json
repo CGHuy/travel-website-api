@@ -17,7 +17,8 @@
         "jsonwebtoken": "^9.0.3",
         "multer": "^2.0.2",
         "multer-storage-cloudinary": "^4.0.0",
-        "mysql2": "^3.16.1"
+        "mysql2": "^3.16.1",
+        "vnpay": "^2.5.0"
     },
     "devDependencies": {
         "nodemon": "^3.1.11"
