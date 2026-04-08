@@ -1,13 +1,23 @@
 const Booking = require("../models/Booking");
 const bookingService = require("../services/bookingService");
 const db = require("../config/database"); // Cần db để check tồn tại/tính giá
+const {
+	VNPay,
+	ignoreLogger,
+	ProductCode,
+	VnpLocale,
+	dateFormat,
+} = require("vnpay");
 
 // Tạo booking mới
 exports.createBooking = async (req, res) => {
 	try {
 		const user_id = req.user.id;
 		const result = req.body;
-		const { bookingId, total_price } = await bookingService.createBooking(user_id, result);
+		const { bookingId, total_price } = await bookingService.createBooking(
+			user_id,
+			result,
+		);
 		res.status(201).json({
 			success: true,
 			message: "Đặt tour thành công!",
@@ -200,3 +210,136 @@ exports.requestCancellation = async (req, res) => {
 		});
 	}
 };
+
+// Danh sách chờ để chứa Booking Data tạm thời trước khi VNPay xác nhận (Cách 3)
+const pendingBookingsCache = new Map();
+
+exports.createVNPayUrl = async (req, res) => {
+	try {
+		const vnpay = new VNPay({
+			tmnCode: process.env.VNP_TMN_CODE,
+			secureSecret: process.env.VNP_SECURE_SECRET,
+			vnpayHost: process.env.VNP_HOST,
+			testMode: true, // tùy chọn
+			hashAlgorithm: "SHA512", // tùy chọn
+			loggerFn: ignoreLogger, // tùy chọn
+		});
+
+		// Tính toán thời gian hết hạn (ví dụ: 15 phút sau hoặc ngày mai như trong ảnh)
+		const tomorrow = new Date();
+		tomorrow.setDate(tomorrow.getDate() + 1);
+
+		const amount = req.body.amount || 50000;
+		const orderInfo = req.body.orderInfo || "123456";
+		// Đảm bảo mã đơn hàng là duy nhất bằng thời gian thực tế kết hợp với chuỗi ngẫu nhiên
+		const uniqueStr = Math.random().toString(36).substring(2, 10).toUpperCase();
+		const txnRef = req.body.txnRef || `VNPAY_${Date.now()}_${uniqueStr}`;
+
+		// -- ÁP DỤNG CÁCH 3 Ở ĐÂY --
+		// Lưu tạm dữ liệu form vào bộ nhớ RAM của Server với khoá là txnRef
+		pendingBookingsCache.set(txnRef, {
+			userId: req.user.id,
+			bookingData: req.body // Bao gồm adults, children, list hành khách...
+		});
+		
+		// Tự động xoá dữ liệu này sau 30 phút để giải phóng bộ nhớ nếu user không thanh toán
+		setTimeout(() => pendingBookingsCache.delete(txnRef), 30 * 60 * 1000);
+		// --------------------------
+
+		// Dùng IP của client, nếu chạy local thì thường ra ::1 hoặc 127.0.0.1
+		const ipAddr =
+			req.headers["x-forwarded-for"] ||
+			req.connection.remoteAddress ||
+			"127.0.0.1";
+
+		const vnpayResponse = await vnpay.buildPaymentUrl({
+			vnp_Amount: amount,
+			vnp_IpAddr: ipAddr,
+			vnp_TxnRef: txnRef, // Mã đơn hàng luôn luôn là duy nhất mỗi lần gọi
+			vnp_OrderInfo: orderInfo,
+			vnp_OrderType: ProductCode.Other,
+			vnp_ReturnUrl: process.env.VNP_RETURN_URL, 
+			vnp_Locale: VnpLocale.VN,
+			vnp_CreateDate: dateFormat(new Date()), // tùy chọn, mặc định là hiện tại
+			vnp_ExpireDate: dateFormat(tomorrow), // tùy chọn
+		});
+
+		return res.status(201).json(vnpayResponse);
+	} catch (error) {
+		console.error("VNPay create URL error:", error);
+		res.status(500).json({
+			success: false,
+			message: "Lỗi tạo URL thanh toán VNPay",
+			error: error.message,
+		});
+	}
+};
+
+exports.vnpayReturn = async (req, res) => {
+	try {
+		const vnpay = new VNPay({
+			tmnCode: process.env.VNP_TMN_CODE,
+			secureSecret: process.env.VNP_SECURE_SECRET,
+			vnpayHost: process.env.VNP_HOST,
+			hashAlgorithm: "SHA512",
+		});
+
+		const verify = vnpay.verifyReturnUrl(req.query);
+		if (verify.isSuccess) {
+			const txnRef = req.query.vnp_TxnRef;
+			let newBookingId = null;
+
+			// -- ÁP DỤNG CÁCH 3 Ở ĐÂY --
+			// VNPay báo thành công -> Lấy dữ liệu tạm ra và tạo Booking thật
+			if (pendingBookingsCache.has(txnRef)) {
+				const { userId, bookingData } = pendingBookingsCache.get(txnRef);
+				
+				try {
+					// Việc trừ số ghế và tính giá sẽ chạy ở phía service
+					const { bookingId } = await bookingService.createBooking(userId, bookingData);
+					newBookingId = bookingId;
+
+					// Cập nhật trạng thái "Đã thanh toán"
+					await Booking.updateStatus(bookingId, "payment_status", "paid");
+					await Booking.updateStatus(bookingId, "status", "confirmed");
+					
+					// Đã tạo DB thành công nên xoá trong Cache tạm đi
+					pendingBookingsCache.delete(txnRef);
+				} catch (err) {
+					console.error("Lỗi khi tạo booking thật:", err);
+				}
+			}
+			// -------------------------
+
+			// Thanh toán thành công
+			// Ở đây bạn nên cập nhật trạng thái đơn hàng trong DB
+			return res.status(200).json({
+				success: true,
+				message: "Thanh toán thành công qua VNPay",
+				newBookingId: newBookingId,
+				data: verify,
+			});
+		} else {
+			// Xoá Cache tạm do người dùng huỷ thanh toán
+			const txnRef = req.query.vnp_TxnRef;
+			if (pendingBookingsCache.has(txnRef)) {
+				pendingBookingsCache.delete(txnRef);
+			}
+
+			// Thanh toán thất bại hoặc chữ ký không hợp lệ
+			return res.status(400).json({
+				success: false,
+				message: "Thanh toán thất bại hoặc phản hồi không hợp lệ",
+				data: verify,
+			});
+		}
+	} catch (error) {
+		console.error("VNPay return error:", error);
+		res.status(500).json({
+			success: false,
+			message: "Lỗi xử lý phản hồi từ VNPay",
+			error: error.message,
+		});
+	}
+};
+

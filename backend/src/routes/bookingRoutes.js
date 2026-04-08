@@ -10,6 +10,7 @@ const {
 	isOwner,
 } = require("../middlewares/auth");
 
+
 // User routes - Cần đăng nhập
 router.post(
 	"/",
@@ -48,6 +49,10 @@ router.put(
 	isBookingStaff,
 	bookingController.updateStatus,
 );
+
+// Integrations
+router.post("/create-qr", verifyToken, isUser, bookingController.createVNPayUrl);
+router.get("/vnpay-return", bookingController.vnpayReturn);
 
 router.get("/:id", verifyToken, bookingController.getBookingDetails);
 
