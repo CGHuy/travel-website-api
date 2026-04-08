@@ -13,6 +13,10 @@
         <link rel="stylesheet" href="../../assets/css/index.css" />
         <link rel="stylesheet" href="../../assets/css/user-sidebar.css" />
         <style>
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
             .profile-form-container {
                 background: #fff;
                 border: 1px solid #e9ecef;
@@ -57,9 +61,36 @@
                 color: #bdc3c7;
                 cursor: pointer;
                 transition: color 0.2s;
+                padding: 4px 6px;
+                border-radius: 4px;
             }
             .profile-field-edit:hover {
                 color: #3498db;
+                background: #eaf4fc;
+            }
+            .profile-inline-input {
+                border: none;
+                border-bottom: 2px solid #3498db;
+                outline: none;
+                font-size: 15px;
+                color: #34495e;
+                background: transparent;
+                width: 100%;
+                padding: 2px 4px;
+                transition: border-color 0.2s;
+            }
+            .profile-inline-input:focus {
+                border-bottom-color: #2980b9;
+            }
+            .profile-field-edit.active {
+                color: #e74c3c;
+            }
+            .profile-field-edit.active:hover {
+                background: #fdecea;
+            }
+            .profile-save-btn {
+                margin-top: 24px;
+                display: none;
             }
             .back-link {
                 color: #2c3e50;
@@ -108,49 +139,17 @@
                             <p class="profile-subtitle">Cập nhật thông tin của Quý khách và tìm hiểu các thông tin này được sử dụng ra sao</p>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
                                 <div class="profile-field-row">
                                     <div class="profile-field-label">Họ tên</div>
-                                    <div class="profile-field-value" id="field-name">Khanh Ngoc</div>
+                                    <div class="profile-field-value" id="field-name">--</div>
                                     <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
                                 </div>
                                 <div class="profile-field-row">
-                                    <div class="profile-field-label">Ngày sinh</div>
-                                    <div class="profile-field-value" id="field-dob">--</div>
-                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
-                                </div>
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Email:</div>
-                                    <div class="profile-field-value" id="field-email">ngockhanh74dctt23@gmail.com</div>
-                                    <div class="profile-field-edit"></div> <!-- Non-editable email usually -->
-                                </div>
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Hộ chiếu</div>
-                                    <div class="profile-field-value" id="field-passport">--</div>
-                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
-                                </div>
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Địa chỉ:</div>
-                                    <div class="profile-field-value" id="field-address">--</div>
-                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
-                                </div>
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Loại thẻ:</div>
-                                    <div class="profile-field-value" id="field-card-type">--</div>
+                                    <div class="profile-field-label">Email</div>
+                                    <div class="profile-field-value" id="field-email">--</div>
                                     <div class="profile-field-edit"></div>
-                                </div>
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Điểm vàng:</div>
-                                    <div class="profile-field-value" id="field-points">0</div>
-                                    <div class="profile-field-edit"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Giới tính</div>
-                                    <div class="profile-field-value" id="field-gender">Nữ</div>
-                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
                                 </div>
                                 <div class="profile-field-row">
                                     <div class="profile-field-label">Điện thoại</div>
@@ -158,26 +157,17 @@
                                     <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
                                 </div>
                                 <div class="profile-field-row">
-                                    <div class="profile-field-label">CMND/CCCD</div>
-                                    <div class="profile-field-value" id="field-id-card">--</div>
+                                    <div class="profile-field-label">Địa chỉ</div>
+                                    <div class="profile-field-value" id="field-address">--</div>
                                     <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
                                 </div>
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Quốc tịch:</div>
-                                    <div class="profile-field-value" id="field-nationality">--</div>
-                                    <div class="profile-field-edit"><i class="fa-solid fa-pencil"></i></div>
-                                </div>
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Tổng số tour đã đi:</div>
-                                    <div class="profile-field-value" id="field-total-tours-1">0</div>
-                                </div>
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Tổng số tour đã đi:</div>
-                                    <div class="profile-field-value" id="field-total-tours-2">0</div>
-                                </div>
-                                <div class="profile-field-row">
-                                    <div class="profile-field-label">Điểm cần để giữ hạng:</div>
-                                    <div class="profile-field-value" id="field-keep-points">0</div>
+                                <div class="profile-save-btn text-end" id="save-btn-wrapper">
+                                    <button id="btn-save-profile" class="btn btn-primary px-4">
+                                        <i class="fa-solid fa-floppy-disk me-2"></i>Lưu thay đổi
+                                    </button>
+                                    <button id="btn-cancel-profile" class="btn btn-outline-secondary px-4 ms-2">
+                                        Hủy
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -11,6 +11,7 @@ const {
 
 // Lấy thông tin user hiện tại - Cần đăng nhập
 router.get("/profile", verifyToken, userController.getProfile);
+
 // Cập nhật thông tin user hiện tại - Cần đăng nhập
 router.put(
 	"/profile",
