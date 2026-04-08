@@ -1,4 +1,4 @@
-const TOUR_API_URL = "http://localhost:3000/api/tours";
+const TOUR_API_URL = "/api/tours";
 const DEFAULT_TOUR_IMAGE = "../../assets/images/image.png";
 
 let adminTourCache = [];
@@ -262,7 +262,7 @@ function buildTourListItemNode(template, tour) {
     const viewModel = {
         id: String(tour.id ?? ""),
         name: tour.name || "Chưa có tên",
-        code: tour.tour_code || `ID-${tour.id ?? "N/A"}`,
+        code: tour.tour_code || `TOUR${String(Math.max(0, Math.trunc(Number(tour.id) || 0))).padStart(3, "0")}`,
         region: tour.region || "Chưa cập nhật",
         duration: tour.duration || "Chưa cập nhật",
         price_default: formatVnd(tour.price_default ?? 0),

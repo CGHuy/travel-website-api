@@ -86,7 +86,7 @@ function bindItinerarySearch() {
 
         const filtered = adminItineraryCache.filter((tour) => {
             const idText = String(tour.id ?? "").toLowerCase();
-            const codeText = String(tour.id_code ?? tour.tour_code ?? "").toLowerCase();
+            const codeText = `TOUR${String(Math.max(0, Math.trunc(Number(tour.id) || 0))).padStart(3, "0")}`.toLowerCase();
             const nameText = String(tour.name ?? "").toLowerCase();
             return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword);
         });
@@ -142,7 +142,7 @@ function buildItineraryTourNode(template, tour) {
     const actionTextEl = node.querySelector(".itinerary-action-text");
     const actionBtn = node.querySelector(".open-itinerary-modal");
 
-    if (codeEl) codeEl.textContent = tour.id_code || tour.tour_code || `TOUR-${String(tour.id ?? "").padStart(3, "0")}`;
+    if (codeEl) codeEl.textContent = `TOUR${String(Math.max(0, Math.trunc(Number(tour.id) || 0))).padStart(3, "0")}`;
     if (nameEl) nameEl.textContent = tour.name || "Chưa có tên";
     if (statusEl) {
         statusEl.className = `itinerary-status ${hasItinerary ? "text-success" : "text-warning"}`;
