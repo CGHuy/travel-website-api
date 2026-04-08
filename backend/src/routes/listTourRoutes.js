@@ -3,13 +3,13 @@ const router = express.Router();
 const listTourController = require("../controllers/listTourController");
 const { verifyToken, isUser } = require("../middlewares/auth");
 
-// Route để lấy danh sách tour
+// 1. Công khai (không cần login)
 router.get("/", listTourController.getAllTours);
 
 // Route để lấy danh sách dịch vụ (cho bộ lọc)
 router.get("/services", listTourController.getServices);
 
-// Route lấy toàn bộ wishlist của user hiện tại (để đánh dấu trên list tour)
+// 2. Bảo mật (cần login)
 router.get("/wishlist/all", verifyToken, isUser, listTourController.getWishListByUser);
 
 // Route để lấy chi tiết tour

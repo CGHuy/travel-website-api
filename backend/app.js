@@ -36,7 +36,7 @@ const wishlistRoutes = require("./src/routes/wishlistRoutes");
 // Lịch trình chỉ gắn với 1 tour, nên mount riêng theo tourId
 app.use("/api/tourItinerary/:tourId", tourItineraryRoutes);
 app.use("/api/tours", searchLimiter, tourRoutes);
-app.use("/api/list-tours", listTourRoutes);
+app.use("/api/list-tours", searchLimiter, listTourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);
