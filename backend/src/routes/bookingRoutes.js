@@ -10,7 +10,7 @@ const {
 } = require("../middlewares/auth");
 const { validateBooking } = require("../middlewares/validation/booking");
 
-// User routes - Cần đăng nhập
+//============================== User routes - Cần đăng nhập=====================
 
 // Xem danh sach booking ma user da dat
 router.get(

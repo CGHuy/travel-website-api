@@ -10,9 +10,14 @@ class bookingService {
 				`SELECT 
                     b.id,
                     t.name as tour_name,
+                    t.cover_image,
                     td.departure_date,
+                    td.departure_location,
+                    b.adults,
+                    b.children,
                     b.total_price,
                     b.status as booking_status,
+                    b.payment_status,
                     b.created_at
                 FROM bookings b
                 JOIN tour_departures td ON b.departure_id = td.id

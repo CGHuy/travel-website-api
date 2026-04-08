@@ -1,5 +1,15 @@
 // Logic for Booking History page
+const API_URL = "http://localhost:3000/api";
+let allBookings = [];
+
 document.addEventListener("DOMContentLoaded", async () => {
+    // Check authentication
+    const token = localStorage.getItem("token");
+    if (!token) {
+        window.location.href = "/pages/user/login.html?redirect=" + encodeURIComponent(window.location.pathname);
+        return;
+    }
+
     // Load components
     await Promise.all([
         loadComponent("header-placeholder", "../../components/header.html"),
@@ -8,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     ]);
 
     initBookingPage();
+    fetchBookings();
 });
 
 async function loadComponent(targetId, filePath) {
@@ -66,36 +77,149 @@ function initSidebarActiveState() {
     });
 }
 
-function initBookingPage() {
-    console.log("Booking History page initialized");
+async function fetchBookings() {
+    const token = localStorage.getItem("token");
+    const bookingList = document.getElementById("booking-list");
+    
+    // Show loading state
+    bookingList.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Đang tải danh sách đơn hàng...</p>
+        </div>
+    `;
 
+    try {
+        const response = await fetch(`${API_URL}/bookings/my-bookings`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            allBookings = result.data;
+            renderBookings(allBookings);
+        } else {
+            bookingList.innerHTML = `<div class="alert alert-danger">Lỗi: ${result.message || "Không thể tải dữ liệu"}</div>`;
+        }
+    } catch (error) {
+        console.error("Fetch bookings error:", error);
+        bookingList.innerHTML = `<div class="alert alert-danger">Lỗi kết nối tới server</div>`;
+    }
+}
+
+function renderBookings(bookings) {
+    const bookingList = document.getElementById("booking-list");
+    
+    if (!bookings || bookings.length === 0) {
+        bookingList.innerHTML = `
+            <div class="text-center py-5 bg-light rounded-3">
+                <i class="fa-solid fa-calendar-xmark fa-3x mb-3 text-muted"></i>
+                <p class="text-muted">Bạn chưa có đơn đặt chỗ nào.</p>
+                <a href="/pages/user/list-tour.html" class="btn btn-primary">Khám phá tour ngay</a>
+            </div>
+        `;
+        return;
+    }
+
+    bookingList.innerHTML = bookings.map(booking => {
+        const createdAt = new Date(booking.created_at).toLocaleString('vi-VN');
+        const statusInfo = getStatusInfo(booking.booking_status);
+        const priceFormatted = new Intl.NumberFormat('vi-VN').format(booking.total_price);
+        
+        return `
+            <div class="booking-item" data-id="${booking.id}">
+                <div class="booking-date">Ngày tạo: ${createdAt}</div>
+                <div class="booking-card">
+                    <img src="${booking.cover_image || '/assets/images/placeholder.png'}" alt="${booking.tour_name}" class="booking-img">
+                    <div class="booking-info">
+                        <h4>${booking.tour_name}</h4>
+                        <div class="info-row">
+                            <i class="fa-solid fa-ticket"></i>
+                            <span class="info-label">Mã booking:</span>
+                            <span class="info-value">${booking.id}</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <span class="info-label">Ngày khởi hành:</span>
+                            <span class="info-value">${new Date(booking.departure_date).toLocaleDateString('vi-VN')}</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span class="info-label">Nơi khởi hành:</span>
+                            <span class="info-value">${booking.departure_location}</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fa-solid fa-users"></i>
+                            <span class="info-label">Hành khách:</span>
+                            <span class="info-value">${booking.adults} Người lớn, ${booking.children} Trẻ em</span>
+                        </div>
+                    </div>
+                    <div class="booking-status-price">
+                        <div class="status-tag ${statusInfo.class}">${statusInfo.label}</div>
+                        <div class="booking-price">${priceFormatted} <span class="currency-symbol">đ</span></div>
+                        <a href="/pages/user/booking-details.html?id=${booking.id}" class="btn btn-outline-primary btn-sm mt-3">Chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+function getStatusInfo(status) {
+    switch (status) {
+        case 'confirmed':
+            return { label: 'Đã xác nhận', class: 'status-paid' };
+        case 'cancelled':
+            return { label: 'Đã hủy', class: 'status-canceled' };
+        case 'pending':
+            return { label: 'Chờ xử lý', class: 'status-pending' };
+        default:
+            return { label: status, class: '' };
+    }
+}
+
+function initBookingPage() {
     // Filter Tabs Interaction
     const filterTabs = document.querySelectorAll(".filter-tab");
     filterTabs.forEach(tab => {
         tab.addEventListener("click", () => {
-            // Remove active from all
             filterTabs.forEach(t => t.classList.remove("active"));
-            // Add to clicked
             tab.classList.add("active");
 
-            // Filter logic (Mock)
             const status = tab.dataset.status;
             filterBookings(status);
         });
     });
 
-    // Search Interaction (Mock)
+    // Search Interaction
     const searchInput = document.querySelector(".search-booking-input");
     if (searchInput) {
         searchInput.addEventListener("input", (e) => {
-            const query = e.target.value.toLowerCase();
-            console.log("Searching for:", query);
-            // Implement real filtering here
+            const query = e.target.value.toLowerCase().trim();
+            const filtered = allBookings.filter(b => 
+                b.id.toString().includes(query) || 
+                b.tour_name.toLowerCase().includes(query)
+            );
+            renderBookings(filtered);
         });
     }
 }
 
 function filterBookings(status) {
-    console.log("Filtering bookings by:", status);
-    // In a real app, you would fetch from API or filter local list
+    if (status === "all") {
+        renderBookings(allBookings);
+    } else {
+        const filtered = allBookings.filter(b => {
+            if (status === "paid") return b.booking_status === "confirmed";
+            if (status === "canceled") return b.booking_status === "cancelled";
+            if (status === "canceling") return b.booking_status === "pending";
+            return false;
+        });
+        renderBookings(filtered);
+    }
 }
