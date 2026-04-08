@@ -10,11 +10,13 @@ class TourServiceController {
                 .trim()
                 .toLowerCase();
             const tours = await Tour.getAll();
+            const serviceRows = await Service.getAll();
+            const activeServiceIds = new Set(serviceRows.filter((service) => Number(service.status) === 1).map((service) => Number(service.id)));
 
             const withCounts = await Promise.all(
                 tours.map(async (tour) => {
                     const linked = await TourService.getByTourId(tour.id);
-                    const serviceCount = linked.length;
+                    const serviceCount = linked.filter((link) => activeServiceIds.has(Number(link.service_id))).length;
                     return {
                         id: tour.id,
                         code: `TR${String(tour.id).padStart(3, "0")}`,
@@ -55,13 +57,15 @@ class TourServiceController {
             const selectedLinks = await TourService.getByTourId(tourId);
             const selectedSet = new Set(selectedLinks.map((x) => Number(x.service_id)));
 
-            const services = serviceRows.map((s) => ({
-                id: s.id,
-                code: `SV${String(s.id).padStart(3, "0")}`,
-                name: s.name || "",
-                description: s.description || "",
-                checked: selectedSet.has(Number(s.id)),
-            }));
+            const services = serviceRows
+                .filter((s) => Number(s.status) === 1)
+                .map((s) => ({
+                    id: s.id,
+                    code: `SV${String(s.id).padStart(3, "0")}`,
+                    name: s.name || "",
+                    description: s.description || "",
+                    checked: selectedSet.has(Number(s.id)),
+                }));
 
             return res.json({
                 success: true,
