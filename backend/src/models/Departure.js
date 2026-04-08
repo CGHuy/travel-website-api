@@ -24,13 +24,19 @@ class Departure {
     // Tạo departure mới
     static async create(departureData) {
         try {
-            const { tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total } = departureData;
-            const seats_available = seats_total; // Ban đầu, số chỗ trống bằng tổng số chỗ
+            const tourId = Number(departureData.tour_id);
+            const departureLocation = departureData.departure_location;
+            const departureDate = departureData.departure_date;
+            const priceMoving = Number(departureData.price_moving);
+            const priceMovingChild = Number(departureData.price_moving_child);
+            const seatsTotal = Number(departureData.seats_total);
+            const seatsAvailable = seatsTotal;
+
             const [result] = await db.query(
                 `
                 INSERT INTO tour_departures (tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
                 `,
-                [tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available],
+                [tourId, departureLocation, departureDate, priceMoving, priceMovingChild, seatsTotal, seatsAvailable],
             );
             return result.insertId;
         } catch (error) {
@@ -41,8 +47,60 @@ class Departure {
     // Cập nhật departure
     static async update(id, departureData) {
         try {
-            const { tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available } = departureData;
-            const [result] = await db.query(`UPDATE tour_departures SET tour_id = ?, departure_location = ?, departure_date = ?, price_moving = ?, price_moving_child = ?, seats_total = ?, seats_available = ?, updated_at = NOW() WHERE id = ?`, [tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available, id]);
+            if (!departureData || typeof departureData !== 'object') {
+                throw new Error('Dữ liệu cập nhật không hợp lệ');
+            }
+
+            const departure = await this.getById(id);
+            if (!departure) {
+                return false;
+            }
+
+            const fields = [];
+            const params = [];
+
+            if (departureData.tour_id !== undefined) {
+                fields.push('tour_id = ?');
+                params.push(Number(departureData.tour_id));
+            }
+            if (departureData.departure_location !== undefined) {
+                fields.push('departure_location = ?');
+                params.push(departureData.departure_location);
+            }
+            if (departureData.departure_date !== undefined) {
+                fields.push('departure_date = ?');
+                params.push(departureData.departure_date);
+            }
+            if (departureData.price_moving !== undefined) {
+                fields.push('price_moving = ?');
+                params.push(Number(departureData.price_moving));
+            }
+            if (departureData.price_moving_child !== undefined) {
+                fields.push('price_moving_child = ?');
+                params.push(Number(departureData.price_moving_child));
+            }
+            if (departureData.seats_total !== undefined) {
+                const seatsTotal = Number(departureData.seats_total);
+                fields.push('seats_total = ?');
+                params.push(seatsTotal);
+
+                if (departureData.seats_available === undefined && Number(departure.seats_available) > seatsTotal) {
+                    departureData.seats_available = seatsTotal;
+                }
+            }
+            if (departureData.seats_available !== undefined) {
+                fields.push('seats_available = ?');
+                params.push(Number(departureData.seats_available));
+            }
+
+            if (fields.length === 0) {
+                throw new Error('Không có trường nào để cập nhật');
+            }
+
+            const query = `UPDATE tour_departures SET ${fields.join(', ')}, updated_at = NOW() WHERE id = ?`;
+            params.push(id);
+
+            const [result] = await db.query(query, params);
             return result.affectedRows > 0;
         } catch (error) {
             throw error;
@@ -68,9 +126,12 @@ class Departure {
     // Quản lý số chỗ ngồi
     static async updateAvailableSeats(id, seatsChange) {
         try {
-            const [result] = await db.query(`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`, [seatsChange, id]);
+            const [result] = await db.query(
+                `UPDATE tour_departures SET seats_available = GREATEST(0, LEAST(seats_total, seats_available + ?)) WHERE id = ?`,
+                [seatsChange, id],
+            );
             return result.affectedRows > 0;
-        } 
+        }
         catch (error) {
             throw error;
         }

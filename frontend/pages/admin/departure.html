@@ -1,0 +1,479 @@
+<style>
+    /* Departure Management Scoped Styles */
+    .departure-management-wrapper {
+        font-family: 'Lexend Deca', sans-serif;
+        animation: fadeIn 0.5s ease-out;
+        color: #1f2937;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header Section */
+    .departure-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding: 0 4px;
+        border-bottom: 2px solid #f3f4f6;
+        padding-bottom: 16px;
+    }
+
+    .departure-title-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .departure-title-group h4 {
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .departure-title-group h4 i {
+        color: #3b82f6;
+    }
+
+    .badge-total {
+        background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+    }
+
+    /* Toolbar Section (Search & Add Button) */
+    .departure-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .search-wrapper i {
+        position: absolute;
+        left: 20px;
+        color: #9ca3af;
+        font-size: 1.1rem;
+        pointer-events: none;
+        transition: color 0.3s;
+    }
+
+    .search-input-modern {
+        width: 100%;
+        padding: 16px 20px 16px 52px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        background-color: #ffffff;
+        font-size: 0.95rem;
+        color: #1f2937;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .search-input-modern::placeholder {
+        color: #9ca3af;
+    }
+
+    .search-input-modern:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
+    
+    .search-input-modern:focus + i,
+    .search-input-modern:focus ~ i {
+        color: #3b82f6;
+    }
+
+    .btn-add-departure {
+        align-self: flex-start;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-add-departure:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        color: white;
+    }
+
+    /* Cards Layout */
+    .departure-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .departure-card {
+        background: #ffffff;
+        border: 1px solid #f3f4f6;
+        border-radius: 16px;
+        padding: 20px 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .departure-card:hover {
+        border-color: #e5e7eb;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+        transform: translateY(-3px);
+    }
+
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .card-title-area {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .tour-name-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .tour-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-open {
+        background-color: #059669;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2);
+    }
+
+    .status-full {
+        background-color: #f59e0b;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+    }
+
+    .tour-code {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    /* Action Buttons */
+    .card-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        background: transparent;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 600;
+        gap: 6px;
+    }
+
+    .btn-edit:hover {
+        background-color: #eff6ff;
+        color: #2563eb;
+    }
+
+    .btn-delete:hover {
+        background-color: #fef2f2;
+        color: #dc2626;
+    }
+
+    /* Card Details Grid */
+    .card-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        border-top: 1px dashed #e5e7eb;
+        padding-top: 16px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+        color: #4b5563;
+        font-weight: 500;
+    }
+
+    .detail-item i {
+        color: #6b7280;
+        font-size: 1rem;
+        width: 16px;
+        text-align: center;
+    }
+
+    .detail-item strong {
+        color: #111827;
+        font-weight: 600;
+    }
+
+    /* Seats progress bar indicator (Optional VIP touch) */
+    .seats-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .seats-text {
+        font-weight: 600;
+    }
+
+    .seats-text.almost-full {
+        color: #ea580c;
+    }
+
+    .seats-text.full {
+        color: #dc2626;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .card-details {
+            gap: 16px;
+        }
+        .detail-item {
+            width: calc(33.333% - 16px);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .detail-item {
+            width: calc(50% - 16px);
+        }
+        .card-top {
+            flex-direction: column;
+            gap: 12px;
+        }
+        .card-actions {
+            align-self: flex-start;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .detail-item {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="departure-management-wrapper">
+    <!-- Header -->
+    <div class="departure-header">
+        <div class="departure-title-group">
+            <h4><i class="fa-solid fa-location-dot"></i> Quản lý Điểm Khởi Hành</h4>
+        </div>
+        <div class="badge-total">Tổng: 20 điểm khởi hành</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="departure-toolbar">
+        <div class="search-wrapper">
+            <input type="text" class="search-input-modern" placeholder="Tìm kiếm điểm khởi hành theo mã, tên tour, địa điểm..." />
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <button class="btn-add-departure">
+            Thêm Điểm Khởi Hành Mới
+        </button>
+    </div>
+
+    <!-- Cards List -->
+    <div class="departure-list" id="departureList">
+        <div style="text-align: center; padding: 2rem; color: #6b7280;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu điểm khởi hành...
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const departureList = document.getElementById('departureList');
+
+        // Hàm format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+        }
+
+        // Hàm format date (từ YYYY-MM-DDTHH:mm... -> DD/MM/YYYY)
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const d = date.getDate().toString().padStart(2, '0');
+            const m = (date.getMonth() + 1).toString().padStart(2, '0');
+            const y = date.getFullYear();
+            return `${d}/${m}/${y}`;
+        }
+
+        // Lấy danh sách departures
+        async function fetchDepartures() {
+            try {
+                const token = localStorage.getItem('token') || '';
+                if (!token) {
+                    departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Bạn cần đăng nhập để xem danh sách điểm khởi hành.</div>`;
+                    return;
+                }
+
+                const response = await fetch('http://localhost:3000/api/departures/all', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    renderDepartures(result.data);
+                } else {
+                    departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Lỗi: ${result.message || 'Không thể tải dữ liệu'}</div>`;
+                }
+            } catch (error) {
+                console.error('Lỗi khi gọi API:', error);
+                departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Đã xảy ra lỗi kết nối với máy chủ.</div>`;
+            }
+        }
+
+        // Hiển thị dữ liệu ra HTML
+        function renderDepartures(departures) {
+            departureList.innerHTML = ''; // Clear placeholder
+            
+            // Update total badge if it exists
+            const badgeTotal = document.querySelector('.badge-total');
+            if (badgeTotal) {
+                badgeTotal.innerText = `Tổng: ${Array.isArray(departures) ? departures.length : 0} điểm khởi hành`;
+            }
+
+            if (!Array.isArray(departures) || departures.length === 0) {
+                departureList.innerHTML = `<div style="text-align: center; padding: 2rem; color: #6b7280;">Không có điểm khởi hành nào.</div>`;
+                return;
+            }
+
+            departures.forEach(dep => {
+                // Formatting data
+                const price = formatCurrency(Number(dep.price_moving) || 0);
+                const priceChild = formatCurrency(Number(dep.price_moving_child) || 0);
+                const date = dep.departure_date ? formatDate(dep.departure_date) : '-';
+
+                const seatsTotal = Number(dep.seats_total) || 0;
+                const seatsAvailable = Number(dep.seats_available) || 0;
+                const seatsBooked = seatsTotal > 0 ? seatsTotal - seatsAvailable : 0;
+                const fillRatio = seatsTotal > 0 ? seatsBooked / seatsTotal : 0;
+
+                // Trạng thái (status)
+                let statusClass = 'status-open';
+                let statusText = 'Mở';
+                if (dep.status === 'closed') {
+                    statusClass = 'status-closed';
+                    statusText = 'Đóng';
+                } else if (dep.status === 'full' || seatsAvailable <= 0) {
+                    statusClass = 'status-full';
+                    statusText = 'Đầy';
+                }
+
+                let seatsColorClass = '';
+                if (fillRatio >= 1) {
+                    seatsColorClass = 'full';
+                } else if (fillRatio >= 0.8) {
+                    seatsColorClass = 'almost-full';
+                }
+
+                const cardHtml = `
+                    <div class="departure-card">
+                        <div class="card-top">
+                            <div class="card-title-area">
+                                <div class="tour-name-group">
+                                    <h3 class="tour-name">Tour ID: #${dep.tour_id}</h3>
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                                </div>
+                                <span class="tour-code">Mã: DEP${dep.id.toString().padStart(5, '0')}</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="action-btn btn-edit"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>
+                                <button class="action-btn btn-delete"><i class="fa-solid fa-trash-can"></i> Xóa</button>
+                            </div>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-item">
+                                <i class="fa-solid fa-plane-departure"></i>
+                                <span>Địa điểm: <strong>${dep.departure_location}</strong></span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fa-regular fa-calendar-days"></i>
+                                <span>Ngày: <strong>${date}</strong></span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fa-solid fa-tag"></i>
+                                <span>Giá: <strong>${price}</strong></span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fa-solid fa-child"></i>
+                                <span>Giá trẻ em: <strong>${priceChild}</strong></span>
+                            </div>
+                            <div class="detail-item seats-indicator">
+                                <i class="fa-solid fa-users"></i>
+                                <span>Chỗ ngồi: <strong class="seats-text ${seatsColorClass}">${seatsBooked}/${dep.seats_total}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                departureList.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // Thực thi việc fetch dữ liệu
+        fetchDepartures();
+    });
+</script>

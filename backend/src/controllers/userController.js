@@ -196,7 +196,7 @@ exports.updateUser = async (req, res) => {
 };
 
 // Cập nhật trạng thái user (dành cho admin)
-exports.updateUserStatus = async (req, res) => {
+exports.updateStatus = async (req, res) => {
 	try {
 		const userId = req.params.id;
 		const { status } = req.body;	
@@ -216,7 +216,7 @@ exports.updateUserStatus = async (req, res) => {
 				message: "Không được phép thay đổi trạng thái của user có vai trò admin",
 			});
 		}
-		const success = await User.updateUserStatus(userId, status);
+		const success = await User.updateStatus(userId, status);
 		if (!success) {
 			return res.status(404).json({
 				success: false,

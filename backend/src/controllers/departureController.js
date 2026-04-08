@@ -110,6 +110,109 @@ exports.deleteDeparture = async (req, res) => {
 	}
 };
 
+// Cập nhật departure
+exports.updateDeparture = async (req, res) => {
+	try {
+		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id <= 0) {
+			return res.status(400).json({
+				success: false,
+				message: "ID điểm khởi hành không hợp lệ",
+			});
+		}
+
+		const updateData = req.body;
+		if (!updateData || Object.keys(updateData).length === 0) {
+			return res.status(400).json({
+				success: false,
+				message: "Chưa có dữ liệu để cập nhật",
+			});
+		}
+
+		const success = await Departure.update(id, updateData);
+		if (!success) {
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy điểm khởi hành",
+			});
+		}
+		return res.json({
+			success: true,
+			message: "Cập nhật điểm khởi hành thành công!",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Lỗi khi cập nhật điểm khởi hành",
+			error: error.message,
+		});
+	}
+};
+
+// Quản lý số chỗ ngồi
+exports.updateAvailableSeats = async (req, res) => {
+	try {
+		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id <= 0) {
+			return res.status(400).json({
+				success: false,
+				message: "ID điểm khởi hành không hợp lệ",
+			});
+		}
+
+		const { seatsChange } = req.body;
+		const success = await Departure.updateAvailableSeats(id, Number(seatsChange));
+		if (!success) {
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy điểm khởi hành",
+			});
+		}
+		return res.json({
+			success: true,
+			message: "Cập nhật số chỗ ngồi thành công!",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Lỗi khi cập nhật số chỗ ngồi",
+			error: error.message,
+		});
+	}
+};
+
+// Quản lý giá vé
+exports.updatePrice = async (req, res) => {
+	try {
+		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id <= 0) {
+			return res.status(400).json({
+				success: false,
+				message: "ID điểm khởi hành không hợp lệ",
+			});
+		}
+
+		const { price_moving, price_moving_child } = req.body;
+		const success = await Departure.updatePrice(id, Number(price_moving), Number(price_moving_child));
+		if (!success) {
+			return res.status(404).json({
+				success: false,
+				message: "Không tìm thấy điểm khởi hành",
+			});
+		}
+		return res.json({
+			success: true,
+			message: "Cập nhật giá vé thành công!",
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Lỗi khi cập nhật giá vé",
+			error: error.message,
+		});
+	}
+};
+
 // Tìm kiếm departures theo nhiều tiêu chí
 exports.searchDepartures = async (req, res) => {
 	try {

@@ -27,6 +27,58 @@ class User {
 		return await bcrypt.compare(plainPassword, hashedPassword);
 	}
 
+	// Tìm user theo email
+	static async findByEmail(email) {
+		try {
+			const [rows] = await db.query(
+				`SELECT * FROM users WHERE email = ? LIMIT 1`,
+				[email],
+			);
+			return rows[0] || null;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	// Tìm user theo số điện thoại
+	static async findByPhone(phone) {
+		try {
+			const [rows] = await db.query(
+				`SELECT * FROM users WHERE phone = ? LIMIT 1`,
+				[phone],
+			);
+			return rows[0] || null;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	// Tìm user theo email hoặc phone
+	static async findByEmailOrPhone(username) {
+		try {
+			const [rows] = await db.query(
+				`SELECT * FROM users WHERE email = ? OR phone = ? LIMIT 1`,
+				[username, username],
+			);
+			return rows[0] || null;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	// Tìm user theo id
+	static async findById(id) {
+		try {
+			const [rows] = await db.query(
+				`SELECT * FROM users WHERE id = ? LIMIT 1`,
+				[id],
+			);
+			return rows[0] || null;
+		} catch (error) {
+			throw error;
+		}
+	}
+
 	// Lấy tất cả users (cho admin)
 	static async getAll() {
 		try {

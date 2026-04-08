@@ -34,13 +34,13 @@ const tourRoutes = require("./src/routes/tourRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const bookingRoutes = require("./src/routes/bookingRoutes");
 const userRoutes = require("./src/routes/userRoutes");
-const depatureRoutes = require("./src/routes/depatureRoutes");
+const departureRoutes = require("./src/routes/departureRoutes");
 
 app.use("/api/tours", searchLimiter, tourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
-app.use("/api/users", createLimiter, userRoutes);
-app.use("/api/departures", searchLimiter, depatureRoutes);
+app.use("/api/users", searchLimiter, userRoutes);
+app.use("/api/departures", searchLimiter, departureRoutes);
 
 
 // ERROR HANDLERS

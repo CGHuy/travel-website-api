@@ -1,0 +1,362 @@
+<style>
+    /* User Management Scoped Styles */
+    .user-management-wrapper {
+        font-family: 'Lexend Deca', sans-serif;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user-management-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding: 0 4px;
+    }
+
+    .user-management-title-group h4 {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 6px;
+        font-size: 1.5rem;
+    }
+
+    .user-management-title-group p {
+        color: #6b7280;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .btn-add-user {
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        color: white;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-add-user:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+        color: white;
+    }
+
+    .btn-add-user:active {
+        transform: translateY(0);
+    }
+
+    .search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    
+    .search-wrapper i {
+        position: absolute;
+        left: 20px;
+        color: #9ca3af;
+        font-size: 1.1rem;
+        pointer-events: none;
+        transition: color 0.3s;
+    }
+
+    .search-input-modern {
+        width: 100%;
+        padding: 16px 20px 16px 52px;
+        border-radius: 14px;
+        border: 1px solid #e5e7eb;
+        background-color: #f9fafb;
+        font-size: 0.95rem;
+        color: #1f2937;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02) inset;
+    }
+
+    .search-input-modern::placeholder {
+        color: #9ca3af;
+    }
+
+    .search-input-modern:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
+    
+    .search-input-modern:focus + i,
+    .search-input-modern:focus ~ i {
+        color: #3b82f6;
+    }
+
+    .table-container {
+        background: #ffffff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        border: 1px solid #f3f4f6;
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .modern-table th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        padding: 18px 20px;
+        border-bottom: 2px solid #e2e8f0;
+        text-align: left;
+    }
+
+    .modern-table td {
+        padding: 16px 20px;
+        color: #334155;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        transition: all 0.2s ease;
+    }
+    
+    /* Subtle zebra striping mixed with hover */
+    .modern-table tbody tr:nth-child(even) td {
+        background-color: #fafaf9;
+    }
+
+    .modern-table tbody tr:hover td {
+        background-color: #f1f5f9;
+    }
+
+    .modern-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Badge Styles */
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        letter-spacing: 0.3px;
+    }
+
+    .status-active {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    /* Avatar styles for more pro look */
+    .user-info-cell {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .avatar-placeholder {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        color: #4338ca;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(67, 56, 202, 0.15);
+    }
+    
+    .user-name {
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    /* Action Buttons */
+    .action-btns {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 500;
+        gap: 6px;
+    }
+
+    .btn-edit:hover {
+        background-color: #eff6ff;
+        border-color: #bfdbfe;
+        color: #2563eb;
+    }
+
+    .btn-delete:hover {
+        background-color: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+    }
+
+</style>
+
+<div class="user-management-wrapper">
+    <div class="user-management-header">
+        <div class="user-management-title-group">
+            <h4>Quản lý User</h4>
+            <p>Danh sách các người dùng</p>
+        </div>
+        <button class="btn-add-user" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fa-solid fa-plus"></i> Thêm User Mới
+        </button>
+    </div>
+
+    <div class="search-wrapper">
+        <input type="text" class="search-input-modern" placeholder="Tìm kiếm user theo id, tên, email, số điện thoại..." />
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </div>
+
+    <div class="table-container">
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    window.initAdminUserPage = async function() {
+        const userTableBody = document.getElementById('userTableBody');
+
+        // Hàm lấy chữ cái đầu tiên của tên để làm avatar
+        function getAvatarLetter(fullname) {
+            if (!fullname) return '?';
+            const names = fullname.trim().split(' ');
+            return names[names.length - 1].charAt(0).toUpperCase();
+        }
+
+        // Lấy danh sách users từ API
+        async function fetchUsers() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Vui lòng đăng nhập để xem dữ liệu.</td></tr>`;
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users/all', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    renderUsers(result.data);
+                } else {
+                    userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Lỗi: ${result.message || 'Không thể tải dữ liệu'}</td></tr>`;
+                }
+            } catch (error) {
+                console.error('Lỗi khi gọi API:', error);
+                userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Đã xảy ra lỗi kết nối với máy chủ.</td></tr>`;
+            }
+        }
+
+        // Hiển thị dữ liệu ra bảng
+        function renderUsers(users) {
+            userTableBody.innerHTML = ''; // Xóa placeholder "Đang tải"
+            
+            if (users.length === 0) {
+                userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #6b7280;">Không có người dùng nào.</td></tr>`;
+                return;
+            }
+
+            users.forEach(user => {
+                const avatar = getAvatarLetter(user.fullname);
+                
+                // Tùy chỉnh hiển thị vai trò (role)
+                let roleDisplay = user.role;
+                if (user.role === 'admin') roleDisplay = 'Admin';
+                else if (user.role === 'customer') roleDisplay = 'Khách hàng';
+                else if (user.role === 'tour-staff') roleDisplay = 'NV Tour';
+                else if (user.role === 'booking-staff') roleDisplay = 'NV Booking';
+
+                // Tùy chỉnh hiển thị trạng thái (status)
+                const statusHtml = user.status === 1 
+                    ? `<span class="status-badge status-active">Hoạt động</span>` 
+                    : `<span class="status-badge" style="background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;">Đã khóa</span>`;
+
+                const phoneDisplay = user.phone || '<span style="color: #9ca3af; font-style: italic;">Chưa cập nhật</span>';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="fw-semibold">${user.id}</td>
+                    <td>
+                        <div class="user-info-cell">
+                            <div class="avatar-placeholder">${avatar}</div>
+                            <span class="user-name">${user.fullname}</span>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>${phoneDisplay}</td>
+                    <td class="text-capitalize text-muted fw-medium">${roleDisplay}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn btn-edit" title="Sửa"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>
+                            <button class="action-btn btn-delete" title="Xóa"><i class="fa-solid fa-trash-can"></i> Xóa</button>
+                        </div>
+                    </td>
+                `;
+                userTableBody.appendChild(tr);
+            });
+        }
+
+        // Thực thi việc fetch dữ liệu
+        await fetchUsers();
+    };
+</script>
