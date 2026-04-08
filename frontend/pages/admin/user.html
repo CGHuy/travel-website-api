@@ -261,9 +261,6 @@
             <h4>Quản lý User</h4>
             <p>Danh sách các người dùng</p>
         </div>
-        <button class="btn-add-user" data-bs-toggle="modal" data-bs-target="#addUserModal">
-            <i class="fa-solid fa-plus"></i> Thêm User Mới
-        </button>
     </div>
 
     <div class="search-wrapper">
@@ -302,11 +299,79 @@
     </div>
 </div>
 
+<!-- Modal Sửa User -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 20px 24px;">
+                <h5 class="modal-title" id="editUserModalLabel" style="font-weight: 700; color: #1e293b;">Chỉnh sửa User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label for="editFullname" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Họ và tên</label>
+                        <input type="text" class="form-control" id="editFullname" required style="border-radius: 10px; padding: 12px 16px;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Email</label>
+                        <input type="email" class="form-control" id="editEmail" required style="border-radius: 10px; padding: 12px 16px;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPhone" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Số điện thoại</label>
+                        <input type="text" class="form-control" id="editPhone" required style="border-radius: 10px; padding: 12px 16px;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editStatus" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Trạng thái</label>
+                        <select class="form-select" id="editStatus" style="border-radius: 10px; padding: 12px 16px;">
+                            <option value="1">Hoạt động</option>
+                            <option value="0">Đã khóa</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 16px 24px;">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500; padding: 10px 20px;">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditUserBtn" style="border-radius: 10px; font-weight: 500; padding: 10px 20px; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border: none;">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+    <div id="actionToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="actionToastBody">
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 <script>
     window.initAdminUserPage = async function () {
         const userTableBody = document.getElementById('userTableBody');
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
+
+        let currentUsersList = []; // Lưu lại danh sách user để hiển thị lên form sửa
+
+        let actionToastEl = document.getElementById('actionToast');
+        let actionToast = actionToastEl ? new bootstrap.Toast(actionToastEl, { delay: 3000 }) : null;
+        
+        function showToast(message, type = 'success') {
+            if (!actionToast) return alert(message);
+            const toastBody = document.getElementById('actionToastBody');
+            toastBody.textContent = message;
+            
+            // Xóa các class bg cũ và thêm class mới
+            actionToastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info', 'text-white');
+            actionToastEl.classList.add(`bg-${type}`, 'text-white');
+            
+            actionToast.show();
+        }
 
         // Hàm lấy chữ cái đầu tiên của tên để làm avatar
         function getAvatarLetter(fullname) {
@@ -333,7 +398,8 @@
                 const result = await response.json();
 
                 if (result.success && result.data) {
-                    renderUsers(result.data);
+                    currentUsersList = Array.isArray(result.data) ? result.data : [result.data];
+                    renderUsers(currentUsersList);
                 } else {
                     userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Lỗi: ${result.message || 'Không thể tải dữ liệu'}</td></tr>`;
                 }
@@ -384,8 +450,8 @@
                     <td>${statusHtml}</td>
                     <td>
                         <div class="action-btns">
-                            <button class="action-btn btn-edit" title="Sửa"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>
-                            <button class="action-btn btn-delete" title="Xóa"><i class="fa-solid fa-trash-can"></i> Xóa</button>
+                            <button class="action-btn btn-edit" title="Sửa" onclick="window.openEditUserModal(${user.id})"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>
+                            <button class="action-btn btn-delete" title="Xóa" onclick="window.deleteUser(${user.id})"><i class="fa-solid fa-trash-can"></i> Xóa</button>
                         </div>
                     </td>
                 `;
@@ -468,7 +534,8 @@
                 const result = await response.json();
 
                 if (result.success && result.data) {
-                    renderUsers(result.data);
+                    currentUsersList = Array.isArray(result.data) ? result.data : [result.data];
+                    renderUsers(currentUsersList);
                 } else {
                     userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #6b7280;">Không tìm thấy người dùng. Vui lòng thử tiêu chí khác.</td></tr>`;
                 }
@@ -477,5 +544,110 @@
                 userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Đã xảy ra lỗi khi tìm kiếm.</td></tr>`;
             }
         }
+
+        // Logic Sửa User
+        const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+
+        window.openEditUserModal = function(id) {
+            const user = currentUsersList.find(u => u.id === id);
+            if (!user) return;
+
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editFullname').value = user.fullname || '';
+            document.getElementById('editEmail').value = user.email || '';
+            document.getElementById('editPhone').value = user.phone || '';
+            document.getElementById('editStatus').value = user.status;
+
+            editUserModal.show();
+        };
+
+        document.getElementById('saveEditUserBtn').addEventListener('click', async () => {
+            const id = document.getElementById('editUserId').value;
+            const fullname = document.getElementById('editFullname').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const status = parseInt(document.getElementById('editStatus').value);
+
+            if (!fullname || !email) {
+                alert('Vui lòng nhập họ tên và email!');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                // Backend endpoint is PUT /api/users/:id update theo controller updateUser()
+                const response = await fetch(`/api/users/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ fullname, email, phone, status })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Cập nhật user thành công!', 'success');
+                    editUserModal.hide();
+                    
+                    // Nếu đang dùng tìm kiếm, fetchUsers sẽ load mặc định, có thể gọi handleSearch() để giữ bộ lọc
+                    const currentQuery = searchInput.value.trim();
+                    if (currentQuery) {
+                        await doSearchUser(currentQuery);
+                    } else {
+                        await fetchUsers();
+                    }
+                } else {
+                    showToast(result.message || 'Có lỗi xảy ra khi cập nhật.', 'danger');
+                }
+            } catch (error) {
+                console.error('Lỗi khi cập nhật:', error);
+                showToast('Có lỗi xảy ra khi cập nhật.', 'danger');
+            }
+        });
+
+        // Xử lý Xóa User
+        window.deleteUser = async function(id) {
+            const user = currentUsersList.find(u => u.id === id);
+            if (!user) return;
+
+            if (!confirm(`Bạn có chắc chắn muốn xóa user "${user.fullname}" không?`)) {
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`/api/users/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Xóa user thành công!', 'success');
+                    
+                    const currentQuery = searchInput.value.trim();
+                    if (currentQuery) {
+                        await doSearchUser(currentQuery);
+                    } else {
+                        await fetchUsers();
+                    }
+                } else {
+                    // Hiển thị message từ backend (ví dụ: Không được phép xóa admin, hoặc user đang hoạt động)
+                    showToast(result.message || 'Có lỗi xảy ra khi xóa user.', 'danger');
+                }
+            } catch (error) {
+                console.error('Lỗi khi xóa user:', error);
+                showToast('Có lỗi xảy ra kết nối với máy chủ.', 'danger');
+            }
+        };
     };
 </script>
