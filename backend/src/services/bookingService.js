@@ -93,30 +93,53 @@ class bookingService {
 	static async getById(id) {
 		try {
 			const [rows] = await db.query(
-				`SELECT b.*, 
-                    u.fullname, 
+				`SELECT 
+                    b.*, 
+                    u.fullname as user_fullname, 
                     u.email as user_email, 
-					u.phone as user_phone,
-					t.id as tour_id,
+                    u.phone as user_phone,
+                    t.id as tour_id,
                     t.name as tour_name, 
+					t.cover_image as tour_image,
+                    t.duration as tour_duration,
                     t.price_default,
+                    t.price_child,
                     td.departure_date,
                     td.departure_location,
-					c.fullname as customer_name,
-					c.dob as customer_dob,
-					c.gender as customer_gender,
-					c.passenger_type as customer_passenger_type
-				FROM bookings b
+                    td.price_moving,
+                    td.price_moving_child,
+                    (
+                        SELECT JSON_ARRAYAGG(
+                            JSON_OBJECT(
+                                'id', c.id,
+                                'fullname', c.fullname,
+                                'gender', c.gender,
+                                'dob', DATE_FORMAT(c.dob, '%Y-%m-%d'),
+                                'passenger_type', c.passenger_type
+                            )
+                        )
+                        FROM customers c
+                        WHERE c.booking_id = b.id
+                    ) as passengers
+                FROM bookings b
                 LEFT JOIN users u ON b.user_id = u.id
                 JOIN tour_departures td ON b.departure_id = td.id
                 JOIN tours t ON td.tour_id = t.id
-				LEFT JOIN customers c ON b.id = c.booking_id
-                WHERE b.id = ?
-				LIMIT 1`,
+                WHERE b.id = ?`,
 				[id],
 			);
-			return rows[0] || null;
+
+			if (rows.length === 0) return null;
+
+			const booking = rows[0];
+			
+			if (typeof booking.passengers === 'string') {
+				booking.passengers = JSON.parse(booking.passengers);
+			}
+
+			return booking;
 		} catch (error) {
+			console.error("Error in bookingService.getById:", error);
 			throw error;
 		}
 	}

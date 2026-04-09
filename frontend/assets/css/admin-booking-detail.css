@@ -1,0 +1,152 @@
+/* Scoped CSS for Booking Detail Component */
+.booking-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.booking-title-info h1 {
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.status-badge {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-confirmed { background: #dcfce7; color: #15803d; }
+.status-pending { background: #fef9c3; color: #854d0e; }
+.status-cancelled { background: #fee2e2; color: #b91c1c; }
+
+.meta-info {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-premium {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.btn-premium:hover { background: #f8fafc; }
+.btn-primary-premium { background: #0d6efd; color: white; border: none; }
+.btn-primary-premium:hover { background: #0b5ed7; }
+
+/* Content Grid */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+}
+
+.detail-grid .card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.card-header h3 { font-size: 15px; font-weight: 700; margin: 0; }
+.card-body { padding: 20px; }
+
+/* Customer Info */
+.info-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.info-item label { display: block; font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
+.info-item span { font-weight: 600; font-size: 14px; }
+
+/* Tour Summary */
+.tour-summary-box {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.tour-img-display {
+    width: 120px;
+    height: 80px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.tour-short-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+.tour-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+.tour-meta-item label { font-size: 10px; color: #64748b; text-transform: uppercase; display: block; }
+.tour-meta-item span { font-size: 12px; font-weight: 600; }
+
+/* Itinerary */
+.itinerary-section h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px; color: #64748b; }
+.itinerary-timeline { position: relative; padding-left: 20px; }
+.itinerary-timeline::before { content: ''; position: absolute; left: 4px; top: 5px; bottom: 5px; width: 2px; background: #e2e8f0; }
+.timeline-item { position: relative; margin-bottom: 15px; }
+.timeline-item::before { content: ''; position: absolute; left: -20px; top: 5px; width: 8px; height: 8px; background: white; border: 2px solid #0d6efd; border-radius: 50%; }
+.timeline-item h5 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.timeline-item p { font-size: 12px; color: #64748b; margin: 0; }
+
+/* Table */
+.premium-table { width: 100%; border-collapse: collapse; }
+.premium-table th { text-align: left; font-size: 11px; text-transform: uppercase; color: #64748b; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; }
+.premium-table td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #f8fafc; }
+.passenger-name { font-weight: 600; display: block; }
+
+/* Financials */
+.sidebar-card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px; display: block; color: #64748b; }
+.premium-select { width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13px; margin-bottom: 12px; }
+.btn-save { width: 100%; background: #0d6efd; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+
+.summary-item { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; color: #64748b; }
+.summary-total { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+.summary-total label { font-weight: 700; color: #1e293b; }
+.summary-total span { font-size: 16px; font-weight: 800; color: #0d6efd; }
+
+.collected-box { background: #eff6ff; border-radius: 10px; padding: 16px; margin-top: 16px; }
+.collected-header { color: #0d6efd; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+.collected-amount { font-size: 18px; font-weight: 800; color: #0d6efd; }
+.collected-meta { font-size: 10px; color: #64748b; }
+
+.history-timeline { padding-left: 16px; position: relative; }
+.history-timeline::before { content: ''; position: absolute; left: 0; top: 5px; bottom: 5px; width: 2px; background: #f1f5f9; }
+.history-item { position: relative; padding-bottom: 16px; }
+.history-item::before { content: ''; position: absolute; left: -19px; top: 6px; width: 6px; height: 6px; border-radius: 50%; }
+.history-item.success::before { background: #22c55e; }
+.history-item.info::before { background: #3b82f6; }
+.history-content h5 { font-size: 12px; font-weight: 700; margin: 0; }
+.history-content span { font-size: 10px; color: #64748b; }
+
+.back-link { font-size: 13px; font-weight: 600; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+.back-link:hover { color: #0d6efd; }
