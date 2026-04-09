@@ -2,13 +2,18 @@ const express = require("express");
 const router = express.Router();
 const StatisticsController = require("../controllers/statisticsController");
 
-// Tất cả route thống kê (nên thêm middleware verifyToken + isAdmin sau)
-router.get("/overview", StatisticsController.getOverview);
+// ═══ REAL-TIME ═══
+router.get("/realtime", StatisticsController.getRealTime);
+router.get("/occupancy", StatisticsController.getTourOccupancy);
+
+// ═══ TIME-BASED ═══
+router.get("/report", StatisticsController.getReport);
 router.get("/revenue", StatisticsController.getRevenue);
-router.get("/tours/top", StatisticsController.getTopTours);
-router.get("/tours/occupancy", StatisticsController.getTourOccupancy);
 router.get("/bookings/status", StatisticsController.getBookingStatus);
-router.get("/users", StatisticsController.getUserStats);
+
+// ═══ ANALYTICS ═══
+router.get("/tours/top", StatisticsController.getTopTours);
 router.get("/reviews", StatisticsController.getReviewStats);
+router.get("/users", StatisticsController.getUserStats);
 
 module.exports = router;

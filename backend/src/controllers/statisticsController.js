@@ -1,28 +1,78 @@
 const StatisticsService = require("../services/statisticsService");
 
 class StatisticsController {
-	// GET /api/stats/overview
-	static async getOverview(req, res) {
+	// ════════════ REAL-TIME ════════════
+
+	// GET /api/stats/realtime
+	static async getRealTime(req, res) {
 		try {
-			const data = await StatisticsService.getOverview();
+			const data = await StatisticsService.getRealTimeStats();
 			res.json({ success: true, data });
 		} catch (error) {
-			console.error("getOverview error:", error);
-			res.status(500).json({ success: false, message: "Lỗi lấy thống kê tổng quan" });
+			console.error("getRealTime error:", error);
+			res.status(500).json({ success: false, message: "Lỗi lấy dữ liệu real-time" });
 		}
 	}
 
-	// GET /api/stats/revenue?year=2025
+	// GET /api/stats/occupancy
+	static async getTourOccupancy(req, res) {
+		try {
+			const data = await StatisticsService.getTourOccupancy();
+			res.json({ success: true, data });
+		} catch (error) {
+			console.error("getTourOccupancy error:", error);
+			res.status(500).json({ success: false, message: "Lỗi lấy thống kê lấp đầy" });
+		}
+	}
+
+	// ════════════ TIME-BASED ════════════
+
+	// GET /api/stats/report?from=YYYY-MM-DD&to=YYYY-MM-DD
+	static async getReport(req, res) {
+		try {
+			const { from, to } = req.query;
+			if (!from || !to) {
+				return res.status(400).json({ success: false, message: "Thiếu tham số from/to" });
+			}
+			const data = await StatisticsService.getTimeBasedReport(from, to);
+			res.json({ success: true, data });
+		} catch (error) {
+			console.error("getReport error:", error);
+			res.status(500).json({ success: false, message: "Lỗi lấy báo cáo" });
+		}
+	}
+
+	// GET /api/stats/revenue?from=YYYY-MM-DD&to=YYYY-MM-DD
 	static async getRevenue(req, res) {
 		try {
-			const year = parseInt(req.query.year) || null;
-			const data = await StatisticsService.getRevenueByMonth(year);
+			const { from, to } = req.query;
+			if (!from || !to) {
+				return res.status(400).json({ success: false, message: "Thiếu tham số from/to" });
+			}
+			const data = await StatisticsService.getRevenueChartData(from, to);
 			res.json({ success: true, data });
 		} catch (error) {
 			console.error("getRevenue error:", error);
 			res.status(500).json({ success: false, message: "Lỗi lấy thống kê doanh thu" });
 		}
 	}
+
+	// GET /api/stats/bookings/status?from=YYYY-MM-DD&to=YYYY-MM-DD
+	static async getBookingStatus(req, res) {
+		try {
+			const { from, to } = req.query;
+			if (!from || !to) {
+				return res.status(400).json({ success: false, message: "Thiếu tham số from/to" });
+			}
+			const data = await StatisticsService.getBookingStatusByPeriod(from, to);
+			res.json({ success: true, data });
+		} catch (error) {
+			console.error("getBookingStatus error:", error);
+			res.status(500).json({ success: false, message: "Lỗi lấy thống kê booking" });
+		}
+	}
+
+	// ════════════ ANALYTICS ════════════
 
 	// GET /api/stats/tours/top?limit=10
 	static async getTopTours(req, res) {
@@ -33,28 +83,6 @@ class StatisticsController {
 		} catch (error) {
 			console.error("getTopTours error:", error);
 			res.status(500).json({ success: false, message: "Lỗi lấy top tour" });
-		}
-	}
-
-	// GET /api/stats/bookings/status
-	static async getBookingStatus(req, res) {
-		try {
-			const data = await StatisticsService.getBookingStatusStats();
-			res.json({ success: true, data });
-		} catch (error) {
-			console.error("getBookingStatus error:", error);
-			res.status(500).json({ success: false, message: "Lỗi lấy thống kê booking" });
-		}
-	}
-
-	// GET /api/stats/users
-	static async getUserStats(req, res) {
-		try {
-			const data = await StatisticsService.getUserStats();
-			res.json({ success: true, data });
-		} catch (error) {
-			console.error("getUserStats error:", error);
-			res.status(500).json({ success: false, message: "Lỗi lấy thống kê người dùng" });
 		}
 	}
 
@@ -69,14 +97,14 @@ class StatisticsController {
 		}
 	}
 
-	// GET /api/stats/tours/occupancy
-	static async getTourOccupancy(req, res) {
+	// GET /api/stats/users
+	static async getUserStats(req, res) {
 		try {
-			const data = await StatisticsService.getTourOccupancy();
+			const data = await StatisticsService.getUserStats();
 			res.json({ success: true, data });
 		} catch (error) {
-			console.error("getTourOccupancy error:", error);
-			res.status(500).json({ success: false, message: "Lỗi lấy thống kê lấp đầy" });
+			console.error("getUserStats error:", error);
+			res.status(500).json({ success: false, message: "Lỗi lấy thống kê người dùng" });
 		}
 	}
 }
