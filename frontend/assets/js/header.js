@@ -1,6 +1,6 @@
 // Khởi tạo header
-function initHeader() {
-    updateAuthUI();
+async function initHeader() {
+    await updateAuthUI();
     setupLogout();
     setupAvatarDropdown();
 }
@@ -19,10 +19,52 @@ window.addEventListener("storage", () => {
     closeUserDropdown();
 });
 
+async function getCurrentRoleFromBackend(token) {
+    try {
+        const response = await fetch("/api/auth/verify", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const result = await response.json();
+        if (!result.success || !result.data || !result.data.user) {
+            return null;
+        }
+
+        return String(result.data.user.role || "").toLowerCase();
+    } catch (error) {
+        console.warn("Không thể kiểm tra role từ backend:", error);
+        return null;
+    }
+}
+
+async function updateAdminNavVisibility(token) {
+    const adminNavLink = document.getElementById("adminNavLink");
+    if (!adminNavLink) return;
+
+    if (!token) {
+        adminNavLink.classList.add("d-none");
+        return;
+    }
+
+    const role = await getCurrentRoleFromBackend(token);
+    const canViewAdmin = role === "admin";
+
+    adminNavLink.classList.toggle("d-none", !canViewAdmin);
+}
+
 // ================== AUTH UI ==================
-function updateAuthUI() {
+async function updateAuthUI() {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
+
+    await updateAdminNavVisibility(token);
 
     const loginBtn = document.getElementById("loginBtn");
     const registerBtn = document.getElementById("registerBtn");
