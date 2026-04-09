@@ -1,8 +1,6 @@
 const db = require("../config/database");
 
 class StatisticsService {
-	// 🔴 KHU VỰC 1: REAL-TIME (Dữ liệu tức thời)
-
 	static async getRealTimeStats() {
 		const [usersToday] = await db.query(`
 			SELECT COUNT(*) AS count FROM users 
@@ -47,8 +45,6 @@ class StatisticsService {
 		`);
 		return rows;
 	}
-
-	// 🔵 KHU VỰC 2: TIME-BASED (Báo cáo theo bộ lọc)
 
 	static async getTimeBasedReport(from, to) {
 		const [current] = await db.query(`
@@ -132,7 +128,6 @@ class StatisticsService {
 		return rows;
 	}
 
-	// 🟣 KHU VỰC 3: ANALYTICS (Phân tích tổng quan)
 
 	static async getTopTours(limit = 10) {
 		const [rows] = await db.query(`
