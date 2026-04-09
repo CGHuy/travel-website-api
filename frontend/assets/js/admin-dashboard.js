@@ -92,6 +92,26 @@ async function setActiveMenu(page, menuItems) {
             }
             contentEl.innerHTML = await res.text();
 
+            // Execute inline/external scripts loaded inside the page fragment
+            const scriptElements = Array.from(contentEl.querySelectorAll("script"));
+            const scriptLoadPromises = scriptElements.map((script) => {
+                const newScript = document.createElement("script");
+                if (script.type) newScript.type = script.type;
+                if (script.src) {
+                    newScript.src = script.src;
+                    return new Promise((resolve, reject) => {
+                        newScript.onload = resolve;
+                        newScript.onerror = reject;
+                        document.body.appendChild(newScript);
+                    });
+                }
+                newScript.textContent = script.textContent;
+                document.body.appendChild(newScript);
+                return Promise.resolve();
+            });
+            await Promise.all(scriptLoadPromises);
+            scriptElements.forEach((script) => script.remove());
+
             // Convention: "booking" -> initAdminBookingPage()
             // "tour-service" -> initAdminTourServicePage()
             const camelCaseStr = page.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');

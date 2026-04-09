@@ -33,6 +33,7 @@ const bookingRoutes = require("./src/routes/bookingRoutes");
 const userRoutes = require("./src/routes/userRoutes");
 const wishlistRoutes = require("./src/routes/wishlistRoutes");
 const statisticsRoutes = require("./src/routes/statisticsRoutes");
+const departureRoutes = require("./src/routes/departureRoutes");
 
 // Lịch trình chỉ gắn với 1 tour, nên mount riêng theo tourId
 app.use("/api/tourItinerary/:tourId", tourItineraryRoutes);
@@ -43,6 +44,8 @@ app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/stats", statisticsRoutes);
+app.use("/api/departures", searchLimiter, departureRoutes);
+
 
 // DYNAMIC VIEW ROUTER
 // Tự động tìm và trả về file HTML cho các đường dẫn ngắn (VD: /list-tour, /login)
@@ -64,7 +67,6 @@ app.get("/:pageName", (req, res, next) => {
     // Nếu không tìm thấy file nào, tiếp tục qua middleware khác (như 404 handler)
     next();
 });
-// -------------------------------------
 
 // ERROR HANDLERS
 // 404 handler - phải đặt sau tất cả routes

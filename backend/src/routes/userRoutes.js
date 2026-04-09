@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
 
-const { verifyToken } = require("../middlewares/auth");
+const { verifyToken, isAdmin} = require("../middlewares/auth");
 
 const {
 	validateUpdateProfile,
@@ -28,4 +28,17 @@ router.put(
 	userController.changePassword,
 );
 
+// Tìm kiếm users với nhiều tiêu chí - Cần đăng nhập và có role admin
+router.get("/search", verifyToken, isAdmin, userController.searchUsers);
+// Lấy danh sách tất cả user - Cần đăng nhập và có role admin
+router.get("/all", verifyToken, isAdmin, userController.getAllUsers);	
+
+
+// Xóa user - Cần đăng nhập và có role admin
+router.delete("/:id", verifyToken, isAdmin, userController.deleteUser);
+
+// Cập nhật user - Cần đăng nhập và có role admin
+router.put("/:id", verifyToken, isAdmin, userController.updateUser);
+// Cập nhật trạng thái user (active/inactive) - Cần đăng nhập và có role admin
+router.put("/:id/status", verifyToken, isAdmin, userController.updateStatus);
 module.exports = router;
