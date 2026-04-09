@@ -1,0 +1,84 @@
+/* frontend/assets/css/admin-booking.css */
+
+/* Custom table styling */
+.table-custom {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.table-custom thead th {
+    border: none;
+    font-weight: 800; /* Bolder text */
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 15px;
+    background-color: #e3f2fd; /* Light blue header background */
+    color: #0056b3; /* Darker blue for text contrast */
+    text-align: center; /* Center align header text */
+}
+
+.table-custom thead tr {
+    border-radius: 8px;
+}
+
+.table-custom thead th:first-child { 
+    border-top-left-radius: 8px; 
+    border-bottom-left-radius: 8px; 
+}
+
+.table-custom thead th:last-child { 
+    border-top-right-radius: 8px; 
+    border-bottom-right-radius: 8px; 
+}
+
+.table-custom tbody tr {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.table-custom tbody tr:nth-child(even) {
+    background-color: #f0f7ff; /* Light blue for even rows */
+}
+
+.table-custom tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.1);
+    background-color: #e3f2fd !important;
+}
+
+.table-custom td {
+    padding: 15px;
+    vertical-align: middle;
+    border: none;
+    text-align: center; /* Matching header alignment for consistency */
+}
+
+/* Adjusting specific alignments if needed */
+.table-custom td.booking-customer,
+.table-custom td.booking-tour {
+    text-align: left; /* Keep names left aligned as it's more readable */
+}
+
+.table-custom td:first-child { 
+    border-top-left-radius: 8px; 
+    border-bottom-left-radius: 8px; 
+}
+
+.table-custom td:last-child { 
+    border-top-right-radius: 8px; 
+    border-bottom-right-radius: 8px; 
+}
+
+.booking-code { 
+    font-weight: 700; 
+    color: #0d6efd; 
+}
+
+.booking-total { 
+    font-weight: 600; 
+    color: #dc3545; 
+}

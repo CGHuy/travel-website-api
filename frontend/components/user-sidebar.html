@@ -59,3 +59,39 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        const userData = localStorage.getItem("user");
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+                const nameEl = document.getElementById("user-display-name");
+                const emailEl = document.getElementById("user-display-email");
+                const initialEl = document.getElementById("user-avatar-initial");
+
+                if (nameEl) nameEl.textContent = user.fullname || user.name || "Khách";
+                if (emailEl) emailEl.textContent = user.email || "";
+                if (initialEl) {
+                    const name = user.fullname || user.name || "K";
+                    initialEl.textContent = name.charAt(0).toUpperCase();
+                }
+            } catch (err) {
+                console.error("Error parsing user data for sidebar:", err);
+            }
+        }
+
+        // Logout functionality
+        const logoutBtn = document.getElementById("logout-btn");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                if (confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+                    window.location.href = "/index";
+                }
+            });
+        }
+    })();
+</script>

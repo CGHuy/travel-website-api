@@ -142,7 +142,7 @@ function renderFavorites(tours) {
                     <div class="meta-grid">
                         <div class="meta-item">
                             <i class="fa-solid fa-barcode"></i>
-                            <span>Mã tour: <b>${tour.tour_id || 'N/A'}</b></span>
+                            <span>Mã tour: <b>${ "TOUR" + String(tour.tour_id).padStart(4, "0") || 'N/A'}</b></span>
                         </div>
                         <div class="meta-item">
                             <i class="fa-solid fa-location-dot"></i>

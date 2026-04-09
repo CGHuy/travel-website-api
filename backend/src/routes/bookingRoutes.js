@@ -3,10 +3,8 @@ const router = express.Router();
 const bookingController = require("../controllers/bookingController");
 const {
 	verifyToken,
-	isAdmin,
 	isUser,
 	isBookingStaff,
-	isOwner,
 } = require("../middlewares/auth");
 const { validateBooking } = require("../middlewares/validation/booking");
 

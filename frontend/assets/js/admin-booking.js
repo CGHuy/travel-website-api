@@ -74,12 +74,12 @@ window.initAdminBookingPage = async function () {
 
     async function loadBookings() {
         bodyEl.innerHTML =
-            '<tr><td colspan="8" class="text-center text-muted p-4">Đang tải danh sách booking...</td></tr>';
+            '<tr><td colspan="7" class="text-center text-muted p-4">Đang tải danh sách booking...</td></tr>';
         try {
             const token = localStorage.getItem("token") || "";
             if (!token) {
                 bodyEl.innerHTML =
-                    '<tr><td colspan="8" class="text-center text-danger p-4">Vui lòng đăng nhập quyền Admin.</td></tr>';
+                    '<tr><td colspan="7" class="text-center text-danger p-4">Vui lòng đăng nhập quyền Admin.</td></tr>';
                 return;
             }
 
@@ -95,7 +95,7 @@ window.initAdminBookingPage = async function () {
 
             if (rows.length === 0) {
                 bodyEl.innerHTML =
-                    '<tr><td colspan="8" class="text-center text-muted p-4">Không có booking nào.</td></tr>';
+                    '<tr><td colspan="7" class="text-center text-muted p-4">Không có booking nào.</td></tr>';
                 return;
             }
 
@@ -103,6 +103,17 @@ window.initAdminBookingPage = async function () {
             bodyEl.innerHTML = "";
             for (const r of rows) {
                 const tr = template.content.cloneNode(true);
+                const trNode = tr.querySelector("tr");
+
+                if (trNode) {
+                    trNode.style.cursor = "pointer";
+                    trNode.onclick = () => {
+                        window.location.href = `/pages/admin/booking-details.html?id=${r.id}`;
+                    };
+                    
+                    // Add hover effect via CSS inline or rely on existing classes
+                    trNode.classList.add("table-hover", "row-clickable");
+                }
 
                 tr.querySelector(".booking-code").textContent =
                     "BOK" + String(r.id).padStart(4, "0");
@@ -117,52 +128,32 @@ window.initAdminBookingPage = async function () {
                 );
 
                 const statusEl = tr.querySelector(".booking-status span");
-                const status = r.status || "confirmed"; 
-                statusEl.textContent =
-                    status === "confirmed"
-                        ? "Đã xác nhận"
-                        : status === "cancelled"
-                            ? "Đã hủy"
-                            : "Đang chờ";
-                statusEl.className =
-                    "badge " +
-                    (status === "confirmed"
-                        ? "bg-success"
-                        : status === "cancelled"
-                            ? "bg-danger"
-                            : "bg-secondary");
+                const status = r.status || "confirmed";
+                
+                if (status === "confirmed") {
+                    statusEl.textContent = "Đã xác nhận";
+                    statusEl.className = "badge bg-success";
+                } else if (status === "pending") {
+                    statusEl.textContent = "Chờ xử lý";
+                    statusEl.className = "badge bg-warning text-dark";
+                } else if (status === "cancelled") {
+                    statusEl.textContent = "Đã hủy";
+                    statusEl.className = "badge bg-danger";
+                } else {
+                    statusEl.textContent = status;
+                    statusEl.className = "badge bg-secondary";
+                }
 
                 tr.querySelector(".booking-created").textContent = formatDateTime(
                     r.created_at,
                 );
-
-                const id = r.id;
-                const confirmBtn = tr.querySelector(".js-confirm-booking");
-                const cancelBtn = tr.querySelector(".js-cancel-booking");
-                const deleteBtn = tr.querySelector(".js-delete-booking");
-
-                if (confirmBtn) {
-                    confirmBtn.onclick = () => updateBookingStatus(id, { status: "confirmed" });
-                    if (status === "confirmed") confirmBtn.style.display = "none";
-                }
-                if (cancelBtn) {
-                    cancelBtn.onclick = () => {
-                        if (confirm("Hủy booking này?")) updateBookingStatus(id, { status: "cancelled" });
-                    };
-                    if (status === "cancelled") cancelBtn.style.display = "none";
-                }
-                if (deleteBtn) {
-                    deleteBtn.onclick = () => {
-                        if (confirm("Xóa vĩnh viễn booking này?")) deleteBooking(id);
-                    };
-                }
 
                 bodyEl.appendChild(tr);
             }
         } catch (err) {
             console.error("Lỗi load bookings", err);
             bodyEl.innerHTML =
-                '<tr><td colspan="8" class="text-center text-danger p-4">Lỗi khi tải danh sách. Kiểm tra server.</td></tr>';
+                '<tr><td colspan="7" class="text-center text-danger p-4">Lỗi khi tải danh sách. Kiểm tra server.</td></tr>';
             totalEl.textContent = "0";
         }
     }
