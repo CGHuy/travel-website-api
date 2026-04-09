@@ -5,7 +5,21 @@ class Wishlist {
     static async getByUserId(user_id) {
         try {
             const [rows] = await db.query(
-                `SELECT w.*, t.name as tour_name, t.cover_image FROM wishlist w JOIN tours t ON w.tour_id = t.id WHERE w.user_id = ? ORDER BY w.created_at DESC`,
+                `SELECT 
+                    w.*, 
+                    t.name as tour_name, 
+                    t.cover_image as image_url, 
+                    t.price_default as price,
+                    t.slug as tour_code,
+                    GROUP_CONCAT(DISTINCT td.departure_location SEPARATOR ', ') as departure_location,
+                    t.duration,
+                    t.region
+                FROM wishlist w
+                JOIN tours t ON w.tour_id = t.id 
+                LEFT JOIN tour_departures td ON t.id = td.tour_id
+                WHERE w.user_id = ? 
+                GROUP BY w.id
+                ORDER BY w.created_at DESC`,
                 [user_id]
             );
             return rows;

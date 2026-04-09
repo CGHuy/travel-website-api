@@ -57,6 +57,23 @@ body {
 .tour-card .card-img-top {
     height: 200px;
     object-fit: cover;
+    transition: opacity 0.8s ease-in-out;
+}
+
+.tour-card-img-wrapper {
+    position: relative;
+    overflow: hidden;
+    background-color: #eee;
+}
+
+.tour-card:hover .tour-main-img {
+    opacity: 0.9;
+}
+
+.image-indicators .dot.active {
+    background: #fff;
+    transform: scale(1.2);
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
 .tour-card .card-badges {
@@ -66,7 +83,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    z-index: 1;
+    z-index: 2;
 }
 
 .tour-card .card-badges .badge {
@@ -87,6 +104,7 @@ body {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    line-clamp: 2;
     overflow: hidden;
 }
 
@@ -96,6 +114,7 @@ body {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    line-clamp: 2;
     overflow: hidden;
     margin-bottom: 10px;
 }
@@ -117,7 +136,143 @@ body {
     font-size: 28px;
     font-weight: 700;
     color: #2c3e50;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+/* Vietravel-style Top Section Header */
+.top-section-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0056b3;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.title-underline {
+    width: 150px;
+    height: 3px;
+    background-color: #0056b3;
+}
+
+.section-description {
+    font-size: 1.1rem;
+    color: #4a5568;
+    line-height: 1.6;
+    max-width: 95%;
+}
+
+/* Custom Navigation Buttons */
+.custom-carousel-controls {
+    display: flex;
+    align-items: center;
+}
+
+.btn-carousel-ctrl {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+}
+
+.btn-carousel-ctrl:hover {
+    background: #0056b3;
+    color: #fff;
+    border-color: #0056b3;
+    transform: scale(1.1);
+    box-shadow: 0 10px 15px rgba(0, 86, 179, 0.2);
+}
+
+.btn-carousel-ctrl i {
+    font-size: 1.1rem;
+}
+
+/* Top Tour Overlay Card Style */
+.top-tour-card {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    height: 300px;
+    border: none;
+    transition: all 0.4s ease;
+}
+
+.top-tour-card .card-img-top {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.top-tour-card:hover .card-img-top {
+    transform: scale(1.1);
+}
+
+.top-tour-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 25px 15px;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.top-tour-card h5 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    line-height: 1.4;
+}
+
+/* Region Category Card Specifics */
+.region-category-card {
+    height: 380px; /* Taller for 3-col layout */
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.region-category-card .top-tour-overlay {
+    padding: 30px 20px;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+.region-category-card h5 {
+    font-size: 1.8rem; /* Larger font for categories */
+    letter-spacing: 2px;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    transition: opacity 0.3s;
+}
+
+.loading-overlay.d-none {
+    display: none !important;
 }
 
 .region-title {
@@ -173,4 +328,212 @@ a.text-decoration-none {
 
 a.text-decoration-none:hover {
     color: inherit;
+}
+
+/* Hero Carousel */
+.hero-carousel {
+    margin-top: -70px; /* Aligns with absolute top behind the fixed header */
+    margin-bottom: 50px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-carousel .carousel-item {
+    height: 600px;
+    background: #000;
+}
+
+.hero-carousel .carousel-item::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+.hero-carousel .carousel-item img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+    transition: transform 10s ease;
+}
+
+.hero-carousel .carousel-item.active img {
+    transform: scale(1.1);
+}
+
+.hero-carousel .carousel-caption {
+    bottom: 25%;
+    text-align: left;
+    max-width: 800px;
+    left: 8%;
+    right: 8%;
+    z-index: 10;
+}
+
+.hero-carousel .carousel-caption h2 {
+    font-size: 4rem;
+    font-weight: 900;
+    line-height: 1.1;
+    text-shadow: 2px 4px 15px rgba(0, 0, 0, 0.6);
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+}
+
+.hero-carousel .carousel-caption p {
+    font-size: 1.5rem;
+    font-weight: 300;
+    text-shadow: 1px 2px 8px rgba(0, 0, 0, 0.5);
+    margin-bottom: 35px;
+    max-width: 600px;
+    color: #e0e0e0;
+}
+
+.hero-carousel .btn-hero {
+    padding: 15px 45px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 50px;
+    background: #3498db;
+    border: none;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hero-carousel .btn-hero:hover {
+    background: #2980b9;
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 10px 25px rgba(52, 152, 219, 0.5);
+    color: white;
+}
+
+.hero-carousel .carousel-indicators {
+    bottom: 40px;
+}
+
+.hero-carousel .carousel-indicators [data-bs-target] {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 8px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.hero-carousel .carousel-indicators .active {
+    background-color: #3498db;
+    width: 35px;
+    border-radius: 10px;
+    opacity: 1;
+}
+
+/* Animations for caption */
+.carousel-item.active .carousel-caption h2 {
+    animation: slideInDown 1s both;
+}
+
+.carousel-item.active .carousel-caption p {
+    animation: slideInUp 1s 0.2s both;
+}
+
+.carousel-item.active .carousel-caption .btn-hero {
+    animation: slideInUp 1s 0.4s both;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Page Spacing Adjustment for Home */
+.home-content-wrapper {
+    margin-top: 20px;
+}
+
+/* Responsiveness */
+@media (max-width: 992px) {
+    .hero-carousel .carousel-item {
+        height: 500px;
+    }
+    .hero-carousel .carousel-caption h2 {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-carousel .carousel-item {
+        height: 450px;
+    }
+    .hero-carousel .carousel-caption h2 {
+        font-size: 2.2rem;
+    }
+    .hero-carousel .carousel-caption p {
+        font-size: 1.1rem;
+    }
+    .hero-carousel .carousel-caption {
+        bottom: 15%;
+        left: 5%;
+    }
+}
+
+
+/* Info Features Section Styling */
+.info-features-section {
+    position: relative;
+    z-index: 10;
+}
+
+.mt-n5 {
+    margin-top: -80px !important; /* Pulls it up onto the carousel slightly */
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    transition: transform 0.3s ease;
+}
+
+.feature-item:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+.feature-title {
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+.feature-text {
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+}
+
+/* Background Utilities */
+.bg-light-blue {
+    background-color: #e1effe !important;
+}
+
+.top-featured-section {
+    border-top: 1px solid #e1effe;
+    border-bottom: 1px solid #e1effe;
 }

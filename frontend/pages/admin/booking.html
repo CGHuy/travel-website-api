@@ -12,6 +12,8 @@
 	</div>
 </div>
 
+
+
 <div class="card-body">
 	<div class="row mb-3">
 		<div class="col-md-8">
@@ -36,18 +38,17 @@
 		</div>
 	</div>
 
-	<div class="table-responsive" style="max-height: 600px; overflow: auto">
-		<table class="table table-borderless">
-			<thead class="table-light text-muted small">
+	<div class="table-responsive">
+		<table class="table table-custom align-middle">
+			<thead class="text-muted">
 				<tr>
-					<th>Mã Booking</th>
-					<th>Tên khách hàng</th>
+					<th class="text-nowrap">Mã Booking</th>
+					<th>Khách hàng</th>
 					<th>Tên Tour</th>
-					<th>Ngày khởi hành</th>
-					<th>Tổng tiền</th>
-					<th>Trạng thái</th>
-					<th>Ngày đặt</th>
-					<th>Hành động</th>
+					<th class="text-nowrap">Khởi hành</th>
+					<th class="text-nowrap">Tổng tiền</th>
+					<th class="text-center">Trạng thái</th>
+					<th class="text-nowrap">Ngày đặt</th>
 				</tr>
 			</thead>
 			<tbody id="booking-list-body">
@@ -66,28 +67,12 @@
 		<td class="booking-code">BOK000</td>
 		<td class="booking-customer">Khách</td>
 		<td class="booking-tour">Tour name</td>
-		<td class="booking-date">--/--/----</td>
-		<td class="booking-total">0 VNĐ</td>
-		<td class="booking-status">
+		<td class="booking-date text-nowrap">--/--/----</td>
+		<td class="booking-total text-nowrap">0 VNĐ</td>
+		<td class="booking-status text-center">
 			<span class="badge bg-secondary">pending</span>
 		</td>
-		<td class="booking-created">--/--/----</td>
-		<td class="booking-actions text-nowrap">
-			<div class="btn-group btn-group-sm" role="group">
-				<button class="btn btn-success btn-sm js-confirm-booking" data-id="">
-					Xác nhận
-				</button>
-				<button class="btn btn-danger btn-sm js-cancel-booking" data-id="">
-					Hủy
-				</button>
-				<button
-					class="btn btn-outline-danger btn-sm js-delete-booking"
-					data-id=""
-				>
-					Xóa
-				</button>
-			</div>
-		</td>
+		<td class="booking-created text-nowrap">--/--/----</td>
 	</tr>
 </template>
 

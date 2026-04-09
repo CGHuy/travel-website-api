@@ -2,22 +2,19 @@ const express = require("express");
 const router = express.Router();
 const bookingController = require("../controllers/bookingController");
 const { validateBookingTour } = require("../middlewares/validation/booking");
-const {
-	verifyToken,
-	isAdmin,
-	isUser,
-	isBookingStaff,
-	isOwner,
-} = require("../middlewares/auth");
+const { verifyToken, isUser, isBookingStaff } = require("../middlewares/auth");
 
-// User routes - Cần đăng nhập
+//============================== User routes - Cần đăng nhập=====================
+
+// Xem danh sach booking ma user da dat
 router.get(
 	"/my-bookings",
 	verifyToken,
 	isUser,
-	bookingController.getMyBookings,
+	bookingController.getBookingsByUserId,
 );
 
+// Xem chi tiết booking ma user da dat
 router.get(
 	"/:id/details",
 	verifyToken,
@@ -25,13 +22,10 @@ router.get(
 	bookingController.getBookingDetailsByUserId,
 );
 
-router.put(
-	"/:id/cancel",
-	verifyToken,
-	isUser,
-	bookingController.requestCancellation,
-);
+// User gui yeu cau huy booking
+router.put("/:id/cancel", verifyToken, isUser, bookingController.cancelBooking);
 
+///===================================================================
 // Booking Staff routes - Cần quyền quản lý
 router.get("/", verifyToken, isBookingStaff, bookingController.getAllBookings);
 
@@ -51,6 +45,12 @@ router.post(
 	bookingController.createVNPayUrl,
 );
 router.get("/vnpay-return", bookingController.vnpayReturn);
+router.get(
+	"/search",
+	verifyToken,
+	isBookingStaff,
+	bookingController.searchBookings,
+);
 
 router.get("/:id", verifyToken, bookingController.getBookingDetails);
 

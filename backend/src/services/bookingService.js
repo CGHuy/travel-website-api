@@ -13,9 +13,14 @@ class bookingService {
 				`SELECT 
                     b.id,
                     t.name as tour_name,
+                    t.cover_image,
                     td.departure_date,
+                    td.departure_location,
+                    b.adults,
+                    b.children,
                     b.total_price,
                     b.status as booking_status,
+                    b.payment_status,
                     b.created_at
                 FROM bookings b
                 JOIN tour_departures td ON b.departure_id = td.id
@@ -97,7 +102,7 @@ class bookingService {
                     t.price_default,
                     td.departure_date,
                     td.departure_location,
-					c.name as customer_name,
+					c.fullname as customer_name,
 					c.dob as customer_dob,
 					c.gender as customer_gender,
 					c.passenger_type as customer_passenger_type
@@ -105,7 +110,7 @@ class bookingService {
                 LEFT JOIN users u ON b.user_id = u.id
                 JOIN tour_departures td ON b.departure_id = td.id
                 JOIN tours t ON td.tour_id = t.id
-				JOIN customers c ON b.id = c.booking_id
+				LEFT JOIN customers c ON b.id = c.booking_id
                 WHERE b.id = ?
 				LIMIT 1`,
 				[id],
@@ -240,7 +245,12 @@ class bookingService {
 			await conn.query(
 				`INSERT INTO customers (booking_id, fullname, gender, dob, passenger_type)
 				VALUES (?, ?, ?, ?, 'adult')`,
-				[bookingId, contact_name, contact_gender || "Khác", contact_dob || null],
+				[
+					bookingId,
+					contact_name,
+					contact_gender || "Khác",
+					contact_dob || null,
+				],
 			);
 
 			// 2.3 Insert các hành khách còn lại (từ người thứ 2 trở đi)
@@ -267,6 +277,49 @@ class bookingService {
 			throw error;
 		} finally {
 			conn.release();
+		}
+	}
+	// Tìm kiếm booking theo mã booking , user id và lọc trạng thái
+
+	static async searchBooking(userId, tourId, status) {
+		try {
+			let query = `
+				SELECT 
+                    b.*, 
+                    u.fullname, 
+                    u.email as user_email, 
+                    t.name as tour_name, 
+                    t.price_default,
+                    td.departure_date
+                FROM bookings b
+                LEFT JOIN users u ON b.user_id = u.id
+                JOIN tour_departures td ON b.departure_id = td.id
+                JOIN tours t ON td.tour_id = t.id
+                WHERE 1=1
+			`;
+			const params = [];
+
+			if (userId) {
+				query += " AND b.user_id = ?";
+				params.push(userId);
+			}
+
+			if (tourId) {
+				query += " AND t.id = ?";
+				params.push(tourId);
+			}
+
+			if (status) {
+				query += " AND b.status = ?";
+				params.push(status);
+			}
+
+			query += " ORDER BY b.created_at DESC";
+
+			const [rows] = await db.query(query, params);
+			return rows;
+		} catch (error) {
+			throw error;
 		}
 	}
 }

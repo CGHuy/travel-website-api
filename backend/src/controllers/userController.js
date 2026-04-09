@@ -9,22 +9,23 @@ exports.updateProfile = async (req, res) => {
 		const { fullname, phone, email } = req.body;
 
 		// Kiểm tra email đã tồn tại cho user khác chưa
-		const [emailRows] = await db.query(
-			"SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1",
-			[email, userId],
-		);
-		if (emailRows.length > 0) {
+		const existingUser = await User.findByEmail(email);
+		if (existingUser && existingUser.id !== userId) {
 			return res.status(400).json({
 				success: false,
 				message: "Email đã được sử dụng bởi người dùng khác!",
 			});
 		}
 
-		// Cập nhật thông tin
-		await db.query(
-			"UPDATE users SET fullname = ?, phone = ?, email = ? WHERE id = ?",
-			[fullname, phone, email, userId],
-		);
+		// Cập nhật thông tin sử dụng Model User
+		const success = await User.updateProfile(userId, { fullname, phone, email });
+
+		if (!success) {
+			return res.status(400).json({
+				success: false,
+				message: "Cập nhật thông tin thất bại!",
+			});
+		}
 
 		return res.json({
 			success: true,

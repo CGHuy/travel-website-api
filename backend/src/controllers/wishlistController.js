@@ -58,3 +58,40 @@ exports.removeFromWishlist = async (req, res) => {
 		});
 	}
 };
+
+// Thêm tour vào wishlist
+exports.addToWishlist = async (req, res) => {
+	try {
+		const userId = parseInt(req.params.id, 10);
+		const { tour_id } = req.body;
+
+		if (isNaN(userId) || !tour_id) {
+			return res.status(400).json({
+				success: false,
+				message: "Dữ liệu không hợp lệ",
+			});
+		}
+
+		// Check duplicate
+		const exists = await Wishlist.exists(userId, tour_id);
+		if (exists) {
+			return res.status(400).json({
+				success: false,
+				message: "Tour đã có trong danh sách yêu thích",
+			});
+		}
+
+		const insertId = await Wishlist.add(userId, tour_id);
+		res.json({
+			success: true,
+			message: "Đã thêm vào yêu thích",
+			data: { id: insertId, user_id: userId, tour_id }
+		});
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			message: "Lỗi khi thêm vào yêu thích",
+			error: error.message,
+		});
+	}
+};

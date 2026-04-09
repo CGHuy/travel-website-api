@@ -88,6 +88,26 @@ exports.updateStatus = async (req, res) => {
 	}
 };
 
+// Tìm kiếm booking theo mã tour , mã user, lọc trạng thái (Dành cho nhân viên xem chi tiết booking)
+exports.searchBookings = async (req, res) => {
+	try {
+		const { tour_id, user_id, status } = req.query;
+		const bookings = await bookingService.searchBooking(
+			user_id,
+			tour_id,
+			status,
+		);
+		res.json({ success: true, count: bookings.length, data: bookings });
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			message: "Lỗi khi tìm kiếm",
+			error: error.message,
+		});
+	}
+};
+
+///=============================== USER =======================================================
 // Gửi yêu cầu hủy booking (User)
 exports.cancelBooking = async (req, res) => {
 	try {
@@ -147,10 +167,10 @@ exports.cancelBooking = async (req, res) => {
 };
 
 // Lấy danh sách bookings của user hiện tại
-exports.getMyBookings = async (req, res) => {
+exports.getBookingsByUserId = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		const bookings = await bookingService.getByUserId(userId);
+		const bookings = await bookingService.getBookingsByUserId(userId);
 		res.json({ success: true, count: bookings.length, data: bookings });
 	} catch (error) {
 		res.status(500).json({
@@ -235,7 +255,7 @@ exports.createVNPayUrl = async (req, res) => {
 			req.body,
 		);
 		// VNPay có thể lỗi nếu nội dung chứa ký tự đặc biệt, nên loại bỏ dấu và ký tự lạ
-		const safeTourName = tourName.replace(/[^\w\s]/gi, '');
+		const safeTourName = tourName.replace(/[^\w\s]/gi, "");
 		const orderInfo = `Thanh toan tour ${safeTourName}`.slice(0, 250);
 		const uniqueStr = Math.random().toString(36).substring(2, 10).toUpperCase();
 		const txnRef = `VNPAY_${Date.now()}_${uniqueStr}`;
@@ -267,11 +287,14 @@ exports.createVNPayUrl = async (req, res) => {
 		});
 
 		// Tính tương thích: Bọc kết quả vào JSON có format chuẩn để Frontend nhận diện
-		const paymentUrl = typeof vnpayResponse === 'string' ? vnpayResponse : vnpayResponse.url || vnpayResponse.paymentUrl;
-		
+		const paymentUrl =
+			typeof vnpayResponse === "string"
+				? vnpayResponse
+				: vnpayResponse.url || vnpayResponse.paymentUrl;
+
 		return res.status(201).json({
 			success: true,
-			vnpayUrl: paymentUrl || vnpayResponse
+			vnpayUrl: paymentUrl || vnpayResponse,
 		});
 	} catch (error) {
 		console.error("VNPay Error:", error);
@@ -322,16 +345,22 @@ exports.vnpayReturn = async (req, res) => {
 			}
 
 			// Chuyển hướng về trang Kết quả thanh toán trên Frontend
-			return res.redirect(`/payment-result?status=success&bookingId=${newBookingId}`);
+			return res.redirect(
+				`/payment-result?status=success&bookingId=${newBookingId}`,
+			);
 		} else {
 			// Xóa dữ liệu tạm nếu giao dịch thất bại hoặc bị hủy
 			pendingBookingsCache.delete(txnRef);
-			
+
 			// Chuyển hướng về trang lỗi
-			return res.redirect(`/payment-result?status=error&message=Giao dịch thất bại hoặc bị hủy`);
+			return res.redirect(
+				`/payment-result?status=error&message=Giao dịch thất bại hoặc bị hủy`,
+			);
 		}
 	} catch (error) {
 		console.error("VNPay Return Error:", error);
-		return res.redirect(`/payment-result?status=error&message=Lỗi máy chủ khi xử lý thanh toán`);
+		return res.redirect(
+			`/payment-result?status=error&message=Lỗi máy chủ khi xử lý thanh toán`,
+		);
 	}
 };

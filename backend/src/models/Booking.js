@@ -43,63 +43,6 @@ class Booking {
 		}
 	}
 
-	// 3. Tạo booking mới (Khớp với các cột trong db.sql)
-	static async create(data) {
-		try {
-			const {
-				user_id,
-				departure_id,
-				adults,
-				children,
-				total_price,
-				contact_name,
-				contact_phone,
-				contact_email,
-				note,
-			} = data;
-
-			const [result] = await db.query(
-				`
-                INSERT INTO bookings (
-                    user_id, departure_id, adults, children, 
-                    total_price, contact_name, contact_phone, 
-                    contact_email, note
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-				[
-					user_id,
-					departure_id,
-					adults,
-					children,
-					total_price,
-					contact_name,
-					contact_phone,
-					contact_email,
-					note,
-				],
-			);
-
-			return result.insertId;
-		} catch (error) {
-			throw error;
-		}
-	}
-
-	// 4. Cập nhật trạng thái (paid, refunded, cancelled) - Che
-	static async updateStatus(id, statusField, statusValue) {
-		try {
-			const [result] = await db.query(
-				`
-                UPDATE bookings 
-                SET ${statusField} = ?, updated_at = NOW() 
-                WHERE id = ?`,
-				[statusValue, id],
-			);
-			return result.affectedRows > 0;
-		} catch (error) {
-			throw error;
-		}
-	}
-
 	// Người dùng gửi yêu cầu hủy booking (chuyển trạng thái sang "pending")
 	static async requestCancellation(id) {
 		try {
@@ -115,6 +58,24 @@ class Booking {
 			const [result] = await db.query(
 				`UPDATE bookings SET status = 'pending', updated_at = NOW() WHERE id = ?`,
 				[id],
+			);
+			return result.affectedRows > 0;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	// Cập nhật trường bất kỳ (ví dụ: status, payment_status)
+	static async updateStatus(id, field, value) {
+		try {
+			const allowedFields = ["status", "payment_status"];
+			if (!allowedFields.includes(field)) {
+				throw new Error("Invalid field to update");
+			}
+
+			const [result] = await db.query(
+				`UPDATE bookings SET ?? = ?, updated_at = NOW() WHERE id = ?`,
+				[field, value, id],
 			);
 			return result.affectedRows > 0;
 		} catch (error) {

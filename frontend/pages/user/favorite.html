@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Yêu thích đã lưu | VietTour</title>
+        <link rel="icon" href="/assets/images/icon.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+        <link rel="stylesheet" href="../../assets/css/index.css" />
+        <link rel="stylesheet" href="../../assets/css/user-sidebar.css" />
+        <style>
+            .main-title {
+                text-align: center;
+                color: #0056b3;
+                font-weight: 800;
+                font-size: 2.5rem;
+                margin-bottom: 40px;
+            }
+            .back-link {
+                color: #2c3e50;
+                text-decoration: none;
+                font-weight: 600;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+            .back-link:hover {
+                color: #3498db;
+            }
+
+            /* Search Bar (Matching Dashboard Aesthetic) */
+            .search-favorite-container {
+                position: relative;
+                margin-bottom: 30px;
+            }
+            .search-favorite-container i {
+                position: absolute;
+                left: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #94a3b8;
+                font-size: 1.1rem;
+            }
+            .search-favorite-input {
+                padding-left: 55px;
+                border: 1px solid #e2e8f0;
+                border-radius: 50px; /* Modern pill shape */
+                height: 55px;
+                width: 100%;
+                font-size: 16px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s;
+                background: #fff;
+            }
+            .search-favorite-input:focus {
+                border-color: #3b82f6;
+                box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1);
+                outline: none;
+            }
+
+            /* Horizontal Card Design */
+            .favorite-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 25px;
+            }
+            
+            .favorite-card {
+                background: #fff;
+                border: 1px solid #e2e8f0;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                display: flex;
+                flex-direction: row;
+                width: 100%;
+                perspective: 1000px;
+            }
+            .favorite-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+
+            .favorite-img-side {
+                width: 380px;
+                position: relative;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+            .favorite-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .favorite-card:hover .favorite-img {
+                transform: scale(1.1);
+            }
+
+            .remove-favorite-btn {
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                background: rgba(255, 255, 255, 0.9);
+                border: none;
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
+                color: #ef4444;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 5;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transition: all 0.2s;
+                font-size: 1.2rem;
+            }
+            .remove-favorite-btn:hover {
+                background: #ef4444;
+                color: #fff;
+                transform: scale(1.1);
+            }
+
+            .favorite-info-side {
+                flex: 1;
+                padding: 25px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .favorite-tour-name {
+                font-size: 1.4rem;
+                font-weight: 800;
+                color: #0f172a;
+                margin-bottom: 15px;
+                line-height: 1.3;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                line-clamp: 2;
+                overflow: hidden;
+            }
+
+            .meta-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            .meta-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 14px;
+                color: #64748b;
+            }
+            .meta-item i {
+                width: 20px;
+                text-align: center;
+                color: #94a3b8;
+                font-size: 1.1rem;
+            }
+            .meta-item b {
+                color: #334155;
+                font-weight: 600;
+            }
+
+            .favorite-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-end;
+                padding-top: 15px;
+                border-top: 1px solid #f1f5f9;
+            }
+
+            .price-container {
+                display: flex;
+                flex-direction: column;
+            }
+            .price-label {
+                font-size: 0.9rem;
+                color: #64748b;
+                margin-bottom: 2px;
+            }
+            .price-value {
+                color: #ef4444;
+                font-size: 1.8rem;
+                font-weight: 800;
+            }
+            .price-value span {
+                text-decoration: underline;
+                font-size: 1.3rem;
+            }
+
+            .btn-view-detail {
+                background: #2563eb;
+                color: #fff;
+                padding: 10px 25px;
+                border-radius: 10px;
+                font-weight: 600;
+                text-decoration: none;
+                transition: all 0.3s;
+                border: none;
+            }
+            .btn-view-detail:hover {
+                background: #1d4ed8;
+                color: #fff;
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            }
+
+            .empty-favorites {
+                text-align: center;
+                padding: 80px 20px;
+                background: #fff;
+                border-radius: 20px;
+                border: 2px dashed #e2e8f0;
+            }
+            
+            @media (max-width: 1200px) {
+                .favorite-img-side { width: 320px; }
+            }
+            @media (max-width: 991px) {
+                .favorite-img-side { width: 280px; }
+                .favorite-tour-name { font-size: 1.2rem; }
+            }
+            @media (max-width: 767px) {
+                .favorite-card { flex-direction: column; }
+                .favorite-img-side { width: 100%; height: 230px; }
+                .meta-grid { grid-template-columns: 1fr; }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="header-placeholder"></div>
+
+        <div class="container my-5">
+            <a href="/index" class="back-link">
+                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+            </a>
+
+            <h1 class="main-title">Tài khoản của bạn</h1>
+
+            <div class="row">
+                <!-- Sidebar Column -->
+                <div class="col-lg-3 col-md-4">
+                    <div id="side-placeholder" class="user-sidebar-container">
+                        <!-- User Sidebar content will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Content Column -->
+                <div class="col-lg-9 col-md-8">
+                    <!-- Search Bar -->
+                    <div class="search-favorite-container">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" class="search-favorite-input" id="searchFavorite" placeholder="Nhập tên tour, địa danh mà bạn đã yêu thích...">
+                    </div>
+
+                    <!-- Favorite Tours List (Horizontal Layout) -->
+                    <div id="favorite-list" class="favorite-grid">
+                        <!-- Mock Item 1 -->
+                        <div class="favorite-card">
+                            <div class="favorite-img-side">
+                                <button class="remove-favorite-btn" title="Gỡ khỏi danh sách"><i class="fa-solid fa-heart"></i></button>
+                                <img src="/assets/images/ha_long_thumbnail.png" alt="Tour image" class="favorite-img">
+                            </div>
+                            <div class="favorite-info-side">
+                                <h4 class="favorite-tour-name">Vịnh Hạ Long - Khám phá vẻ đẹp kỳ quan thiên nhiên thế giới hùng vĩ</h4>
+                                
+                                <div class="meta-grid">
+                                    <div class="meta-item">
+                                        <i class="fa-solid fa-barcode"></i>
+                                        <span>Mã tour: <b>TOUR001</b></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        <span>Khởi hành: <b>Quảng Ninh</b></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fa-regular fa-clock"></i>
+                                        <span>Thời gian: <b>2 ngày 1 đêm</b></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fa-solid fa-map-marked-alt"></i>
+                                        <span>Khu vực: <b>Miền Bắc</b></span>
+                                    </div>
+                                </div>
+
+                                <div class="favorite-footer">
+                                    <div class="price-container">
+                                        <span class="price-label">Giá chuẩn từ:</span>
+                                        <span class="price-value">3.250.000 <span>đ</span></span>
+                                    </div>
+                                    <a href="/detail-tour?id=1" class="btn-view-detail">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mock Item 2 -->
+                        <div class="favorite-card">
+                            <div class="favorite-img-side">
+                                <button class="remove-favorite-btn" title="Gỡ khỏi danh sách"><i class="fa-solid fa-heart"></i></button>
+                                <img src="/assets/images/seoul_thumbnail.png" alt="Tour image" class="favorite-img">
+                            </div>
+                            <div class="favorite-info-side">
+                                <h4 class="favorite-tour-name">Seoul - Hàn Quốc: Hành trình đặc biệt khám phá xứ sở Kim Chi cao cấp</h4>
+                                
+                                <div class="meta-grid">
+                                    <div class="meta-item">
+                                        <i class="fa-solid fa-barcode"></i>
+                                        <span>Mã tour: <b>TOUR002</b></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        <span>Khởi hành: <b>Hàn Quốc</b></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fa-regular fa-clock"></i>
+                                        <span>Thời gian: <b>5 ngày 4 đêm</b></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fa-solid fa-map-marked-alt"></i>
+                                        <span>Khu vực: <b>Hàn Quốc</b></span>
+                                    </div>
+                                </div>
+
+                                <div class="favorite-footer">
+                                    <div class="price-container">
+                                        <span class="price-label">Giá chuẩn từ:</span>
+                                        <span class="price-value">15.490.000 <span>đ</span></span>
+                                    </div>
+                                    <a href="/detail-tour?id=2" class="btn-view-detail">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No results message -->
+                    <div id="no-favorites" class="empty-favorites d-none">
+                        <i class="fa-solid fa-heart-crack"></i>
+                        <h5>Hiện tại bạn chưa lưu tour nào!</h5>
+                        <p class="text-muted">Hãy dạo quanh các tour hấp dẫn để lưu lại hành trình bạn yêu thích nhé.</p>
+                        <a href="/index" class="btn btn-primary mt-2">Khám phá Tour</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="footer-placeholder"></div>
+
+        <!-- Confirm Delete Modal -->
+        <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="deleteConfirmModalLabel">Xác nhận xóa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <div class="text-center mb-3">
+                            <i class="fa-solid fa-circle-exclamation text-warning fs-1"></i>
+                        </div>
+                        <p class="text-center mb-0">Bạn có chắc chắn muốn xóa tour này khỏi danh sách yêu thích không? Hành động này không thể hoàn tác.</p>
+                    </div>
+                    <div class="modal-footer border-0 pt-0 justify-content-center pb-4">
+                        <button type="button" class="btn btn-light px-4 rounded-3 fw-600" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="button" id="confirmDeleteBtn" class="btn btn-danger px-4 rounded-3 fw-600">Xác nhận xóa</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="../../assets/js/favorite.js"></script>
+    </body>
+</html>
