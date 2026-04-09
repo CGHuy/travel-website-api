@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     initAdminLayout();
 });
 
+let currentAdminPage = null;
+
 function initAdminLayout() {
     const menuItems = document.querySelectorAll(".menu-item[data-page][data-file]");
     if (menuItems.length === 0) return;
@@ -34,8 +36,10 @@ function initAdminLayout() {
 
         link.addEventListener("click", (e) => {
             e.preventDefault(); // Ngăn trình duyệt load lại trang
+            if (item.classList.contains("disabled")) return;
             
             const page = item.getAttribute("data-page");
+            if (page === currentAdminPage) return;
             const newUrl = `${window.location.pathname}?page=${page}`;
             
             // Cập nhật URL trên thanh địa chỉ mà không load lại
@@ -62,15 +66,22 @@ function initAdminLayout() {
 }
 
 async function setActiveMenu(page, menuItems) {
+    if (page === currentAdminPage) {
+        return;
+    }
+
     const activeItem = Array.from(menuItems).find((item) => item.getAttribute("data-page") === page);
     if (!activeItem) {
         clearActiveMenu(menuItems);
         clearContent();
+        currentAdminPage = null;
         return;
     }
 
     const filePath = activeItem.getAttribute("data-file");
     if (!filePath) return;
+
+    currentAdminPage = page;
 
     menuItems.forEach((item) => {
         item.classList.toggle("active", item.getAttribute("data-file") === filePath);
@@ -185,13 +196,14 @@ function applyPermissions(menuItems) {
     try {
         const user = JSON.parse(userStr);
         // Định nghĩa quyền cho từng Role
+        const normalizedRole = String(user.role || "").toLowerCase().replace(/_/g, "-");
         let allowedPages = [];
 
-        if (user.role === 'admin') {
-            allowedPages = ['user', 'tour', 'tour-image', 'statistics'];
-        } else if (user.role === 'tour-staff') {
+        if (normalizedRole === 'admin') {
+            allowedPages = ['user', 'tour', 'itinerary', 'departure', 'booking', 'service', 'tour-service', 'tour-image', 'statistics', 'booking-details'];
+        } else if (normalizedRole === 'tour-staff') {
             allowedPages = ['departure', 'itinerary', 'service', 'tour-service'];
-        } else if (user.role === 'booking-staff') {
+        } else if (normalizedRole === 'booking-staff') {
             allowedPages = ['booking', 'booking-details'];
         }
 

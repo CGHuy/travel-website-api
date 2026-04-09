@@ -9,33 +9,33 @@ const {
 	validateUpdateDeparturePrice,
 } = require("../middlewares/validation/departures");
 
-const { verifyToken, isAdmin } = require("../middlewares/auth");
+const { verifyToken, isTourStaff } = require("../middlewares/auth");
 
 // Tạo departure mới - Cần đăng nhập và có role admin
-router.post("/", verifyToken, isAdmin, validateCreateDeparture, departureController.createDeparture);
+router.post("/", verifyToken, isTourStaff, validateCreateDeparture, departureController.createDeparture);
 
 // Lấy tất cả departures - Cần đăng nhập và có role admin
-router.get("/all", verifyToken, isAdmin, departureController.getAllDepartures);
+router.get("/all", verifyToken, isTourStaff, departureController.getAllDepartures);
 
 // Tìm kiếm departures theo nhiều tiêu chí - Cần đăng nhập và có role admin
-router.get("/search", verifyToken, isAdmin, departureController.searchDepartures);
+router.get("/search", verifyToken, isTourStaff, departureController.searchDepartures);
 
 // Lấy departure theo ID - Cần đăng nhập và có role admin
-router.get("/:id", verifyToken, isAdmin, departureController.getDepartureById);
+router.get("/:id", verifyToken, isTourStaff, departureController.getDepartureById);
 
 // Cập nhật departure - Cần đăng nhập và có role admin
-router.put("/:id", verifyToken, isAdmin, validateUpdateDeparture, departureController.updateDeparture);
+router.put("/:id", verifyToken, isTourStaff, validateUpdateDeparture, departureController.updateDeparture);
 
 // Quản lý số chỗ ngồi - Cần đăng nhập và có role admin
-router.put("/:id/seats", verifyToken, isAdmin, validateUpdateDepartureSeats, departureController.updateAvailableSeats);
+router.put("/:id/seats", verifyToken, isTourStaff, validateUpdateDepartureSeats, departureController.updateAvailableSeats);
 
 // Quản lý giá vé - Cần đăng nhập và có role admin
-router.put("/:id/price", verifyToken, isAdmin, validateUpdateDeparturePrice, departureController.updatePrice);
+router.put("/:id/price", verifyToken, isTourStaff, validateUpdateDeparturePrice, departureController.updatePrice);
 
 // Cập nhật trạng thái departure - Cần đăng nhập và có role admin
-router.put("/:id/status", verifyToken, isAdmin, validateUpdateDepartureStatus, departureController.updateDepartureStatus);
+router.put("/:id/status", verifyToken, isTourStaff, validateUpdateDepartureStatus, departureController.updateDepartureStatus);
 
 // Xóa departure - Cần đăng nhập và có role admin
-router.delete("/:id", verifyToken, isAdmin, departureController.deleteDeparture);
+router.delete("/:id", verifyToken, isTourStaff, departureController.deleteDeparture);
 
 module.exports = router;

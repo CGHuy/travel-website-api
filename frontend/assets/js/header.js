@@ -54,7 +54,14 @@ async function updateAdminNavVisibility(token) {
     }
 
     const role = await getCurrentRoleFromBackend(token);
-    const canViewAdmin = role === "admin";
+    const canViewAdminRoles = new Set([
+        "admin",
+        "tour_staff",
+        "booking_staff",
+        "tour-staff",
+        "booking-staff",
+    ]);
+    const canViewAdmin = canViewAdminRoles.has(role);
 
     adminNavLink.classList.toggle("d-none", !canViewAdmin);
 }
