@@ -28,6 +28,7 @@ function updateAuthUI() {
     const registerBtn = document.getElementById("registerBtn");
     const userMenu = document.getElementById("userMenu");
     const userName = document.getElementById("userName");
+    const adminMenu = document.getElementById("adminMenu");
 
     console.log("updateAuthUI - token:", token ? "có" : "không");
     console.log("updateAuthUI - elements:", { loginBtn, registerBtn, userMenu });
@@ -43,6 +44,11 @@ function updateAuthUI() {
             const userData = JSON.parse(user);
             const avatarImg = document.getElementById("userAvatar");
 
+            if (adminMenu) {
+                const canAccessAdmin = hasAdminAccess(userData);
+                adminMenu.classList.toggle("d-none", !canAccessAdmin);
+            }
+
             if (avatarImg) {
                 avatarImg.alt = userData.fullname;
             }
@@ -52,15 +58,28 @@ function updateAuthUI() {
             }
         } catch (err) {
             console.error("Không đọc được dữ liệu user:", err);
+            if (adminMenu) adminMenu.classList.add("d-none");
         }
     } else {
         // Chưa đăng nhập: Hiện nút login/register, ẩn userMenu
         if (loginBtn) loginBtn.classList.remove("d-none");
         if (registerBtn) registerBtn.classList.remove("d-none");
         if (userMenu) userMenu.classList.add("d-none");
+        if (adminMenu) adminMenu.classList.add("d-none");
 
         closeUserDropdown();
     }
+}
+
+function hasAdminAccess(userData) {
+    if (!userData || typeof userData !== "object") return false;
+
+    const isTruthyRole = (value) => value === true || value === "true" || value === 1 || value === "1";
+    const normalizedRole = typeof userData.role === "string" ? userData.role.trim().toLowerCase() : "";
+
+    const hasRoleByName = ["admin", "booking-staff", "tour-staff"].includes(normalizedRole);
+
+    return hasRoleByName || isTruthyRole(userData.isAdmin) || isTruthyRole(userData.isBookingStaff) || isTruthyRole(userData.isTourStaff);
 }
 
 // LOGOUT
@@ -118,7 +137,7 @@ function closeUserDropdown() {
  * @param {string} type - success | error | warning | info
  * @param {number} duration - Thời gian hiển thị (ms)
  */
-window.showToast = function(title, message = "", type = "success", duration = 5000) {
+window.showToast = function (title, message = "", type = "success", duration = 5000) {
     const container = document.getElementById("toast-container");
     if (!container) {
         console.warn("Toast container not found!");
@@ -131,12 +150,12 @@ window.showToast = function(title, message = "", type = "success", duration = 50
         success: "fa-solid fa-circle-check",
         error: "fa-solid fa-circle-xmark",
         warning: "fa-solid fa-triangle-exclamation",
-        info: "fa-solid fa-circle-info"
+        info: "fa-solid fa-circle-info",
     };
 
     const toast = document.createElement("div");
     toast.className = `toast-message toast-${type}`;
-    
+
     toast.innerHTML = `
         <div class="toast-icon">
             <i class="${icons[type] || icons.info}"></i>
