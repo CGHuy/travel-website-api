@@ -137,7 +137,7 @@ class ListTourService {
             const images = await tourImageModel.getByTourId(id);
 
             // 3. Lấy danh sách các dịch vụ đi kèm của tour từ bảng tour_services (kèm join với bảng services)
-            const services = await tourServiceModel.getServicesByTourId(id);
+            const services = await tourServiceModel.getServicesByTourIdForListTour(id);
 
             // 4. Lấy danh sách lịch trình của tour
             const itineraries = await tourItineraryModel.getByTourId(id);
