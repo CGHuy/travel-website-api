@@ -53,15 +53,27 @@ function initAdminLayout() {
     // Xử lý khi nhấn nút Back/Forward của trình duyệt
     window.addEventListener("popstate", (e) => {
         const page = getCurrentPageQuery();
-        if (page) setActiveMenu(page, menuItems);
+        if (page) {
+            setActiveMenu(page, menuItems);
+        } else {
+            const fallbackPage = getFirstEnabledPage(menuItems);
+            if (fallbackPage) {
+                setActiveMenu(fallbackPage, menuItems);
+            }
+        }
     });
 
     const initialPage = getCurrentPageQuery();
     if (initialPage) {
         setActiveMenu(initialPage, menuItems);
     } else {
-        clearActiveMenu(menuItems);
-        clearContent();
+        const fallbackPage = getFirstEnabledPage(menuItems);
+        if (fallbackPage) {
+            setActiveMenu(fallbackPage, menuItems);
+        } else {
+            clearActiveMenu(menuItems);
+            clearContent();
+        }
     }
 }
 
@@ -71,10 +83,17 @@ async function setActiveMenu(page, menuItems) {
     }
 
     const activeItem = Array.from(menuItems).find((item) => item.getAttribute("data-page") === page);
-    if (!activeItem) {
+    if (!activeItem || activeItem.classList.contains("disabled")) {
         clearActiveMenu(menuItems);
         clearContent();
         currentAdminPage = null;
+
+        const fallbackPage = getFirstEnabledPage(menuItems);
+        if (fallbackPage && fallbackPage !== page) {
+            const newUrl = `${window.location.pathname}?page=${fallbackPage}`;
+            history.replaceState({ page: fallbackPage }, "", newUrl);
+            setActiveMenu(fallbackPage, menuItems);
+        }
         return;
     }
 
@@ -157,6 +176,11 @@ function clearContent() {
     }
 }
 
+function getFirstEnabledPage(menuItems) {
+    const firstEnabledItem = Array.from(menuItems).find((item) => !item.classList.contains("disabled"));
+    return firstEnabledItem ? firstEnabledItem.getAttribute("data-page") : null;
+}
+
 function getCurrentPageQuery() {
     const params = new URLSearchParams(window.location.search);
     return params.get("page");
@@ -200,7 +224,7 @@ function applyPermissions(menuItems) {
         let allowedPages = [];
 
         if (normalizedRole === 'admin') {
-            allowedPages = ['user', 'tour', 'itinerary', 'departure', 'booking', 'service', 'tour-service', 'tour-image', 'statistics', 'booking-details'];
+            allowedPages = ['tour', 'tour-image', 'user', 'statistics'];
         } else if (normalizedRole === 'tour-staff') {
             allowedPages = ['departure', 'itinerary', 'service', 'tour-service'];
         } else if (normalizedRole === 'booking-staff') {
