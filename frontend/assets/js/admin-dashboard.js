@@ -86,7 +86,7 @@ async function setActiveMenu(page, menuItems) {
             </div>`;
 
         try {
-            const res = await fetch(`./${filePath}`);
+            const res = await fetch(`/pages/admin/${filePath}`);
             if (!res.ok) {
                 throw new Error(`HTTP ${res.status}`);
             }
@@ -122,7 +122,7 @@ async function setActiveMenu(page, menuItems) {
             } else if (typeof window.initAdminPage === "function") {
                 // Fallback for older inline scripts (if any remain)
                 await window.initAdminPage();
-                window.initAdminPage = null; 
+                window.initAdminPage = null;
             }
         } catch (error) {
             contentEl.innerHTML = `<div class="alert alert-warning">Chưa có file <strong>${filePath}</strong> hoặc không thể tải nội dung.</div>`;
