@@ -27,7 +27,18 @@ class ListTourService {
                     FROM tour_departures 
                     WHERE tour_id = t.id AND departure_date >= CURDATE()
                     ORDER BY departure_date ASC LIMIT 4
-                ) as upcoming_dates
+                ) as upcoming_dates,
+                (
+                    SELECT GROUP_CONCAT(loc.departure_location SEPARATOR '||')
+                    FROM (
+                        SELECT td.departure_location, MIN(td.departure_date) AS nearest_departure
+                        FROM tour_departures td
+                        WHERE td.tour_id = t.id AND td.departure_date >= CURDATE()
+                        GROUP BY td.departure_location
+                        ORDER BY nearest_departure ASC
+                        LIMIT 3
+                    ) loc
+                ) as departure_locations
             FROM tours t
             WHERE 1=1
         `;
@@ -99,11 +110,18 @@ class ListTourService {
 
         try {
             const [rows] = await db.query(baseSql, queryValues);
+            const normalizedRows = rows.map((tour) => ({
+                ...tour,
+                departure_locations: tour.departure_locations
+                    ? tour.departure_locations.split('||')
+                    : [],
+            }));
+
             // Lấy tổng số bản ghi khớp điều kiện (không tính LIMIT)
             const [[{ total }]] = await db.query('SELECT FOUND_ROWS() as total');
 
             return {
-                tours: rows,
+                tours: normalizedRows,
                 totalCount: total,
                 currentPage: page,
                 totalPages: Math.ceil(total / limit)

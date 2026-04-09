@@ -146,6 +146,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             .map(
                 (tour) => {
                     const isInWishlist = wishlistTourIds.includes(tour.id);
+                    const departureLocations = Array.isArray(tour.departure_locations)
+                        ? tour.departure_locations.filter(Boolean).slice(0, 3)
+                        : [];
+                    const departureLocationHtml = departureLocations.length > 0
+                        ? departureLocations
+                            .map(
+                                (location) => `
+                                    <span class="badge rounded-pill border border-primary-subtle text-primary-emphasis bg-primary-subtle">${location}</span>
+                                `,
+                            )
+                            .join("")
+                        : `<span class="text-primary fw-medium">${tour.location || "Liên hệ"}</span>`;
+
                     return `
             <div class="card border border-light shadow-sm overflow-hidden bg-white tour-horizontal-card mb-4" onclick="window.location.href='/detail-tour?id=${tour.id}'">
                 <div class="row g-0 flex-column flex-md-row h-100">
@@ -180,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 <div class="col-sm-6 d-flex align-items-center gap-2">
                                     <i class="fa-solid fa-location-dot text-muted" style="width: 18px; text-align: center;"></i>
                                     <span class="text-secondary">Khởi hành:</span> 
-                                    <span class="text-primary fw-medium">${tour.location}</span>
+                                    <div class="d-flex align-items-center flex-wrap gap-1">${departureLocationHtml}</div>
                                 </div>
                                 <div class="col-sm-6 d-flex align-items-center gap-2">
                                     <i class="fa-regular fa-clock text-muted" style="width: 18px; text-align: center;"></i>
