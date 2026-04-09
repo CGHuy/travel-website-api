@@ -128,3 +128,12 @@ body {
 .collapsed-sidebar .menu-card .card-body {
     padding: 1rem 0.5rem !important;
 }
+
+/* Role-based access control */
+.menu-item.disabled {
+    opacity: 0.4;
+    filter: grayscale(1) blur(0.5px);
+    pointer-events: none;
+    cursor: not-allowed;
+    background: #f1f5f9;
+}
