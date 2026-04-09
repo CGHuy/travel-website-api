@@ -119,6 +119,8 @@ exports.changePassword = async (req, res) => {
 			error: error.message,
 		});
 	}
+};
+
 // Lay danh sach tat ca user (dành cho admin) 
 exports.getAllUsers = async (req, res) => {
 	try {
