@@ -24,6 +24,9 @@ function initAdminLayout() {
         });
     }
 
+    // --- MỚI: Phân quyền ---
+    applyPermissions(menuItems);
+
     // --- MỚI: Xử lý Click để chuyển tab không load lại trang (SPA) ---
     menuItems.forEach(item => {
         const link = item.querySelector("a");
@@ -172,5 +175,42 @@ async function loadComponent(targetId, filePath) {
         }
     } catch (err) {
         console.error("Không thể tải component:", err);
+    }
+}
+
+function applyPermissions(menuItems) {
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return;
+    
+    try {
+        const user = JSON.parse(userStr);
+        // Định nghĩa quyền cho từng Role
+        let allowedPages = [];
+
+        if (user.role === 'admin') {
+            allowedPages = ['user', 'tour', 'tour-image', 'statistics'];
+        } else if (user.role === 'tour-staff') {
+            allowedPages = ['departure', 'itinerary', 'service', 'tour-service'];
+        } else if (user.role === 'booking-staff') {
+            allowedPages = ['booking', 'booking-details'];
+        }
+
+        // Nếu role có trong danh sách phân quyền (Staff/Admin)
+        if (allowedPages.length > 0) {
+            menuItems.forEach(item => {
+                const page = item.getAttribute('data-page');
+                if (!allowedPages.includes(page)) {
+                    item.classList.add('disabled');
+                    // Vô hiệu hóa các liên kết bên trong
+                    const link = item.querySelector('a');
+                    if (link) {
+                        link.style.pointerEvents = 'none';
+                        link.setAttribute('tabindex', '-1');
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        console.error("Lỗi phân quyền:", e);
     }
 }

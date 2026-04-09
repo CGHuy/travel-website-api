@@ -108,7 +108,9 @@ window.initAdminBookingPage = async function () {
                 if (trNode) {
                     trNode.style.cursor = "pointer";
                     trNode.onclick = () => {
-                        window.location.href = `/pages/admin/booking-details.html?id=${r.id}`;
+                        const newUrl = `?page=booking-details&id=${r.id}`;
+                        history.pushState({ page: 'booking-details', id: r.id }, "", newUrl);
+                        window.dispatchEvent(new Event('popstate'));
                     };
                     
                     // Add hover effect via CSS inline or rely on existing classes

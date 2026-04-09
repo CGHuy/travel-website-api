@@ -1,0 +1,183 @@
+<!-- Header Nav -->
+<header class="header-nav" style="margin-top: 0;">
+    <a href="/booking" class="back-link" id="back-to-list">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+    </a>
+</header>
+
+<!-- Page Title & Quick Actions -->
+<section class="booking-page-header">
+    <div class="booking-title-info">
+        <h1 id="booking-id-title">Booking #----- <span class="status-badge">Đang tải...</span></h1>
+        <div class="meta-info" id="booking-meta-info">Đang lấy dữ liệu...</div>
+    </div>
+    <div class="action-buttons">
+        <button class="btn-premium"><i class="fa-solid fa-print"></i> In hóa đơn</button>
+        <button class="btn-premium btn-primary-premium"><i class="fa-solid fa-pencil"></i> Chỉnh sửa</button>
+    </div>
+</section>
+
+<!-- Content Grid -->
+<div class="detail-grid">
+    <!-- Left Column -->
+    <div class="main-detail-col">
+        <!-- Customer Info -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-user"></i>
+                <h3>Thông tin người đặt</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <div class="info-item">
+                        <label>User ID</label>
+                        <span id="det-user-id">---</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Họ và tên</label>
+                        <span id="det-fullname">---</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Số điện thoại</label>
+                        <span id="det-phone">---</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Email</label>
+                        <span id="det-email">---</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tour & Itinerary -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-route"></i>
+                <h3>Thông tin Tour </h3>
+            </div>
+            <div class="card-body">
+                <div class="tour-summary-box">
+                    <img id="det-tour-image" class="tour-img-display" alt="Tour Image" src="">
+                    <div class="tour-short-info">
+                        <h4 id="det-tour-name">Tên Tour</h4>
+                        <div class="tour-meta-grid">
+                            <div class="tour-meta-item">
+                                <label>Ngày khởi hành</label>
+                                <span id="det-dep-date">---</span>
+                            </div>
+                            <div class="tour-meta-item">
+                                <label>Ngày kết thúc</label>
+                                <span id="det-ret-date">---</span>
+                            </div>
+                            <div class="tour-meta-item">
+                                <label>Điểm khởi hành</label>
+                                <span id="det-dep-loc">---</span>
+                            </div>
+                            <div class="tour-meta-item">
+                                <label>Số lượng</label>
+                                <span id="det-pax-count">---</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+               
+            </div>
+        </div>
+
+        <!-- Passenger List -->
+        <div class="card">
+            <div class="card-header table-header-flex">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fa-solid fa-users-viewfinder"></i>
+                    <h3>Danh sách khách đi tour (<span id="det-pax-total">0</span>)</h3>
+                </div>
+                <button class="btn-export">
+                    <i class="fa-solid fa-file-arrow-down"></i> Tải DS Khách
+                </button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>Họ và tên</th>
+                            <th>Loại khách</th>
+                            <th>Giới tính</th>
+                            <th>Ngày sinh</th>
+                        </tr>
+                    </thead>
+                    <tbody id="det-passenger-list">
+                        <!-- Will be populated -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column (Sidebar) -->
+    <div class="sidebar-detail-col">
+        <!-- Update Status -->
+        <div class="card">
+            <div class="card-body">
+                <span class="sidebar-card-title">Cập nhật trạng thái</span>
+                <div class="form-group">
+                    <label>Trạng thái Booking</label>
+                    <select class="premium-select" id="booking-status-select">
+                        <option value="confirmed">Đã xác nhận</option>
+                        <option value="pending">Đang chờ xử lý</option>
+                        <option value="cancelled">Đã hủy</option>
+                      
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Trạng thái thanh toán</label>
+                    <select class="premium-select" id="payment-status-select">
+                        <option value="paid">Đã thanh toán 100%</option>
+                        <option value="partial">Thanh toán một phần</option>
+                        
+                        <option value="refunding">Đang chờ hoàn tiền</option>
+                    </select>
+                </div>
+                <button class="btn-save" id="save-status-btn">Lưu thay đổi</button>
+            </div>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="card">
+            <div class="card-body">
+                <span class="sidebar-card-title">Tổng tiền</span>
+                <div class="summary-list">
+                    <div id="det-price-breakdown">
+                        <!-- Will be populated -->
+                    </div>
+                    <div class="summary-total">
+                        <label>Tổng cộng</label>
+                        <span id="det-total-price">0đ</span>
+                    </div>
+                </div>
+
+                <div class="collected-box">
+                    <div class="collected-header">
+                        <i class="fa-solid fa-money-bill-transfer"></i> ĐÃ THU
+                    </div>
+                    <div class="collected-amount" id="det-collected-amt">0đ</div>
+                    <div class="collected-meta" id="det-payment-meta">Thông tin thanh toán...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity History -->
+        <div class="card">
+            <div class="card-body">
+                <span class="sidebar-card-title">Lịch sử hoạt động</span>
+                <div class="history-timeline" id="det-history">
+                    <div class="history-item info">
+                        <div class="history-content">
+                            <h5>Hệ thống đang tải dữ liệu...</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
