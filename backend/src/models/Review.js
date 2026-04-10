@@ -36,6 +36,23 @@ class Review {
         }
     }
 
+    // Lấy review theo user_id
+    static async getByUserId(user_id) {
+        try {
+            const [rows] = await db.query(
+                `SELECT r.*, t.name as tour_name 
+                 FROM reviews r 
+                 JOIN tours t ON r.tour_id = t.id 
+                 WHERE r.user_id = ? 
+                 ORDER BY r.created_at DESC`,
+                [user_id]
+            );
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     // Lấy review theo user và tour
     static async getByUserAndTour(user_id, tour_id) {
         try {
