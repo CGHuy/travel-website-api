@@ -118,7 +118,7 @@ window.initAdminBookingPage = async function () {
                 }
 
                 tr.querySelector(".booking-code").textContent =
-                    "BOK" + String(r.id).padStart(4, "0");
+                    "BOK" + String(r.id).padStart(3, "0");
                 tr.querySelector(".booking-customer").textContent =
                     r.fullname || r.contact_name || "N/A";
                 tr.querySelector(".booking-tour").textContent = r.tour_name || "N/A";

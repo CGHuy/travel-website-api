@@ -40,7 +40,7 @@ function renderAdminBookingDetails(data) {
     // Header & Title
     const titleEl = document.getElementById('booking-id-title');
     if (titleEl) {
-        titleEl.innerHTML = `Booking #BOK${String(data.id).padStart(4, '0')} <span class="status-badge ${getStatusClass(data.status)}">${getStatusText(data.status)}</span>`;
+        titleEl.innerHTML = `Booking #BOK${String(data.id).padStart(3, '0')} <span class="status-badge ${getStatusClass(data.status)}">${getStatusText(data.status)}</span>`;
     }
     const metaEl = document.getElementById('booking-meta-info');
     if (metaEl) {
@@ -48,7 +48,7 @@ function renderAdminBookingDetails(data) {
     }
 
     // Customer info (Orderer)
-    setElText('det-user-id', `USR${String(data.user_id).padStart(4, '0') || 'KHÁCH'}`);
+    setElText('det-user-id', `USR${String(data.user_id).padStart(3, '0') || 'KHÁCH'}`);
     setElText('det-fullname', data.contact_name || data.user_fullname);
     setElText('det-phone', data.contact_phone || data.user_phone);
     setElText('det-email', data.contact_email || data.user_email);

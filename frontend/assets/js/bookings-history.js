@@ -146,7 +146,7 @@ function renderBookings(bookings) {
                         <div class="info-row">
                             <i class="fa-solid fa-ticket"></i>
                             <span class="info-label">Mã booking:</span>
-                            <span class="info-value">${"BOK" + String(booking.id).padStart(4, "0") || "N/A"}</span>
+                            <span class="info-value">${"BOK" + String(booking.id).padStart(3, "0") || "N/A"}</span>
                         </div>
                         <div class="info-row">
                             <i class="fa-solid fa-calendar-days"></i>
