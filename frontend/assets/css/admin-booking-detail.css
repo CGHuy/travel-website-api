@@ -67,6 +67,13 @@
     border: 1px solid #f1f5f9;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detail-grid .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(13, 110, 253, 0.1);
+    border-color: #bae6fd;
 }
 
 .card-header {
@@ -74,10 +81,41 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #e0f2fe;
+    background: #f0f9ff; /* Light blue background */
+    border-radius: 12px 12px 0 0;
 }
 
-.card-header h3 { font-size: 15px; font-weight: 700; margin: 0; }
+.card-header i {
+    color: #0369a1;
+}
+
+.card-header h3 { font-size: 15px; font-weight: 700; margin: 0; color: #1e293b; }
+
+.table-header-flex {
+    justify-content: space-between;
+}
+
+.btn-export {
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0369a1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-export:hover {
+    background: #f0f9ff;
+    border-color: #0369a1;
+}
+
 .card-body { padding: 20px; }
 
 /* Customer Info */
@@ -125,7 +163,15 @@
 .passenger-name { font-weight: 600; display: block; }
 
 /* Financials */
-.sidebar-card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px; display: block; color: #64748b; }
+.sidebar-card-title { 
+    font-size: 12px; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    margin-bottom: 16px; 
+    display: block; 
+    color: #0369a1; /* Light blue text */
+    letter-spacing: 0.5px;
+}
 .premium-select { width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13px; margin-bottom: 12px; }
 .btn-save { width: 100%; background: #0d6efd; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer; }
 
