@@ -1,20 +1,13 @@
 const db = require("../config/database");
+const User = require("../models/User");
+const Booking = require("../models/Booking");
+const departure = require("../models/Departure");
 
 class StatisticsService {
 	static async getRealTimeStats() {
-		const [usersToday] = await db.query(`
-			SELECT COUNT(*) AS count FROM users 
-			WHERE role = 'customer' AND status = 1 AND created_at >= NOW() - INTERVAL 24 HOUR
-		`);
-
-		const [pendingBookings] = await db.query(`
-			SELECT COUNT(*) AS count FROM bookings WHERE status = 'pending'
-		`);
-
-		const [openTours] = await db.query(`
-			SELECT COUNT(*) AS count FROM tour_departures 
-			WHERE status = 'open' AND departure_date >= CURDATE()
-		`);
+		const usersToday = await User.countNewUsersToday();
+		const pendingBookings = await Booking.countPendingBookingsToday();
+		const openDepartures = await departure.countOpenDepartures();
 
 		const [totals] = await db.query(`
 			SELECT
@@ -23,9 +16,9 @@ class StatisticsService {
 		`);
 
 		return {
-			new_users_today: usersToday[0].count,
-			pending_bookings: pendingBookings[0].count,
-			open_departures: openTours[0].count,
+			new_users_today: usersToday,
+			pending_bookings: pendingBookings,
+			open_departures: openDepartures,
 			total_users: totals[0].total_users,
 			total_tours: totals[0].total_tours,
 		};

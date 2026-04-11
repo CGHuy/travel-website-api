@@ -115,7 +115,7 @@ async function loadRealTime() {
 	$("rt-new-users").textContent = fmtNum(data.new_users_today);
 	$("rt-total-users").textContent = `Tổng: ${data.total_users}`;
 	$("rt-pending").textContent = data.pending_bookings;
-	$("rt-open-tours").textContent = data.open_departures;
+	$("rt-open-tours").textContent = data.open_departures + ``; 
 	$("rt-total-tours").textContent = `Tổng: ${data.total_tours}`;
 }
 

@@ -82,6 +82,19 @@ class Booking {
 			throw error;
 		}
 	}
+
+	// === Thống kê ===
+	static async countPendingBookingsToday() {
+		try
+		{
+			const [rows] = await db.query(`SELECT COUNT(*) AS count FROM bookings WHERE status = 'pending'`);
+			return rows[0].count || 0;
+		}
+		catch (error) {
+			throw error;
+		}
+	}
+
 }
 
 module.exports = Booking;
