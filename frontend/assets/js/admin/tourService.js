@@ -54,9 +54,8 @@ function bindTourServiceSearch() {
             const idText = String(tour.id ?? "").toLowerCase();
             const codeText = String(tour.code ?? "").toLowerCase();
             const nameText = String(tour.name ?? "").toLowerCase();
-            const destinationText = String(tour.destination ?? "").toLowerCase();
 
-            return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword) || destinationText.includes(keyword);
+            return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword);
         });
 
         renderTourServiceList(filtered);
@@ -212,72 +211,124 @@ function bindServiceModalReset() {
 
 function renderTourServiceList(tours) {
     const listEl = document.getElementById("tour-service-list");
+    const itemTemplate = document.getElementById("tour-service-item-template");
+    const emptyTemplate = document.getElementById("tour-service-empty-template");
     if (!listEl) return;
 
     if (!Array.isArray(tours) || tours.length === 0) {
-        listEl.innerHTML = '<li class="list-group-item text-center py-4 text-muted">Không có dữ liệu tour.</li>';
+        if (emptyTemplate instanceof HTMLTemplateElement) {
+            listEl.innerHTML = "";
+            listEl.appendChild(emptyTemplate.content.cloneNode(true));
+        } else {
+            listEl.innerHTML = '<li class="list-group-item text-center py-4 text-muted">Không có dữ liệu tour.</li>';
+        }
         return;
     }
 
-    listEl.innerHTML = tours
-        .map((tour) => {
-            const hasServices = !!tour.hasServices;
-            const statusHtml = hasServices ? `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Đã có dịch vụ (${Number(tour.serviceCount || 0)})</span>` : `<span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i> Chưa có dịch vụ</span>`;
-            const actionClass = hasServices ? "btn-outline-primary" : "btn-primary";
-            const actionLabel = hasServices ? "Chỉnh sửa" : "Thêm mới";
-            const actionIcon = hasServices ? "fa-edit" : "fa-plus";
+    if (!(itemTemplate instanceof HTMLTemplateElement)) {
+        listEl.innerHTML = '<li class="list-group-item text-center py-4 text-danger">Thiếu template danh sách tour dịch vụ.</li>';
+        return;
+    }
 
-            return `
-            <li class="list-group-item p-3 hover-shadow">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <div class="d-flex align-items-start align-items-center">
-                            <div class="me-3"><span class="badge bg-secondary">${escapeHtml(tour.code || "")}</span></div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">${escapeHtml(tour.name || "")}</h6>
-                                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i> ${escapeHtml(tour.destination || "")}</small>
-                                <br>
-                                <small class="text-muted"><i class="fas fa-briefcase me-1"></i> ${statusHtml}</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <button class="btn btn-sm ${actionClass} open-service-modal" data-tour-id="${tour.id}">
-                            <i class="fas ${actionIcon}"></i> ${actionLabel}
-                        </button>
-                    </div>
-                </div>
-            </li>`;
-        })
-        .join("");
+    const fragment = document.createDocumentFragment();
+    tours.forEach((tour) => {
+        const node = itemTemplate.content.firstElementChild.cloneNode(true);
+        if (!node) return;
+
+        const hasServices = !!tour.hasServices;
+        const codeEl = node.querySelector(".tour-service-code");
+        const nameEl = node.querySelector(".tour-service-name");
+        const statusEl = node.querySelector(".tour-service-status");
+        const actionTextEl = node.querySelector(".tour-service-action-text");
+        const actionBtn = node.querySelector(".open-service-modal");
+
+        if (codeEl) codeEl.textContent = String(tour.code || "");
+        if (nameEl) nameEl.textContent = String(tour.name || "");
+
+        if (statusEl) {
+            statusEl.className = `tour-service-status ${hasServices ? "text-success" : "text-warning"}`;
+            statusEl.innerHTML = hasServices ? `<i class="fas fa-check-circle me-1"></i> Đã có dịch vụ (${Number(tour.serviceCount || 0)})` : `<i class="fas fa-exclamation-circle me-1"></i> Chưa có dịch vụ`;
+        }
+
+        if (actionTextEl) {
+            actionTextEl.textContent = hasServices ? "Chỉnh sửa" : "Thêm mới";
+        }
+
+        if (actionBtn) {
+            actionBtn.dataset.tourId = String(tour.id);
+            actionBtn.classList.remove("btn-outline-primary");
+            actionBtn.classList.add("btn-primary");
+
+            const iconEl = actionBtn.querySelector("i");
+            if (iconEl) {
+                iconEl.className = `fas ${hasServices ? "fa-edit" : "fa-plus"}`;
+            }
+        }
+
+        fragment.appendChild(node);
+    });
+
+    listEl.innerHTML = "";
+    listEl.appendChild(fragment);
 }
 
 function renderServiceCheckboxes(services) {
     const container = document.getElementById("services-container");
+    const itemTemplate = document.getElementById("service-checkbox-item-template");
+    const emptyTemplate = document.getElementById("service-checkbox-empty-template");
     if (!container) return;
 
     if (!Array.isArray(services) || services.length === 0) {
-        container.innerHTML = '<div class="text-muted">Không có dịch vụ.</div>';
+        if (emptyTemplate instanceof HTMLTemplateElement) {
+            container.innerHTML = "";
+            container.appendChild(emptyTemplate.content.cloneNode(true));
+        } else {
+            container.innerHTML = '<div class="text-muted">Không có dịch vụ.</div>';
+        }
         return;
     }
 
-    container.innerHTML = services
-        .map(
-            (service) => `
-        <div class="form-check mb-3 p-3 border rounded bg-light service-item"
-            data-service-id="${escapeHtml(service.code || "")}"
-            data-service-name="${escapeHtml(String(service.name || "").toLowerCase())}">
-            <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="${service.id}" id="service-${service.id}" ${service.checked ? "checked" : ""}>
-            <label class="form-check-label w-100 cursor-pointer" for="service-${service.id}">
-                <strong>${escapeHtml(service.name || "")}</strong>
-                <br>
-                <small class="text-muted">Mã dịch vụ: ${escapeHtml(service.code || "")}</small>
-                <br>
-                <small class="text-muted">${escapeHtml(service.description || "")}</small>
-            </label>
-        </div>`,
-        )
-        .join("");
+    if (!(itemTemplate instanceof HTMLTemplateElement)) {
+        container.innerHTML = '<div class="text-danger">Thiếu template dịch vụ.</div>';
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    services.forEach((service) => {
+        const node = itemTemplate.content.firstElementChild.cloneNode(true);
+        if (!node) return;
+
+        const code = String(service.code || "");
+        const name = String(service.name || "");
+        const description = String(service.description || "");
+        const checkboxId = `service-${service.id}`;
+
+        node.setAttribute("data-service-id", code.toLowerCase());
+        node.setAttribute("data-service-name", name.toLowerCase());
+
+        const inputEl = node.querySelector(".service-checkbox");
+        const labelEl = node.querySelector("label");
+        const nameEl = node.querySelector(".service-item-name");
+        const codeEl = node.querySelector(".service-item-code");
+        const descEl = node.querySelector(".service-item-description");
+
+        if (inputEl) {
+            inputEl.value = String(service.id);
+            inputEl.id = checkboxId;
+            inputEl.checked = !!service.checked;
+        }
+        if (labelEl) {
+            labelEl.setAttribute("for", checkboxId);
+        }
+        if (nameEl) nameEl.textContent = name;
+        if (codeEl) codeEl.textContent = code;
+        if (descEl) descEl.textContent = description;
+
+        fragment.appendChild(node);
+    });
+
+    container.innerHTML = "";
+    container.appendChild(fragment);
 }
 
 function collectServicePayload() {

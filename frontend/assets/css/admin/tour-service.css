@@ -150,11 +150,13 @@
     transform: translateY(-3px);
 }
 
-.tour-service-card .badge {
+.tour-service-card .tour-service-code {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     border-radius: 999px;
     padding: 6px 12px;
     font-size: 0.75rem;
     font-weight: 700;
+    letter-spacing: 0.4px;
 }
 
 .tour-service-card h6 {

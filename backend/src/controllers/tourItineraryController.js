@@ -28,7 +28,7 @@ exports.getToursForItineraryManagement = async (req, res) => {
             const tourItineraries = itinerariesByTourId.get(Number(tour.id)) || [];
             return {
                 id: tour.id,
-                code: `TR${String(tour.id).padStart(3, "0")}`,
+                code: `TOUR${String(tour.id).padStart(3, "0")}`,
                 name: tour.name || "",
                 itineraries: tourItineraries,
                 itineraryCount: tourItineraries.length,
