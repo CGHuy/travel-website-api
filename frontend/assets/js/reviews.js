@@ -20,6 +20,19 @@ async function loadComponent(targetId, filePath) {
         const html = await res.text();
         target.innerHTML = html;
 
+        // Execute any scripts within the loaded component
+        const scripts = target.querySelectorAll("script");
+        scripts.forEach((script) => {
+            const newScript = document.createElement("script");
+            if (script.src) {
+                newScript.src = script.src;
+            } else {
+                newScript.textContent = script.textContent;
+            }
+            document.body.appendChild(newScript);
+            script.remove();
+        });
+
         // Re-run sidebar active state after it's loaded
         if (targetId === "side-placeholder") {
             initSidebarActiveState();
@@ -94,46 +107,40 @@ async function initReviewsPage() {
 
             reviews.forEach(review => {
                 const card = document.createElement("div");
-                card.className = "review-item-card animate__animated animate__fadeInUp";
+                card.className = "review-item-card animate__animated animate__fadeInUp mb-3";
                 
                 let starsHtml = "";
                 for (let i = 1; i <= 5; i++) {
                     starsHtml += `<i class="${i <= review.rating ? 'fa-solid' : 'fa-regular'} fa-star"></i> `;
                 }
 
+                const bookingCode = `BOK${String(review.id).padStart(3, '0')}`; // Example booking code
+
                 card.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <h6 class="mb-1 text-primary fw-bold">${review.tour_name}</h6>
-                            <div class="review-date">
-                                <i class="fa-regular fa-calendar-days me-2"></i> ${formatDate(review.created_at)}
+                            <h6 class="review-tour-name mb-1 font-weight-bold">${review.tour_name}</h6>
+                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                <span class="booking-id-badge">Mã booking: ${bookingCode}</span>
+                                <div class="review-date">
+                                    <i class="fa-regular fa-calendar-days me-1"></i> ${formatDate(review.created_at)}
+                                </div>
                             </div>
                         </div>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-primary border-0 btn-edit-review" 
+                            <button class="btn btn-action btn-edit-review" 
                                 data-id="${review.id}" 
                                 data-rating="${review.rating}" 
                                 data-comment="${review.comment.replace(/"/g, '&quot;')}"
                                 data-tour="${review.tour_name}">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-danger border-0 btn-delete-review" data-id="${review.id}">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
                         </div>
                     </div>
-                    <div class="review-stars-static">${starsHtml}</div>
+                    <div class="review-stars-static mb-2">${starsHtml}</div>
                     <div class="review-text">${review.comment}</div>
                 `;
                 historyList.appendChild(card);
-            });
-
-            // Add delete listeners
-            document.querySelectorAll(".btn-delete-review").forEach(btn => {
-                btn.addEventListener("click", function() {
-                    const reviewId = this.getAttribute("data-id");
-                    confirmDeleteReview(reviewId);
-                });
             });
 
             // Add edit listeners
@@ -170,7 +177,7 @@ async function initReviewsPage() {
                 </div>
                 <div class="mb-3">
                     <label for="edit-comment" class="form-label d-block text-start fw-bold">Nhận xét của bạn:</label>
-                    <textarea id="edit-comment" class="form-control" rows="4" placeholder="Chia sẻ trải nghiệm của bạn...">${currentComment}</textarea>
+                    <textarea id="edit-comment" class="form-control" rows="8" placeholder="Chia sẻ trải nghiệm của bạn...">${currentComment}</textarea>
                 </div>
             `,
             focusConfirm: false,
@@ -237,39 +244,7 @@ async function initReviewsPage() {
         }
     }
 
-    async function confirmDeleteReview(id) {
-        const result = await Swal.fire({
-            title: 'Xóa đánh giá?',
-            text: "Bạn có chắc chắn muốn xóa đánh giá này không?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Xóa ngay',
-            cancelButtonText: 'Hủy'
-        });
 
-        if (result.isConfirmed) {
-            try {
-                const res = await fetch(`/api/reviews/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    Swal.fire('Đã xóa!', data.message, 'success');
-                    fetchAndRenderReviews();
-                } else {
-                    Swal.fire('Lỗi!', data.message, 'error');
-                }
-            } catch (err) {
-                Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ', 'error');
-            }
-        }
-    }
 
     await fetchAndRenderReviews();
 }

@@ -58,48 +58,7 @@ exports.createReview = async (req, res) => {
     }
 };
 
-// Xóa đánh giá
-exports.deleteReview = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const reviewId = req.params.id;
 
-        // Kiểm tra xem review có thuộc về user không
-        const review = await Review.getById(reviewId);
-        if (!review) {
-            return res.status(404).json({
-                success: false,
-                message: "Không tìm thấy đánh giá"
-            });
-        }
-
-        if (review.user_id !== userId) {
-            return res.status(403).json({
-                success: false,
-                message: "Bạn không có quyền xóa đánh giá này"
-            });
-        }
-
-        const success = await Review.delete(reviewId);
-        if (success) {
-            return res.json({
-                success: true,
-                message: "Xóa đánh giá thành công!"
-            });
-        } else {
-            return res.status(400).json({
-                success: false,
-                message: "Xóa đánh giá thất bại"
-            });
-        }
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Lỗi khi xóa đánh giá",
-            error: error.message
-        });
-    }
-};
 
 // Cập nhật đánh giá
 exports.updateReview = async (req, res) => {

@@ -14,7 +14,6 @@ router.post("/create", verifyToken, isUser, reviewController.createReview);
 // Cập nhật đánh giá
 router.put("/:id", verifyToken, isUser, reviewController.updateReview);
 
-// Xóa đánh giá
-router.delete("/:id", verifyToken, isUser, reviewController.deleteReview);
+
 
 module.exports = router;
