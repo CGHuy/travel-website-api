@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="bg-light p-4 rounded-4 mb-4 text-start">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="text-secondary small">Mã đơn đặt tour:</span>
-                            <span class="fw-bold fs-5 text-dark">#${bookingId}</span>
+                            <span class="fw-bold fs-5 text-dark">BOK${bookingId.toString().padStart(3, '0')}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-secondary small">Tên tour:</span>
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
 
                     <div class="d-flex flex-column gap-2">
-                        <a href="/my-bookings" class="btn btn-home">Quản lý đơn hàng</a>
+                        <a href="/bookings-history" class="btn btn-home">Xem chi tiết đơn đặt chỗ</a>
                         <a href="/index" class="btn btn-link text-muted text-decoration-none">Về trang chủ</a>
                     </div>
                 `;
