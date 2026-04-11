@@ -21,7 +21,13 @@ class ListTourService {
         // Thêm SQL_CALC_FOUND_ROWS để lấy tổng số hàng khớp bộ lọc mà không cần query lại lần 2 (tối ưu performance)
         let baseSql = `
             SELECT SQL_CALC_FOUND_ROWS
-                t.*,
+                t.id,
+                t.name,
+                t.location,
+                t.price_default,
+                t.duration,
+                t.region,
+                t.cover_image,
                 (
                     SELECT GROUP_CONCAT(DATE_FORMAT(departure_date, '%d/%m')) 
                     FROM tour_departures 
