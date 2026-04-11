@@ -231,6 +231,16 @@ class Departure {
         }
     }
 
+    // == Thống kê ==
+    static async countOpenDepartures() {
+        try {
+            const [rows] = await db.query(`SELECT COUNT(*) AS count FROM tour_departures 
+			WHERE status = 'open' AND departure_date >= CURDATE()`);
+            return rows[0].count;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = Departure;
