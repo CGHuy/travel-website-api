@@ -119,28 +119,72 @@
 				background: #fff;
 				border: 1px solid #e2e8f0;
 				border-radius: 12px;
-				padding: 20px;
-				transition: all 0.3s;
+				padding: 24px;
+				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 				position: relative;
 			}
 			.review-item-card:hover {
 				border-color: #3b82f6;
-				box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+				box-shadow: 0 10px 25px rgba(59, 130, 246, 0.08);
+				transform: translateY(-2px);
+			}
+			.review-tour-name {
+				color: #1e293b;
+				font-size: 1.1rem;
+				font-weight: 700;
+				letter-spacing: -0.01em;
+			}
+			.booking-id-badge {
+				background: #f1f5f9;
+				color: #475569;
+				padding: 4px 12px;
+				border-radius: 6px;
+				font-size: 0.8rem;
+				font-weight: 600;
+				border: 1px solid #e2e8f0;
 			}
 			.review-date {
 				font-size: 0.85rem;
 				color: #94a3b8;
-				margin-bottom: 8px;
+				display: flex;
+				align-items: center;
 			}
 			.review-stars-static {
 				color: #fbbf24;
-				margin-bottom: 12px;
+				font-size: 0.9rem;
 			}
 			.review-text {
-				color: #475569;
-				font-size: 0.95rem;
-				line-height: 1.6;
+				color: #334155;
+				font-size: 1rem;
+				line-height: 1.7;
+				background: #f0f7ff;
+				padding: 18px 24px;
+				border-radius: 12px;
+				margin-top: 15px;
+				border-left: 5px solid #3b82f6;
+				width: 100%;
+				min-height: 100px;
 			}
+			.btn-action {
+				width: 38px;
+				height: 38px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 10px;
+				transition: all 0.2s;
+				border: 1px solid #e2e8f0;
+				background: #fff;
+			}
+			.btn-edit-review {
+				color: #3b82f6;
+			}
+			.btn-edit-review:hover {
+				background: #3b82f6;
+				color: #fff;
+				border-color: #3b82f6;
+			}
+
 			.main-title {
 				text-align: center;
 				color: #0056b3;
@@ -185,7 +229,7 @@
 				<div class="col-lg-9 col-md-8">
 					<div class="reviews-container">
 						<!-- History List -->
-						<div class="section-header mt-5">
+						<div class="section-header mt-2">
 							<h2 class="section-title">
 								<i class="fa-solid fa-history"></i>
 								Lịch sử đánh giá

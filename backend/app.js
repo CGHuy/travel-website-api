@@ -36,6 +36,7 @@ const tourServiceRoutes = require("./src/routes/tourServiceRoutes");
 const wishlistRoutes = require("./src/routes/wishlistRoutes");
 const statisticsRoutes = require("./src/routes/statisticsRoutes");
 const departureRoutes = require("./src/routes/departureRoutes");
+const reviewRoutes = require("./src/routes/reviewRoutes");
 
 // Lịch trình tour dùng cả danh sách tổng hợp và thao tác theo tourId
 app.use("/api/tourItinerary", tourItineraryRoutes);
@@ -49,6 +50,7 @@ app.use("/api/tour-services", tourServiceRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/stats", statisticsRoutes);
 app.use("/api/departures", searchLimiter, departureRoutes);
+app.use("/api/reviews", createLimiter, reviewRoutes);
 
 // DYNAMIC VIEW ROUTER
 // Tự động tìm và trả về file HTML cho các đường dẫn ngắn (VD: /list-tour, /login)
