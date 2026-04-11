@@ -103,16 +103,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         // --- Render Services ---
         const serviceList = document.getElementById("service-list");
         if (tour.services && tour.services.length > 0) {
-            // Chọn ngẫu nhiên vài icon bootstrap cho sinh động nếu không có trường icon
-            const icons = ["fa-solid fa-utensils", "fa-solid fa-car", "fa-solid fa-wifi", "fa-solid fa-spa", "fa-solid fa-ticket", "fa-solid fa-person-hiking"];
+            // Mapping icon dựa trên tên dịch vụ
+            const getServiceIcon = (name) => {
+                const n = name.toLowerCase();
+                if (n.includes("ăn") || n.includes("ẩm thực") || n.includes("buffet")) return "fa-solid fa-utensils";
+                if (n.includes("xe") || n.includes("di chuyển") || n.includes("đưa đón")) return "fa-solid fa-car";
+                if (n.includes("wifi") || n.includes("internet")) return "fa-solid fa-wifi";
+                if (n.includes("hướng dẫn") || n.includes("hdv")) return "fa-solid fa-user-tie";
+                if (n.includes("vé") || n.includes("tham quan")) return "fa-solid fa-ticket";
+                if (n.includes("khách sạn") || n.includes("chỗ ở") || n.includes("resort")) return "fa-solid fa-hotel";
+                if (n.includes("bảo hiểm")) return "fa-solid fa-shield-halved";
+                if (n.includes("spa") || n.includes("massage")) return "fa-solid fa-spa";
+                if (n.includes("hồ bơi") || n.includes("bơi")) return "fa-solid fa-person-swimming";
+                if (n.includes("gym") || n.includes("thể thao")) return "fa-solid fa-dumbbell";
+                
+                // Icon mặc định nếu không khớp từ khóa nào
+                return "fa-solid fa-circle-plus"; 
+            };
 
             serviceList.innerHTML = tour.services
                 .map(
-                    (svc, idx) => `
+                    (svc) => `
                 <div class="col-md-6">
                     <div class="service-card d-flex gap-3">
                         <div class="icon-box flex-shrink-0">
-                            <i class="${icons[idx % icons.length]}"></i>
+                            <i class="${svc.icon || getServiceIcon(svc.name)}"></i>
                         </div>
                         <div>
                             <h6 class="fw-bold mb-1 text-dark">${svc.name}</h6>
