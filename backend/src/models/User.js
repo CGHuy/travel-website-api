@@ -224,6 +224,15 @@ class User {
 			throw error;
 		}
 	}
+
+	static async totalUsers() {
+		try {
+			const [rows] = await db.query(`SELECT COUNT(*) AS total_users FROM users WHERE role = 'customer' AND status = 1`);
+			return rows[0].total_users;
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 module.exports = User;
