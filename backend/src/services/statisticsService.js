@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Booking = require("../models/Booking");
 const departure = require("../models/Departure");
 const Tour = require("../models/Tour");
+const Review = require("../models/Review");
 
 
 class StatisticsService {
@@ -135,22 +136,9 @@ class StatisticsService {
 	}
 
 	static async getReviewStats() {
-		const [overall] = await db.query(`
-			SELECT ROUND(AVG(rating), 1) AS avg_rating, COUNT(*) AS total_reviews,
-				COUNT(CASE WHEN rating = 5 THEN 1 END) AS star5, COUNT(CASE WHEN rating = 4 THEN 1 END) AS star4,
-				COUNT(CASE WHEN rating = 3 THEN 1 END) AS star3, COUNT(CASE WHEN rating = 2 THEN 1 END) AS star2,
-				COUNT(CASE WHEN rating = 1 THEN 1 END) AS star1
-			FROM reviews
-		`);
-
-		const [topRated] = await db.query(`
-			SELECT t.id, t.name, t.region, t.cover_image, ROUND(AVG(r.rating), 1) AS avg_rating, COUNT(r.id) AS review_count
-			FROM tours t JOIN reviews r ON r.tour_id = t.id
-			GROUP BY t.id, t.name, t.region, t.cover_image HAVING review_count >= 1
-			ORDER BY avg_rating DESC, review_count DESC LIMIT 5
-		`);
-
-		return { overall: overall[0], top_rated_tours: topRated };
+		const overall = await Review.getOverallRating();
+		const topRated = await Review.getTopRated();
+		return { overall: overall, top_rated_tours: topRated };
 	}
 
 	static async getUserStats() {
