@@ -210,6 +210,20 @@ class User {
 			throw error;
 		}
 	}
+
+	// === Thống kê==
+	//Lấy user tạo mới cho ngày hiện tại 
+	static async countNewUsersToday() {
+		try {
+			const [rows] = await db.query(
+				`SELECT COUNT(*) AS count FROM users 
+				WHERE role = 'customer' AND status = 1 AND created_at >= NOW() - INTERVAL 24 HOUR`
+			);
+			return rows[0].count;
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 module.exports = User;
