@@ -6,7 +6,5 @@
         "dev": "cd backend && npx nodemon app.js",
         "start": "cd backend && node app.js"
     },
-    "dependencies": {
-        "vnpay": "^2.5.0"
-    }
+    "dependencies": {}
 }

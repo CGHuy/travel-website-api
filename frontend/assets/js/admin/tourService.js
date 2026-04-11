@@ -41,10 +41,11 @@ async function fetchAndRenderTourServices() {
 }
 
 function bindTourServiceSearch() {
-    const input = document.querySelector(".search-input");
+    const input = document.getElementById("tour-service-search-input");
+    const searchBtn = document.getElementById("tour-service-search-btn");
     if (!input || input.dataset.bound === "true") return;
 
-    input.addEventListener("input", () => {
+    const runSearch = () => {
         const keyword = String(input.value || "")
             .trim()
             .toLowerCase();
@@ -60,7 +61,23 @@ function bindTourServiceSearch() {
 
         renderTourServiceList(filtered);
         updateTourServiceTotal(filtered);
+    };
+
+    input.addEventListener("input", () => {
+        if (String(input.value || "").trim() !== "") return;
+        renderTourServiceList(adminTourServiceCache);
+        updateTourServiceTotal(adminTourServiceCache);
     });
+
+    input.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        runSearch();
+    });
+
+    if (searchBtn) {
+        searchBtn.addEventListener("click", runSearch);
+    }
 
     input.dataset.bound = "true";
 }

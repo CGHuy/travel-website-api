@@ -1,0 +1,312 @@
+.departure-management-wrapper {
+    font-family: "Lexend Deca", sans-serif;
+    animation: fadeIn 0.5s ease-out;
+    color: #1f2937;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.departure-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 0 4px;
+    border-bottom: 2px solid #f3f4f6;
+    padding-bottom: 16px;
+}
+
+.departure-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.departure-title-group h4 {
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.departure-title-group h4 i {
+    color: #3b82f6;
+}
+
+.badge-total {
+    background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+}
+
+.departure-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.search-wrapper i {
+    position: absolute;
+    left: 20px;
+    color: #9ca3af;
+    font-size: 1.1rem;
+    pointer-events: none;
+    transition: color 0.3s;
+}
+
+.search-input-modern {
+    width: 100%;
+    padding: 16px 20px 16px 52px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    font-size: 0.95rem;
+    color: #1f2937;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-input-modern::placeholder {
+    color: #9ca3af;
+}
+
+.search-input-modern:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.search-input-modern:focus + i,
+.search-input-modern:focus ~ i {
+    color: #3b82f6;
+}
+
+.btn-add-departure {
+    align-self: flex-start;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-add-departure:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+    color: white;
+}
+
+.departure-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.departure-card {
+    background: #ffffff;
+    border: 1px solid #f3f4f6;
+    border-radius: 16px;
+    padding: 20px 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.departure-card:hover {
+    border-color: #e5e7eb;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    transform: translateY(-3px);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.card-title-area {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tour-name-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tour-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-open {
+    background-color: #059669;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2);
+}
+
+.status-full {
+    background-color: #f59e0b;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+}
+
+.tour-code {
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 600;
+    gap: 6px;
+}
+
+.btn-edit:hover {
+    background-color: #eff6ff;
+    color: #2563eb;
+}
+
+.btn-delete:hover {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.card-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    border-top: 1px dashed #e5e7eb;
+    padding-top: 16px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.detail-item i {
+    color: #6b7280;
+    font-size: 1rem;
+    width: 16px;
+    text-align: center;
+}
+
+.detail-item strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.seats-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.seats-text {
+    font-weight: 600;
+}
+
+.seats-text.almost-full {
+    color: #ea580c;
+}
+
+.seats-text.full {
+    color: #dc2626;
+}
+
+@media (max-width: 1024px) {
+    .card-details {
+        gap: 16px;
+    }
+
+    .detail-item {
+        width: calc(33.333% - 16px);
+    }
+}
+
+@media (max-width: 768px) {
+    .detail-item {
+        width: calc(50% - 16px);
+    }
+
+    .card-top {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .card-actions {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .detail-item {
+        width: 100%;
+    }
+}

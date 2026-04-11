@@ -44,7 +44,16 @@
         <div class="stat-card-header"><h3 class="stat-card-title">Tỷ lệ chỗ ngồi</h3></div>
         <div class="table-responsive">
             <table class="stats-table">
-                <thead><tr><th>Tour</th><th>Ngày</th><th>Điểm đi</th><th>Ghế</th><th>Tỷ lệ</th><th>Trạng thái</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Tour</th>
+                        <th>Ngày</th>
+                        <th>Điểm đi</th>
+                        <th>Ghế</th>
+                        <th>Tỷ lệ</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
                 <tbody id="occupancy-body"></tbody>
             </table>
         </div>
@@ -66,9 +75,9 @@
             <button class="time-filter-btn" data-period="year">Năm nay</button>
         </div>
         <div class="time-filter-custom">
-            <input type="date" id="filter-from" class="time-filter-input">
+            <input type="date" id="filter-from" class="time-filter-input" />
             <span class="text-muted">→</span>
-            <input type="date" id="filter-to" class="time-filter-input">
+            <input type="date" id="filter-to" class="time-filter-input" />
             <button class="time-filter-btn active" id="filter-apply"><i class="fa-solid fa-filter"></i> Lọc</button>
         </div>
         <div class="time-filter-label ms-2" id="time-label">Tháng này</div>
@@ -92,11 +101,15 @@
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-lg-8"><div class="stat-card"><div class="chart-wrapper"><canvas id="revenueChart"></canvas></div></div></div>
+        <div class="col-lg-8">
+            <div class="stat-card">
+                <div class="chart-wrapper"><canvas id="revenueChart"></canvas></div>
+            </div>
+        </div>
         <div class="col-lg-4">
             <div class="stat-card">
                 <div class="stat-card-header"><h3 class="stat-card-title">Trạng thái</h3></div>
-                <div class="chart-wrapper" style="height:200px"><canvas id="bookingStatusChart"></canvas></div>
+                <div class="chart-wrapper" style="height: 200px"><canvas id="bookingStatusChart"></canvas></div>
                 <div id="booking-status-legend" class="pie-legend"></div>
             </div>
         </div>
@@ -114,7 +127,16 @@
         <div class="stat-card-header"><h3 class="stat-card-title">Top tour bán chạy</h3></div>
         <div class="table-responsive">
             <table class="stats-table">
-                <thead><tr><th>#</th><th>Tour</th><th>Vùng</th><th>Booking</th><th>Doanh thu</th><th>Đánh giá</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tour</th>
+                        <th>Vùng</th>
+                        <th>Booking</th>
+                        <th>Doanh thu</th>
+                        <th>Đánh giá</th>
+                    </tr>
+                </thead>
                 <tbody id="top-tours-body"></tbody>
             </table>
         </div>
@@ -123,13 +145,26 @@
     <div class="row g-3 mb-4">
         <div class="col-lg-5">
             <div class="stat-card">
-                <div class="stat-card-header"><h3 class="stat-card-title">Đánh giá</h3><div class="avg-rating-badge" id="avg-rating-badge">--</div></div>
+                <div class="stat-card-header">
+                    <h3 class="stat-card-title">Đánh giá</h3>
+                    <div class="avg-rating-badge" id="avg-rating-badge">--</div>
+                </div>
                 <div id="rating-bars"></div>
                 <div class="mt-2 text-center small text-muted" id="total-reviews-label"></div>
             </div>
         </div>
-        <div class="col-lg-7"><div class="stat-card"><div class="stat-card-header"><h3 class="stat-card-title">Ưa thích nhất</h3></div><div id="top-rated-list"></div></div></div>
+        <div class="col-lg-7">
+            <div class="stat-card">
+                <div class="stat-card-header"><h3 class="stat-card-title">Ưa thích nhất</h3></div>
+                <div id="top-rated-list"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="stat-card"><div class="stat-card-header"><h3 class="stat-card-title">Khách hàng thân thiết</h3></div><div id="top-customers-list"></div></div>
+    <div class="stat-card">
+        <div class="stat-card-header"><h3 class="stat-card-title">Khách hàng thân thiết</h3></div>
+        <div id="top-customers-list"></div>
+    </div>
 </div>
+
+<script src="../../assets/js/admin/statistics.js"></script>

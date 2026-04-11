@@ -1,21 +1,25 @@
-<div class="d-flex justify-content-between align-items-center px-3">
-    <div>
-        <h5 class="card-title mb-0">
-            <i class="fa-solid fa-concierge-bell me-2"></i>Quản lý Dịch vụ
-        </h5>
+<link rel="stylesheet" href="../../assets/css/admin/service.css" />
+
+<div class="service-management-wrapper">
+    <div class="service-header">
+        <div class="service-title-group">
+            <h4><i class="fa-solid fa-concierge-bell"></i> Quản lý Dịch vụ</h4>
+        </div>
+        <div class="badge-total">Tổng: <span id="service-total-count">0</span> dịch vụ</div>
     </div>
-</div>
-<div class="card-body">
-    <div class="input-group search-group mb-3">
-        <span class="input-group-text search-icon">
-            <i class="fa-solid fa-magnifying-glass fa-sm"></i>
-        </span>
-        <input class="form-control search-input" id="service-search-input"
-            placeholder="Tìm kiếm dịch vụ theo id, tên..." value="" aria-label="Tìm kiếm" />
+
+    <div class="service-toolbar">
+        <div class="search-row">
+            <div class="search-input-wrap">
+                <input class="search-input-modern" id="service-search-input" placeholder="Tìm kiếm dịch vụ theo ID, tên, mô tả..." value="" aria-label="Tìm kiếm" />
+                <i class="fa-solid fa-magnifying-glass search-icon-modern"></i>
+            </div>
+            <button id="service-search-btn" type="button" class="btn-primary-modern btn-search-modern">Tìm</button>
+        </div>
+        <button type="button" class="btn-primary-modern" data-bs-toggle="modal" data-bs-target="#addServiceModal">Thêm Dịch vụ Mới</button>
     </div>
-    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addServiceModal">Thêm
-        Dịch vụ Mới</button>
-    <div class="table-responsive">
+
+    <div class="service-table-shell table-responsive">
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -38,7 +42,7 @@
 <!-- Modal Thêm Dịch vụ -->
 <div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content service-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="addServiceModalLabel">Thêm Dịch vụ Mới</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -59,7 +63,7 @@
 <!-- Modal Sửa Dịch vụ -->
 <div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content service-modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editServiceModalLabel">Sửa Dịch vụ</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -78,8 +82,7 @@
 </div>
 
 <!-- Modal Xóa Dịch vụ -->
-<div class="modal fade" id="deleteServiceModal" tabindex="-1" aria-labelledby="deleteServiceModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="deleteServiceModal" tabindex="-1" aria-labelledby="deleteServiceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-danger">
@@ -88,7 +91,7 @@
             </div>
 
             <form id="delete-service-form">
-                <input type="hidden" name="id" id="delete_service_id">
+                <input type="hidden" name="id" id="delete_service_id" />
 
                 <div class="modal-body">
                     <p class="m-0 p-2">Bạn có chắc chắn muốn xóa dịch vụ:</p>
@@ -104,3 +107,5 @@
         </div>
     </div>
 </div>
+
+<script src="../../assets/js/admin/service.js"></script>
