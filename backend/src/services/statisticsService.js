@@ -2,25 +2,23 @@ const db = require("../config/database");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
 const departure = require("../models/Departure");
+const Tour = require("../models/Tour");
+
 
 class StatisticsService {
 	static async getRealTimeStats() {
 		const usersToday = await User.countNewUsersToday();
 		const pendingBookings = await Booking.countPendingBookingsToday();
 		const openDepartures = await departure.countOpenDepartures();
-
-		const [totals] = await db.query(`
-			SELECT
-				(SELECT COUNT(*) FROM users WHERE role = 'customer' AND status = 1) AS total_users,
-				(SELECT COUNT(*) FROM tours) AS total_tours
-		`);
+		const totalTours = await Tour.totalTours();
+		const totalUsers = await User.totalUsers();
 
 		return {
 			new_users_today: usersToday,
 			pending_bookings: pendingBookings,
 			open_departures: openDepartures,
-			total_users: totals[0].total_users,
-			total_tours: totals[0].total_tours,
+			total_users: totalUsers,
+			total_tours: totalTours,
 		};
 	}
 
