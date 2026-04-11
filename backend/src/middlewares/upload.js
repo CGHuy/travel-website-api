@@ -1,20 +1,8 @@
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
 
-// Cấu hình CloudinaryStorage
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: "travel-website", // Thư mục trên Cloudinary
-        allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
-        resource_type: "auto",
-    },
-});
-
-// Middleware upload với xác thực file
 const upload = multer({
-    storage: storage,
+    storage: multer.memoryStorage(),
     limits: {
         fileSize: 5 * 1024 * 1024, // Giới hạn 5MB
     },
@@ -30,4 +18,42 @@ const upload = multer({
     },
 });
 
-module.exports = upload;
+function uploadBufferToCloudinary(buffer) {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder: "travel-website",
+                resource_type: "image",
+            },
+            (error, result) => {
+                if (error) return reject(error);
+                return resolve(result);
+            },
+        );
+
+        stream.end(buffer);
+    });
+}
+
+function buildUploadMiddleware(fieldName) {
+    return (req, res, next) => {
+        upload.single(fieldName)(req, res, async (err) => {
+            if (err) return next(err);
+            if (!req.file || !req.file.buffer) return next();
+
+            try {
+                const result = await uploadBufferToCloudinary(req.file.buffer);
+                req.file.path = result.secure_url;
+                req.file.filename = result.public_id;
+                req.file.cloudinary = result;
+                next();
+            } catch (uploadError) {
+                next(uploadError);
+            }
+        });
+    };
+}
+
+module.exports = {
+    single: buildUploadMiddleware,
+};

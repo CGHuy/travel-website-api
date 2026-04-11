@@ -1,23 +1,26 @@
-<div class="d-flex justify-content-between align-items-center px-3">
-    <div>
-        <h5 class="card-title mb-0"><i class="fa-solid fa-map me-2"></i>Quản lý Tour</h5>
-    </div>
-    <div class="text-end">
-        <span class="badge bg-info">Tổng: <span id="tour-total-count">0</span> tour</span>
-    </div>
-</div>
+<link rel="stylesheet" href="../../assets/css/admin/tour.css" />
 
-<div class="card-body">
-    <div class="input-group search-group mb-3">
-        <span class="input-group-text search-icon">
-            <i class="fa-solid fa-magnifying-glass fa-sm"></i>
-        </span>
-        <input id="tour-search-input" class="form-control search-input" placeholder="Tìm kiếm tour theo id, tên, vùng miền..." aria-label="Tìm kiếm" />
+<div class="tour-management-wrapper">
+    <div class="tour-header">
+        <div class="tour-title-group">
+            <h4><i class="fa-solid fa-map"></i> Quản lý Tour</h4>
+        </div>
+        <div class="badge-total">Tổng: <span id="tour-total-count">0</span> tour</div>
     </div>
 
-    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addTourModal">Thêm Tour Mới</button>
+    <div class="tour-toolbar">
+        <div class="search-row">
+            <div class="search-input-wrap">
+                <input id="tour-search-input" class="search-input-modern" placeholder="Tìm kiếm tour theo ID, mã tour, tên hoặc vùng miền..." aria-label="Tìm kiếm" />
+                <i class="fa-solid fa-magnifying-glass search-icon-modern"></i>
+            </div>
+            <button id="tour-search-btn" type="button" class="btn-primary-modern btn-search-modern">Tìm</button>
+        </div>
 
-    <div id="tour-list-container" class="list-group">
+        <button type="button" class="btn-primary-modern" data-bs-toggle="modal" data-bs-target="#addTourModal">Thêm Tour Mới</button>
+    </div>
+
+    <div id="tour-list-container" class="tour-list-shell list-group">
         <div class="text-center p-4 text-muted">Đang tải danh sách tour...</div>
     </div>
 </div>
@@ -232,3 +235,5 @@
         </div>
     </div>
 </div>
+
+<script src="../../assets/js/admin/tour.js"></script>

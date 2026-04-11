@@ -19,7 +19,7 @@ class TourServiceController {
                     const serviceCount = linked.filter((link) => activeServiceIds.has(Number(link.service_id))).length;
                     return {
                         id: tour.id,
-                        code: `TR${String(tour.id).padStart(3, "0")}`,
+                        code: `TOUR${String(tour.id).padStart(3, "0")}`,
                         name: tour.name || "",
                         destination: tour.location || "",
                         serviceCount,

@@ -206,15 +206,31 @@ async function fetchAndRenderTours() {
 
 function bindTourSearch() {
     const input = document.getElementById("tour-search-input");
+    const searchBtn = document.getElementById("tour-search-btn");
     if (!input || input.dataset.bound === "true") return;
 
-    input.addEventListener("input", () => {
+    const runSearch = () => {
         const keyword = String(input.value || "")
             .trim()
             .toLowerCase();
         const filteredTours = adminTourCache.filter((tour) => isTourMatchedKeyword(tour, keyword));
         renderTourList(filteredTours);
+    };
+
+    input.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        runSearch();
     });
+
+    input.addEventListener("input", () => {
+        if (String(input.value || "").trim() !== "") return;
+        renderTourList(adminTourCache);
+    });
+
+    if (searchBtn) {
+        searchBtn.addEventListener("click", runSearch);
+    }
 
     input.dataset.bound = "true";
 }

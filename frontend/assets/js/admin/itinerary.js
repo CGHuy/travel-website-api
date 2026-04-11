@@ -1,4 +1,4 @@
-const ITINERARY_TOUR_API_URL = "/api/tours";
+const ITINERARY_TOUR_API_URL = "/api/tourItinerary/tours";
 const ITINERARY_API_URL = "/api/tourItinerary";
 
 let adminItineraryCache = [];
@@ -33,24 +33,11 @@ async function fetchAndRenderItineraryTours() {
         if (!tourRes.ok) throw new Error(`HTTP ${tourRes.status}`);
 
         const tourPayload = await parseJsonSafe(tourRes);
-
-        const tours = tourPayload.success && Array.isArray(tourPayload.data) ? tourPayload.data : [];
-
-        const toursWithItineraries = await Promise.all(
-            tours.map(async (tour) => {
-                const itineraries = await fetchTourItinerarySafely(tour.id);
-                return {
-                    ...tour,
-                    itineraries,
-                };
-            }),
-        );
-
-        adminItineraryCache = toursWithItineraries;
+        adminItineraryCache = tourPayload.success && Array.isArray(tourPayload.data) ? tourPayload.data : [];
 
         const totalEl = document.getElementById("itinerary-total-count");
         if (totalEl) {
-            const count = toursWithItineraries.filter((tour) => tour.itineraries.length > 0).length;
+            const count = adminItineraryCache.filter((tour) => tour.hasItinerary || (Array.isArray(tour.itineraries) && tour.itineraries.length > 0)).length;
             totalEl.textContent = String(count);
         }
 
@@ -63,36 +50,40 @@ async function fetchAndRenderItineraryTours() {
     }
 }
 
-async function fetchTourItinerarySafely(tourId) {
-    try {
-        const url = `${ITINERARY_API_URL}/${tourId}`;
-        const res = await fetch(url);
-        if (!res.ok) return {};
-        const payload = await parseJsonSafe(res);
-        return payload.success && Array.isArray(payload.data) ? payload.data : [];
-    } catch (error) {
-        return [];
-    }
-}
-
 function bindItinerarySearch() {
     const input = document.getElementById("itinerary-search-input");
+    const searchBtn = document.getElementById("itinerary-search-btn");
     if (!input || input.dataset.bound === "true") return;
 
-    input.addEventListener("input", () => {
+    const runSearch = () => {
         const keyword = String(input.value || "")
             .trim()
             .toLowerCase();
 
         const filtered = adminItineraryCache.filter((tour) => {
             const idText = String(tour.id ?? "").toLowerCase();
-            const codeText = `TOUR${String(Math.max(0, Math.trunc(Number(tour.id) || 0))).padStart(3, "0")}`.toLowerCase();
+            const codeText = String(tour.code ?? `TR${String(Math.max(0, Math.trunc(Number(tour.id) || 0))).padStart(3, "0")}`).toLowerCase();
             const nameText = String(tour.name ?? "").toLowerCase();
             return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword);
         });
 
         renderItineraryTourList(filtered);
+    };
+
+    input.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        runSearch();
     });
+
+    input.addEventListener("input", () => {
+        if (String(input.value || "").trim() !== "") return;
+        renderItineraryTourList(adminItineraryCache);
+    });
+
+    if (searchBtn) {
+        searchBtn.addEventListener("click", runSearch);
+    }
 
     input.dataset.bound = "true";
 }
@@ -132,8 +123,9 @@ function buildItineraryTourNode(template, tour) {
     const node = template.content.firstElementChild.cloneNode(true);
     if (!node) return null;
 
-    const hasItinerary = Array.isArray(tour.itineraries) && tour.itineraries.length > 0;
-    const statusText = hasItinerary ? `Đã có ${tour.itineraries.length} ngày lịch trình` : "Chưa có lịch trình";
+    const itineraryList = Array.isArray(tour.itineraries) ? tour.itineraries : [];
+    const hasItinerary = itineraryList.length > 0;
+    const statusText = hasItinerary ? `Đã có ${itineraryList.length} ngày lịch trình` : "Chưa có lịch trình";
 
     const codeEl = node.querySelector(".itinerary-tour-code");
     const nameEl = node.querySelector(".itinerary-tour-name");

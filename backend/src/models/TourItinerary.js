@@ -1,6 +1,16 @@
 const db = require("../config/database");
 
 class TourItinerary {
+    // Lấy tất cả itinerary
+    static async getAll() {
+        try {
+            const [rows] = await db.query(`SELECT * FROM tour_itineraries ORDER BY tour_id ASC, day_number ASC`);
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     // Lấy tất cả itinerary của 1 tour
     static async getByTourId(tour_id) {
         try {

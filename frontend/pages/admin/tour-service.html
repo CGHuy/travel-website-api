@@ -1,49 +1,102 @@
-﻿<div class="d-flex justify-content-between align-items-center px-3">
-    <div>
-        <h5 class="card-title mb-0"><i class="fa-solid fa-list me-2"></i>Quản lý Dịch vụ Tour</h5>
+﻿<link rel="stylesheet" href="../../assets/css/admin/tour-service.css" />
+
+<div class="tour-service-management-wrapper">
+    <div class="tour-service-header">
+        <div class="tour-service-title-group">
+            <h4><i class="fa-solid fa-list"></i> Quản lý Dịch vụ Tour</h4>
+        </div>
+        <div class="badge-total" id="total-tour-has-service">Tổng: 0 tour có dịch vụ</div>
     </div>
-    <div class="text-end mb-2">
-        <span id="total-tour-has-service" class="badge bg-info">Tổng: 0 tour có dịch vụ</span>
+
+    <div class="tour-service-toolbar">
+        <div class="search-row">
+            <div class="search-input-wrap">
+                <input class="search-input-modern" id="tour-service-search-input" placeholder="Tìm kiếm tour theo ID, mã tour, tên..." value="" aria-label="Tìm kiếm" />
+                <i class="fa-solid fa-magnifying-glass search-icon-modern"></i>
+            </div>
+            <button id="tour-service-search-btn" type="button" class="btn-primary-modern btn-search-modern">Tìm</button>
+        </div>
     </div>
-</div>
-<div class="card-body">
-    <div class="input-group search-group mb-3">
-        <span class="input-group-text search-icon">
-            <i class="fa-solid fa-magnifying-glass fa-sm"></i>
-        </span>
-        <input class="form-control search-input" placeholder="Tìm kiếm tour theo id, tên..." value=""
-            aria-label="Tìm kiếm" />
-    </div>
-    <ul class="list-group list-group-flush" id="tour-service-list"></ul>
+
+    <ul class="tour-service-list-shell list-group list-group-flush" id="tour-service-list"></ul>
 </div>
 
-<!-- Modal -->
+<!-- Template item tour có dịch vụ -->
+<template id="tour-service-item-template">
+    <li class="tour-service-card list-group-item p-3 hover-shadow">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-start align-items-center">
+                    <div class="me-3"><span class="badge bg-secondary tour-service-code">TR000</span></div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 tour-service-name">Tên tour</h6>
+                        <small class="text-muted tour-service-status-wrap">
+                            <i class="fas fa-briefcase me-1"></i>
+                            <span class="tour-service-status text-warning"><i class="fas fa-exclamation-circle me-1"></i> Chưa có dịch vụ</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-sm btn-primary open-service-modal" data-tour-id=""><i class="fas fa-plus"></i> <span class="tour-service-action-text">Thêm mới</span></button>
+            </div>
+        </div>
+    </li>
+</template>
+
+<!-- Template cho trạng thái không có tour nào -->
+<template id="tour-service-empty-template">
+    <li class="tour-service-empty-card list-group-item text-center py-5">
+        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+        <p class="text-muted mb-0">Không có dữ liệu tour.</p>
+    </li>
+</template>
+
+<!-- Template cho checkbox dịch vụ -->
+<template id="service-checkbox-item-template">
+    <div class="form-check mb-3 p-3 border rounded bg-light service-item" data-service-id="" data-service-name="">
+        <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="" id="" />
+        <label class="form-check-label w-100 cursor-pointer" for="">
+            <strong class="service-item-name">Tên dịch vụ</strong>
+            <br />
+            <small class="text-muted">Mã dịch vụ: <span class="service-item-code">SV000</span></small>
+            <br />
+            <small class="text-muted service-item-description">Mô tả dịch vụ</small>
+        </label>
+    </div>
+</template>
+
+<!-- Template cho checkbox không có dịch vụ nào -->
+<template id="service-checkbox-empty-template">
+    <div class="text-muted">Không có dịch vụ.</div>
+</template>
+
+<!-- Modal hiển thị ds dịch vụ -->
 <div class="modal fade" id="serviceModal" tabindex="-1" aria-labelledby="serviceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content tour-service-modal-content">
+            <div class="modal-header tour-service-modal-header">
                 <h5 class="modal-title" id="serviceModalLabel">Dịch vụ Tour</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="#" method="POST" id="service-form">
                 <input type="hidden" name="tour_id" id="form-tour-id" value="" />
                 <div class="modal-body pt-0">
-                    <div class="input-group search-group mb-3">
-                        <span class="input-group-text search-icon">
-                            <i class="fa-solid fa-magnifying-glass fa-sm"></i>
-                        </span>
-                        <input id="service-search-input" class="form-control"
-                            placeholder="Tìm kiếm dịch vụ theo id, tên..." value="" aria-label="Tìm kiếm" />
+                    <div class="search-row mb-3">
+                        <div class="search-input-wrap">
+                            <input id="service-search-input" class="search-input-modern" placeholder="Tìm kiếm dịch vụ theo id, tên..." value="" aria-label="Tìm kiếm" />
+                            <i class="fa-solid fa-magnifying-glass search-icon-modern"></i>
+                        </div>
                     </div>
                     <div id="services-container"></div>
                 </div>
-                <div class="modal-footer p-3 pb-0">
-                    <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-1"></i> Lưu Dịch
-                        vụ</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
-                            class="fas fa-times me-1"></i> Hủy</button>
+                <div class="modal-footer tour-service-modal-footer p-3 pb-0">
+                    <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-1"></i> Lưu Dịch vụ</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i> Hủy</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script src="../../assets/js/admin/tourService.js"></script>

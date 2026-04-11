@@ -1,5 +1,3 @@
-// File: frontend/assets/js/admin-service.js
-
 window.initAdminServicePage = async function () {
     const searchInput = document.querySelector(".search-input");
     const tableBody = document.querySelector("table tbody");

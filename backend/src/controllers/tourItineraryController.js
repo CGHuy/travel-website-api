@@ -1,10 +1,71 @@
 const TourItinerary = require("../models/TourItinerary");
 const Tour = require("../models/Tour");
 
+// Lấy tất cả tour kèm lịch trình để admin render 1 lần duy nhất
+exports.getToursForItineraryManagement = async (req, res) => {
+    try {
+        const q = String(req.query.q || "")
+            .trim()
+            .toLowerCase();
+
+        const tours = await Tour.getAll();
+        const itineraries = await TourItinerary.getAll();
+
+        const itinerariesByTourId = itineraries.reduce((acc, itinerary) => {
+            const tourId = Number(itinerary.tour_id);
+            if (!acc.has(tourId)) {
+                acc.set(tourId, []);
+            }
+            acc.get(tourId).push({
+                id: itinerary.id,
+                day_number: itinerary.day_number,
+                description: itinerary.description || "",
+            });
+            return acc;
+        }, new Map());
+
+        const data = tours.map((tour) => {
+            const tourItineraries = itinerariesByTourId.get(Number(tour.id)) || [];
+            return {
+                id: tour.id,
+                code: `TOUR${String(tour.id).padStart(3, "0")}`,
+                name: tour.name || "",
+                itineraries: tourItineraries,
+                itineraryCount: tourItineraries.length,
+                hasItinerary: tourItineraries.length > 0,
+            };
+        });
+
+        const filtered = data.filter((tour) => {
+            if (!q) return true;
+            return `${tour.id} ${tour.code} ${tour.name}`.toLowerCase().includes(q);
+        });
+
+        return res.json({
+            success: true,
+            data: filtered,
+            total: filtered.filter((tour) => tour.hasItinerary).length,
+        });
+    } catch (error) {
+        console.error("Lỗi lấy danh sách tour lịch trình:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi khi lấy danh sách lịch trình tour",
+            error: error.message,
+        });
+    }
+};
+
 // Lấy tất cả itinerary của 1 tour
 exports.getByTourId = async (req, res) => {
     try {
         const tourId = parseInt(req.params.tourId);
+        if (!Number.isInteger(tourId) || tourId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "tourId không hợp lệ",
+            });
+        }
 
         // Kiểm tra tour có tồn tại
         const tour = await Tour.getById(tourId);

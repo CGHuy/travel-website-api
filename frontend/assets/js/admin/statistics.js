@@ -1,7 +1,3 @@
-/* 
-   ADMIN STATISTICS — Core Logic
-*/
-
 const API = "";
 let revenueChart = null;
 let statusChart = null;
