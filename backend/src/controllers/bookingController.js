@@ -151,6 +151,7 @@ exports.cancelBooking = async (req, res) => {
 
 		// Đổi trạng thái sang pending để chờ Admin/Staff duyệt
 		await Booking.updateStatus(bookingId, "status", "pending");
+		await Booking.updateStatus(bookingId, "payment_status", "pending");
 
 		res.json({
 			success: true,

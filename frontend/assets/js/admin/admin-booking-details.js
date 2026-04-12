@@ -29,6 +29,36 @@ window.initAdminBookingDetailsPage = async function() {
         const { data: booking } = await response.json();
         renderAdminBookingDetails(booking);
 
+        // Map Save button
+        const saveBtn = document.getElementById('save-status-btn');
+        if (saveBtn) {
+            saveBtn.onclick = async () => {
+                const status = document.getElementById('booking-status-select').value;
+                const payment_status = document.getElementById('payment-status-select').value;
+                
+                try {
+                    const updateRes = await fetch(`/api/bookings/${bookingId}/status`, {
+                        method: 'PUT',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}` 
+                        },
+                        body: JSON.stringify({ status, payment_status })
+                    });
+                    
+                    if (updateRes.ok) {
+                        alert('Cập nhật trạng thái thành công!');
+                        window.location.reload(); // Refresh to see updated history & UI
+                    } else {
+                        throw new Error('Lỗi cập nhật');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Không thể cập nhật trạng thái');
+                }
+            };
+        }
+
     } catch (error) {
         console.error('Error fetching booking details:', error);
     }
@@ -40,7 +70,16 @@ function renderAdminBookingDetails(data) {
     // Header & Title
     const titleEl = document.getElementById('booking-id-title');
     if (titleEl) {
-        titleEl.innerHTML = `Booking #BOK${String(data.id).padStart(3, '0')} <span class="status-badge ${getStatusClass(data.status)}">${getStatusText(data.status)}</span>`;
+        let badgeClass = getStatusClass(data.status);
+        let badgeText = getStatusText(data.status);
+
+        // Logic đặc biệt cho yêu cầu hủy
+        if (data.status === 'pending' && data.payment_status === 'pending') {
+            badgeClass = 'status-warning';
+            badgeText = 'Yêu cầu hủy';
+        }
+
+        titleEl.innerHTML = `Booking #BOK${String(data.id).padStart(3, '0')} <span class="status-badge ${badgeClass}">${badgeText}</span>`;
     }
     const metaEl = document.getElementById('booking-meta-info');
     if (metaEl) {
@@ -114,11 +153,66 @@ function renderAdminBookingDetails(data) {
     setElText('det-collected-amt', totalP);
     setElText('det-payment-meta', `Thanh toán qua: Chuyển khoản - ${formatDate(data.created_at)}`);
 
+    // Refund logic
+    const refundCard = document.getElementById('refund-receipt-card');
+    if (refundCard) {
+        if (data.status === 'cancelled' && data.payment_status === 'refunded') {
+            refundCard.style.display = 'block';
+            setElText('refund-id', `REF-BOK${String(data.id).padStart(3, '0')}`);
+            setElText('refund-amount', totalP);
+            setElText('refund-date', formatDate(data.updated_at));
+        } else {
+            refundCard.style.display = 'none';
+        }
+    }
+
+    // Activity History
+    renderActivityHistory(data);
+
     // Status selects
     const statusSelect = document.getElementById('booking-status-select');
     if (statusSelect) statusSelect.value = data.status || 'confirmed';
     const paymentSelect = document.getElementById('payment-status-select');
     if (paymentSelect) paymentSelect.value = data.payment_status || 'paid';
+}
+
+function renderActivityHistory(data) {
+    const historyContainer = document.getElementById('det-history');
+    if (!historyContainer) return;
+
+    // Giả lập lịch sử dựa trên trạng thái hiện tại (Nếu backend chưa có bảng log)
+    const history = [
+        { time: data.created_at, action: 'Khách hàng khởi tạo đặt tour', type: 'info' }
+    ];
+
+    if (data.payment_status !== 'pending' || data.status === 'confirmed') {
+        history.push({ time: data.created_at, action: 'Thanh toán thành công qua Chuyển khoản', type: 'success' });
+    }
+
+    if (data.status === 'pending' && data.payment_status === 'pending') {
+        history.push({ time: data.updated_at, action: 'Khách hàng đã gửi yêu cầu hủy tour', type: 'warning' });
+    }
+
+    if (data.status === 'confirmed') {
+        history.push({ time: data.updated_at, action: 'Hệ thống xác nhận booking', type: 'success' });
+    }
+
+    if (data.status === 'cancelled') {
+        const actionText = data.payment_status === 'refunded' 
+            ? 'Nhân viên đã duyệt hủy & Hoàn tiền thành công' 
+            : 'Booking đã bị hủy';
+        history.push({ time: data.updated_at, action: actionText, type: 'danger' });
+    }
+
+    // Hiển thị từ mới nhất đến cũ nhất
+    historyContainer.innerHTML = history.reverse().map(item => `
+        <div class="history-item ${item.type}">
+            <div class="history-content">
+                <h5>${item.action}</h5>
+                <span>${formatDateTime(item.time)}</span>
+            </div>
+        </div>
+    `).join('');
 }
 
 function setElText(id, text) {
@@ -151,6 +245,12 @@ function formatDate(dateString) {
 
 function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) return '---';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 }
 
 function addDays(date, days) {
