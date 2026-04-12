@@ -1,14 +1,22 @@
 window.initAdminServicePage = async function () {
-    const searchInput = document.querySelector(".search-input");
-    const tableBody = document.querySelector("table tbody");
+    const searchInput = document.getElementById("service-search-input");
+    const searchBtn = document.getElementById("service-search-btn");
+    const tableBody = document.getElementById("service-table-body");
     const addServiceBtn = document.querySelector('[data-bs-target="#addServiceModal"]');
     const addServiceModal = document.getElementById("addServiceModal");
     const editServiceModal = document.getElementById("editServiceModal");
     const deleteServiceModal = document.getElementById("deleteServiceModal");
+    const totalCountEl = document.getElementById("service-total-count");
 
     if (!tableBody) return;
 
     // Load dữ liệu dịch vụ từ API
+    async function updateServiceTotal(count) {
+        if (totalCountEl) {
+            totalCountEl.textContent = count;
+        }
+    }
+
     async function loadServices() {
         tableBody.innerHTML =
             '<tr><td colspan="5" class="text-center text-muted p-4">Đang tải danh sách dịch vụ...</td></tr>';
@@ -28,6 +36,7 @@ window.initAdminServicePage = async function () {
 
             const data = await res.json();
             const services = (data.data || []).slice().sort((a, b) => Number(a.id) - Number(b.id));
+            updateServiceTotal(services.length);
 
             if (services.length === 0) {
                 tableBody.innerHTML =
@@ -84,6 +93,7 @@ window.initAdminServicePage = async function () {
             }
         } catch (err) {
             console.error("Lỗi load services", err);
+            updateServiceTotal(0);
             tableBody.innerHTML =
                 '<tr><td colspan="5" class="text-center text-danger p-4">Lỗi khi tải danh sách. Kiểm tra server.</td></tr>';
         }
@@ -347,15 +357,27 @@ window.initAdminServicePage = async function () {
     }
 
     // Search dịch vụ
-    if (searchInput) {
-        searchInput.addEventListener("input", () => {
-            const q = searchInput.value.trim().toLowerCase();
-            const rows = tableBody.querySelectorAll("tr");
-            rows.forEach((row) => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(q) ? "" : "none";
-            });
+    function handleSearch() {
+        if (!searchInput || !tableBody) return;
+        const q = searchInput.value.trim().toLowerCase();
+        const rows = tableBody.querySelectorAll("tr");
+        let visibleCount = 0;
+        rows.forEach((row) => {
+            // Chỉ lọc các hàng chứa dữ liệu, bỏ qua hàng thông báo "Đang tải" hoặc "Không có dữ liệu"
+            if (row.cells.length < 5) return; 
+            const text = row.textContent.toLowerCase();
+            const isVisible = text.includes(q);
+            row.style.display = isVisible ? "" : "none";
+            if (isVisible) visibleCount++;
         });
+        updateServiceTotal(visibleCount);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", handleSearch);
+    }
+    if (searchBtn) {
+        searchBtn.addEventListener("click", handleSearch);
     }
 
     // Load form thêm dịch vụ khi click nút
