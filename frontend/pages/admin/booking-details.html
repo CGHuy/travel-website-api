@@ -167,6 +167,24 @@
             </div>
         </div>
 
+        <!-- Refund Receipt (Hidden by default) -->
+        <div class="card" id="refund-receipt-card" style="display: none; border-left: 4px solid #ef4444;">
+            <div class="card-header" style="background: #fff5f5;">
+                <i class="fa-solid fa-file-invoice-dollar" style="color: #ef4444;"></i>
+                <h3 style="color: #991b1b;">Hóa đơn hoàn tiền</h3>
+            </div>
+            <div class="card-body">
+                <div class="refund-detail-box">
+                    <p><strong>Mã hoàn tiền:</strong> <span id="refund-id">---</span></p>
+                    <p><strong>Số tiền hoàn:</strong> <span id="refund-amount" class="text-danger">0đ</span></p>
+                    <p><strong>Phương thức:</strong> Chuyển khoản ngân hàng</p>
+                    <p><strong>Ngày thực hiện:</strong> <span id="refund-date">--/--/----</span></p>
+                    <hr>
+                    <p class="note"><i>* Booking đã được hủy và hoàn tiền thành công.</i></p>
+                </div>
+            </div>
+        </div>
+
         <!-- Activity History -->
         <div class="card">
             <div class="card-body">
