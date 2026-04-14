@@ -1,6 +1,8 @@
 window.initAdminServicePage = async function () {
-    const searchInput = document.querySelector(".search-input");
-    const tableBody = document.querySelector("table tbody");
+    const searchInput = document.getElementById("service-search-input");
+    const searchBtn = document.getElementById("service-search-btn");
+    const tableBody = document.getElementById("service-table-body");
+    const totalCountEl = document.getElementById("service-total-count");
     const addServiceBtn = document.querySelector('[data-bs-target="#addServiceModal"]');
     const addServiceModal = document.getElementById("addServiceModal");
     const editServiceModal = document.getElementById("editServiceModal");
@@ -8,15 +10,20 @@ window.initAdminServicePage = async function () {
 
     if (!tableBody) return;
 
+    function updateServiceTotalCount(total) {
+        if (totalCountEl) {
+            totalCountEl.textContent = String(total);
+        }
+    }
+
     // Load dữ liệu dịch vụ từ API
     async function loadServices() {
-        tableBody.innerHTML =
-            '<tr><td colspan="5" class="text-center text-muted p-4">Đang tải danh sách dịch vụ...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted p-4">Đang tải danh sách dịch vụ...</td></tr>';
         try {
             const token = localStorage.getItem("token") || "";
             if (!token) {
-                tableBody.innerHTML =
-                    '<tr><td colspan="5" class="text-center text-danger p-4">Vui lòng đăng nhập quyền Admin.</td></tr>';
+                updateServiceTotalCount(0);
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger p-4">Vui lòng đăng nhập quyền Admin.</td></tr>';
                 return;
             }
 
@@ -28,10 +35,10 @@ window.initAdminServicePage = async function () {
 
             const data = await res.json();
             const services = (data.data || []).slice().sort((a, b) => Number(a.id) - Number(b.id));
+            updateServiceTotalCount(services.length);
 
             if (services.length === 0) {
-                tableBody.innerHTML =
-                    '<tr><td colspan="5" class="text-center text-muted p-4">Không có dịch vụ nào.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted p-4">Không có dịch vụ nào.</td></tr>';
                 return;
             }
 
@@ -41,10 +48,7 @@ window.initAdminServicePage = async function () {
                 const desc = service.description || "";
                 const shortDesc = desc.length > 50 ? desc.substring(0, 50) + "..." : desc;
 
-                const statusBadge =
-                    (service.status || 0) == 1
-                        ? '<span class="badge bg-success">Hoạt động</span>'
-                        : '<span class="badge bg-secondary">Ngưng</span>';
+                const statusBadge = (service.status || 0) == 1 ? '<span class="badge bg-success">Hoạt động</span>' : '<span class="badge bg-secondary">Ngưng</span>';
 
                 tr.innerHTML = `
                     <td class="find_id">SVC${String(service.id).padStart(3, "0")}</td>
@@ -84,8 +88,8 @@ window.initAdminServicePage = async function () {
             }
         } catch (err) {
             console.error("Lỗi load services", err);
-            tableBody.innerHTML =
-                '<tr><td colspan="5" class="text-center text-danger p-4">Lỗi khi tải danh sách. Kiểm tra server.</td></tr>';
+            updateServiceTotalCount(0);
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger p-4">Lỗi khi tải danh sách. Kiểm tra server.</td></tr>';
         }
     }
 
@@ -329,8 +333,7 @@ window.initAdminServicePage = async function () {
             bootstrap.Modal.getOrCreateInstance(editServiceModal).show();
         } catch (err) {
             console.error(err);
-            modalBody.innerHTML =
-                '<div class="alert alert-danger">Lỗi khi tải dịch vụ. Kiểm tra server.</div>';
+            modalBody.innerHTML = '<div class="alert alert-danger">Lỗi khi tải dịch vụ. Kiểm tra server.</div>';
         }
     }
 
@@ -349,6 +352,17 @@ window.initAdminServicePage = async function () {
     // Search dịch vụ
     if (searchInput) {
         searchInput.addEventListener("input", () => {
+            const q = searchInput.value.trim().toLowerCase();
+            const rows = tableBody.querySelectorAll("tr");
+            rows.forEach((row) => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(q) ? "" : "none";
+            });
+        });
+    }
+
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener("click", () => {
             const q = searchInput.value.trim().toLowerCase();
             const rows = tableBody.querySelectorAll("tr");
             rows.forEach((row) => {
@@ -390,7 +404,7 @@ window.initAdminServicePage = async function () {
     }
 
     // Xử lý xóa dịch vụ
-    const deleteForm = document.querySelector('#deleteServiceModal form');
+    const deleteForm = document.querySelector("#deleteServiceModal form");
     if (deleteForm) {
         deleteForm.addEventListener("submit", async (e) => {
             e.preventDefault();

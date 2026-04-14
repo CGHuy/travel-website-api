@@ -35,6 +35,46 @@ function uploadBufferToCloudinary(buffer) {
     });
 }
 
+function extractCloudinaryPublicId(imageUrl) {
+    if (typeof imageUrl !== "string" || imageUrl.trim() === "") {
+        return "";
+    }
+
+    const uploadMarker = "/upload/";
+    const markerIndex = imageUrl.indexOf(uploadMarker);
+    if (markerIndex === -1) return "";
+
+    let pathAfterUpload = imageUrl.slice(markerIndex + uploadMarker.length);
+    const parts = pathAfterUpload.split("/");
+    if (parts.length === 0) return "";
+
+    if (/^v\d+$/.test(parts[0])) {
+        parts.shift();
+    }
+
+    pathAfterUpload = parts.join("/");
+    const dotIndex = pathAfterUpload.lastIndexOf(".");
+    if (dotIndex <= 0) return pathAfterUpload;
+
+    return pathAfterUpload.slice(0, dotIndex);
+}
+
+async function deleteFromCloudinaryByUrl(imageUrl) {
+    const publicId = extractCloudinaryPublicId(imageUrl);
+    if (!publicId) {
+        return { ok: false, reason: "empty-public-id" };
+    }
+
+    const result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: "image",
+    });
+
+    return {
+        ok: result && (result.result === "ok" || result.result === "not found"),
+        result,
+    };
+}
+
 function buildUploadMiddleware(fieldName) {
     return (req, res, next) => {
         upload.single(fieldName)(req, res, async (err) => {
@@ -56,4 +96,5 @@ function buildUploadMiddleware(fieldName) {
 
 module.exports = {
     single: buildUploadMiddleware,
+    deleteFromCloudinaryByUrl,
 };
