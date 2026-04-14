@@ -1,7 +1,7 @@
 // BookingTour.js - Logic for booking-tour.html
 
 // 0. Xác thực ngay khi script được tải để tránh nháy giao diện hoặc truy cập trái phép
-(function() {
+(function () {
     if (!localStorage.getItem("token")) {
         window.location.replace(`/login?redirect=${encodeURIComponent(window.location.href)}`);
     }
@@ -39,8 +39,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const response = await fetch(`/api/list-tours/tour-departures/${tourId}`, {
                 headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                    Authorization: `Bearer ${token}`,
+                },
             });
 
             if (response.status === 401 || response.status === 403) {
@@ -71,8 +71,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const response = await fetch("/api/users/profile", {
                 headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                    Authorization: `Bearer ${token}`,
+                },
             });
 
             const result = await response.json();
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Display tour info
         document.getElementById("bc-tour-name").innerText = tour.name;
         document.getElementById("tour-name-display").innerText = tour.name;
-        document.getElementById("tour-code").innerText = `TOUR-${tourId.toString().padStart(3, "0")}`;
+        document.getElementById("tour-code").innerText = String(tour.code || "");
         document.getElementById("tour-img").src = tour.cover_image;
         document.getElementById("tour-duration").innerText = tour.duration;
 
@@ -180,13 +180,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const validateSeats = (maxSeats) => {
         const adultsInput = document.getElementById("adults");
         const childrenInput = document.getElementById("children");
-        
+
         let adults = parseInt(adultsInput.value) || 0;
         let children = parseInt(childrenInput.value) || 0;
 
         if (adults + children > maxSeats) {
             alert(`Rất tiếc, lịch khởi hành này chỉ còn ${maxSeats} chỗ trống.`);
-            
+
             // Ưu tiên giữ người lớn, giảm trẻ em trước
             if (adults > maxSeats) {
                 adultsInput.value = maxSeats;
@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             } else {
                 childrenInput.value = maxSeats - adults;
             }
-            
+
             calculateTotal();
             renderPassengerFields();
         }
@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             e.target.value = 1;
         }
         const depId = document.getElementById("departure_id").value;
-        const dep = departuresInfo.find(d => d.id == depId);
+        const dep = departuresInfo.find((d) => d.id == depId);
         if (dep) validateSeats(dep.seats_available);
         calculateTotal();
         renderPassengerFields();
@@ -215,7 +215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("children").addEventListener("input", (e) => {
         const depId = document.getElementById("departure_id").value;
-        const dep = departuresInfo.find(d => d.id == depId);
+        const dep = departuresInfo.find((d) => d.id == depId);
         if (dep) validateSeats(dep.seats_available);
         calculateTotal();
         renderPassengerFields();
@@ -232,8 +232,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Kiểm tra tổng số chỗ nếu đã chọn lịch khởi hành
         const depId = document.getElementById("departure_id").value;
-        const dep = departuresInfo.find(d => d.id == depId);
-        
+        const dep = departuresInfo.find((d) => d.id == depId);
+
         if (dep) {
             const otherType = type === "adults" ? "children" : "adults";
             const otherVal = parseInt(document.getElementById(otherType).value) || 0;
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Ẩn/Hiện các dòng liên quan đến trẻ em
         const rowBaseChild = document.getElementById("row-base-child");
         const rowMovingChild = document.getElementById("row-moving-child");
-        
+
         if (children > 0) {
             if (rowBaseChild) rowBaseChild.setAttribute("style", "display: flex !important;");
             // Chỉ hiện dòng phụ phí nếu đã chọn lịch khởi hành (có movingChildPrice)
@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             dateFormat: "Y-m-d", // Định dạng lưu trữ/gửi server
             altInput: true,
             altFormat: "d/m/Y", // Định dạng hiển thị cho người dùng
-            allowInput: true
+            allowInput: true,
         });
     };
 
@@ -373,7 +373,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const token = localStorage.getItem("token");
             const adults = parseInt(document.getElementById("adults").value);
             const children = parseInt(document.getElementById("children").value);
-            
+
             // Thu thập thông tin hành khách đi cùng
             const passengers = [];
             const totalCount = adults + children;
@@ -383,7 +383,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         name: document.querySelector(`[name="ps_name_${i}"]`).value,
                         gender: document.querySelector(`[name="ps_gender_${i}"]`).value,
                         dob: document.querySelector(`[name="ps_dob_${i}"]`).value,
-                        type: i <= adults ? "adult" : "child"
+                        type: i <= adults ? "adult" : "child",
                     });
                 }
             }
@@ -397,16 +397,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 contact_email: document.getElementById("contact_email").value,
                 contact_dob: document.getElementById("contact_dob").value,
                 note: document.getElementById("note").value,
-                passengers: passengers
+                passengers: passengers,
             };
 
             const response = await fetch("/api/bookings/create-payment-url", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(bookingData)
+                body: JSON.stringify(bookingData),
             });
 
             const result = await response.json();

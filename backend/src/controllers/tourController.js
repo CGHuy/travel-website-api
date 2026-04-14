@@ -1,19 +1,12 @@
 const Tour = require("../models/Tour");
-const TourImage = require("../models/TourImage");
 
 exports.getAllTours = async (req, res) => {
     try {
         const tours = await Tour.getAll();
-        
-        // Gắn thêm ảnh cho mỗi tour
-        const toursWithImages = await Promise.all(tours.map(async (tour) => {
-            const images = await TourImage.getByTourId(tour.id);
-            return { ...tour, images: images.map(img => img.image) };
-        }));
 
         res.json({
             success: true,
-            data: toursWithImages,
+            data: tours,
         });
     } catch (error) {
         res.status(500).json({
@@ -37,15 +30,9 @@ exports.searchTours = async (req, res) => {
 
         const tours = await Tour.search(keyword);
 
-        // Gắn thêm ảnh cho mỗi tour
-        const toursWithImages = await Promise.all(tours.map(async (tour) => {
-            const images = await TourImage.getByTourId(tour.id);
-            return { ...tour, images: images.map(img => img.image) };
-        }));
-
         res.json({
             success: true,
-            data: toursWithImages,
+            data: tours,
         });
     } catch (error) {
         res.status(500).json({
@@ -69,15 +56,9 @@ exports.getToursByRegion = async (req, res) => {
 
         const tours = await Tour.getByRegion(region);
 
-        // Gắn thêm ảnh cho mỗi tour
-        const toursWithImages = await Promise.all(tours.map(async (tour) => {
-            const images = await TourImage.getByTourId(tour.id);
-            return { ...tour, images: images.map(img => img.image) };
-        }));
-
         res.json({
             success: true,
-            data: toursWithImages,
+            data: tours,
         });
     } catch (error) {
         res.status(500).json({
@@ -107,13 +88,9 @@ exports.getTourById = async (req, res) => {
             });
         }
 
-        // Gắn thêm ảnh cho tour
-        const images = await TourImage.getByTourId(id);
-        const tourWithImages = { ...tour, images: images.map(img => img.image) };
-
         res.json({
             success: true,
-            data: tourWithImages,
+            data: tour,
         });
     } catch (error) {
         res.status(500).json({

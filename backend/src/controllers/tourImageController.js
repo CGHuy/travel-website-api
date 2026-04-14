@@ -2,6 +2,35 @@ const Tour = require("../models/Tour");
 const TourImage = require("../models/TourImage");
 const { deleteFromCloudinaryByUrl } = require("../middlewares/mediaStorage");
 
+exports.getToursForImageManagement = async (req, res) => {
+    try {
+        const q = String(req.query.q || "")
+            .trim()
+            .toLowerCase();
+
+        const tours = await TourImage.getTourImageManagementList(q);
+        const data = tours.map((tour) => ({
+            id: tour.id,
+            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+            name: tour.name || "",
+            region: tour.region || "",
+            cover_image: tour.cover_image || "",
+            image_count: Number(tour.image_count || 0),
+        }));
+
+        return res.json({
+            success: true,
+            data,
+            total: data.length,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 exports.getImagesByTourId = async (req, res) => {
     try {
         const tourId = parseInt(req.params.tourId, 10);
@@ -29,7 +58,7 @@ exports.getImagesByTourId = async (req, res) => {
                 tour: {
                     id: tour.id,
                     name: tour.name,
-                    code: tour.tour_code,
+                    code: `TOUR${String(tour.id).padStart(3, "0")}`,
                 },
                 images,
             },
