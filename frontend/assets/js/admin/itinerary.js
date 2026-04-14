@@ -37,8 +37,7 @@ async function fetchAndRenderItineraryTours() {
 
         const totalEl = document.getElementById("itinerary-total-count");
         if (totalEl) {
-            const count = adminItineraryCache.filter((tour) => tour.hasItinerary || (Array.isArray(tour.itineraries) && tour.itineraries.length > 0)).length;
-            totalEl.textContent = String(count);
+            totalEl.textContent = String(Number(tourPayload.total || 0));
         }
 
         renderItineraryTourList(adminItineraryCache);
@@ -62,7 +61,7 @@ function bindItinerarySearch() {
 
         const filtered = adminItineraryCache.filter((tour) => {
             const idText = String(tour.id ?? "").toLowerCase();
-            const codeText = String(tour.code ?? `TR${String(Math.max(0, Math.trunc(Number(tour.id) || 0))).padStart(3, "0")}`).toLowerCase();
+            const codeText = String(tour.code ?? "").toLowerCase();
             const nameText = String(tour.name ?? "").toLowerCase();
             return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword);
         });
@@ -123,9 +122,9 @@ function buildItineraryTourNode(template, tour) {
     const node = template.content.firstElementChild.cloneNode(true);
     if (!node) return null;
 
-    const itineraryList = Array.isArray(tour.itineraries) ? tour.itineraries : [];
-    const hasItinerary = itineraryList.length > 0;
-    const statusText = hasItinerary ? `Đã có ${itineraryList.length} ngày lịch trình` : "Chưa có lịch trình";
+    const itineraryCount = Number(tour.itineraryCount || 0);
+    const hasItinerary = itineraryCount > 0;
+    const statusText = hasItinerary ? `Đã có ${itineraryCount} ngày lịch trình` : "Chưa có lịch trình";
 
     const codeEl = node.querySelector(".itinerary-tour-code");
     const nameEl = node.querySelector(".itinerary-tour-name");
@@ -134,7 +133,7 @@ function buildItineraryTourNode(template, tour) {
     const actionTextEl = node.querySelector(".itinerary-action-text");
     const actionBtn = node.querySelector(".open-itinerary-modal");
 
-    if (codeEl) codeEl.textContent = `TOUR${String(Math.max(0, Math.trunc(Number(tour.id) || 0))).padStart(3, "0")}`;
+    if (codeEl) codeEl.textContent = String(tour.code ?? "");
     if (nameEl) nameEl.textContent = tour.name || "Chưa có tên";
     if (statusEl) {
         statusEl.className = `itinerary-status ${hasItinerary ? "text-success" : "text-warning"}`;
@@ -157,27 +156,27 @@ function bindItineraryActions() {
     const listEl = document.getElementById("tour-itinerary-list");
     if (!listEl || listEl.dataset.bound === "true") return;
 
-    listEl.addEventListener("click", (event) => {
+    listEl.addEventListener("click", async (event) => {
         const btn = event.target.closest(".open-itinerary-modal");
         if (!btn) return;
 
         const tourId = Number(btn.dataset.tourId);
         if (!Number.isFinite(tourId)) return;
 
-        populateItineraryForm(tourId);
+        await populateItineraryForm(tourId);
     });
 
     listEl.dataset.bound = "true";
 }
 
-function populateItineraryForm(tourId) {
+async function populateItineraryForm(tourId) {
     const form = document.getElementById("itinerary-form");
     const modalTitle = document.getElementById("itineraryModalLabel");
     const deleteAllBtn = document.getElementById("delete-all-itinerary-btn");
     const tour = adminItineraryCache.find((item) => Number(item.id) === Number(tourId));
     if (!form || !tour) return;
 
-    const hasItinerary = Array.isArray(tour.itineraries) && tour.itineraries.length > 0;
+    const hasItinerary = Number(tour.itineraryCount || 0) > 0;
 
     if (modalTitle) {
         modalTitle.textContent = `${hasItinerary ? "Chỉnh sửa" : "Thêm"} Lịch Trình cho Tour: ${tour.name || "(Không rõ tên)"}`;
@@ -193,7 +192,19 @@ function populateItineraryForm(tourId) {
         deleteAllBtn.disabled = !hasItinerary;
     }
 
-    renderItineraryDays(Array.isArray(tour.itineraries) ? tour.itineraries : []);
+    renderItineraryDays([]);
+
+    try {
+        const res = await fetch(`${ITINERARY_API_URL}/${tour.id}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const payload = await parseJsonSafe(res);
+        const days = payload.success && Array.isArray(payload.data) ? payload.data : [];
+        renderItineraryDays(days);
+    } catch (error) {
+        renderItineraryDays([]);
+        window.alert(error.message || "Không thể tải chi tiết lịch trình.");
+    }
 }
 
 function renderItineraryDays(days) {

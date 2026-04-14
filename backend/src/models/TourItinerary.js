@@ -1,6 +1,42 @@
 const db = require("../config/database");
 
 class TourItinerary {
+    // Lấy danh sách tour cho màn quản lý lịch trình (chỉ trả summary)
+    static async getTourItineraryManagementList(keyword = "") {
+        try {
+            const normalizedKeyword = String(keyword || "")
+                .trim()
+                .toLowerCase();
+            const likeKeyword = `%${normalizedKeyword}%`;
+
+            const [rows] = await db.query(
+                `
+                SELECT
+                    t.id,
+                    CONCAT('TOUR', LPAD(t.id, 3, '0')) AS code,
+                    t.name,
+                    COUNT(ti.id) AS itinerary_count
+                FROM tours t
+                LEFT JOIN tour_itineraries ti ON ti.tour_id = t.id
+                WHERE (
+                    ? = ''
+                    OR CAST(t.id AS CHAR) LIKE ?
+                    OR LOWER(CONCAT('tour', LPAD(t.id, 3, '0'))) LIKE ?
+                    OR LOWER(COALESCE(t.name, '')) LIKE ?
+                    OR LOWER(COALESCE(t.region, '')) LIKE ?
+                )
+                GROUP BY t.id, t.name
+                ORDER BY t.id DESC
+                `,
+                [normalizedKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword],
+            );
+
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     // Lấy tất cả itinerary
     static async getAll() {
         try {

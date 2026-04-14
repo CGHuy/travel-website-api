@@ -8,43 +8,22 @@ exports.getToursForItineraryManagement = async (req, res) => {
             .trim()
             .toLowerCase();
 
-        const tours = await Tour.getAll();
-        const itineraries = await TourItinerary.getAll();
-
-        const itinerariesByTourId = itineraries.reduce((acc, itinerary) => {
-            const tourId = Number(itinerary.tour_id);
-            if (!acc.has(tourId)) {
-                acc.set(tourId, []);
-            }
-            acc.get(tourId).push({
-                id: itinerary.id,
-                day_number: itinerary.day_number,
-                description: itinerary.description || "",
-            });
-            return acc;
-        }, new Map());
-
+        const tours = await TourItinerary.getTourItineraryManagementList(q);
         const data = tours.map((tour) => {
-            const tourItineraries = itinerariesByTourId.get(Number(tour.id)) || [];
+            const itineraryCount = Number(tour.itinerary_count || 0);
             return {
                 id: tour.id,
-                code: `TOUR${String(tour.id).padStart(3, "0")}`,
+                code: tour.code || `TOUR${String(tour.id).padStart(3, "0")}`,
                 name: tour.name || "",
-                itineraries: tourItineraries,
-                itineraryCount: tourItineraries.length,
-                hasItinerary: tourItineraries.length > 0,
+                itineraryCount,
+                hasItinerary: itineraryCount > 0,
             };
-        });
-
-        const filtered = data.filter((tour) => {
-            if (!q) return true;
-            return `${tour.id} ${tour.code} ${tour.name}`.toLowerCase().includes(q);
         });
 
         return res.json({
             success: true,
-            data: filtered,
-            total: filtered.filter((tour) => tour.hasItinerary).length,
+            data,
+            total: data.filter((tour) => tour.hasItinerary).length,
         });
     } catch (error) {
         console.error("Lỗi lấy danh sách tour lịch trình:", error);

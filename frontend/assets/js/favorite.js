@@ -13,11 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Load components
-    await Promise.all([
-        loadComponent("header-placeholder", "../../components/header.html"),
-        loadComponent("footer-placeholder", "../../components/footer.html"),
-        loadComponent("side-placeholder", "../../components/user-sidebar.html")
-    ]);
+    await Promise.all([loadComponent("header-placeholder", "../../components/header.html"), loadComponent("footer-placeholder", "../../components/footer.html"), loadComponent("side-placeholder", "../../components/user-sidebar.html")]);
 
     initFavoritePage();
     fetchFavorites(user.id, token);
@@ -58,8 +54,8 @@ async function loadComponent(targetId, filePath) {
 function initSidebarActiveState() {
     const currentPath = window.location.pathname;
     const navLinks = document.querySelectorAll(".user-nav-menu .nav-link");
-    
-    navLinks.forEach(link => {
+
+    navLinks.forEach((link) => {
         const href = link.getAttribute("href");
         if (currentPath.includes(href)) {
             link.classList.add("active");
@@ -70,7 +66,7 @@ function initSidebarActiveState() {
 
     // Handle static items
     const staticLinks = document.querySelectorAll(".nav-item-static a");
-    staticLinks.forEach(link => {
+    staticLinks.forEach((link) => {
         const href = link.getAttribute("href");
         if (currentPath.includes(href)) {
             link.style.color = "#0056b3";
@@ -81,7 +77,7 @@ function initSidebarActiveState() {
 
 async function fetchFavorites(userId, token) {
     const favoriteList = document.getElementById("favorite-list");
-    
+
     // Show loading state
     favoriteList.innerHTML = `
         <div class="text-center py-5">
@@ -95,8 +91,8 @@ async function fetchFavorites(userId, token) {
     try {
         const response = await fetch(`${API_URL}/wishlist/${userId}`, {
             headers: {
-                "Authorization": `Bearer ${token}`
-            }
+                Authorization: `Bearer ${token}`,
+            },
         });
 
         const result = await response.json();
@@ -126,15 +122,16 @@ function renderFavorites(tours) {
     favoriteList.classList.remove("d-none");
     noFavorites.classList.add("d-none");
 
-    favoriteList.innerHTML = tours.map(tour => {
-        const priceFormatted = new Intl.NumberFormat('vi-VN').format(tour.price);
-        return `
+    favoriteList.innerHTML = tours
+        .map((tour) => {
+            const priceFormatted = new Intl.NumberFormat("vi-VN").format(tour.price);
+            return `
             <div class="favorite-card animate__animated animate__fadeIn" data-tour-id="${tour.tour_id}">
                 <div class="favorite-img-side">
                     <button class="remove-favorite-btn" title="Gỡ khỏi danh sách" onclick="handleRemoveFavorite(${tour.tour_id})">
                         <i class="fa-solid fa-heart"></i>
                     </button>
-                    <img src="${tour.image_url || '/assets/images/placeholder.png'}" alt="${tour.tour_name}" class="favorite-img">
+                    <img src="${tour.image_url || "/assets/images/placeholder.png"}" alt="${tour.tour_name}" class="favorite-img">
                 </div>
                 <div class="favorite-info-side">
                     <h4 class="favorite-tour-name">${tour.tour_name}</h4>
@@ -142,19 +139,19 @@ function renderFavorites(tours) {
                     <div class="meta-grid">
                         <div class="meta-item">
                             <i class="fa-solid fa-barcode"></i>
-                            <span>Mã tour: <b>${ "TOUR" + String(tour.tour_id).padStart(3, "0") || 'N/A'}</b></span>
+                            <span>Mã tour: <b>${"TOUR" + String(tour.tour_id).padStart(3, "0") || "N/A"}</b></span>
                         </div>
                         <div class="meta-item">
                             <i class="fa-solid fa-location-dot"></i>
-                            <span>Khởi hành: <b>${tour.departure_location || 'N/A'}</b></span>
+                            <span>Khởi hành: <b>${tour.departure_location || "N/A"}</b></span>
                         </div>
                         <div class="meta-item">
                             <i class="fa-regular fa-clock"></i>
-                            <span>Thời gian: <b>${tour.duration || 'N/A'}</b></span>
+                            <span>Thời gian: <b>${tour.duration || "N/A"}</b></span>
                         </div>
                         <div class="meta-item">
                             <i class="fa-solid fa-map-marked-alt"></i>
-                            <span>Khu vực: <b>${tour.region || 'Miền Bắc'}</b></span>
+                            <span>Khu vực: <b>${tour.region || "Miền Bắc"}</b></span>
                         </div>
                     </div>
 
@@ -168,7 +165,8 @@ function renderFavorites(tours) {
                 </div>
             </div>
         `;
-    }).join("");
+        })
+        .join("");
 }
 
 let deleteModal;
@@ -177,7 +175,7 @@ let tourIdToDelete = null;
 async function handleRemoveFavorite(tourId) {
     tourIdToDelete = tourId;
     if (!deleteModal) {
-        deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        deleteModal = new bootstrap.Modal(document.getElementById("deleteConfirmModal"));
     }
     deleteModal.show();
 }
@@ -197,8 +195,8 @@ async function executeRemoveFavorite(tourId) {
         const response = await fetch(`${API_URL}/wishlist/${user.id}/${tourId}`, {
             method: "DELETE",
             headers: {
-                "Authorization": `Bearer ${token}`
-            }
+                Authorization: `Bearer ${token}`,
+            },
         });
 
         const result = await response.json();
@@ -206,10 +204,14 @@ async function executeRemoveFavorite(tourId) {
         if (response.ok && result.success) {
             deleteModal.hide();
             card.classList.add("animate__fadeOutLeft");
-            card.addEventListener("animationend", () => {
-                favoriteTours = favoriteTours.filter(t => t.tour_id !== tourId);
-                renderFavorites(favoriteTours);
-            }, { once: true });
+            card.addEventListener(
+                "animationend",
+                () => {
+                    favoriteTours = favoriteTours.filter((t) => t.tour_id !== tourId);
+                    renderFavorites(favoriteTours);
+                },
+                { once: true },
+            );
         } else {
             alert("Lỗi: " + (result.message || "Không thể xóa tour"));
         }
@@ -236,15 +238,11 @@ function initFavoritePage() {
     // Search Filtering
     const searchInput = document.getElementById("searchFavorite");
     if (searchInput) {
-        searchInput.addEventListener("input", function() {
+        searchInput.addEventListener("input", function () {
             const query = this.value.trim().toLowerCase();
-            const filtered = favoriteTours.filter(tour => 
-                tour.tour_name.toLowerCase().includes(query) ||
-                (tour.tour_code && tour.tour_code.toLowerCase().includes(query)) ||
-                (tour.departure_location && tour.departure_location.toLowerCase().includes(query))
-            );
+            const filtered = favoriteTours.filter((tour) => tour.tour_name.toLowerCase().includes(query) || (tour.code && tour.code.toLowerCase().includes(query)) || (tour.departure_location && tour.departure_location.toLowerCase().includes(query)));
             renderFavorites(filtered);
-            
+
             if (filtered.length === 0 && query !== "") {
                 const noFavorites = document.getElementById("no-favorites");
                 noFavorites.classList.remove("d-none");
