@@ -6,7 +6,7 @@ class Customer {
         try {
             const { booking_id, fullname, gender, dob, passenger_type } = customerData;
             const [result] = await db.query(
-                `INSERT INTO customers (booking_id, fullname, gender, dob, passenger_type, created_at) 
+                `INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type, created_at) 
                  VALUES (?, ?, ?, ?, ?, NOW())`,
                 [booking_id, fullname, gender, dob, passenger_type]
             );
@@ -21,12 +21,12 @@ class Customer {
     static async getByBookingId(bookingId) {
         try {
             const [rows] = await db.query(
-                `SELECT * FROM customers WHERE booking_id = ? ORDER BY id ASC`,
+                `SELECT * FROM passengers WHERE booking_id = ? ORDER BY id ASC`,
                 [bookingId]
             );
             return rows;
         } catch (error) {
-            console.error("Error fetching customers by booking_id:", error);
+            console.error("Error fetching passengers by booking_id:", error);
             throw error;
         }
     }
@@ -35,7 +35,7 @@ class Customer {
     static async getById(id) {
         try {
             const [rows] = await db.query(
-                `SELECT * FROM customers WHERE id = ?`,
+                `SELECT * FROM passengers WHERE id = ?`,
                 [id]
             );
             return rows[0] || null;

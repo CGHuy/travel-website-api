@@ -441,7 +441,7 @@ INSERT INTO wishlist (user_id,tour_id) VALUES
 (8,8);
 
 
-INSERT INTO customers (booking_id, fullname, gender, dob, passenger_type) VALUES
+INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUES
 -- Booking ID 1: 2 người lớn, 1 trẻ em (Người đặt: Phạm Minh Tuấn)
 (1, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
 (1, 'Lê Thu Hương', 'Nữ', '1992-10-20', 'adult'),

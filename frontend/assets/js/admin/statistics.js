@@ -208,7 +208,7 @@ async function loadAnalytics() {
 			<div class="top-item-value"><span class="text-warning">★</span> ${t.avg_rating}</div>
 		</div>`).join("");
 
-	$("top-customers-list").innerHTML = users.data.top_customers.map((c, i) => `
+	$("top-passengers-list").innerHTML = users.data.top_passengers.map((c, i) => `
 		<div class="top-item">
 			<div class="top-item-rank">${i+1}</div>
 			<div class="top-item-body"><div class="top-item-name">${c.fullname}</div><div class="top-item-meta">${c.email} · ${c.booking_count} booking</div></div>

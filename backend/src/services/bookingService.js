@@ -38,27 +38,57 @@ class bookingService {
 	// Xem chi tiết booking mà người dùng đã đặt
 	static async getBookingDetailsByUserId(bookingId, userId) {
 		try {
-			// Lấy chi tiết booking kèm theo thông tin tour, lịch trình
+			// Lấy chi tiết booking kèm theo thông tin tour và danh sách hành khách
 			const [rows] = await db.query(
 				`SELECT 
-                    b.*,
-                    t.name as tour_name,
+                    b.*, 
+                    t.id as tour_id,
+                    t.name as tour_name, 
+                    t.cover_image as tour_image,
+                    t.duration as tour_duration,
+                    t.price_default,
+                    t.price_child,
                     td.departure_date,
                     td.departure_location,
-                    (
-                        SELECT GROUP_CONCAT(s.name SEPARATOR ', ')
-                        FROM tour_services ts
-                        JOIN services s ON ts.service_id = s.id
-                        WHERE ts.tour_id = t.id
-                    ) as service_names
+                    td.price_moving,
+                    td.price_moving_child,
+                    p.id as passenger_id,
+                    p.fullname as passenger_fullname,
+                    p.gender as passenger_gender,
+                    DATE_FORMAT(p.dob, '%Y-%m-%d') as passenger_dob,
+                    p.passenger_type
                 FROM bookings b
+                LEFT JOIN passengers p ON p.booking_id = b.id
                 JOIN tour_departures td ON b.departure_id = td.id
                 JOIN tours t ON td.tour_id = t.id
-                WHERE b.id = ? AND b.user_id = ?
-                LIMIT 1`,
+                WHERE b.id = ? AND b.user_id = ?`,
 				[bookingId, userId],
 			);
-			return rows[0] || null;
+
+			if (rows.length === 0) return null;
+
+			// Lấy các thông tin cơ bản của booking từ phần tử đầu tiên
+			const booking = { ...rows[0], passengers: [] };
+
+			// Xử lý và map các row thành một mảng khách hàng
+			if (rows[0].passenger_id) {
+				booking.passengers = rows.map(row => ({
+					id: row.passenger_id,
+					fullname: row.passenger_fullname,
+					gender: row.passenger_gender,
+					dob: row.passenger_dob,
+					passenger_type: row.passenger_type
+				}));
+			}
+
+			// Dọn dẹp các field phụ để object booking được gọn
+			delete booking.passenger_id;
+			delete booking.passenger_fullname;
+			delete booking.passenger_gender;
+			delete booking.passenger_dob;
+			delete booking.passenger_type;
+
+			return booking;
 		} catch (error) {
 			throw error;
 		}
@@ -118,7 +148,7 @@ class bookingService {
                                 'passenger_type', c.passenger_type
                             )
                         )
-                        FROM customers c
+                        FROM passengers c
                         WHERE c.booking_id = b.id
                     ) as passengers
                 FROM bookings b
@@ -132,8 +162,8 @@ class bookingService {
 			if (rows.length === 0) return null;
 
 			const booking = rows[0];
-			
-			if (typeof booking.passengers === 'string') {
+
+			if (typeof booking.passengers === "string") {
 				booking.passengers = JSON.parse(booking.passengers);
 			}
 
@@ -246,7 +276,7 @@ class bookingService {
 		try {
 			await conn.beginTransaction();
 
-			// 2.1 Tạo booking (contact_dob không lưu ở đây, lưu ở bảng customers)
+			// 2.1 Tạo booking (contact_dob không lưu ở đây, lưu ở bảng passengers)
 			const [bookingResult] = await conn.query(
 				`INSERT INTO bookings (user_id, departure_id, adults, children, total_price, contact_name, contact_phone, contact_email, note)
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -266,7 +296,7 @@ class bookingService {
 
 			// 2.2 Insert người liên hệ là hành khách đầu tiên (adult)
 			await conn.query(
-				`INSERT INTO customers (booking_id, fullname, gender, dob, passenger_type)
+				`INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type)
 				VALUES (?, ?, ?, ?, 'adult')`,
 				[
 					bookingId,
@@ -280,7 +310,7 @@ class bookingService {
 			if (passengers && passengers.length > 0) {
 				for (const p of passengers) {
 					await conn.query(
-						`INSERT INTO customers (booking_id, fullname, gender, dob, passenger_type)
+						`INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type)
 						VALUES (?, ?, ?, ?, ?)`,
 						[bookingId, p.name, p.gender || "Khác", p.dob || null, p.type],
 					);

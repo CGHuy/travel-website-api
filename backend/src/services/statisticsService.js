@@ -163,13 +163,13 @@ class StatisticsService {
 	}
 
 	static async getUserStats() {
-		const [topCustomers] = await db.query(`
+		const [toppassengers] = await db.query(`
 			SELECT u.id, u.fullname, u.email, COUNT(b.id) AS booking_count, COALESCE(SUM(b.total_price), 0) AS total_spent
 			FROM users u JOIN bookings b ON b.user_id = u.id
 			WHERE b.payment_status = 'paid' AND b.status != 'cancelled'
 			GROUP BY u.id, u.fullname, u.email ORDER BY total_spent DESC LIMIT 5
 		`);
-		return { top_customers: topCustomers.map(c => ({ ...c, total_spent: parseFloat(c.total_spent) })) };
+		return { top_passengers: toppassengers.map(c => ({ ...c, total_spent: parseFloat(c.total_spent) })) };
 	}
 }
 
