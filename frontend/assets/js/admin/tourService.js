@@ -245,7 +245,7 @@ function renderTourServiceList(tours) {
 
         if (statusEl) {
             statusEl.className = `tour-service-status ${hasServices ? "text-success" : "text-warning"}`;
-            statusEl.innerHTML = hasServices ? `<i class="fas fa-check-circle me-1"></i> Đã có dịch vụ (${Number(tour.serviceCount || 0)})` : `<i class="fas fa-exclamation-circle me-1"></i> Chưa có dịch vụ`;
+            statusEl.innerHTML = hasServices ? `<i class="fas fa-check-circle me-1 "></i> Đã có ${Number(tour.serviceCount || 0)} dịch vụ ` : `<i class="fas fa-exclamation-circle me-1"></i> Chưa có dịch vụ`;
         }
 
         if (actionTextEl) {

@@ -1,0 +1,99 @@
+<link rel="stylesheet" href="../../assets/css/admin/tour-image.css" />
+
+<div class="tour-image-management-wrapper">
+    <div class="tour-image-header">
+        <div class="tour-image-title-group">
+            <h4><i class="fa-solid fa-image"></i> Quản lý Hình Ảnh Tour</h4>
+        </div>
+        <div class="badge-total">Tổng: <span id="tour-image-total-count">0</span> tour</div>
+    </div>
+
+    <div class="tour-image-toolbar">
+        <div class="search-row">
+            <div class="search-input-wrap">
+                <input id="tour-image-search-input" class="search-input-modern" placeholder="Tìm kiếm tour theo ID, mã tour, tên hoặc vùng miền..." aria-label="Tìm kiếm" />
+                <i class="fa-solid fa-magnifying-glass search-icon-modern"></i>
+            </div>
+            <button id="tour-image-search-btn" type="button" class="btn-primary-modern btn-search-modern">Tìm</button>
+        </div>
+    </div>
+
+    <div id="tour-image-list" class="tour-image-list-shell">
+        <div class="text-center p-4 text-muted">Đang tải danh sách tour...</div>
+    </div>
+</div>
+
+<!-- Template cho thẻ tour -->
+<template id="tour-image-card-template">
+    <div class="tour-image-card">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-lg-auto">
+                <img class="tour-image-main" src="../../assets/images/image.png" alt="Tour" />
+            </div>
+            <div class="col-12 col-lg">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                    <div>
+                        <h5 class="mb-1 fw-bold tour-item-name">Tên tour</h5>
+                        <span class="badge text-bg-secondary tour-code-badge tour-item-code">TOUR000</span>
+                    </div>
+                    <button type="button" class="btn btn-outline-primary js-open-image-manager"><i class="fa-solid fa-images me-1"></i> Quản lý ảnh</button>
+                </div>
+                <div class="tour-image-count mt-2">Số ảnh phụ: 0</div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Modal quản lý ảnh phụ cho tour -->
+<div class="modal fade" id="tourImageModal" tabindex="-1" aria-labelledby="tourImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tourImageModalLabel">Quản lý ảnh phụ cho tour</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <strong>Danh sách ảnh hiện tại</strong>
+                    <span class="text-muted">Tổng ảnh: <strong id="tour-image-modal-count">0</strong></span>
+                </div>
+
+                <div id="tour-image-grid" class="tour-image-grid mb-4"></div>
+
+                <hr />
+
+                <h6 class="mb-3">Tải ảnh mới</h6>
+                <form id="add-tour-image-form" method="post">
+                    <input id="tour-image-tour-id" type="hidden" name="tour_id" />
+                    <div class="row g-3 align-items-start">
+                        <div class="col-12 col-lg-7">
+                            <label class="form-label" for="tour-image-file">Chọn ảnh</label>
+                            <input id="tour-image-file" class="form-control" type="file" name="image" accept="image/*" required />
+                        </div>
+                        <div class="col-12 col-lg-5">
+                            <img id="tour-image-preview" class="upload-preview" src="../../assets/images/image.png" alt="Xem trước ảnh tải lên" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Tải ảnh lên</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template cho thẻ ảnh trong modal quản lý ảnh phụ -->
+<template id="tour-image-item-template">
+    <div class="tour-image-item">
+        <img src="../../assets/images/image.png" alt="Tour image" />
+        <div class="tour-image-actions">
+            <button type="button" class="btn btn-sm btn-outline-danger js-delete-tour-image"><i class="fa-solid fa-trash me-1"></i> Xóa</button>
+        </div>
+    </div>
+</template>
+
+<script src="../../assets/js/admin/tour-image.js"></script>

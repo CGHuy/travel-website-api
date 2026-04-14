@@ -10,6 +10,12 @@ window.initAdminServicePage = async function () {
 
     if (!tableBody) return;
 
+    function updateServiceTotalCount(total) {
+        if (totalCountEl) {
+            totalCountEl.textContent = String(total);
+        }
+    }
+
     // Load dữ liệu dịch vụ từ API
     async function updateServiceTotal(count) {
         if (totalCountEl) {
@@ -18,13 +24,12 @@ window.initAdminServicePage = async function () {
     }
 
     async function loadServices() {
-        tableBody.innerHTML =
-            '<tr><td colspan="5" class="text-center text-muted p-4">Đang tải danh sách dịch vụ...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted p-4">Đang tải danh sách dịch vụ...</td></tr>';
         try {
             const token = localStorage.getItem("token") || "";
             if (!token) {
-                tableBody.innerHTML =
-                    '<tr><td colspan="5" class="text-center text-danger p-4">Vui lòng đăng nhập quyền Admin.</td></tr>';
+                updateServiceTotalCount(0);
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger p-4">Vui lòng đăng nhập quyền Admin.</td></tr>';
                 return;
             }
 
@@ -39,8 +44,7 @@ window.initAdminServicePage = async function () {
             updateServiceTotal(services.length);
 
             if (services.length === 0) {
-                tableBody.innerHTML =
-                    '<tr><td colspan="5" class="text-center text-muted p-4">Không có dịch vụ nào.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted p-4">Không có dịch vụ nào.</td></tr>';
                 return;
             }
 
@@ -50,10 +54,7 @@ window.initAdminServicePage = async function () {
                 const desc = service.description || "";
                 const shortDesc = desc.length > 50 ? desc.substring(0, 50) + "..." : desc;
 
-                const statusBadge =
-                    (service.status || 0) == 1
-                        ? '<span class="badge bg-success">Hoạt động</span>'
-                        : '<span class="badge bg-secondary">Ngưng</span>';
+                const statusBadge = (service.status || 0) == 1 ? '<span class="badge bg-success">Hoạt động</span>' : '<span class="badge bg-secondary">Ngưng</span>';
 
                 tr.innerHTML = `
                     <td class="find_id">SVC${String(service.id).padStart(3, "0")}</td>
@@ -339,8 +340,7 @@ window.initAdminServicePage = async function () {
             bootstrap.Modal.getOrCreateInstance(editServiceModal).show();
         } catch (err) {
             console.error(err);
-            modalBody.innerHTML =
-                '<div class="alert alert-danger">Lỗi khi tải dịch vụ. Kiểm tra server.</div>';
+            modalBody.innerHTML = '<div class="alert alert-danger">Lỗi khi tải dịch vụ. Kiểm tra server.</div>';
         }
     }
 
@@ -380,6 +380,17 @@ window.initAdminServicePage = async function () {
         searchBtn.addEventListener("click", handleSearch);
     }
 
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener("click", () => {
+            const q = searchInput.value.trim().toLowerCase();
+            const rows = tableBody.querySelectorAll("tr");
+            rows.forEach((row) => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(q) ? "" : "none";
+            });
+        });
+    }
+
     // Load form thêm dịch vụ khi click nút
     if (addServiceBtn) {
         addServiceBtn.addEventListener("click", loadAddServiceForm);
@@ -412,7 +423,7 @@ window.initAdminServicePage = async function () {
     }
 
     // Xử lý xóa dịch vụ
-    const deleteForm = document.querySelector('#deleteServiceModal form');
+    const deleteForm = document.querySelector("#deleteServiceModal form");
     if (deleteForm) {
         deleteForm.addEventListener("submit", async (e) => {
             e.preventDefault();
