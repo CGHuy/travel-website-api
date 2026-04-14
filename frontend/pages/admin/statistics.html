@@ -60,25 +60,20 @@
     </div>
 </div>
 
-<!-- SECTION 2: 🔵 THEO THỜI GIAN -->
+<!-- SECTION 2: 🔵 THEO THỜI GIAN (bộ lọc nhanh) -->
 <div class="stats-section">
     <div class="stats-section-header">
         <h2 class="stats-section-title"><span class="section-dot dot-timebased"></span> Báo cáo thời gian</h2>
         <span class="section-tag tag-timebased">Time-based</span>
     </div>
 
+    <!-- Bộ lọc nhanh -->
     <div class="time-filter-bar mb-4">
         <div class="time-filter-presets">
             <button class="time-filter-btn" data-period="today">Hôm nay</button>
             <button class="time-filter-btn" data-period="7days">7 ngày</button>
             <button class="time-filter-btn active" data-period="month">Tháng này</button>
             <button class="time-filter-btn" data-period="year">Năm nay</button>
-        </div>
-        <div class="time-filter-custom">
-            <input type="date" id="filter-from" class="time-filter-input" />
-            <span class="text-muted">→</span>
-            <input type="date" id="filter-to" class="time-filter-input" />
-            <button class="time-filter-btn active" id="filter-apply"><i class="fa-solid fa-filter"></i> Lọc</button>
         </div>
         <div class="time-filter-label ms-2" id="time-label">Tháng này</div>
     </div>
@@ -113,6 +108,87 @@
                 <div id="booking-status-legend" class="pie-legend"></div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- SECTION 2.5: 📅 THỐNG KÊ LINH HOẠT (bộ lọc tùy chỉnh) -->
+<div class="stats-section">
+    <div class="stats-section-header">
+        <h2 class="stats-section-title"><span class="section-dot dot-custom"></span> Thống kê theo khoảng thời gian</h2>
+        <span class="section-tag tag-custom">Tùy chỉnh</span>
+    </div>
+
+    <!-- Bộ chọn ngày -->
+    <div class="custom-filter-bar mb-4">
+        <div class="custom-filter-inner">
+            <div class="custom-filter-field">
+                <label class="custom-filter-label">Từ ngày</label>
+                <input type="date" id="custom-from" class="time-filter-input" />
+            </div>
+            <span class="custom-filter-arrow">→</span>
+            <div class="custom-filter-field">
+                <label class="custom-filter-label">Đến ngày</label>
+                <input type="date" id="custom-to" class="time-filter-input" />
+            </div>
+            <button class="time-filter-btn active" id="custom-apply">
+                <i class="fa-solid fa-magnifying-glass-chart"></i> Xem thống kê
+            </button>
+        </div>
+        <div class="custom-range-label" id="custom-range-label"></div>
+    </div>
+
+    <!-- Cards thống kê -->
+    <div id="custom-stats-result" class="custom-stats-hidden">
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-xl-3">
+                <div class="cs-card cs-revenue">
+                    <div class="cs-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                    <div class="cs-label">Doanh thu</div>
+                    <div class="cs-value" id="cs-revenue">--</div>
+                    <div class="cs-sub" id="cs-revenue-growth"></div>
+                    <div class="cs-prev" id="cs-revenue-prev">--</div>
+                </div>
+            </div>
+            <div class="col-6 col-xl-3">
+                <div class="cs-card cs-booking">
+                    <div class="cs-icon"><i class="fa-solid fa-ticket"></i></div>
+                    <div class="cs-label">Tổng Booking</div>
+                    <div class="cs-value" id="cs-bookings">--</div>
+                    <div class="cs-sub" id="cs-booking-growth"></div>
+                    <div class="cs-prev" id="cs-booking-prev">--</div>
+                </div>
+            </div>
+            <div class="col-6 col-xl-3">
+                <div class="cs-card cs-confirmed">
+                    <div class="cs-icon"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="cs-label">Đã xác nhận</div>
+                    <div class="cs-value" id="cs-confirmed">--</div>
+                    <div class="cs-prev">Booking thành công</div>
+                </div>
+            </div>
+            <div class="col-6 col-xl-3">
+                <div class="cs-card cs-cancelled">
+                    <div class="cs-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+                    <div class="cs-label">Đã huỷ</div>
+                    <div class="cs-value" id="cs-cancelled">--</div>
+                    <div class="cs-prev">Booking bị huỷ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thêm: chart doanh thu theo khoảng tùy chỉnh -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <h3 class="stat-card-title">Biểu đồ doanh thu <span class="text-muted fw-normal small" id="custom-chart-label"></span></h3>
+            </div>
+            <div class="chart-wrapper"><canvas id="customRevenueChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Placeholder khi chưa chọn ngày -->
+    <div id="custom-stats-placeholder" class="custom-placeholder">
+        <i class="fa-regular fa-calendar-days"></i>
+        <p>Chọn khoảng thời gian để xem thống kê chi tiết</p>
     </div>
 </div>
 
