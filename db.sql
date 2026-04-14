@@ -169,8 +169,8 @@ CREATE TABLE wishlist (
     UNIQUE KEY uk_wishlist (user_id, tour_id)
 );
 
--- 11.  CUSTOMERS
-CREATE TABLE customers (
+-- 11.  passengers
+CREATE TABLE passengers (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
     booking_id INT NOT NULL,
