@@ -321,11 +321,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const initDatePickers = () => {
         flatpickr(".datepicker", {
-            locale: "vn",
+            locale: {
+                ...flatpickr.l10ns.vn,
+                months: {
+                    ...flatpickr.l10ns.vn.months,
+                    longhand: [
+                        "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4",
+                        "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8",
+                        "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+                    ]
+                }
+            },
             dateFormat: "Y-m-d", // Định dạng lưu trữ/gửi server
             altInput: true,
             altFormat: "d/m/Y", // Định dạng hiển thị cho người dùng
             allowInput: true,
+            monthSelectorType: "dropdown",
+            maxDate: "today", 
         });
     };
 
@@ -367,6 +379,63 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
+        // --- Custom Age Validation (Matching Backend) ---
+        clearFieldErrors();
+        let hasErrors = false;
+        const today = new Date();
+        
+        // 1. Kiểm tra người liên hệ (Contact person) >= 18 tuổi
+        const contactDobInput = document.getElementById("contact_dob");
+        const contactDobVal = contactDobInput.value;
+        if (contactDobVal) {
+            const contactBirthYear = new Date(contactDobVal).getFullYear();
+            const age = today.getFullYear() - contactBirthYear;
+            if (age < 18) {
+                showFieldError("contact_dob", "Người đặt tour phải đủ 18 tuổi trở lên.");
+                hasErrors = true;
+            }
+        }
+
+        // 2. Thu thập và kiểm tra thông tin hành khách đi cùng
+        const adultsCount = parseInt(document.getElementById("adults").value);
+        const childrenCount = parseInt(document.getElementById("children").value);
+        const totalPax = adultsCount + childrenCount;
+        const passengers = [];
+
+        if (totalPax > 1) {
+            for (let i = 2; i <= totalPax; i++) {
+                const nameInput = document.querySelector(`[name="ps_name_${i}"]`);
+                const dobInput = document.querySelector(`[name="ps_dob_${i}"]`);
+                const typeInput = i <= adultsCount ? "adult" : "child";
+
+                const dobVal = dobInput.value;
+                const nameVal = nameInput.value;
+
+                if (dobVal) {
+                    const birthYear = new Date(dobVal).getFullYear();
+                    const age = today.getFullYear() - birthYear;
+
+                    if (typeInput === "child" && age >= 6) {
+                        showFieldError(`ps_dob_${i}`, "Trẻ em phải dưới 6 tuổi. Vui lòng đặt ở mục người lớn.");
+                        hasErrors = true;
+                    }
+                    if (typeInput === "adult" && age < 6) {
+                        showFieldError(`ps_dob_${i}`, "Người lớn phải từ 6 tuổi trở lên. Vui lòng đặt ở mục trẻ em.");
+                        hasErrors = true;
+                    }
+                }
+
+                passengers.push({ name: nameVal, gender: document.querySelector(`[name="ps_gender_${i}"]`).value, dob: dobVal, type: typeInput });
+            }
+        }
+
+        if (hasErrors) {
+            const firstError = document.querySelector(".is-invalid");
+            if (firstError) firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
+        // --- End Custom Age Validation ---
+
         const btn = e.currentTarget;
         const originalContent = btn.innerHTML;
         btn.disabled = true;
@@ -374,31 +443,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
             const token = localStorage.getItem("token");
-            const adults = parseInt(document.getElementById("adults").value);
-            const children = parseInt(document.getElementById("children").value);
-
-            // Thu thập thông tin hành khách đi cùng
-            const passengers = [];
-            const totalCount = adults + children;
-            if (totalCount > 1) {
-                for (let i = 2; i <= totalCount; i++) {
-                    passengers.push({
-                        name: document.querySelector(`[name="ps_name_${i}"]`).value,
-                        gender: document.querySelector(`[name="ps_gender_${i}"]`).value,
-                        dob: document.querySelector(`[name="ps_dob_${i}"]`).value,
-                        type: i <= adults ? "adult" : "child",
-                    });
-                }
-            }
-
             const bookingData = {
                 departure_id: document.getElementById("departure_id").value,
-                adults: adults,
-                children: children,
+                adults: adultsCount,
+                children: childrenCount,
                 contact_name: document.getElementById("contact_name").value,
                 contact_phone: document.getElementById("contact_phone").value,
                 contact_email: document.getElementById("contact_email").value,
-                contact_dob: document.getElementById("contact_dob").value,
+                contact_dob: contactDobVal,
                 contact_gender: document.getElementById("contact_gender").value,
                 note: document.getElementById("note").value,
                 passengers: passengers,
@@ -437,6 +489,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     fetchUserProfile();
     renderPassengerFields();
 });
+
+function showFieldError(inputId, message) {
+    const input = document.getElementById(inputId) || document.querySelector(`[name="${inputId}"]`);
+    if (!input) return;
+
+    input.classList.add("is-invalid");
+    
+    // Handle Flatpickr altInput
+    if (input._flatpickr && input._flatpickr.altInput) {
+        input._flatpickr.altInput.classList.add("is-invalid");
+    }
+
+    let feedback = input.parentElement.querySelector(".invalid-feedback");
+    if (!feedback) {
+        feedback = document.createElement("div");
+        feedback.className = "invalid-feedback d-block"; 
+        input.parentElement.appendChild(feedback);
+    }
+    feedback.innerText = message;
+}
+
+function clearFieldErrors() {
+    document.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
+    document.querySelectorAll(".invalid-feedback").forEach(el => el.remove());
+}
 
 async function loadComponent(targetId, filePath) {
     const target = document.getElementById(targetId);

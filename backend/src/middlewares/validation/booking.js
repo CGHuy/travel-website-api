@@ -74,6 +74,39 @@ const validateBookingTour = (req, res, next) => {
         });
     }
 
+    //Kiểm tra người đặt tour có đủ 18 tuổi hay chưa
+        if (contact_dob) {
+            const contactBirthDate = new Date(contact_dob);
+            const today = new Date();
+            const age = today.getFullYear() - contactBirthDate.getFullYear();
+            if (age < 18) {
+                errors.push("Người đặt tour phải đủ 18 tuổi trở lên");
+            }
+        }
+    
+    //Kiểm tra các khách hàng trẻ em có dưới 6 tuổi hay không
+    if (passengers && Array.isArray(passengers)) {
+        passengers.forEach((p, i) => {
+            if (p.type === "child" && p.dob) {
+                const childBirthDate = new Date(p.dob);
+                const today = new Date();
+                const age = today.getFullYear() - childBirthDate.getFullYear();
+                if (age >= 6) {
+                    errors.push(`Hành khách thứ ${i + 2} phải đặt ở người lớn`);
+                }
+            }
+
+            if (p.type === "adult" && p.dob) {
+                const adultBirthDate = new Date(p.dob);
+                const today = new Date();
+                const age = today.getFullYear() - adultBirthDate.getFullYear();
+                if (age < 6) {
+                    errors.push(`Hành khách thứ ${i + 2} phải đặt ở trẻ em`);
+                }
+            }
+        });
+    }
+
     if (errors.length > 0) {
         return res.status(400).json({ success: false, errors });
     }

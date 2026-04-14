@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-class Customer {
+class Passenger {
     // 1. Tạo mới hành khách
     static async create(customerData) {
         try {
@@ -48,4 +48,4 @@ class Customer {
     
 }
 
-module.exports = Customer;
+module.exports = Passenger;
