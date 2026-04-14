@@ -71,7 +71,22 @@ class Review {
             throw error;
         }
     }
-
+    // Lấy danh sách review theo tour_id
+    static async getByTourId(tour_id) {
+        try {
+            const [rows] = await db.query(
+                `SELECT r.*, u.fullname as user_name
+                 FROM reviews r
+                 JOIN users u ON r.user_id = u.id
+                 WHERE r.tour_id = ?
+                 ORDER BY r.created_at DESC`,
+                [tour_id]
+            );
+            return rows;
+        } catch (error) {
+            throw error;
+        }
+    }
 
 }
 
