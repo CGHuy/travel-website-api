@@ -78,16 +78,25 @@
                                         placeholder="VD: 0912345678" required />
                                 </div>
                                 <div class="col-md-6 text-start">
-                                    <label for="contact_email" class="form-label">Email <span
-                                            class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="contact_email" name="contact_email"
-                                            placeholder="VD: email@example.com" required />
-                                </div>
-                                <div class="col-md-6 text-start">
                                     <label for="contact_dob" class="form-label">Ngày sinh <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control datepicker" id="contact_dob" name="contact_dob" 
                                         placeholder="dd/mm/yyyy" required />
+                                </div>
+                                <div class="col-md-6 text-start">
+                                    <label for="contact_gender" class="form-label">Giới tính <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-select" id="contact_gender" name="contact_gender" required>
+                                        <option value="Nam">Nam</option>
+                                        <option value="Nữ">Nữ</option>
+                                        <option value="Khác">Khác</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 text-start">
+                                    <label for="contact_email" class="form-label">Email <span
+                                            class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="contact_email" name="contact_email"
+                                            placeholder="VD: email@example.com" required />
                                 </div>
                                 <div class="col-12 text-start">
                                     <label for="note" class="form-label">Ghi chú thêm</label>

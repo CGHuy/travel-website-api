@@ -94,6 +94,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                         contactDobInput._flatpickr.setDate(user.dob);
                     }
                 }
+                if (document.getElementById("contact_gender") && user.gender) {
+                    document.getElementById("contact_gender").value = user.gender;
+                }
             }
         } catch (error) {
             console.error("Error fetching user profile:", error);
@@ -396,6 +399,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 contact_phone: document.getElementById("contact_phone").value,
                 contact_email: document.getElementById("contact_email").value,
                 contact_dob: document.getElementById("contact_dob").value,
+                contact_gender: document.getElementById("contact_gender").value,
                 note: document.getElementById("note").value,
                 passengers: passengers,
             };
