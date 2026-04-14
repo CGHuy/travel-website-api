@@ -63,9 +63,7 @@ function bindTourServiceSearch() {
     };
 
     input.addEventListener("input", () => {
-        if (String(input.value || "").trim() !== "") return;
-        renderTourServiceList(adminTourServiceCache);
-        updateTourServiceTotal(adminTourServiceCache);
+        runSearch();
     });
 
     input.addEventListener("keydown", (event) => {
