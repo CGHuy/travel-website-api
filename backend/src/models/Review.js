@@ -18,9 +18,10 @@ class Review {
     static async getByUserId(user_id) {
         try {
             const [rows] = await db.query(
-                `SELECT r.*, t.name as tour_name 
+                `SELECT r.*, t.name as tour_name, b.id as booking_id
                  FROM reviews r 
                  JOIN tours t ON r.tour_id = t.id 
+                 LEFT JOIN bookings b ON r.booking_id = b.id
                  WHERE r.user_id = ? 
                  ORDER BY r.created_at DESC`,
                 [user_id]
@@ -47,10 +48,10 @@ class Review {
     // Tạo review mới
     static async create(reviewData) {
         try {
-            const { user_id, tour_id, rating, comment } = reviewData;
+            const { user_id, tour_id, rating, comment, booking_id } = reviewData;
             const [result] = await db.query(
-                `INSERT INTO reviews (user_id, tour_id, rating, comment, created_at) VALUES (?, ?, ?, ?, NOW())`,
-                [user_id, tour_id, rating, comment]
+                `INSERT INTO reviews (user_id, tour_id, rating, comment, booking_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())`,
+                [user_id, tour_id, rating, comment, booking_id]
             );
             return result.insertId;
         } catch (error) {

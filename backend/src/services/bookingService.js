@@ -35,6 +35,26 @@ class bookingService {
 		}
 	}
 
+	// Kiểm tra xem user có booking đã hoàn thành (đã đi) cho tour này chưa
+	static async checkCompletedBooking(userId, tourId) {
+		try {
+			const [rows] = await db.query(
+				`SELECT b.id 
+                 FROM bookings b
+                 JOIN tour_departures td ON b.departure_id = td.id
+                 WHERE b.user_id = ? AND td.tour_id = ? 
+                 AND b.status = 'confirmed' 
+                 AND b.payment_status = 'paid'
+                 AND td.departure_date <= NOW()
+                 LIMIT 1`,
+				[userId, tourId],
+			);
+			return rows.length > 0;
+		} catch (error) {
+			throw error;
+		}
+	}
+
 	// Xem chi tiết booking mà người dùng đã đặt
 	static async getBookingDetailsByUserId(bookingId, userId) {
 		try {
@@ -56,7 +76,8 @@ class bookingService {
                     p.fullname as passenger_fullname,
                     p.gender as passenger_gender,
                     DATE_FORMAT(p.dob, '%Y-%m-%d') as passenger_dob,
-                    p.passenger_type
+                    p.passenger_type,
+                    (SELECT COUNT(id) FROM reviews r WHERE r.user_id = b.user_id AND r.tour_id = t.id) > 0 as is_reviewed
                 FROM bookings b
                 LEFT JOIN passengers p ON p.booking_id = b.id
                 JOIN tour_departures td ON b.departure_id = td.id
