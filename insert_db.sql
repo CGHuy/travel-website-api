@@ -463,9 +463,11 @@ INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUE
 -- Booking ID 5: 1 người lớn, 0 trẻ em (Người đặt: Nguyễn Thị Hồng Nhung)
 (5, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult');
 
--- =========================
--- BỔ SUNG DỮ LIỆU CÁC TOUR (TỪ 9 ĐẾN 18)
--- =========================
+-- ==========================================================
+-- BỔ SUNG DỮ LIỆU CÁC TOUR (TỪ 9 ĐẾN 18) VÀ DỮ LIỆU LIÊN QUAN
+-- ==========================================================
+
+-- 1. TOURS (9 - 18)
 INSERT INTO tours (name, slug, description, location, region, duration, price_default, price_child, cover_image) VALUES
 ('Tour Côn Đảo 3N2Đ', 'tour-con-dao', 'Tour Côn Đảo 3 ngày 2 đêm đưa du khách về với hòn đảo thiêng liêng, nơi ghi dấu những trang sử hào hùng của dân tộc tại Nghĩa trang Hàng Dương. Bên cạnh đó, du khách còn được đắm mình trong làn nước xanh mát tại Bãi Đầm Trầu - một trong những bãi biển hoang sơ đẹp nhất tại đây, và trải nghiệm lặn ngắm san hô tuyệt đẹp.', 'Côn Đảo', 'Miền Nam', '3 ngày 2 đêm', 3500000, 2500000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/condao.jpg'),
 ('Tour Mộc Châu 2N1Đ', 'tour-moc-chau', 'Khám phá cao nguyên Mộc Châu 2 ngày 1 đêm với khí hậu mát mẻ quanh năm. Điểm nhấn của hành trình là check-in tại những Đồi chè trái tim xanh mướt, chiêm ngưỡng vẻ đẹp thơ mộng của Thác Dải Yếm và đắm chìm trong sắc trắng tinh khôi của mùa hoa mận, hoa cải nở rộ khắp các bản làng Tây Bắc.', 'Mộc Châu', 'Miền Bắc', '2 ngày 1 đêm', 1800000, 1200000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/mocchau.jpg'),
@@ -478,6 +480,7 @@ INSERT INTO tours (name, slug, description, location, region, duration, price_de
 ('Tour Vũng Tàu 2N1Đ', 'tour-vung-tau', 'Nạp năng lượng với chuyến du lịch biển gần TP.HCM tại Vũng Tàu 2 ngày 1 đêm. Hành trình đưa bạn tham quan bức Tượng Chúa Kitô cao nhất Việt Nam, chinh phục Hải đăng Vũng Tàu để ngắm toàn cảnh thành phố và thỏa sức tắm biển, thưởng thức hải sản tươi ngon.', 'Vũng Tàu', 'Miền Nam', '2 ngày 1 đêm', 1300000, 900000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/vungtau.jpg'),
 ('Tour Pleiku – Gia Lai 3N2Đ', 'tour-gia-lai', 'Khám phá đại ngàn Tây Nguyên hùng vĩ với tour Pleiku - Gia Lai 3 ngày 2 đêm. Đôi mắt Pleiku - Biển Hồ T’Nưng xanh biếc, chiêm ngưỡng vẻ đẹp hoang sơ của Núi lửa Chư Đăng Ya mùa hoa dã quỳ và đắm mình trong không gian Văn hóa Tây Nguyên đậm đà bản sắc cùng tiếng cồng chiêng vang vọng.', 'Gia Lai', 'Tây Nguyên', '3 ngày 2 đêm', 2800000, 1900000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai.jpg');
 
+-- 2. TOUR IMAGES
 INSERT INTO tour_images (tour_id, image) VALUES
 (9, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/condao.jpg'),
 (9, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/condao-2.jpg'),
@@ -500,6 +503,7 @@ INSERT INTO tour_images (tour_id, image) VALUES
 (18, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai.jpg'),
 (18, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai-2.jpg');
 
+-- 3. TOUR ITINERARIES
 INSERT INTO tour_itineraries (tour_id, day_number, description) VALUES
 (9, 1, 'CHÀO MỪNG CÔN ĐẢO – TÌM HIỂU LỊCH SỬ\n08:00: Hướng dẫn viên đón quý khách tại sân bay Tân Sơn Nhất, làm thủ tục bay đi Côn Đảo.\n10:30: Đến sân bay Cỏ Ống (Côn Đảo), xe đưa đoàn về trung tâm thị trấn, nhận phòng khách sạn và nghỉ ngơi ngắm cảnh biển.\n12:00: Quý khách dùng bữa trưa tại nhà hàng địa phương với các món hải sản biển đảo.\n14:00: Xe và HDV đưa đoàn tham quan Cựu nhà tù Côn Đảo, tìm hiểu về Di tích lịch sử Quốc gia đặc biệt.\n16:30: Tự do tắm biển tại Bãi Đầm Trầu.\n18:30: Ăn tối tại nhà hàng.\n23:00: Đoàn tham gia chương trình viếng Nghĩa trang Hàng Dương, viếng mộ cô Sáu linh thiêng.'),
 (9, 2, 'KHÁM PHÁ HÒN BẢY CẠNH – LẶN NGẮM SAN HÔ\n07:00: Đoàn dùng điểm tâm sáng tại nhà hàng khách sạn.\n08:30: Lên cano khởi hành đi tham quan Hòn Bảy Cạnh, tham gia chương trình lặn ngắm san hô dưới đáy biển tuyệt đẹp.\n11:30: Thưởng thức bữa trưa BBQ hải sản dã ngoại ngay trên bãi biển.\n14:00: Quay về đảo lớn, tiếp tục tham quan Miếu bà Phi Yến, chùa Núi Một.\n16:00: Tự do tắm biển.\n18:30: Dùng bữa tối. Buổi tối quý khách tự do dạo biển Côn Đảo.'),
@@ -528,18 +532,7 @@ INSERT INTO tour_itineraries (tour_id, day_number, description) VALUES
 (18, 2, 'LÀNG VĂN HÓA TÂY NGUYÊN – NÚI LỬA CHƯ ĐĂNG YA\n07:00: Ăn sáng hương vị mộc mạc đặc sắc.\n08:30: Hành trình di chuyển đến ngọn đồi chè Biển hồ bạt ngàn thẳng tắp một hàng dọc lãng mạn.\n10:00: Dạo qua Hàng thông trăm tuổi đẹp như tranh vẽ Châu Âu giữa lòng phố núi.\n11:30: Dùng tiệc trưa đặc thù vùng miền.\n13:30: Thăm Núi lửa Chư Đăng Ya mang hình phễu kỳ quan hiếm có, tuỳ thời điểm ngắm dã quỳ hoa nhuộm vàng rực núi đồi.\n15:30: Di chuyển vào sâu trong buôn làng đồng bào dân tộc thiểu số, tìm hiểu thói quen tập tục lâu đời.\n18:00: Giao lưu cồng chiêng, tận hưởng tiệc thịt nướng ngay bên bếp lửa bập bùng truyền thống.'),
 (18, 3, 'TẠM BIỆT PHỐ NÚI GIA LAI\n07:30: Ngắm sương lãng đãng dạo bộ công viên, làm tô bún bò bữa sớm.\n09:00: Tự do đi tham quan mua sắm đặc sản tiêu, cafe, mắc ca ngay tại chợ nội ô.\n11:00: Thu xếp hành lí, trả phòng.\n11:30: Xe trung chuyển chở quý đoàn thưởng thức món gà xé phay thanh nhẹ cho bữa trưa.\n13:00: Đưa khách ra khu vực sân bay khởi hành về nơi bắt đầu, kết thúc tốt đẹp đầy cung bậc.');
 
-INSERT INTO tour_departures (tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available) VALUES
-(9, 'TP.HCM', '2026-05-15', 500000, 300000, 20, 20),
-(10, 'Hà Nội', '2026-05-20', 300000, 200000, 25, 25),
-(11, 'TP.HCM', '2026-06-01', 600000, 400000, 30, 30),
-(12, 'TP.HCM', '2026-05-10', 100000, 50000, 40, 40),
-(13, 'TP.HCM', '2026-05-25', 200000, 100000, 30, 30),
-(14, 'Hà Nội', '2026-06-15', 400000, 200000, 25, 25),
-(15, 'Nha Trang', '2026-05-18', 200000, 100000, 20, 20),
-(16, 'Đồng Hới', '2026-07-01', 0, 0, 10, 10),
-(17, 'TP.HCM', '2026-05-05', 100000, 50000, 45, 45),
-(18, 'TP.HCM', '2026-06-10', 500000, 300000, 20, 20);
-
+-- 4. TOUR SERVICES
 INSERT INTO tour_services (tour_id, service_id) VALUES
 (9, 1), (9, 2), (9, 3), (9, 4), (9, 5),
 (10, 1), (10, 2), (10, 3), (10, 4),
@@ -552,47 +545,21 @@ INSERT INTO tour_services (tour_id, service_id) VALUES
 (17, 1), (17, 2), (17, 3), (17, 4),
 (18, 1), (18, 2), (18, 3), (18, 4), (18, 5);
 
-INSERT INTO bookings 
-(user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email) VALUES
-(4, 17, 2, 0, 8000000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
-(5, 18, 2, 1, 5600000, 'pending', 'pending', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
-(6, 19, 1, 0, 3800000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
-(7, 20, 4, 2, 3700000, 'refunded', 'cancelled', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
-(8, 24, 2, 0, 130000000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com');
+-- 5. TOUR DEPARTURES
+-- Batch 1: Tự động tăng ID (Tours 9-18)
+INSERT INTO tour_departures (tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available) VALUES
+(9, 'TP.HCM', '2026-05-15', 500000, 300000, 20, 20),
+(10, 'Hà Nội', '2026-05-20', 300000, 200000, 25, 25),
+(11, 'TP.HCM', '2026-06-01', 600000, 400000, 30, 30),
+(12, 'TP.HCM', '2026-05-10', 100000, 50000, 40, 40),
+(13, 'TP.HCM', '2026-05-25', 200000, 100000, 30, 30),
+(14, 'Hà Nội', '2026-06-15', 400000, 200000, 25, 25),
+(15, 'Nha Trang', '2026-05-18', 200000, 100000, 20, 20),
+(16, 'Đồng Hới', '2026-07-01', 0, 0, 10, 10),
+(17, 'TP.HCM', '2026-05-05', 100000, 50000, 45, 45),
+(18, 'TP.HCM', '2026-06-10', 500000, 300000, 20, 20);
 
-INSERT INTO reviews (user_id, tour_id, rating, comment, booking_id) VALUES
-(4, 9, 5, 'Tour Côn Đảo rất thanh bình, phù hợp để đi tìm sự tĩnh lặng và ngắm biển hoang sơ.', 6),
-(5, 10, 4, 'Mộc Châu mùa hoa mận tuyệt vời, thác Dải Yếm rất đẹp. Điểm trừ là đồ ăn hơi cay so với mình.', 7),
-(6, 11, 5, 'Biển Kỳ Co rất trong xanh, hướng dẫn viên nhiệt tình, hải sản Quy Nhơn ngon bá cháy!', 8),
-(7, 12, 5, 'Chuyến đi Tây Ninh rất ý nghĩa gia đình mình đi dịp cuối tuần. Cáp treo hiện đại, ngắm được toàn cảnh quá đã.', 9),
-(8, 16, 5, 'Chuyến thám hiểm Sơn Đoòng thực sự là một trải nghiệm thay đổi cuộc đời tôi. Quá vĩ đại!', 10);
-
-INSERT INTO wishlist (user_id, tour_id) VALUES
-(4, 15), (4, 18),
-(5, 10), (5, 11),
-(6, 9), (6, 16),
-(7, 12),
-(8, 13), (8, 14), (8, 17);
-
-INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUES
-(6, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
-(6, 'Lê Thu Hương', 'Nữ', '1992-10-20', 'adult'),
-(7, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult'),
-(7, 'Nguyễn Trường Giang', 'Nam', '1993-02-14', 'adult'),
-(7, 'Nguyễn Ngọc Hân', 'Nữ', '2019-11-30', 'child'),
-(8, 'Võ Hoàng Nam', 'Nam', '1988-12-05', 'adult'),
-(9, 'Bùi Thanh Trúc', 'Nữ', '1993-02-28', 'adult'),
-(9, 'Trần Văn An', 'Nam', '1965-01-01', 'adult'),
-(9, 'Trần Thanh Ngọc', 'Nữ', '1967-02-02', 'adult'),
-(9, 'Trần Văn Mạnh', 'Nam', '1990-07-19', 'adult'),
-(9, 'Trần Bình An', 'Nam', '2018-05-10', 'child'),
-(9, 'Trần Thiên An', 'Nữ', '2020-08-15', 'child'),
-(10, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult'),
-(10, 'Hoàng Trọng Minh', 'Nam', '1995-10-22', 'adult');
-
--- =========================
--- BỔ SUNG LỊCH KHỞI HÀNH (2025 VÀ 2026)
--- =========================
+-- Batch 2: Chỉ định ID (Lịch 2025-2026 và Đợt 2)
 INSERT INTO tour_departures (id, tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available) VALUES
 (27, 1, 'TP.HCM', '2025-06-15', 500000, 300000, 25, 0),
 (28, 1, 'TP.HCM', '2025-11-20', 500000, 300000, 25, 0),
@@ -615,11 +582,40 @@ INSERT INTO tour_departures (id, tour_id, departure_location, departure_date, pr
 (45, 10, 'Hà Nội', '2026-08-30', 300000, 200000, 25, 15),
 (46, 14, 'Hà Nội', '2026-09-25', 400000, 200000, 25, 18),
 (47, 16, 'Đồng Hới', '2026-08-15', 0, 0, 10, 5),
-(48, 18, 'TP.HCM', '2026-11-20', 500000, 300000, 20, 10);
+(48, 18, 'TP.HCM', '2026-11-20', 500000, 300000, 20, 10),
+(49, 1, 'Hà Nội', '2025-05-10', 800000, 500000, 25, 0),
+(50, 2, 'TP.HCM', '2025-08-22', 700000, 450000, 30, 0),
+(51, 3, 'Hà Nội', '2025-06-15', 300000, 150000, 35, 0),
+(52, 4, 'TP.HCM', '2025-10-10', 700000, 400000, 30, 0),
+(53, 5, 'Hà Nội', '2025-12-01', 1500000, 1000000, 30, 0),
+(54, 7, 'Đà Nẵng', '2025-09-05', 400000, 200000, 25, 0),
+(55, 10, 'Hà Nội', '2025-10-25', 300000, 200000, 25, 0),
+(56, 11, 'TP.HCM', '2025-11-11', 600000, 400000, 30, 0),
+(57, 13, 'TP.HCM', '2025-08-08', 200000, 100000, 30, 0),
+(58, 14, 'Hà Nội', '2025-07-20', 400000, 200000, 25, 0),
+(59, 15, 'Nha Trang', '2025-06-30', 200000, 100000, 20, 0),
+(60, 18, 'TP.HCM', '2025-12-12', 500000, 300000, 20, 0),
+(61, 5, 'Hà Nội', '2026-05-20', 1500000, 1000000, 30, 15),
+(62, 6, 'TP.HCM', '2026-04-25', 1200000, 800000, 25, 12),
+(63, 7, 'Đà Nẵng', '2026-06-10', 400000, 200000, 25, 10),
+(64, 11, 'TP.HCM', '2026-07-05', 600000, 400000, 30, 18),
+(65, 12, 'TP.HCM', '2026-08-15', 100000, 50000, 40, 25),
+(66, 13, 'TP.HCM', '2026-09-05', 200000, 100000, 30, 20),
+(67, 15, 'Nha Trang', '2026-10-10', 200000, 100000, 20, 15),
+(68, 17, 'TP.HCM', '2026-11-25', 100000, 50000, 45, 30),
+(69, 18, 'TP.HCM', '2026-12-05', 500000, 300000, 20, 18),
+(70, 4, 'Hà Nội', '2026-05-15', 1200000, 800000, 30, 12);
 
--- =========================
--- BỔ SUNG KHÁCH ĐẶT TOUR
--- =========================
+-- 6. BOOKINGS
+-- Batch 1: Tự động tăng ID
+INSERT INTO bookings (user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email) VALUES
+(4, 17, 2, 0, 8000000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
+(5, 18, 2, 1, 5600000, 'pending', 'pending', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
+(6, 19, 1, 0, 3800000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
+(7, 20, 4, 2, 3700000, 'refunded', 'cancelled', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
+(8, 24, 2, 0, 130000000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com');
+
+-- Batch 2: Chỉ định ID
 INSERT INTO bookings (id, user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email) VALUES
 (11, 4, 27, 2, 0, 7400000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
 (12, 5, 29, 2, 1, 8900000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
@@ -630,12 +626,44 @@ INSERT INTO bookings (id, user_id, departure_id, adults, children, total_price, 
 (17, 5, 39, 2, 0, 7400000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
 (18, 6, 40, 1, 0, 3600000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
 (19, 7, 44, 2, 1, 11400000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
-(20, 8, 47, 1, 0, 65000000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com');
+(20, 8, 47, 1, 0, 65000000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com'),
+(21, 4, 49, 2, 1, 9300000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
+(22, 5, 52, 2, 0, 10400000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
+(23, 6, 54, 4, 0, 12800000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
+(24, 7, 56, 2, 2, 12800000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
+(25, 8, 59, 1, 0, 2400000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com'),
+(26, 4, 61, 2, 1, 16000000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
+(27, 5, 62, 3, 0, 12900000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
+(28, 6, 64, 2, 0, 7600000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
+(29, 7, 66, 1, 1, 3800000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
+(30, 8, 68, 4, 0, 5600000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com'),
+(31, 4, 53, 2, 0, 13400000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
+(32, 5, 58, 2, 1, 11400000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
+(33, 6, 60, 1, 0, 3300000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
+(34, 7, 50, 2, 0, 7400000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
+(35, 8, 63, 2, 0, 6400000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com'),
+(36, 4, 65, 5, 0, 3500000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
+(37, 5, 67, 2, 1, 6400000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
+(38, 6, 69, 1, 0, 3300000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
+(39, 7, 70, 2, 2, 20200000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
+(40, 8, 51, 1, 0, 2800000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com');
 
--- =========================
--- BỔ SUNG HÀNH KHÁCH
--- =========================
+-- 7. PASSENGERS
 INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUES
+(6, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
+(6, 'Lê Thu Hương', 'Nữ', '1992-10-20', 'adult'),
+(7, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult'),
+(7, 'Nguyễn Trường Giang', 'Nam', '1993-02-14', 'adult'),
+(7, 'Nguyễn Ngọc Hân', 'Nữ', '2019-11-30', 'child'),
+(8, 'Võ Hoàng Nam', 'Nam', '1988-12-05', 'adult'),
+(9, 'Bùi Thanh Trúc', 'Nữ', '1993-02-28', 'adult'),
+(9, 'Trần Văn An', 'Nam', '1965-01-01', 'adult'),
+(9, 'Trần Thanh Ngọc', 'Nữ', '1967-02-02', 'adult'),
+(9, 'Trần Văn Mạnh', 'Nam', '1990-07-19', 'adult'),
+(9, 'Trần Bình An', 'Nam', '2018-05-10', 'child'),
+(9, 'Trần Thiên An', 'Nữ', '2020-08-15', 'child'),
+(10, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult'),
+(10, 'Hoàng Trọng Minh', 'Nam', '1995-10-22', 'adult'),
 (11, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
 (11, 'Lê Thu Hương', 'Nữ', '1992-10-20', 'adult'),
 (12, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult'),
@@ -660,64 +688,7 @@ INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUE
 (19, 'Bùi Thanh Trúc', 'Nữ', '1993-02-28', 'adult'),
 (19, 'Trần Văn Mạnh', 'Nam', '1990-07-19', 'adult'),
 (19, 'Bùi Ngọc Diệp', 'Nữ', '2020-05-10', 'child'),
-(20, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult');
-
--- =========================
--- BỔ SUNG LỊCH KHỞI HÀNH THỤT (ĐỢT 2)
--- =========================
-INSERT INTO tour_departures (id, tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available) VALUES
-(49, 1, 'Hà Nội', '2025-05-10', 800000, 500000, 25, 0),
-(50, 2, 'TP.HCM', '2025-08-22', 700000, 450000, 30, 0),
-(51, 3, 'Hà Nội', '2025-06-15', 300000, 150000, 35, 0),
-(52, 4, 'TP.HCM', '2025-10-10', 700000, 400000, 30, 0),
-(53, 5, 'Hà Nội', '2025-12-01', 1500000, 1000000, 30, 0),
-(54, 7, 'Đà Nẵng', '2025-09-05', 400000, 200000, 25, 0),
-(55, 10, 'Hà Nội', '2025-10-25', 300000, 200000, 25, 0),
-(56, 11, 'TP.HCM', '2025-11-11', 600000, 400000, 30, 0),
-(57, 13, 'TP.HCM', '2025-08-08', 200000, 100000, 30, 0),
-(58, 14, 'Hà Nội', '2025-07-20', 400000, 200000, 25, 0),
-(59, 15, 'Nha Trang', '2025-06-30', 200000, 100000, 20, 0),
-(60, 18, 'TP.HCM', '2025-12-12', 500000, 300000, 20, 0),
-(61, 5, 'Hà Nội', '2026-05-20', 1500000, 1000000, 30, 15),
-(62, 6, 'TP.HCM', '2026-04-25', 1200000, 800000, 25, 12),
-(63, 7, 'Đà Nẵng', '2026-06-10', 400000, 200000, 25, 10),
-(64, 11, 'TP.HCM', '2026-07-05', 600000, 400000, 30, 18),
-(65, 12, 'TP.HCM', '2026-08-15', 100000, 50000, 40, 25),
-(66, 13, 'TP.HCM', '2026-09-05', 200000, 100000, 30, 20),
-(67, 15, 'Nha Trang', '2026-10-10', 200000, 100000, 20, 15),
-(68, 17, 'TP.HCM', '2026-11-25', 100000, 50000, 45, 30),
-(69, 18, 'TP.HCM', '2026-12-05', 500000, 300000, 20, 18),
-(70, 4, 'Hà Nội', '2026-05-15', 1200000, 800000, 30, 12);
-
--- =========================
--- BỔ SUNG KHÁCH ĐẶT TOUR ĐỢT 2
--- =========================
-INSERT INTO bookings (id, user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email) VALUES
-(21, 4, 49, 2, 1, 9300000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
-(22, 5, 52, 2, 0, 10400000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
-(23, 6, 54, 4, 0, 12800000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
-(24, 7, 56, 2, 2, 12800000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
-(25, 8, 59, 1, 0, 2400000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com'),
-(26, 4, 61, 2, 1, 16000000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
-(27, 5, 62, 3, 0, 12900000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
-(28, 6, 64, 2, 0, 7600000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
-(29, 7, 66, 1, 1, 3800000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
-(30, 8, 68, 4, 0, 5600000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com'),
-(31, 4, 53, 2, 0, 13400000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
-(32, 5, 58, 2, 1, 11400000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
-(33, 6, 60, 1, 0, 3300000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
-(34, 7, 50, 2, 0, 7400000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
-(35, 8, 63, 2, 0, 6400000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com'),
-(36, 4, 65, 5, 0, 3500000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
-(37, 5, 67, 2, 1, 6400000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
-(38, 6, 69, 1, 0, 3300000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
-(39, 7, 70, 2, 2, 20200000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
-(40, 8, 51, 1, 0, 2800000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com');
-
--- =========================
--- BỔ SUNG HÀNH KHÁCH ĐỢT 2
--- =========================
-INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUES
+(20, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult'),
 (21, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
 (21, 'Lê Thu Hương', 'Nữ', '1992-10-20', 'adult'),
 (21, 'Phạm Minh Khang', 'Nam', '2018-03-12', 'child'),
@@ -770,3 +741,55 @@ INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUE
 (39, 'Bùi Ngọc Diệp', 'Nữ', '2020-05-10', 'child'),
 (39, 'Trần Hữu Danh', 'Nam', '2018-01-01', 'child'),
 (40, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult');
+
+-- 8. REVIEWS
+INSERT INTO reviews (user_id, tour_id, rating, comment, booking_id) VALUES
+(4, 1, 5, 'Tour Đà Lạt lần nào đi cũng thấy yêu, không khí trong lành, dịch vụ tour chuyên nghiệp.', 1),
+(5, 2, 4, 'Tour Đà Nẵng – Hội An khá tốt, đặc biệt ấn tượng với Bà Nà Hills và Cầu Vàng. Dịch vụ ổn, sẽ quay lại.', 2),
+(6, 3, 5, 'Hạ Long quá đẹp, du thuyền sang trọng, đồ ăn ngon. Đây là chuyến đi đáng nhớ nhất của tôi.', 3),
+(7, 5, 5, 'Phú Quốc rất đẹp, biển trong xanh, dịch vụ resort tốt. Trải nghiệm cáp treo Hòn Thơm rất ấn tượng.', 4),
+(8, 6, 4, 'Sapa mát mẻ, cảnh đẹp, Fansipan rất hùng vĩ. Tuy nhiên thời tiết hơi lạnh nhưng vẫn rất đáng trải nghiệm.', 5),
+(4, 9, 5, 'Tour Côn Đảo rất thanh bình, phù hợp để đi tìm sự tĩnh lặng và ngắm biển hoang sơ.', 6),
+(5, 10, 4, 'Mộc Châu mùa hoa mận tuyệt vời, thác Dải Yếm rất đẹp. Điểm trừ là đồ ăn hơi cay so với mình.', 7),
+(6, 11, 5, 'Biển Kỳ Co rất trong xanh, hướng dẫn viên nhiệt tình, hải sản Quy Nhơn ngon bá cháy!', 8),
+(7, 12, 5, 'Chuyến đi Tây Ninh rất ý nghĩa gia đình mình đi dịp cuối tuần. Cáp treo hiện đại, ngắm được toàn cảnh quá đã.', 9),
+(8, 16, 5, 'Chuyến thám hiểm Sơn Đoòng thực sự là một trải nghiệm thay đổi cuộc đời tôi. Quá vĩ đại!', 10),
+(4, 1, 5, 'Đà Lạt luôn mang lại cảm giác bình yên, lịch trình tour rất hợp lý.', 11),
+(5, 2, 5, 'Đà Nẵng quá đẹp, Bà Nà Hills thực sự là một trải nghiệm tuyệt vời cho gia đình mình.', 12),
+(6, 3, 5, 'Vịnh Hạ Long vĩ đại, du thuyền phục vụ chu đáo, hải sản rất tươi.', 13),
+(7, 4, 4, 'Biển Nha Trang trong xanh, các trò chơi tại VinWonders rất vui và đa dạng.', 14),
+(8, 9, 5, 'Côn Đảo mang vẻ đẹp hoang sơ và linh thiêng, một chuyến đi rất ý nghĩa cho tâm hồn.', 15),
+(4, 17, 4, 'Vũng Tàu gần nên đi cuối tuần rất tiện, đồ ăn ngon và giá cả hợp lý.', 16),
+(5, 1, 5, 'Đi tour 10 năm trước và giờ vẫn thấy Đà Lạt rất thơ mộng. Tour tổ chức ngày càng tốt hơn.', 17),
+(6, 2, 5, 'Hội An lung linh về đêm, tôi rất thích không khí cổ kính và bình lặng ở đây.', 18),
+(7, 9, 5, 'Dịch vụ ở Côn Đảo ngày càng tốt hơn, hướng dẫn viên kể chuyện lịch sử rất cảm động.', 19),
+(8, 16, 5, 'Khám phá Sơn Đoòng là ước mơ của tôi, thực sự choáng ngợp trước sự vĩ đại của thiên nhiên.', 20),
+(4, 1, 4, 'Dịch vụ tour chu đáo, khách sạn gần trung tâm nên đi lại mua sắm rất dễ dàng.', 21),
+(5, 4, 5, 'Check-in Nha Trang mùa này biển đẹp tuyệt, tour đi các đảo lặn ngắm san hô rất vui.', 22),
+(6, 7, 5, 'Cố đô Huế mang vẻ đẹp trầm mặc, các di tích lăng tẩm được bảo tồn rất tốt.', 23),
+(7, 11, 4, 'Quy Nhơn nắng gió nhưng biển Kỳ Co thì không chê vào đâu được, nước trong vắt.', 24),
+(8, 15, 5, 'Đảo Bình Ba yên bình, trải nghiệm ăn tôm hùm nướng ngay trên bè thực sự rất ngon.', 25),
+(4, 5, 5, 'Phú Quốc mùa này nắng vàng biển xanh, rất phù hợp cho một kỳ nghỉ dưỡng thực thụ.', 26),
+(5, 6, 5, 'Chinh phục đỉnh Fansipan là trải nghiệm không thể quên, cảm giác đứng giữa mây trời rất tuyệt.', 27),
+(6, 11, 5, 'Biển miền Trung lúc nào cũng làm tôi hài lòng, HDV giải thích thông tin rất chi tiết.', 28),
+(7, 13, 4, 'Chợ nổi Cái Răng tấp nập, trải nghiệm sông nước miền Tây thật thú vị và dân dã.', 29),
+(8, 17, 5, 'Tượng Chúa Kitô view từ trên cao ngắm toàn cảnh Vũng Tàu đẹp mê hồn, đáng để leo bậc thang.', 30),
+(4, 5, 5, 'Resort ở Phú Quốc dịch vụ đẳng cấp, bãi biển riêng sạch sẽ và yên tĩnh.', 31),
+(5, 3, 4, 'Phong cảnh Vịnh Hạ Long mờ ảo trong sương rất đẹp, đồ ăn trên tàu đa dạng.', 32),
+(6, 18, 5, 'Biển Hồ Pleiku xanh mướt, không khí cao nguyên buổi sớm thật dễ chịu và sảng khoái.', 33),
+(7, 2, 5, 'Đà Nẵng sạch sẽ, văn minh, tour đi Bà Nà được sắp xếp rất đúng giờ và không phải chờ đợi lâu.', 34),
+(8, 7, 4, 'Thưởng thức ca Huế trên sông Hương là một trải nghiệm văn hóa rất đặc sắc.', 35),
+(4, 12, 5, 'Cáp treo lên đỉnh Núi Bà Đen nhanh và hiện đại, dịch vụ tại khu du lịch rất tốt.', 36),
+(5, 15, 5, 'Bãi biển Bình Ba hoang sơ, hải sản tươi sống giá cả phải chăng, rất hài lòng với chuyến đi.', 37),
+(6, 18, 5, 'Khám phá văn hóa Tây Nguyên và tham gia đêm hội cồng chiêng thực sự rất ấn tượng.', 38),
+(7, 4, 5, 'Nha Trang luôn là lựa chọn hàng đầu của gia đình tôi cho mỗi dịp nghỉ hè.', 39),
+(8, 3, 5, 'Tour tổ chức chuyên nghiệp, xe đưa đón đời mới đi rất êm, HDV cực kỳ vui tính.', 40);
+
+-- 9. WISHLIST
+INSERT INTO wishlist (user_id, tour_id) VALUES
+(4, 15), (4, 18),
+(5, 10), (5, 11),
+(6, 9), (6, 16),
+(7, 12),
+(8, 13), (8, 14), (8, 17);
+
