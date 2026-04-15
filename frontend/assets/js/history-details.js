@@ -136,16 +136,44 @@ function renderBookingDetail(booking) {
     }
 
     // 5. Payment Summary
+    const breakdownEl = document.getElementById("price-breakdown");
+    let breakdownHtml = "";
+    
+    // Tính toán breakdown
+    if (booking.adults > 0) {
+        const adultPrice = booking.price_default || 0;
+        const totalAdult = adultPrice * booking.adults;
+        breakdownHtml += `
+            <div class="price-breakdown-item">
+                <span>Người lớn (x${booking.adults})</span>
+                <strong>${new Intl.NumberFormat("vi-VN").format(totalAdult)}đ</strong>
+            </div>
+        `;
+    }
+    
+    if (booking.children > 0) {
+        const childPrice = booking.price_child || 0;
+        const totalChild = childPrice * booking.children;
+        breakdownHtml += `
+            <div class="price-breakdown-item">
+                <span>Trẻ em (x${booking.children})</span>
+                <strong>${new Intl.NumberFormat("vi-VN").format(totalChild)}đ</strong>
+            </div>
+        `;
+    }
+    
+    breakdownEl.innerHTML = breakdownHtml;
+
     const totalPriceFormatted = new Intl.NumberFormat("vi-VN").format(booking.total_price);
     document.getElementById("total-price").textContent = `${totalPriceFormatted}đ`;
     
     const paymentStatusEl = document.getElementById("payment-status");
     if (booking.payment_status === "paid") {
         paymentStatusEl.textContent = "Đã thanh toán";
-        paymentStatusEl.className = "text-success font-weight-bold";
+        paymentStatusEl.className = "text-success fw-bold";
     } else {
         paymentStatusEl.textContent = "Chưa thanh toán";
-        paymentStatusEl.className = "text-danger font-weight-bold";
+        paymentStatusEl.className = "text-danger fw-bold";
     }
 
     // 6. Note
@@ -159,6 +187,151 @@ function renderBookingDetail(booking) {
     document.getElementById("print-booking").addEventListener("click", () => {
         window.print();
     });
+
+    // 7. Render Action Buttons (Demo Mode Logic)
+    const actionContainer = document.getElementById("booking-actions");
+    actionContainer.innerHTML = ""; // Clear old
+
+    if (booking.status === "confirmed" && booking.payment_status === "paid") {
+        // A. Nút Hủy Tour
+        // Logic: Cho phép hủy nếu tour chưa diễn ra (Ngày khởi hành > Ngày hiện tại)
+        const departureTime = new Date(booking.departure_date).getTime();
+        const now = new Date().getTime();
+        const isBeforeDeparture = departureTime > now;
+
+        if (isBeforeDeparture) {
+            const cancelBtn = document.createElement("button");
+            cancelBtn.className = "btn btn-outline-danger btn-sm fw-bold rounded-pill px-3";
+            cancelBtn.innerHTML = `<i class="fa-solid fa-xmark me-1"></i> Yêu cầu hủy`;
+            cancelBtn.onclick = () => {
+                const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
+                cancelModal.show();
+
+                const confirmBtn = document.getElementById("confirm-cancel-btn");
+                // Gỡ bỏ event cũ tránh gọi nhiều API
+                const newConfirmBtn = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                newConfirmBtn.addEventListener("click", async () => {
+                    newConfirmBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Đang xử lý...`;
+                    newConfirmBtn.disabled = true;
+                    
+                    try {
+                        const token = localStorage.getItem("token");
+                        const response = await fetch(`${API_URL}/bookings/${booking.id}/cancel`, {
+                            method: "PUT",
+                            headers: {
+                                "Authorization": `Bearer ${token}`
+                            }
+                        });
+                        const resData = await response.json();
+                        if (resData.success) {
+                            alert("Đã gửi yêu cầu hủy thành công!");
+                            window.location.reload();
+                        } else {
+                            alert(resData.message || "Không thể hủy lúc này.");
+                        }
+                    } catch (error) {
+                        console.error("Cancel API error", error);
+                        alert("Có lỗi xảy ra khi gọi máy chủ!");
+                        newConfirmBtn.innerHTML = `Chắc chắn Hủy`;
+                        newConfirmBtn.disabled = false;
+                    }
+                });
+            };
+            actionContainer.appendChild(cancelBtn);
+        }
+
+        // B. Nút Đánh Giá Tour
+        // Logic Thực tế: Chỉ cho phép đánh giá khi tour đã bắt đầu hoặc kết thúc (Ngày khởi hành <= Ngày hiện tại)
+        // LƯU Ý DEMO: Nếu muốn hiện luôn để cô xem, hãy đổi dấu <= thành >= 
+        const hasStarted = departureTime <= now;
+
+        if (hasStarted && !booking.is_reviewed) {
+            const reviewBtn = document.createElement("button");
+            reviewBtn.className = "btn btn-warning btn-sm fw-bold rounded-pill px-3 text-dark";
+            reviewBtn.innerHTML = `<i class="fa-solid fa-star me-1"></i> Viết đánh giá`;
+            reviewBtn.onclick = () => {
+                const reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+                reviewModal.show();
+
+                const reviewForm = document.getElementById("review-form");
+                // Gỡ bỏ event cũ của form
+                const newReviewForm = reviewForm.cloneNode(true);
+                reviewForm.parentNode.replaceChild(newReviewForm, reviewForm);
+
+                // Logic chọn sao (Phải gán SAU KHI replaceChild vì cloneNode không copy event listener)
+                const stars = newReviewForm.querySelectorAll('.star-btn');
+                const ratingInput = newReviewForm.querySelector('#review-rating-value');
+                const ratingText = newReviewForm.querySelector('#rating-text');
+                const ratingLevels = {
+                    1: 'Rất tệ',
+                    2: 'Tệ',
+                    3: 'Chấp nhận được',
+                    4: 'Tốt',
+                    5: 'Rất tuyệt vời'
+                };
+
+                stars.forEach(star => {
+                    star.onclick = () => {
+                        const val = parseInt(star.getAttribute('data-value'));
+                        ratingInput.value = val;
+                        ratingText.textContent = ratingLevels[val];
+                        
+                        stars.forEach(s => {
+                            if (parseInt(s.getAttribute('data-value')) <= val) {
+                                s.classList.add('active');
+                            } else {
+                                s.classList.remove('active');
+                            }
+                        });
+                    };
+                });
+
+                newReviewForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const rating = ratingInput.value;
+                    const comment = newReviewForm.querySelector("#review-comment").value;
+                    const submitBtn = newReviewForm.querySelector("button[type='submit']");
+                    
+                    submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Đang gửi...`;
+                    submitBtn.disabled = true;
+                    
+                    try {
+                        const token = localStorage.getItem("token");
+                        const response = await fetch(`${API_URL}/reviews`, {
+                            method: "POST",
+                            body: JSON.stringify({
+                                tour_id: booking.tour_id,
+                                booking_id: booking.id,
+                                rating: parseInt(rating),
+                                comment: comment
+                            }),
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`
+                            }
+                        });
+                        const resData = await response.json();
+                        if (resData.success) {
+                            alert("Cảm ơn bạn đã gửi đánh giá thành công!");
+                            window.location.reload();
+                        } else {
+                            alert(resData.message || "Không thể gửi đánh giá.");
+                            submitBtn.innerHTML = `Gửi đánh giá`;
+                            submitBtn.disabled = false;
+                        }
+                    } catch (error) {
+                        console.error("Review API error", error);
+                        alert("Có lỗi xảy ra khi gọi máy chủ!");
+                        submitBtn.innerHTML = `Gửi đánh giá`;
+                        submitBtn.disabled = false;
+                    }
+                });
+            };
+            actionContainer.appendChild(reviewBtn);
+        }
+    }
 }
 
 function getStatusInfo(status) {

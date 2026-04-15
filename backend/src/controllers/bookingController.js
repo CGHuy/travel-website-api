@@ -149,6 +149,16 @@ exports.cancelBooking = async (req, res) => {
 			});
 		}
 
+		// Logic Thực tế: Không được hủy nếu tour đã hoặc đang diễn ra
+		const departureDate = new Date(booking.departure_date);
+		const now = new Date();
+		if (departureDate <= now) {
+			return res.status(400).json({
+				success: false,
+				message: "Không thể yêu cầu hủy tour đã hoặc đang diễn ra",
+			});
+		}
+
 		// Đổi trạng thái sang pending để chờ Admin/Staff duyệt
 		await Booking.updateStatus(bookingId, "status", "pending");
 		await Booking.updateStatus(bookingId, "payment_status", "pending");

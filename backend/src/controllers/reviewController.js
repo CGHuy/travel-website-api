@@ -1,4 +1,5 @@
 const Review = require("../models/Review");
+const bookingService = require("../services/bookingService");
 
 // Lấy danh sách đánh giá của user hiện tại
 exports.getUserReviews = async (req, res) => {
@@ -24,9 +25,18 @@ exports.getUserReviews = async (req, res) => {
 exports.createReview = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { tour_id, rating, comment } = req.body;
+        const { tour_id, rating, comment, booking_id } = req.body;
 
-        // Kiểm tra xem đã review tour này chưa
+        // 1. Kiểm tra xem tour đã hoàn thành (đã đi) bởi user này chưa
+        const hasCompleted = await bookingService.checkCompletedBooking(userId, tour_id);
+        if (!hasCompleted) {
+            return res.status(403).json({
+                success: false,
+                message: "Bạn chỉ có thể đánh giá những tour mà bạn đã tham gia và hoàn tất thanh toán!"
+            });
+        }
+
+        // 2. Kiểm tra xem đã review tour này chưa
         const existingReview = await Review.getByUserAndTour(userId, tour_id);
         if (existingReview) {
             return res.status(400).json({
@@ -39,7 +49,8 @@ exports.createReview = async (req, res) => {
             user_id: userId,
             tour_id,
             rating,
-            comment
+            comment,
+            booking_id
         };
 
         const insertId = await Review.create(reviewData);
