@@ -415,17 +415,17 @@ INSERT INTO bookings
 -- =========================
 -- 9. REVIEWS (chi tiết hơn)
 -- =========================
-INSERT INTO reviews (user_id,tour_id,rating,comment) VALUES
+INSERT INTO reviews (user_id,tour_id,rating,comment, booking_id) VALUES
 
-(4,1,5,'Tour Đà Lạt rất tuyệt vời, lịch trình hợp lý, hướng dẫn viên nhiệt tình, khách sạn sạch sẽ. Trải nghiệm săn mây và tham quan thác rất đáng nhớ.'),
+(4,1,5,'Tour Đà Lạt rất tuyệt vời, lịch trình hợp lý, hướng dẫn viên nhiệt tình, khách sạn sạch sẽ. Trải nghiệm săn mây và tham quan thác rất đáng nhớ.', 1),
 
-(5,2,4,'Tour Đà Nẵng – Hội An khá tốt, đặc biệt ấn tượng với Bà Nà Hills và Cầu Vàng. Dịch vụ ổn, sẽ quay lại.'),
+(5,2,4,'Tour Đà Nẵng – Hội An khá tốt, đặc biệt ấn tượng với Bà Nà Hills và Cầu Vàng. Dịch vụ ổn, sẽ quay lại.', 2),
 
-(6,3,5,'Hạ Long quá đẹp, du thuyền sang trọng, đồ ăn ngon. Đây là chuyến đi đáng nhớ nhất của tôi.'),
+(6,3,5,'Hạ Long quá đẹp, du thuyền sang trọng, đồ ăn ngon. Đây là chuyến đi đáng nhớ nhất của tôi.', 3),
 
-(7,5,5,'Phú Quốc rất đẹp, biển trong xanh, dịch vụ resort tốt. Trải nghiệm cáp treo Hòn Thơm rất ấn tượng.'),
+(7,5,5,'Phú Quốc rất đẹp, biển trong xanh, dịch vụ resort tốt. Trải nghiệm cáp treo Hòn Thơm rất ấn tượng.', 4),
 
-(8,6,4,'Sapa mát mẻ, cảnh đẹp, Fansipan rất hùng vĩ. Tuy nhiên thời tiết hơi lạnh nhưng vẫn rất đáng trải nghiệm.');
+(8,6,4,'Sapa mát mẻ, cảnh đẹp, Fansipan rất hùng vĩ. Tuy nhiên thời tiết hơi lạnh nhưng vẫn rất đáng trải nghiệm.', 5);
 
 
 -- =========================

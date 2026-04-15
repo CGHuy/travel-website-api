@@ -142,6 +142,7 @@ CREATE TABLE reviews (
 
     user_id INT NOT NULL,
     tour_id INT NOT NULL,
+    booking_id INT NULL,
 
     rating TINYINT UNSIGNED NOT NULL CHECK (rating BETWEEN 1 AND 5),
     comment TEXT,
@@ -150,8 +151,11 @@ CREATE TABLE reviews (
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
 
-    UNIQUE KEY uk_user_tour_review (user_id, tour_id)
+    UNIQUE KEY uk_user_tour_review (user_id, tour_id),
+    UNIQUE KEY uk_booking_review (booking_id)
+
 );
 
 -- 10. WISHLIST

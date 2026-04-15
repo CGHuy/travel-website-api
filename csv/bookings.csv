@@ -1,0 +1,8 @@
+id,user_id,departure_id,adults,children,total_price,payment_status,status,contact_name,contact_phone,contact_email,note,created_at,updated_at
+1,4,1,2,1,9900000.00,paid,confirmed,"Phạm Minh Tuấn",0978123456,tuan@gmail.com,NULL,"2026-04-02 18:48:49","2026-04-09 08:14:00"
+2,5,3,1,1,5300000.00,paid,confirmed,"Đỗ Thị Ngọc Anh",0967123456,ngocanh@gmail.com,NULL,"2026-04-02 18:48:49","2026-04-02 18:48:49"
+3,6,5,2,0,5600000.00,paid,pending,"Võ Hoàng Nam",0945123789,nam@gmail.com,NULL,"2026-04-02 18:48:49","2026-04-12 17:31:16"
+4,7,9,2,1,16100000.00,refunded,cancelled,"Bùi Thanh Trúc",0923456789,truc@gmail.com,NULL,"2026-04-02 18:48:49","2026-04-12 17:30:45"
+5,8,11,1,0,3500000.00,refunded,cancelled,"Nguyễn Thị Hồng Nhung",0398765432,nhung@gmail.com,NULL,"2026-04-02 18:48:49","2026-04-09 08:42:14"
+6,3,2,1,0,3700000.00,paid,confirmed,"Lê Quốc Bảo",0934567890,booking_staff@gmail.com,,"2026-04-11 21:53:19","2026-04-11 21:53:19"
+7,5,14,1,0,3200000.00,paid,confirmed,"Đỗ Thị Ngọc Anh",0967123456,ngocanh@gmail.com,,"2026-04-11 22:01:16","2026-04-11 22:01:16"

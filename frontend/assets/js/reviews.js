@@ -114,7 +114,7 @@ async function initReviewsPage() {
                     starsHtml += `<i class="${i <= review.rating ? 'fa-solid' : 'fa-regular'} fa-star"></i> `;
                 }
 
-                const bookingCode = `BOK${String(review.id).padStart(3, '0')}`; // Example booking code
+                const bookingCode = `BOK${String(review.booking_id).padStart(3, '0')}`; 
 
                 card.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center mb-3">
