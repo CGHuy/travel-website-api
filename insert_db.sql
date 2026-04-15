@@ -1,5 +1,20 @@
 USE db_viet_tour;
 
+-- Xóa dữ liệu cũ để có thể chạy lại script nhiều lần
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE wishlist;
+TRUNCATE TABLE reviews;
+TRUNCATE TABLE passengers;
+TRUNCATE TABLE bookings;
+TRUNCATE TABLE tour_departures;
+TRUNCATE TABLE tour_services;
+TRUNCATE TABLE tour_itineraries;
+TRUNCATE TABLE tour_images;
+TRUNCATE TABLE services;
+TRUNCATE TABLE tours;
+TRUNCATE TABLE users;
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- =========================
 -- 1. USERS
 -- =========================
@@ -68,7 +83,7 @@ Tiếp đó, hành trình đưa du khách đến Quảng Bình để khám phá 
 'Tour Ninh Bình 2 ngày 1 đêm là hành trình khám phá vùng đất được ví như "Hạ Long trên cạn". Du khách sẽ được trải nghiệm ngồi thuyền tham quan Tràng An, chiêm ngưỡng hệ thống hang động và núi đá vôi hùng vĩ.
 Ngoài ra, hành trình còn bao gồm tham quan Tam Cốc – Bích Động và chùa Bái Đính, nơi có nhiều kỷ lục về kiến trúc Phật giáo.',
 'Ninh Bình - Tràng An - Tam Cốc','Miền Bắc','2 ngày 1 đêm',2200000,1500000,
-'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281113/travel-website/ninhbinh.jpg');
+'https://res.cloudinary.com/dtsroyjxz/image/upload/v1776238804/travel-website/ninhbinh.jpg');
 
 -- ========================= -- 3. TOUR IMAGES (5/tour) -- =========================
 INSERT INTO tour_images (tour_id, image) VALUES
@@ -123,7 +138,7 @@ INSERT INTO tour_images (tour_id, image) VALUES
 (7,'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774280930/travel-website/hue-5.jpg'),
 
 -- Tour 8: Ninh Bình
-(8,'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281113/travel-website/ninhbinh.jpg'),
+(8,'https://res.cloudinary.com/dtsroyjxz/image/upload/v1776238804/travel-website/ninhbinh.jpg'),
 (8,'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281113/travel-website/ninhbinh-2.jpg'),
 (8,'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281114/travel-website/ninhbinh-3.jpg'),
 (8,'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281115/travel-website/ninhbinh-4.jpg'),
@@ -412,35 +427,6 @@ INSERT INTO bookings
 (8,11,1,0, (1*3100000 + 1*400000),'paid','confirmed','Nguyễn Thị Hồng Nhung','0398765432','nhung@gmail.com');
 
 
--- =========================
--- 9. REVIEWS (chi tiết hơn)
--- =========================
-INSERT INTO reviews (user_id,tour_id,rating,comment, booking_id) VALUES
-
-(4,1,5,'Tour Đà Lạt rất tuyệt vời, lịch trình hợp lý, hướng dẫn viên nhiệt tình, khách sạn sạch sẽ. Trải nghiệm săn mây và tham quan thác rất đáng nhớ.', 1),
-
-(5,2,4,'Tour Đà Nẵng – Hội An khá tốt, đặc biệt ấn tượng với Bà Nà Hills và Cầu Vàng. Dịch vụ ổn, sẽ quay lại.', 2),
-
-(6,3,5,'Hạ Long quá đẹp, du thuyền sang trọng, đồ ăn ngon. Đây là chuyến đi đáng nhớ nhất của tôi.', 3),
-
-(7,5,5,'Phú Quốc rất đẹp, biển trong xanh, dịch vụ resort tốt. Trải nghiệm cáp treo Hòn Thơm rất ấn tượng.', 4),
-
-(8,6,4,'Sapa mát mẻ, cảnh đẹp, Fansipan rất hùng vĩ. Tuy nhiên thời tiết hơi lạnh nhưng vẫn rất đáng trải nghiệm.', 5);
-
-
--- =========================
--- 10. WISHLIST (hợp lý theo user)
--- =========================
-INSERT INTO wishlist (user_id,tour_id) VALUES
-
-(4,5),
-(4,4),
-(5,1),
-(6,2),
-(7,3),
-(8,8);
-
-
 INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUES
 -- Booking ID 1: 2 người lớn, 1 trẻ em (Người đặt: Phạm Minh Tuấn)
 (1, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
@@ -472,36 +458,85 @@ INSERT INTO tours (name, slug, description, location, region, duration, price_de
 ('Tour Côn Đảo 3N2Đ', 'tour-con-dao', 'Tour Côn Đảo 3 ngày 2 đêm đưa du khách về với hòn đảo thiêng liêng, nơi ghi dấu những trang sử hào hùng của dân tộc tại Nghĩa trang Hàng Dương. Bên cạnh đó, du khách còn được đắm mình trong làn nước xanh mát tại Bãi Đầm Trầu - một trong những bãi biển hoang sơ đẹp nhất tại đây, và trải nghiệm lặn ngắm san hô tuyệt đẹp.', 'Côn Đảo', 'Miền Nam', '3 ngày 2 đêm', 3500000, 2500000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/condao.jpg'),
 ('Tour Mộc Châu 2N1Đ', 'tour-moc-chau', 'Khám phá cao nguyên Mộc Châu 2 ngày 1 đêm với khí hậu mát mẻ quanh năm. Điểm nhấn của hành trình là check-in tại những Đồi chè trái tim xanh mướt, chiêm ngưỡng vẻ đẹp thơ mộng của Thác Dải Yếm và đắm chìm trong sắc trắng tinh khôi của mùa hoa mận, hoa cải nở rộ khắp các bản làng Tây Bắc.', 'Mộc Châu', 'Miền Bắc', '2 ngày 1 đêm', 1800000, 1200000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/mocchau.jpg'),
 ('Tour Quy Nhơn – Phú Yên 3N2Đ', 'tour-quy-nhon-phu-yen', 'Hành trình Quy Nhơn - Phú Yên 3 ngày 2 đêm đưa bạn đến với xứ sở "hoa vàng trên cỏ xanh". Tận mắt chiêm ngưỡng vẻ đẹp hùng vĩ của Eo Gió, tắm biển trong vắt tại Kỳ Co và ngỡ ngàng trước kiệt tác thiên nhiên Ghềnh Đá Đĩa. Đừng quên thưởng thức hải sản tươi sống vô cùng hấp dẫn của miền Trung nắng gió.', 'Quy Nhơn - Phú Yên', 'Miền Trung', '3 ngày 2 đêm', 3200000, 2200000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/quynhon.jpg'),
-('Tour Tây Ninh – Núi Bà Đen 1N', 'tour-tay-ninh', 'Hành trình hành hương ngắn ngày đến Tây Ninh, chinh phục "Nóc nhà Đông Nam Bộ" bằng hệ thống Cáp treo Núi Bà Đen hiện đại. Thăm viếng Chùa Bà linh thiêng, cầu bình an cho gia đình và tận hưởng không khí trong lành, ngoạn cảnh thiên nhiên từ trên cao. Một chuyến đi du lịch tâm linh kết hợp ngắm cảnh vô cùng ý nghĩa.', 'Tây Ninh', 'Miền Nam', '1 ngày', 600000, 400000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/tayninh.jpg'),
-('Tour Cần Thơ – Miền Tây 2N1Đ', 'tour-can-tho', 'Xuôi về miền Tây sông nước 2 ngày 1 đêm, trải nghiệm nét văn hóa độc đáo tại Chợ nổi Cái Răng tấp nập thuyền bè lúc bình minh. Lênh đênh trên xuồng ba lá len lỏi qua các kênh rạch, ghé thăm Vườn trái cây trĩu quả, thưởng thức đặc sản đậm chất dân dã và lắng nghe đờn ca tài tử Nam Bộ ngọt ngào.', 'Cần Thơ', 'Miền Nam', '2 ngày 1 đêm', 1500000, 1000000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/cantho.jpg'),
+('Tour Tây Ninh – Núi Bà Đen 1N', 'tour-tay-ninh', 'Hành trình hành hương ngắn ngày đến Tây Ninh, chinh phục "Nóc nhà Đông Nam Bộ" bằng hệ thống Cáp treo Núi Bà Đen hiện đại. Thăm viếng Chùa Bà linh thiêng, cầu bình an cho gia đình và tận hưởng không khí trong lành, ngoạn cảnh thiên nhiên từ trên cao. Một chuyến đi du lịch tâm linh kết hợp ngắm cảnh vô cùng ý nghĩa.', 'Tây Ninh', 'Miền Nam', '1 ngày', 600000, 400000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1776238825/travel-website/tayninh.jpg'),
+('Tour Cần Thơ – Miền Tây 2N1Đ', 'tour-can-tho', 'Xuôi về miền Tây sông nước 2 ngày 1 đêm, trải nghiệm nét văn hóa độc đáo tại Chợ nổi Cái Răng tấp nập thuyền bè lúc bình minh. Lênh đênh trên xuồng ba lá len lỏi qua các kênh rạch, ghé thăm Vườn trái cây trĩu quả, thưởng thức đặc sản đậm chất dân dã và lắng nghe đờn ca tài tử Nam Bộ ngọt ngào.', 'Cần Thơ', 'Miền Nam', '2 ngày 1 đêm', 1500000, 1000000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1776238158/travel-website/cantho.jpg'),
 ('Tour Hà Giang 4N3Đ', 'tour-ha-giang', 'Chuyến đi 4 ngày 3 đêm khám phá Hà Giang - nơi địa đầu Tổ quốc. Chinh phục những cung đường uốn lượn ngoạn mục, chiêm ngưỡng sự hùng vĩ của Cao nguyên đá Đồng Văn và Đèo Mã Pí Lèng - một trong tứ đại đỉnh đèo. Quý khách còn được ngắm nhìn Ruộng bậc thang Hoàng Su Phì rực rỡ mùa lúa chín.', 'Hà Giang', 'Miền Bắc', '4 ngày 3 đêm', 3800000, 2800000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/hagiang.jpg'),
-('Tour Bình Ba – Cam Ranh 2N1Đ', 'tour-binh-ba', 'Trốn khỏi sự ồn ào của phố thị với Tour Bình Ba - Cam Ranh 2 ngày 1 đêm. Đảo Bình Ba nổi tiếng với Biển trong xanh, cát trắng mịn và tĩnh lặng. Đặc biệt, du khách sẽ được thưởng thức đặc sản Tôm hùm Bình Ba trứ danh, tham gia các hoạt động Lặn biển ngắm san hô rực rỡ màu sắc dưới đáy đại dương.', 'Bình Ba', 'Miền Trung', '2 ngày 1 đêm', 2200000, 1500000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/binhba.jpg'),
+('Tour Bình Ba – Cam Ranh 2N1Đ', 'tour-binh-ba', 'Trốn khỏi sự ồn ào của phố thị với Tour Bình Ba - Cam Ranh 2 ngày 1 đêm. Đảo Bình Ba nổi tiếng với Biển trong xanh, cát trắng mịn và tĩnh lặng. Đặc biệt, du khách sẽ được thưởng thức đặc sản Tôm hùm Bình Ba trứ danh, tham gia các hoạt động Lặn biển ngắm san hô rực rỡ màu sắc dưới đáy đại dương.', 'Bình Ba', 'Miền Trung', '2 ngày 1 đêm', 2200000, 1500000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1776238854/travel-website/binhba-2.jpg'),
 ('Tour Thám Hiểm Sơn Đoòng 4N3Đ', 'tour-son-doong', 'Tour thám hiểm hang Sơn Đoòng 4 ngày 3 đêm mang đến trải nghiệm độc nhất vô nhị trên thế giới. Khám phá hang động lớn nhất hành tinh với hệ sinh thái kỳ diệu, rừng nguyên sinh ngay trong lòng hang và những khối thạch nhũ khổng lồ. Hành trình đòi hỏi thể lực tốt, dành cho những ai đam mê mạo hiểm và thiên nhiên.', 'Quảng Bình', 'Miền Trung', '4 ngày 3 đêm', 65000000, 65000000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/sondoong.jpg'),
 ('Tour Vũng Tàu 2N1Đ', 'tour-vung-tau', 'Nạp năng lượng với chuyến du lịch biển gần TP.HCM tại Vũng Tàu 2 ngày 1 đêm. Hành trình đưa bạn tham quan bức Tượng Chúa Kitô cao nhất Việt Nam, chinh phục Hải đăng Vũng Tàu để ngắm toàn cảnh thành phố và thỏa sức tắm biển, thưởng thức hải sản tươi ngon.', 'Vũng Tàu', 'Miền Nam', '2 ngày 1 đêm', 1300000, 900000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/vungtau.jpg'),
 ('Tour Pleiku – Gia Lai 3N2Đ', 'tour-gia-lai', 'Khám phá đại ngàn Tây Nguyên hùng vĩ với tour Pleiku - Gia Lai 3 ngày 2 đêm. Đôi mắt Pleiku - Biển Hồ T’Nưng xanh biếc, chiêm ngưỡng vẻ đẹp hoang sơ của Núi lửa Chư Đăng Ya mùa hoa dã quỳ và đắm mình trong không gian Văn hóa Tây Nguyên đậm đà bản sắc cùng tiếng cồng chiêng vang vọng.', 'Gia Lai', 'Tây Nguyên', '3 ngày 2 đêm', 2800000, 1900000, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai.jpg');
 
 -- 2. TOUR IMAGES
 INSERT INTO tour_images (tour_id, image) VALUES
+-- Tour 9: Côn Đảo
 (9, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/condao.jpg'),
 (9, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/condao-2.jpg'),
+(9, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/condao-3.jpg'),
+(9, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/condao-4.jpg'),
+(9, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/condao-5.jpg'),
+
+-- Tour 10: Mộc Châu
 (10, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/mocchau.jpg'),
 (10, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/mocchau-2.jpg'),
+(10, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/mocchau-3.jpg'),
+(10, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/mocchau-4.jpg'),
+(10, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/mocchau-5.jpg'),
+
+-- Tour 11: Quy Nhơn - Phú Yên
 (11, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/quynhon.jpg'),
 (11, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/quynhon-2.jpg'),
-(12, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/tayninh.jpg'),
+(11, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/quynhon-3.jpg'),
+(11, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/quynhon-4.jpg'),
+(11, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/quynhon-5.jpg'),
+
+-- Tour 12: Tây Ninh
+(12, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1776238825/travel-website/tayninh.jpg'),
 (12, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/tayninh-2.jpg'),
-(13, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/cantho.jpg'),
+(12, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/tayninh-3.jpg'),
+(12, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/tayninh-4.jpg'),
+(12, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/tayninh-5.jpg'),
+
+-- Tour 13: Cần Thơ
+(13, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1776238158/travel-website/cantho.jpg'),
 (13, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/cantho-2.jpg'),
+(13, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/cantho-3.jpg'),
+(13, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/cantho-4.jpg'),
+(13, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/cantho-5.jpg'),
+
+-- Tour 14: Hà Giang
 (14, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/hagiang.jpg'),
 (14, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/hagiang-2.jpg'),
+(14, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/hagiang-3.jpg'),
+(14, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/hagiang-4.jpg'),
+(14, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/hagiang-5.jpg'),
+
+-- Tour 15: Bình Ba
+(15, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1776238854/travel-website/binhba-2.jpg'),
 (15, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/binhba.jpg'),
-(15, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/binhba-2.jpg'),
+(15, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/binhba-3.jpg'),
+(15, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/binhba-4.jpg'),
+(15, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/binhba-5.jpg'),
+
+-- Tour 16: Sơn Đoòng
 (16, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/sondoong.jpg'),
 (16, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/sondoong-2.jpg'),
+(16, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/sondoong-3.jpg'),
+(16, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/sondoong-4.jpg'),
+(16, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/sondoong-5.jpg'),
+
+-- Tour 17: Vũng Tàu
 (17, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/vungtau.jpg'),
 (17, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/vungtau-2.jpg'),
+(17, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/vungtau-3.jpg'),
+(17, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/vungtau-4.jpg'),
+(17, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/vungtau-5.jpg'),
+
+-- Tour 18: Gia Lai
 (18, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai.jpg'),
-(18, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai-2.jpg');
+(18, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai-2.jpg'),
+(18, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai-3.jpg'),
+(18, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai-4.jpg'),
+(18, 'https://res.cloudinary.com/dtsroyjxz/image/upload/v1774281352/travel-website/gialai-5.jpg');
 
 -- 3. TOUR ITINERARIES
 INSERT INTO tour_itineraries (tour_id, day_number, description) VALUES
@@ -743,6 +778,8 @@ INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUE
 (40, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult');
 
 -- 8. REVIEWS
+-- Lưu ý: Mỗi user chỉ được review 1 tour duy nhất 1 lần (UNIQUE KEY uk_user_tour_review)
+-- Các booking trùng user+tour (11,12,13,20,21,28,31,38,39) sẽ không có review
 INSERT INTO reviews (user_id, tour_id, rating, comment, booking_id) VALUES
 (4, 1, 5, 'Tour Đà Lạt lần nào đi cũng thấy yêu, không khí trong lành, dịch vụ tour chuyên nghiệp.', 1),
 (5, 2, 4, 'Tour Đà Nẵng – Hội An khá tốt, đặc biệt ấn tượng với Bà Nà Hills và Cầu Vàng. Dịch vụ ổn, sẽ quay lại.', 2),
@@ -754,35 +791,26 @@ INSERT INTO reviews (user_id, tour_id, rating, comment, booking_id) VALUES
 (6, 11, 5, 'Biển Kỳ Co rất trong xanh, hướng dẫn viên nhiệt tình, hải sản Quy Nhơn ngon bá cháy!', 8),
 (7, 12, 5, 'Chuyến đi Tây Ninh rất ý nghĩa gia đình mình đi dịp cuối tuần. Cáp treo hiện đại, ngắm được toàn cảnh quá đã.', 9),
 (8, 16, 5, 'Chuyến thám hiểm Sơn Đoòng thực sự là một trải nghiệm thay đổi cuộc đời tôi. Quá vĩ đại!', 10),
-(4, 1, 5, 'Đà Lạt luôn mang lại cảm giác bình yên, lịch trình tour rất hợp lý.', 11),
-(5, 2, 5, 'Đà Nẵng quá đẹp, Bà Nà Hills thực sự là một trải nghiệm tuyệt vời cho gia đình mình.', 12),
-(6, 3, 5, 'Vịnh Hạ Long vĩ đại, du thuyền phục vụ chu đáo, hải sản rất tươi.', 13),
 (7, 4, 4, 'Biển Nha Trang trong xanh, các trò chơi tại VinWonders rất vui và đa dạng.', 14),
 (8, 9, 5, 'Côn Đảo mang vẻ đẹp hoang sơ và linh thiêng, một chuyến đi rất ý nghĩa cho tâm hồn.', 15),
 (4, 17, 4, 'Vũng Tàu gần nên đi cuối tuần rất tiện, đồ ăn ngon và giá cả hợp lý.', 16),
-(5, 1, 5, 'Đi tour 10 năm trước và giờ vẫn thấy Đà Lạt rất thơ mộng. Tour tổ chức ngày càng tốt hơn.', 17),
+(5, 1, 5, 'Đà Lạt vẫn giữ được nét thơ mộng vốn có, lịch trình tour được sắp xếp khoa học.', 17),
 (6, 2, 5, 'Hội An lung linh về đêm, tôi rất thích không khí cổ kính và bình lặng ở đây.', 18),
 (7, 9, 5, 'Dịch vụ ở Côn Đảo ngày càng tốt hơn, hướng dẫn viên kể chuyện lịch sử rất cảm động.', 19),
-(8, 16, 5, 'Khám phá Sơn Đoòng là ước mơ của tôi, thực sự choáng ngợp trước sự vĩ đại của thiên nhiên.', 20),
-(4, 1, 4, 'Dịch vụ tour chu đáo, khách sạn gần trung tâm nên đi lại mua sắm rất dễ dàng.', 21),
 (5, 4, 5, 'Check-in Nha Trang mùa này biển đẹp tuyệt, tour đi các đảo lặn ngắm san hô rất vui.', 22),
 (6, 7, 5, 'Cố đô Huế mang vẻ đẹp trầm mặc, các di tích lăng tẩm được bảo tồn rất tốt.', 23),
 (7, 11, 4, 'Quy Nhơn nắng gió nhưng biển Kỳ Co thì không chê vào đâu được, nước trong vắt.', 24),
 (8, 15, 5, 'Đảo Bình Ba yên bình, trải nghiệm ăn tôm hùm nướng ngay trên bè thực sự rất ngon.', 25),
 (4, 5, 5, 'Phú Quốc mùa này nắng vàng biển xanh, rất phù hợp cho một kỳ nghỉ dưỡng thực thụ.', 26),
 (5, 6, 5, 'Chinh phục đỉnh Fansipan là trải nghiệm không thể quên, cảm giác đứng giữa mây trời rất tuyệt.', 27),
-(6, 11, 5, 'Biển miền Trung lúc nào cũng làm tôi hài lòng, HDV giải thích thông tin rất chi tiết.', 28),
 (7, 13, 4, 'Chợ nổi Cái Răng tấp nập, trải nghiệm sông nước miền Tây thật thú vị và dân dã.', 29),
 (8, 17, 5, 'Tượng Chúa Kitô view từ trên cao ngắm toàn cảnh Vũng Tàu đẹp mê hồn, đáng để leo bậc thang.', 30),
-(4, 5, 5, 'Resort ở Phú Quốc dịch vụ đẳng cấp, bãi biển riêng sạch sẽ và yên tĩnh.', 31),
 (5, 3, 4, 'Phong cảnh Vịnh Hạ Long mờ ảo trong sương rất đẹp, đồ ăn trên tàu đa dạng.', 32),
 (6, 18, 5, 'Biển Hồ Pleiku xanh mướt, không khí cao nguyên buổi sớm thật dễ chịu và sảng khoái.', 33),
 (7, 2, 5, 'Đà Nẵng sạch sẽ, văn minh, tour đi Bà Nà được sắp xếp rất đúng giờ và không phải chờ đợi lâu.', 34),
 (8, 7, 4, 'Thưởng thức ca Huế trên sông Hương là một trải nghiệm văn hóa rất đặc sắc.', 35),
 (4, 12, 5, 'Cáp treo lên đỉnh Núi Bà Đen nhanh và hiện đại, dịch vụ tại khu du lịch rất tốt.', 36),
 (5, 15, 5, 'Bãi biển Bình Ba hoang sơ, hải sản tươi sống giá cả phải chăng, rất hài lòng với chuyến đi.', 37),
-(6, 18, 5, 'Khám phá văn hóa Tây Nguyên và tham gia đêm hội cồng chiêng thực sự rất ấn tượng.', 38),
-(7, 4, 5, 'Nha Trang luôn là lựa chọn hàng đầu của gia đình tôi cho mỗi dịp nghỉ hè.', 39),
 (8, 3, 5, 'Tour tổ chức chuyên nghiệp, xe đưa đón đời mới đi rất êm, HDV cực kỳ vui tính.', 40);
 
 -- 9. WISHLIST
