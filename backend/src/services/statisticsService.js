@@ -58,31 +58,10 @@ class StatisticsService {
 
 	static async getTimeBasedReport(from, to) {
 		// 1. Dữ liệu của kỳ hiện tại
-		const [current] = await db.query(`
-			SELECT 
-				COALESCE(SUM(total_price), 0) AS revenue, COUNT(*) AS booking_count,
-				COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed,
-				COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending,
-				COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled
-			FROM bookings
-			WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY)
-				AND payment_status = 'paid' AND status != 'cancelled'
-		`, [from, to]);
+		const cur = await Booking.getCurrentBookingForStatistics(from, to);
 
 		// 2. So sánh kỳ trước (để tính tăng trưởng MoM hoặc WoW)
-		const daysDiff = Math.ceil((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24)) + 1;
-		const prevTo = new Date(from); prevTo.setDate(prevTo.getDate() - 1);
-		const prevFrom = new Date(prevTo); prevFrom.setDate(prevFrom.getDate() - daysDiff + 1);
-
-		const [previous] = await db.query(`
-			SELECT COALESCE(SUM(total_price), 0) AS revenue, COUNT(*) AS booking_count
-			FROM bookings
-			WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY) 
-				AND payment_status = 'paid' AND status != 'cancelled'
-		`, [prevFrom.toISOString().split("T")[0], prevTo.toISOString().split("T")[0]]);
-
-		const cur = current[0];
-		const prev = previous[0];
+		const prev = await Booking.getPreviousBookingForStatistics(from, to);
 
 		const revGrowth = prev.revenue > 0 ? (((cur.revenue - prev.revenue) / prev.revenue) * 100).toFixed(1) : (cur.revenue > 0 ? 100 : 0);
 		const bookGrowth = prev.booking_count > 0 ? (((cur.booking_count - prev.booking_count) / prev.booking_count) * 100).toFixed(1) : (cur.booking_count > 0 ? 100 : 0);

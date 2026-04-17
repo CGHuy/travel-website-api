@@ -104,6 +104,45 @@ class Booking {
 		return rows.map(r => r.year);
 	}
 
+	static async getCurrentBookingForStatistics(from, to) {
+		try {
+			const [rows] = await db.query(`
+				SELECT 
+				COALESCE(SUM(total_price), 0) AS revenue, COUNT(*) AS booking_count,
+				COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed,
+				COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending,
+				COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled
+			FROM bookings
+			WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY)
+				AND payment_status = 'paid' AND status != 'cancelled'
+		`, [from, to]);
+			return rows[0];
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	static async getPreviousBookingForStatistics(from, to) {
+		try {
+			// Tính toán kỳ trước dựa trên kỳ hiện tại
+			const daysDiff = Math.ceil((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24)) + 1;
+			const prevToDate = new Date(from); prevToDate.setDate(prevToDate.getDate() - 1);
+			const prevFromDate = new Date(prevToDate); prevFromDate.setDate(prevFromDate.getDate() - daysDiff + 1);
+
+			const prevFrom = prevFromDate.toISOString().split("T")[0];
+			const prevTo = prevToDate.toISOString().split("T")[0];
+
+			const [rows] = await db.query(`
+				SELECT COALESCE(SUM(total_price), 0) AS revenue, COUNT(*) AS booking_count
+				FROM bookings
+				WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY) 
+					AND payment_status = 'paid' AND status != 'cancelled'
+			`, [prevFrom, prevTo]);
+			return rows[0];
+		} catch (error) {
+			throw error;
+		}
+	}
 }
 
 module.exports = Booking;
