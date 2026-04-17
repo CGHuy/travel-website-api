@@ -165,30 +165,81 @@ async function loadRealTime() {
 	$("rt-total-tours").textContent = `Tổng ${data.total_tours} Tour đang hoạt động`;
 }
 
-async function loadOccupancy() {
-	const { data } = await (await fetch(`${API}/api/stats/occupancy`)).json();
-	const body = $("occupancy-body");
-	if (!body) return;
-	if (!data.length) {
-		body.innerHTML = '<tr><td colspan="6" class="text-center py-4">Chưa có dữ liệu</td></tr>';
-		$("rt-avg-occupancy").textContent = "0%";
+async function loadOccupancy(page = 1) {
+	const limit = 10;
+	try {
+		const { data: result } = await (await fetch(`${API}/api/stats/occupancy?page=${page}&limit=${limit}`)).json();
+		const { data, pagination } = result;
+		const body = $("occupancy-body");
+		if (!body) return;
+
+		if (!data.length) {
+			body.innerHTML = '<tr><td colspan="6" class="text-center py-4">Chưa có dữ liệu</td></tr>';
+			$("rt-avg-occupancy").textContent = "0%";
+			$("occupancy-pagination").innerHTML = "";
+			return;
+		}
+
+		// Tính trung bình lấp đầy cho thẻ real-time (từ trang hiện tại)
+		$("rt-avg-occupancy").textContent = (data.reduce((s, d) => s + parseFloat(d.occupancy_rate || 0), 0) / data.length).toFixed(1) + "%";
+
+		body.innerHTML = data.map(d => `
+			<tr>
+				<td class="text-truncate" style="max-width:180px">${d.tour_name}</td>
+				<td>${new Date(d.departure_date).toLocaleDateString("vi-VN")}</td>
+				<td>${d.departure_location}</td>
+				<td>${d.seats_booked}/${d.seats_total}</td>
+				<td>
+					<div class="occupancy-bar-wrap">
+						<div class="occupancy-bar-track"><div class="occupancy-bar-fill ${d.occupancy_rate >= 80 ? 'high' : ''}" style="width:${Math.min(d.occupancy_rate, 100)}%"></div></div>
+						<span class="fw-bold">${d.occupancy_rate}%</span>
+					</div>
+				</td>
+				<td>${statusLabel(d.status)}</td>
+			</tr>`).join("");
+
+		renderPagination("occupancy-pagination", pagination, (p) => loadOccupancy(p));
+	} catch (e) { console.error("Lỗi tải lấp đầy tour", e); }
+}
+
+function renderPagination(containerId, pagination, onPageClick) {
+	const container = $(containerId);
+	if (!container) return;
+	const { page, total_pages } = pagination;
+	if (total_pages <= 1) {
+		container.innerHTML = "";
 		return;
 	}
-	$("rt-avg-occupancy").textContent = (data.reduce((s, d) => s + parseFloat(d.occupancy_rate || 0), 0) / data.length).toFixed(1) + "%";
-	body.innerHTML = data.map(d => `
-		<tr>
-			<td class="text-truncate" style="max-width:180px">${d.tour_name}</td>
-			<td>${new Date(d.departure_date).toLocaleDateString("vi-VN")}</td>
-			<td>${d.departure_location}</td>
-			<td>${d.seats_booked}/${d.seats_total}</td>
-			<td>
-				<div class="occupancy-bar-wrap">
-					<div class="occupancy-bar-track"><div class="occupancy-bar-fill ${d.occupancy_rate >= 80 ? 'high' : ''}" style="width:${Math.min(d.occupancy_rate, 100)}%"></div></div>
-					<span class="fw-bold">${d.occupancy_rate}%</span>
-				</div>
-			</td>
-			<td>${statusLabel(d.status)}</td>
-		</tr>`).join("");
+
+	let html = '<div class="pagination-buttons">';
+	
+	// Nút Trước
+	html += `<button class="p-btn" ${page === 1 ? 'disabled' : ''} data-page="${page - 1}"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+	// Các số trang (đơn giản hóa: hiện tối đa 5 trang xung quanh hiện tại)
+	let start = Math.max(1, page - 2);
+	let end = Math.min(total_pages, start + 4);
+	if (end - start < 4) start = Math.max(1, end - 4);
+
+	for (let i = start; i <= end; i++) {
+		html += `<button class="p-btn ${i === page ? 'active' : ''}" data-page="${i}">${i}</button>`;
+	}
+
+	// Nút Tiếp
+	html += `<button class="p-btn" ${page === total_pages ? 'disabled' : ''} data-page="${page + 1}"><i class="fa-solid fa-chevron-right"></i></button>`;
+	
+	html += '</div>';
+	container.innerHTML = html;
+
+	// Gán sự kiện
+	container.querySelectorAll(".p-btn[data-page]").forEach(btn => {
+		btn.onclick = () => {
+			const p = parseInt(btn.dataset.page);
+			if (p >= 1 && p <= total_pages && p !== page) {
+				onPageClick(p);
+			}
+		};
+	});
 }
 
 async function loadReport(from, to) {

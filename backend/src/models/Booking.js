@@ -95,6 +95,15 @@ class Booking {
 		}
 	}
 
+	static async getAvailableYears() {
+		const [rows] = await db.query(`
+			SELECT DISTINCT YEAR(created_at) AS year 
+			FROM bookings 
+			ORDER BY year DESC
+		`);
+		return rows.map(r => r.year);
+	}
+
 }
 
 module.exports = Booking;

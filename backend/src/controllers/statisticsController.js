@@ -1,3 +1,4 @@
+const Booking = require("../models/Booking");
 const StatisticsService = require("../services/statisticsService");
 
 class StatisticsController {
@@ -17,7 +18,8 @@ class StatisticsController {
 	// GET /api/stats/occupancy
 	static async getTourOccupancy(req, res) {
 		try {
-			const data = await StatisticsService.getTourOccupancy();
+			const { page = 1, limit = 10 } = req.query;
+			const data = await StatisticsService.getTourOccupancy(page, limit);
 			res.json({ success: true, data });
 		} catch (error) {
 			console.error("getTourOccupancy error:", error);
@@ -110,7 +112,7 @@ class StatisticsController {
 	// GET /api/stats/years
 	static async getYears(req, res) {
 		try {
-			const data = await StatisticsService.getAvailableYears();
+			const data = await Booking.getAvailableYears();
 			res.json({ success: true, data });
 		} catch (error) {
 			console.error("getYears error:", error);

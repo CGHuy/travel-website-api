@@ -23,7 +23,15 @@ class StatisticsService {
 		};
 	}
 
-	static async getTourOccupancy() {
+	static async getTourOccupancy(page = 1, limit = 10) {
+		const offset = (page - 1) * limit;
+
+		// 1. Đếm tổng số bản ghi
+		const [[{ total }]] = await db.query(`
+			SELECT COUNT(*) AS total FROM tour_departures WHERE departure_date >= CURDATE()
+		`);
+
+		// 2. Lấy dữ liệu có phân trang
 		const [rows] = await db.query(`
 			SELECT
 				t.name AS tour_name, td.departure_date, td.departure_location,
@@ -33,9 +41,19 @@ class StatisticsService {
 			FROM tour_departures td
 			JOIN tours t ON t.id = td.tour_id
 			WHERE td.departure_date >= CURDATE()
-			ORDER BY td.departure_date ASC LIMIT 20
-		`);
-		return rows;
+			ORDER BY td.departure_date ASC 
+			LIMIT ? OFFSET ?
+		`, [parseInt(limit), parseInt(offset)]);
+
+		return {
+			data: rows,
+			pagination: {
+				total,
+				page: parseInt(page),
+				limit: parseInt(limit),
+				total_pages: Math.ceil(total / limit)
+			}
+		};
 	}
 
 	static async getTimeBasedReport(from, to) {
@@ -153,14 +171,7 @@ class StatisticsService {
 		return { top_passengers: toppassengers.map(c => ({ ...c, total_spent: parseFloat(c.total_spent) })) };
 	}
 
-	static async getAvailableYears() {
-		const [rows] = await db.query(`
-			SELECT DISTINCT YEAR(created_at) AS year 
-			FROM bookings 
-			ORDER BY year DESC
-		`);
-		return rows.map(r => r.year);
-	}
+
 }
 
 module.exports = StatisticsService;
