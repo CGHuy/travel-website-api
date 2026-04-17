@@ -39,18 +39,19 @@ class StatisticsService {
 	}
 
 	static async getTimeBasedReport(from, to) {
+		// 1. Dữ liệu của kỳ hiện tại
 		const [current] = await db.query(`
-			SELECT
+			SELECT 
 				COALESCE(SUM(total_price), 0) AS revenue, COUNT(*) AS booking_count,
 				COUNT(CASE WHEN status = 'confirmed' THEN 1 END) AS confirmed,
 				COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending,
 				COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled
 			FROM bookings
 			WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY)
-				AND payment_status = 'paid'
+				AND payment_status = 'paid' AND status != 'cancelled'
 		`, [from, to]);
 
-		// So sánh kỳ trước
+		// 2. So sánh kỳ trước (để tính tăng trưởng MoM hoặc WoW)
 		const daysDiff = Math.ceil((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24)) + 1;
 		const prevTo = new Date(from); prevTo.setDate(prevTo.getDate() - 1);
 		const prevFrom = new Date(prevTo); prevFrom.setDate(prevFrom.getDate() - daysDiff + 1);
@@ -58,7 +59,8 @@ class StatisticsService {
 		const [previous] = await db.query(`
 			SELECT COALESCE(SUM(total_price), 0) AS revenue, COUNT(*) AS booking_count
 			FROM bookings
-			WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY) AND payment_status = 'paid'
+			WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY) 
+				AND payment_status = 'paid' AND status != 'cancelled'
 		`, [prevFrom.toISOString().split("T")[0], prevTo.toISOString().split("T")[0]]);
 
 		const cur = current[0];
@@ -73,7 +75,7 @@ class StatisticsService {
 			booking_count: cur.booking_count,
 			confirmed: cur.confirmed, pending: cur.pending, cancelled: cur.cancelled,
 			previous: { revenue: parseFloat(prev.revenue), booking_count: prev.booking_count },
-			growth: { revenue: parseFloat(revGrowth), booking: parseFloat(bookGrowth) },
+			growth: { revenue: parseFloat(revGrowth), booking: parseFloat(bookGrowth) }
 		};
 	}
 
@@ -149,6 +151,15 @@ class StatisticsService {
 			GROUP BY u.id, u.fullname, u.email ORDER BY total_spent DESC LIMIT 5
 		`);
 		return { top_passengers: toppassengers.map(c => ({ ...c, total_spent: parseFloat(c.total_spent) })) };
+	}
+
+	static async getAvailableYears() {
+		const [rows] = await db.query(`
+			SELECT DISTINCT YEAR(created_at) AS year 
+			FROM bookings 
+			ORDER BY year DESC
+		`);
+		return rows.map(r => r.year);
 	}
 }
 

@@ -15,5 +15,6 @@ router.get("/bookings/status", StatisticsController.getBookingStatus);
 router.get("/tours/top", StatisticsController.getTopTours);
 router.get("/reviews", StatisticsController.getReviewStats);
 router.get("/users", StatisticsController.getUserStats);
+router.get("/years", StatisticsController.getYears);
 
 module.exports = router;

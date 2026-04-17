@@ -38,12 +38,26 @@ function getDateRange(period) {
 			from = d7.toISOString().split("T")[0];
 			break;
 		case "month":
-			from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-			to = today;
+			const m = $("filter-month-m").value;
+			const y = $("filter-month-y").value;
+			if (m && y) {
+				from = `${y}-${m}-01`;
+				const lastDay = new Date(y, parseInt(m), 0).getDate();
+				to = `${y}-${m}-${String(lastDay).padStart(2, "0")}`;
+			} else {
+				from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+				to = today;
+			}
 			break;
 		case "year":
-			from = `${now.getFullYear()}-01-01`;
-			to = today;
+			const yearVal = $("filter-year").value;
+			if (yearVal) {
+				from = `${yearVal}-01-01`;
+				to = `${yearVal}-12-31`;
+			} else {
+				from = `${now.getFullYear()}-01-01`;
+				to = today;
+			}
 			break;
 		default: from = to = today;
 	}
@@ -51,8 +65,15 @@ function getDateRange(period) {
 }
 
 function getPeriodLabel(period, from, to) {
-	const map = { today: "Hôm nay", "7days": "7 ngày qua", month: `Tháng ${new Date().getMonth() + 1}`, year: `Năm ${new Date().getFullYear()}` };
-	return map[period] || `${from} → ${to}`;
+	if (period === "month") {
+		const [y, m] = from.split("-");
+		return `Tháng ${m}/${y}`;
+	}
+	if (period === "year") {
+		return `Năm ${from.split("-")[0]}`;
+	}
+	const map = { today: "Hôm nay", "7days": "7 ngày qua" };
+	return map[period] || `${formatDateVN(from)} → ${formatDateVN(to)}`;
 }
 
 function formatDateVN(dateStr) {
@@ -178,10 +199,16 @@ async function loadReport(from, to) {
 	$("tb-booking-growth").innerHTML = growthBadge(data.growth.booking);
 	$("tb-revenue-prev").textContent = `Kỳ trước: ${fmt(data.previous.revenue)}`;
 	$("tb-booking-prev").textContent = `Kỳ trước: ${data.previous.booking_count} booking`;
+
+
 }
 
 // --- Bộ lọc nhanh (preset) ---
 async function applyFilter(period) {
+	// Ẩn hiện ô chọn đặc thù
+	if ($("month-select-wrap")) $("month-select-wrap").style.display = (period === "month") ? "block" : "none";
+	if ($("year-select-wrap")) $("year-select-wrap").style.display = (period === "year") ? "block" : "none";
+
 	const { from, to } = getDateRange(period);
 	if ($("time-label")) $("time-label").textContent = getPeriodLabel(period, from, to);
 	document.querySelectorAll(".time-filter-btn[data-period]").forEach(b => b.classList.toggle("active", b.dataset.period === period));
@@ -292,19 +319,56 @@ async function loadAnalytics() {
 
 // --- Khởi tạo trang ---
 window.initAdminStatisticsPage = async () => {
+	const now = new Date();
+	const currYear = now.getFullYear();
+	const currMonth = String(now.getMonth() + 1).padStart(2, "0");
+
+	// Lấy danh sách năm có dữ liệu từ DB
+	let dbYears = [];
+	try {
+		const resYears = await (await fetch(`${API}/api/stats/years`)).json();
+		dbYears = resYears.data || [];
+	} catch (e) { console.error("Lỗi lấy năm từ DB", e); }
+
+	// Nếu DB chưa có dữ liệu, mặc định lấy năm hiện tại
+	if (dbYears.length === 0) dbYears = [currYear];
+
+	// Khởi tạo danh sách năm cho các select
+	const yearSelects = ["filter-month-y", "filter-year"];
+	yearSelects.forEach(id => {
+		const el = $(id);
+		if (!el) return;
+		el.innerHTML = "";
+		dbYears.forEach(y => {
+			const opt = document.createElement("option");
+			opt.value = y;
+			opt.textContent = y;
+			if (y === currYear) opt.selected = true;
+			el.appendChild(opt);
+		});
+	});
+
+	if ($("filter-month-m")) $("filter-month-m").value = currMonth;
+
 	loadRealTime();
 	loadOccupancy();
 	loadAnalytics();
 	applyFilter("month");
 
-	// Bộ lọc nhanh
-	document.querySelectorAll(".time-filter-btn[data-period]").forEach(b => b.onclick = () => applyFilter(b.dataset.period));
+	// Bộ lọc nhanh (nút bấm)
+	document.querySelectorAll(".time-filter-btn[data-period]").forEach(b => {
+		b.onclick = () => applyFilter(b.dataset.period);
+	});
+
+	// Lắng nghe thay đổi trên các ô chọn Month/Year
+	if ($("filter-month-m")) $("filter-month-m").onchange = () => applyFilter("month");
+	if ($("filter-month-y")) $("filter-month-y").onchange = () => applyFilter("month");
+	if ($("filter-year")) $("filter-year").onchange = () => applyFilter("year");
 
 	// Bộ lọc tùy chỉnh
 	if ($("custom-apply")) $("custom-apply").onclick = () => applyCustomFilter();
 
 	// Set ngày mặc định cho custom filter (tháng này)
-	const now = new Date();
 	const today = now.toISOString().split("T")[0];
 	const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
 	if ($("custom-from")) $("custom-from").value = firstDay;

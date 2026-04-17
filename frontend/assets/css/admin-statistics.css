@@ -469,7 +469,6 @@
     font-weight: 500;
 }
 
-/* ─── Responsive ────────────────────────────────── */
 @media (max-width: 768px) {
     .time-filter-bar {
         flex-direction: column;

@@ -107,6 +107,16 @@ class StatisticsController {
 			res.status(500).json({ success: false, message: "Lỗi lấy thống kê người dùng" });
 		}
 	}
+	// GET /api/stats/years
+	static async getYears(req, res) {
+		try {
+			const data = await StatisticsService.getAvailableYears();
+			res.json({ success: true, data });
+		} catch (error) {
+			console.error("getYears error:", error);
+			res.status(500).json({ success: false, message: "Lỗi lấy danh sách năm" });
+		}
+	}
 }
 
 module.exports = StatisticsController;

@@ -72,10 +72,37 @@
         <div class="time-filter-presets">
             <button class="time-filter-btn" data-period="today">Hôm nay</button>
             <button class="time-filter-btn" data-period="7days">7 ngày</button>
-            <button class="time-filter-btn active" data-period="month">Tháng này</button>
-            <button class="time-filter-btn" data-period="year">Năm nay</button>
+            <button class="time-filter-btn active" data-period="month">Tháng</button>
+            <button class="time-filter-btn" data-period="year">Năm</button>
         </div>
-        <div class="time-filter-label ms-2" id="time-label">Tháng này</div>
+
+        <!-- Ô chọn tháng (ẩn mặc định) -->
+        <div id="month-select-wrap" class="ms-2" style="display: none;">
+            <div class="d-flex gap-1">
+                <select id="filter-month-m" class="time-filter-input" style="width: 100px;">
+                    <option value="01">Tháng 1</option>
+                    <option value="02">Tháng 2</option>
+                    <option value="03">Tháng 3</option>
+                    <option value="04">Tháng 4</option>
+                    <option value="05">Tháng 5</option>
+                    <option value="06">Tháng 6</option>
+                    <option value="07">Tháng 7</option>
+                    <option value="08">Tháng 8</option>
+                    <option value="09">Tháng 9</option>
+                    <option value="10">Tháng 10</option>
+                    <option value="11">Tháng 11</option>
+                    <option value="12">Tháng 12</option>
+                </select>
+                <select id="filter-month-y" class="time-filter-input" style="width: 90px;"></select>
+            </div>
+        </div>
+
+        <!-- Ô chọn năm (ẩn mặc định) -->
+        <div id="year-select-wrap" class="ms-2" style="display: none;">
+            <select id="filter-year" class="time-filter-input" style="width: 100px;"></select>
+        </div>
+
+        <div class="time-filter-label ms-auto" id="time-label">Tháng này</div>
     </div>
 
     <div class="row g-3 mb-4">
@@ -109,6 +136,7 @@
             </div>
         </div>
     </div>
+
 </div>
 
 <!-- SECTION 2.5: 📅 THỐNG KÊ LINH HOẠT (bộ lọc tùy chỉnh) -->
