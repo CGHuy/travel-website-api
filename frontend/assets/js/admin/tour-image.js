@@ -1,7 +1,7 @@
 (() => {
     const TOUR_IMAGE_TOURS_API_URL = "/api/tour-images/tours";
     const TOUR_IMAGE_API_URL = "/api/tour-images";
-    const DEFAULT_TOUR_IMAGE = "../../assets/images/image.png";
+    const DEFAULT_TOUR_IMAGE = "../../assets/images/image-default.webp";
 
     let adminTourImageCache = [];
     let currentTourImages = [];
