@@ -206,6 +206,30 @@ const isTourStaff = (req, res, next) => {
     }
 };
 
+const isCustomer = (req, res, next) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({
+                success: false,
+                message: "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!",
+            });
+        }
+        if(req.user.role !== "customer") {
+            return res.status(403).json({
+                success: false,
+                message: "Quyền truy cập bị từ chối. Chỉ khách hàng mới được phép!",
+            });
+        }
+        next();
+    } catch (error) {
+        console.error("Lỗi trong isCustomer middleware:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ nội bộ khi kiểm tra quyền truy cập",
+        });
+    }
+};
+
 module.exports = {
     verifyToken,
     isAdmin,
@@ -213,4 +237,5 @@ module.exports = {
     isOwner,
     isBookingStaff,
     isTourStaff,
+    isCustomer,
 };

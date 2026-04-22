@@ -8,6 +8,14 @@
 })();
 
 document.addEventListener("DOMContentLoaded", async () => {
+    const notify = (title, message = "", type = "info", duration = 4500) => {
+        if (typeof window.showToast === "function") {
+            window.showToast(title, message, type, duration);
+            return;
+        }
+        alert(message ? `${title}: ${message}` : title);
+    };
+
     await Promise.all([loadComponent("header-placeholder", "../../components/header.html"), loadComponent("footer-placeholder", "../../components/footer.html")]);
 
     // 1. Get tourId from URL query string
@@ -15,7 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tourId = urlParams.get("tour_id");
 
     if (!tourId) {
-        alert("Không tìm thấy thông tin tour để đặt! Quay lại trang chủ.");
+        notify("Không tìm thấy tour", "Không có thông tin tour để đặt. Hệ thống sẽ quay về trang chủ.", "warning");
         window.location.href = "/index";
         return;
     }
@@ -27,6 +35,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     let baseChildPrice = 0;
     let movingAdultPrice = 0;
     let movingChildPrice = 0;
+    let currentUserRole = null;
+
+    const setBookingPermission = (role) => {
+        const submitBtn = document.getElementById("submitBooking");
+        const warningEl = document.getElementById("booking-role-warning");
+        if (!submitBtn) return;
+
+        const isCustomer = role === "customer";
+        submitBtn.disabled = !isCustomer;
+
+        if (isCustomer) {
+            submitBtn.classList.remove("disabled");
+            submitBtn.removeAttribute("title");
+            if (warningEl) warningEl.classList.add("d-none");
+        } else {
+            submitBtn.classList.add("disabled");
+            submitBtn.title = "Chỉ tài khoản khách hàng mới có thể đặt tour.";
+            if (warningEl) warningEl.classList.remove("d-none");
+        }
+    };
+
+    // Mặc định khóa đặt tour cho đến khi xác định được role từ profile
+    setBookingPermission(currentUserRole);
 
     // Phase 1: Fetch Tour Data
     const fetchTourAndDepartures = async () => {
@@ -78,6 +109,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const result = await response.json();
             if (result.success && result.data) {
                 const user = result.data;
+                currentUserRole = user.role || null;
+                setBookingPermission(currentUserRole);
                 if (document.getElementById("contact_name")) {
                     document.getElementById("contact_name").value = user.fullname || "";
                 }
@@ -188,7 +221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         let children = parseInt(childrenInput.value) || 0;
 
         if (adults + children > maxSeats) {
-            alert(`Rất tiếc, lịch khởi hành này chỉ còn ${maxSeats} chỗ trống.`);
+            notify("Không đủ chỗ", `Lịch khởi hành này chỉ còn ${maxSeats} chỗ trống.`, "warning");
 
             // Ưu tiên giữ người lớn, giảm trẻ em trước
             if (adults > maxSeats) {
@@ -241,7 +274,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const otherType = type === "adults" ? "children" : "adults";
             const otherVal = parseInt(document.getElementById(otherType).value) || 0;
             if (newVal + otherVal > dep.seats_available) {
-                alert(`Lịch trình này chỉ còn tối đa ${dep.seats_available} chỗ.`);
+                notify("Vượt quá số chỗ", `Lịch trình này chỉ còn tối đa ${dep.seats_available} chỗ.`, "warning");
                 return;
             }
         }
@@ -373,6 +406,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("submitBooking").addEventListener("click", async (e) => {
         e.preventDefault();
 
+        if (currentUserRole !== "customer") {
+            notify("Không có quyền đặt tour", "Chỉ tài khoản khách hàng mới có thể đặt tour.", "warning");
+            return;
+        }
+
         const form = document.getElementById("booking-form");
         if (!form.checkValidity()) {
             form.reportValidity();
@@ -471,13 +509,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 // Chuyển hướng sang trang thanh toán của VNPay
                 window.location.href = result.vnpayUrl;
             } else {
-                alert("Lỗi: " + (result.message || "Không thể tạo liên kết thanh toán."));
+                notify("Không thể tạo liên kết thanh toán", result.message || "Vui lòng thử lại sau.", "error");
                 btn.disabled = false;
                 btn.innerHTML = originalContent;
             }
         } catch (error) {
             console.error("Booking Error:", error);
-            alert("Đã có lỗi xảy ra trong quá trình kết nối thanh toán.");
+            notify("Lỗi kết nối", "Đã có lỗi xảy ra trong quá trình kết nối thanh toán.", "error");
             btn.disabled = false;
             btn.innerHTML = originalContent;
         }
