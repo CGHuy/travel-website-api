@@ -7,7 +7,7 @@ const rateLimit = require("express-rate-limit");
 // Giới hạn chung cho tất cả các request
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 phút
-    max: 10000, // 100 request/15 phút
+    max: 10000, // 10000 request/15 phút
     message: {
         success: false,
         message: "Quá nhiều request từ địa chỉ IP này, vui lòng thử lại sau 15 phút",
@@ -20,7 +20,7 @@ const generalLimiter = rateLimit({
 // Giới hạn cho auth (đăng nhập, đăng ký)
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 phút
-    max: 100, // 5 attempt/15 phút
+    max: 100, // 100 attempt/15 phút
     message: {
         success: false,
         message: "Quá nhiều lần đăng nhập/đăng ký không thành công, vui lòng thử lại sau 15 phút",
@@ -47,7 +47,7 @@ const createLimiter = rateLimit({
 // Giới hạn cho search/list requests
 const searchLimiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 phút
-    max: 60, // 60 request/10 phút
+    max: 10000, // 10000 request/10 phút
     message: {
         success: false,
         message: "Quá nhiều request tìm kiếm, vui lòng thử lại sau",
