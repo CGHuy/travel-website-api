@@ -192,7 +192,7 @@ function getStatusInfo(status) {
 		case "cancelled":
 			return { label: "Đã hủy", class: "status-canceled" };
 		case "pending":
-			return { label: "Chờ xử lý", class: "status-pending" };
+			return { label: "Yêu cầu hủy", class: "status-pending" };
 		default:
 			return { label: status, class: "" };
 	}

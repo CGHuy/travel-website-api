@@ -78,6 +78,11 @@ exports.updateStatus = async (req, res) => {
 			if (status === "cancelled") {
 				const booking = await bookingService.getById(bookingId);
 				if (booking) {
+					// Tự động chuyển sang refunded nếu đang chờ hủy
+					if (booking.payment_status === "pending") {
+						await Booking.updateStatus(bookingId, "payment_status", "refunded");
+					}
+
 					const totalPax = (booking.adults || 0) + (booking.children || 0);
 					await db.query(
 						`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`,
@@ -174,6 +179,7 @@ exports.cancelBooking = async (req, res) => {
 
 		// Đổi trạng thái sang pending để chờ Admin/Staff duyệt
 		await Booking.updateStatus(bookingId, "status", "pending");
+		// Cập nhật trạng thái thanh toán sang pending để chờ duyệt hoàn tiền
 		await Booking.updateStatus(bookingId, "payment_status", "pending");
 
 		res.json({

@@ -128,11 +128,12 @@ class bookingService {
                     t.name as tour_name, 
                     t.price_default,
                     td.departure_date
+					
                 FROM bookings b
                 LEFT JOIN users u ON b.user_id = u.id
                 JOIN tour_departures td ON b.departure_id = td.id
                 JOIN tours t ON td.tour_id = t.id
-                ORDER BY b.created_at DESC
+                ORDER BY b.id DESC
             `);
 			return rows;
 		} catch (error) {

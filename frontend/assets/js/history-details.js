@@ -171,6 +171,12 @@ function renderBookingDetail(booking) {
     if (booking.payment_status === "paid") {
         paymentStatusEl.textContent = "Đã thanh toán";
         paymentStatusEl.className = "text-success fw-bold";
+    } else if (booking.payment_status === "pending") {
+        paymentStatusEl.textContent = "Đang chờ hoàn tiền";
+        paymentStatusEl.className = "text-warning fw-bold";
+    } else if (booking.payment_status === "refunded") {
+        paymentStatusEl.textContent = "Đã hoàn tiền";
+        paymentStatusEl.className = "text-info fw-bold";
     } else {
         paymentStatusEl.textContent = "Chưa thanh toán";
         paymentStatusEl.className = "text-danger fw-bold";
@@ -197,7 +203,7 @@ function renderBookingDetail(booking) {
         actionContainer.innerHTML = `
             <span class="badge rounded-pill py-2 px-3 fw-semibold" 
                   style="background:#fff8e1;color:#f39c12;border:1.5px solid #f39c12;font-size:13px;">
-                <i class="fa-solid fa-clock me-1"></i>Yêu cầu hủy đang chờ xử lý
+                <i class="fa-solid fa-clock me-1"></i>Yêu cầu hủy tour đang chờ xử lý
             </span>`;
         return;
     }
@@ -366,7 +372,7 @@ function getStatusInfo(status) {
         case "cancelled":
             return { label: "Đã hủy", class: "cancelled" };
         case "pending":
-            return { label: "Chờ xử lý", class: "pending" };
+            return { label: "Yêu cầu hủy", class: "pending" };
         default:
             return { label: status, class: "pending" };
     }

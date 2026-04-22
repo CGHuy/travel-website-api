@@ -136,7 +136,7 @@ window.initAdminBookingPage = async function () {
                     statusEl.textContent = "Đã xác nhận";
                     statusEl.className = "badge bg-success";
                 } else if (status === "pending") {
-                    statusEl.textContent = "Chờ xử lý";
+                    statusEl.textContent = "Yêu cầu hủy";
                     statusEl.className = "badge bg-warning text-dark";
                 } else if (status === "cancelled") {
                     statusEl.textContent = "Đã hủy";

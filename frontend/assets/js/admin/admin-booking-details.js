@@ -70,16 +70,16 @@ function renderAdminBookingDetails(data) {
     // Header & Title
     const titleEl = document.getElementById('booking-id-title');
     if (titleEl) {
-        let badgeClass = getStatusClass(data.status);
-        let badgeText = getStatusText(data.status);
+        // Trạng thái chính của Booking
+        const bStatusClass = getStatusClass(data.status);
+        const bStatusText = getStatusText(data.status);
 
-        // Logic đặc biệt cho yêu cầu hủy
-        if (data.status === 'pending' && data.payment_status === 'pending') {
-            badgeClass = 'status-warning';
-            badgeText = 'Yêu cầu hủy';
-        }
-
-        titleEl.innerHTML = `Booking #BOK${String(data.id).padStart(3, '0')} <span class="status-badge ${badgeClass}">${badgeText}</span>`;
+      
+        titleEl.innerHTML = `
+            Booking #BOK${String(data.id).padStart(3, '0')} 
+            <span class="status-badge ${bStatusClass}">${bStatusText}</span>
+           
+        `;
     }
     const metaEl = document.getElementById('booking-meta-info');
     if (metaEl) {
@@ -174,6 +174,60 @@ function renderAdminBookingDetails(data) {
     if (statusSelect) statusSelect.value = data.status || 'confirmed';
     const paymentSelect = document.getElementById('payment-status-select');
     if (paymentSelect) paymentSelect.value = data.payment_status || 'paid';
+
+    // Handle Cancellation UI Logic
+    const cancelActionArea = document.getElementById('cancellation-action-area');
+    const modal = document.getElementById('cancel-confirm-modal');
+    
+    if (cancelActionArea && data.status === 'pending' && data.payment_status === 'pending') {
+        cancelActionArea.style.display = 'block';
+        
+        // Modal Event Listeners
+        const showModalBtn = document.getElementById('btn-show-cancel-modal');
+        const closeModalX = modal.querySelector('.close-modal');
+        const closeModalBtn = document.getElementById('btn-close-modal');
+        const approveBtn = document.getElementById('btn-approve-cancel');
+        const refundAmtEl = document.getElementById('modal-refund-amount');
+
+        if (refundAmtEl) refundAmtEl.textContent = formatCurrency(data.total_price);
+
+        showModalBtn.onclick = () => modal.style.display = 'flex';
+        closeModalX.onclick = () => modal.style.display = 'none';
+        closeModalBtn.onclick = () => modal.style.display = 'none';
+        
+        approveBtn.onclick = async () => {
+            approveBtn.disabled = true;
+            approveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+            
+            try {
+                const response = await fetch(`/api/bookings/${data.id}/status`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                    },
+                    body: JSON.stringify({ 
+                        status: 'cancelled', 
+                        payment_status: 'refunded' 
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Phê duyệt yêu cầu hủy và hoàn tiền thành công!');
+                    window.location.reload();
+                } else {
+                    throw new Error('Lỗi phê duyệt');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Không thể phê duyệt yêu cầu hủy');
+                approveBtn.disabled = false;
+                approveBtn.textContent = 'Đồng ý phê duyệt';
+            }
+        };
+    } else if (cancelActionArea) {
+        cancelActionArea.style.display = 'none';
+    }
 }
 
 function renderActivityHistory(data) {
@@ -220,6 +274,24 @@ function setElText(id, text) {
     if (el) el.textContent = text || '---';
 }
 
+function getStatusText(status) {
+    switch (status) {
+        case 'confirmed': return 'Đã xác nhận';
+        case 'pending': return 'Yêu cầu hủy';
+        case 'cancelled': return 'Đã hủy';
+        default: return status || 'N/A';
+    }
+}
+
+function getPaymentStatusText(status) {
+    switch (status) {
+        case 'paid': return 'Đã thanh toán';
+        case 'pending': return 'Đang chờ hoàn tiền';
+        case 'refunded': return 'Đã hoàn tiền';
+        default: return 'Chưa thanh toán';
+    }
+}
+
 function getStatusClass(status) {
     switch (status) {
         case 'confirmed': return 'status-confirmed';
@@ -229,12 +301,12 @@ function getStatusClass(status) {
     }
 }
 
-function getStatusText(status) {
+function getPaymentStatusClass(status) {
     switch (status) {
-        case 'confirmed': return 'Đã xác nhận';
-        case 'pending': return 'Chờ xử lý';
-        case 'cancelled': return 'Đã hủy';
-        default: return status || 'N/A';
+        case 'paid': return 'status-paid-alt';
+        case 'pending': return 'status-pending-alt';
+        case 'refunded': return 'status-refunded';
+        default: return 'status-unpaid';
     }
 }
 
