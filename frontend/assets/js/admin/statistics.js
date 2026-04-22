@@ -4,22 +4,35 @@ let statusChart = null;
 let customRevenueChart = null;
 
 // --- Định dạng hiển thị ---
-const fmt = (n) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(n);
+const fmt = (n) =>
+	new Intl.NumberFormat("vi-VN", {
+		style: "currency",
+		currency: "VND",
+		maximumFractionDigits: 0,
+	}).format(n);
 const fmtNum = (n) => new Intl.NumberFormat("vi-VN").format(n);
 const $ = (id) => document.getElementById(id);
 
 function growthBadge(pct) {
 	const val = parseFloat(pct);
-	if (isNaN(val) || val === 0) return '<span class="tb-growth-tag neutral">0%</span>';
+	if (isNaN(val) || val === 0)
+		return '<span class="tb-growth-tag neutral">0%</span>';
 	const up = val > 0;
 	const cls = up ? "up" : "down";
 	const icon = up ? "▲" : "▼";
-	const label = (val === 100) ? "Mới" : `${Math.abs(val)}%`;
+	const label = val === 100 ? "Mới" : `${Math.abs(val)}%`;
 	return `<span class="tb-growth-tag ${cls}">${icon} ${label}</span>`;
 }
 
 function statusLabel(status) {
-	const map = { confirmed: ["Đã xác nhận", "confirmed"], pending: ["Chờ xử lý", "pending"], cancelled: ["Đã huỷ", "cancelled"], open: ["Đang mở", "open"], closed: ["Đã đóng", "closed"], full: ["Đã đầy", "full"] };
+	const map = {
+		confirmed: ["Đã xác nhận", "confirmed"],
+		pending: ["Chờ xử lý", "pending"],
+		cancelled: ["Đã huỷ", "cancelled"],
+		open: ["Đang mở", "open"],
+		closed: ["Đã đóng", "closed"],
+		full: ["Đã đầy", "full"],
+	};
 	const [label, cls] = map[status] || [status, ""];
 	return `<span class="status-badge status-${cls}">${label}</span>`;
 }
@@ -31,10 +44,13 @@ function getDateRange(period) {
 	let from, to;
 
 	switch (period) {
-		case "today": from = to = today; break;
+		case "today":
+			from = to = today;
+			break;
 		case "7days":
 			to = today;
-			const d7 = new Date(); d7.setDate(d7.getDate() - 6);
+			const d7 = new Date();
+			d7.setDate(d7.getDate() - 6);
 			from = d7.toISOString().split("T")[0];
 			break;
 		case "month":
@@ -59,7 +75,8 @@ function getDateRange(period) {
 				to = today;
 			}
 			break;
-		default: from = to = today;
+		default:
+			from = to = today;
 	}
 	return { from, to };
 }
@@ -94,41 +111,99 @@ function initRevenueChart(labels, data) {
 			data: {
 				labels,
 				datasets: [
-					{ label: "Doanh thu", data, backgroundColor: "rgba(59,130,246,0.18)", borderColor: "#3b82f6", borderWidth: 2, borderRadius: 8, order: 2 },
-					{ label: "Xu hướng", data, type: "line", borderColor: "#8b5cf6", borderWidth: 2.5, pointRadius: 4, tension: 0.4, yAxisID: "y", order: 1 }
-				]
+					{
+						label: "Doanh thu",
+						data,
+						backgroundColor: "rgba(59,130,246,0.18)",
+						borderColor: "#3b82f6",
+						borderWidth: 2,
+						borderRadius: 8,
+						order: 2,
+					},
+					{
+						label: "Xu hướng",
+						data,
+						type: "line",
+						borderColor: "#8b5cf6",
+						borderWidth: 2.5,
+						pointRadius: 4,
+						tension: 0.4,
+						yAxisID: "y",
+						order: 1,
+					},
+				],
 			},
 			options: {
-				responsive: true, maintainAspectRatio: false,
-				plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => " " + fmt(c.raw) } } },
-				scales: { y: { beginAtZero: true, ticks: { callback: (v) => (v >= 1e6 ? (v / 1e6).toFixed(0) + "M" : v) } }, x: { grid: { display: false } } }
-			}
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { display: false },
+					tooltip: { callbacks: { label: (c) => " " + fmt(c.raw) } },
+				},
+				scales: {
+					y: {
+						beginAtZero: true,
+						ticks: {
+							callback: (v) => (v >= 1e6 ? (v / 1e6).toFixed(0) + "M" : v),
+						},
+					},
+					x: { grid: { display: false } },
+				},
+			},
 		});
-	} catch (e) { console.error("Lỗi vẽ biểu đồ doanh thu", e); }
+	} catch (e) {
+		console.error("Lỗi vẽ biểu đồ doanh thu", e);
+	}
 }
 
 function initStatusChart(data) {
 	try {
 		const canvas = $("bookingStatusChart");
 		if (!canvas || typeof Chart === "undefined") return;
-		const colors = { confirmed: "#10b981", pending: "#f59e0b", cancelled: "#ef4444" };
-		const labelsMap = { confirmed: "Đã xác nhận", pending: "Chờ xử lý", cancelled: "Đã huỷ" };
+		const colors = {
+			confirmed: "#10b981",
+			pending: "#f59e0b",
+			cancelled: "#ef4444",
+		};
+		const labelsMap = {
+			confirmed: "Đã xác nhận",
+			pending: "Chờ xử lý",
+			cancelled: "Đã huỷ",
+		};
 		if (statusChart) statusChart.destroy();
 		statusChart = new Chart(canvas.getContext("2d"), {
 			type: "doughnut",
 			data: {
-				labels: data.map(d => labelsMap[d.status] || d.status),
-				datasets: [{ data: data.map(d => d.count), backgroundColor: data.map(d => colors[d.status] || "#94a3b8"), borderWidth: 0 }]
+				labels: data.map((d) => labelsMap[d.status] || d.status),
+				datasets: [
+					{
+						data: data.map((d) => d.count),
+						backgroundColor: data.map((d) => colors[d.status] || "#94a3b8"),
+						borderWidth: 0,
+					},
+				],
 			},
-			options: { responsive: true, maintainAspectRatio: false, cutout: "72%", plugins: { legend: { display: false } } }
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				cutout: "72%",
+				plugins: { legend: { display: false } },
+			},
 		});
 		const legend = $("booking-status-legend");
-		if (legend) legend.innerHTML = data.map(d => `
+		if (legend)
+			legend.innerHTML = data
+				.map(
+					(d) => `
 			<div class="legend-item">
 				<span class="legend-dot" style="background:${colors[d.status] || "#94a3b8"}"></span>
 				${labelsMap[d.status] || d.status}: <strong>${d.count}</strong>
-			</div>`).join("");
-	} catch (e) { console.error("Lỗi vẽ biểu đồ booking", e); }
+			</div>`,
+				)
+				.join("");
+	} catch (e) {
+		console.error("Lỗi vẽ biểu đồ booking", e);
+	}
 }
 
 function initCustomRevenueChart(labels, data) {
@@ -142,17 +217,49 @@ function initCustomRevenueChart(labels, data) {
 			data: {
 				labels,
 				datasets: [
-					{ label: "Doanh thu", data, backgroundColor: "rgba(16,185,129,0.18)", borderColor: "#10b981", borderWidth: 2, borderRadius: 8, order: 2 },
-					{ label: "Xu hướng", data, type: "line", borderColor: "#f59e0b", borderWidth: 2.5, pointRadius: 4, tension: 0.4, yAxisID: "y", order: 1 }
-				]
+					{
+						label: "Doanh thu",
+						data,
+						backgroundColor: "rgba(16,185,129,0.18)",
+						borderColor: "#10b981",
+						borderWidth: 2,
+						borderRadius: 8,
+						order: 2,
+					},
+					{
+						label: "Xu hướng",
+						data,
+						type: "line",
+						borderColor: "#f59e0b",
+						borderWidth: 2.5,
+						pointRadius: 4,
+						tension: 0.4,
+						yAxisID: "y",
+						order: 1,
+					},
+				],
 			},
 			options: {
-				responsive: true, maintainAspectRatio: false,
-				plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => " " + fmt(c.raw) } } },
-				scales: { y: { beginAtZero: true, ticks: { callback: (v) => (v >= 1e6 ? (v / 1e6).toFixed(0) + "M" : v) } }, x: { grid: { display: false } } }
-			}
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { display: false },
+					tooltip: { callbacks: { label: (c) => " " + fmt(c.raw) } },
+				},
+				scales: {
+					y: {
+						beginAtZero: true,
+						ticks: {
+							callback: (v) => (v >= 1e6 ? (v / 1e6).toFixed(0) + "M" : v),
+						},
+					},
+					x: { grid: { display: false } },
+				},
+			},
 		});
-	} catch (e) { console.error("Lỗi vẽ biểu đồ tùy chỉnh", e); }
+	} catch (e) {
+		console.error("Lỗi vẽ biểu đồ tùy chỉnh", e);
+	}
 }
 
 // --- Tải dữ liệu ---
@@ -162,28 +269,38 @@ async function loadRealTime() {
 	$("rt-total-users").textContent = `Tổng: ${data.total_users}`;
 	$("rt-pending").textContent = data.pending_bookings;
 	$("rt-open-tours").textContent = data.open_departures + ``;
-	$("rt-total-tours").textContent = `Tổng ${data.total_tours} Tour đang hoạt động`;
+	$("rt-total-tours").textContent =
+		`Tổng ${data.total_tours} Tour đang hoạt động`;
 }
 
 async function loadOccupancy(page = 1) {
 	const limit = 10;
 	try {
-		const { data: result } = await (await fetch(`${API}/api/stats/occupancy?page=${page}&limit=${limit}`)).json();
+		const { data: result } = await (
+			await fetch(`${API}/api/stats/occupancy?page=${page}&limit=${limit}`)
+		).json();
 		const { data, pagination } = result;
 		const body = $("occupancy-body");
 		if (!body) return;
 
 		if (!data.length) {
-			body.innerHTML = '<tr><td colspan="6" class="text-center py-4">Chưa có dữ liệu</td></tr>';
+			body.innerHTML =
+				'<tr><td colspan="6" class="text-center py-4">Chưa có dữ liệu</td></tr>';
 			$("rt-avg-occupancy").textContent = "0%";
 			$("occupancy-pagination").innerHTML = "";
 			return;
 		}
 
 		// Tính trung bình lấp đầy cho thẻ real-time (từ trang hiện tại)
-		$("rt-avg-occupancy").textContent = (data.reduce((s, d) => s + parseFloat(d.occupancy_rate || 0), 0) / data.length).toFixed(1) + "%";
+		$("rt-avg-occupancy").textContent =
+			(
+				data.reduce((s, d) => s + parseFloat(d.occupancy_rate || 0), 0) /
+				data.length
+			).toFixed(1) + "%";
 
-		body.innerHTML = data.map(d => `
+		body.innerHTML = data
+			.map(
+				(d) => `
 			<tr>
 				<td class="text-truncate" style="max-width:180px">${d.tour_name}</td>
 				<td>${new Date(d.departure_date).toLocaleDateString("vi-VN")}</td>
@@ -191,15 +308,21 @@ async function loadOccupancy(page = 1) {
 				<td>${d.seats_booked}/${d.seats_total}</td>
 				<td>
 					<div class="occupancy-bar-wrap">
-						<div class="occupancy-bar-track"><div class="occupancy-bar-fill ${d.occupancy_rate >= 80 ? 'high' : ''}" style="width:${Math.min(d.occupancy_rate, 100)}%"></div></div>
+						<div class="occupancy-bar-track"><div class="occupancy-bar-fill ${d.occupancy_rate >= 80 ? "high" : ""}" style="width:${Math.min(d.occupancy_rate, 100)}%"></div></div>
 						<span class="fw-bold">${d.occupancy_rate}%</span>
 					</div>
 				</td>
 				<td>${statusLabel(d.status)}</td>
-			</tr>`).join("");
+			</tr>`,
+			)
+			.join("");
 
-		renderPagination("occupancy-pagination", pagination, (p) => loadOccupancy(p));
-	} catch (e) { console.error("Lỗi tải lấp đầy tour", e); }
+		renderPagination("occupancy-pagination", pagination, (p) =>
+			loadOccupancy(p),
+		);
+	} catch (e) {
+		console.error("Lỗi tải lấp đầy tour", e);
+	}
 }
 
 function renderPagination(containerId, pagination, onPageClick) {
@@ -212,9 +335,9 @@ function renderPagination(containerId, pagination, onPageClick) {
 	}
 
 	let html = '<div class="pagination-buttons">';
-	
+
 	// Nút Trước
-	html += `<button class="p-btn" ${page === 1 ? 'disabled' : ''} data-page="${page - 1}"><i class="fa-solid fa-chevron-left"></i></button>`;
+	html += `<button class="p-btn" ${page === 1 ? "disabled" : ""} data-page="${page - 1}"><i class="fa-solid fa-chevron-left"></i></button>`;
 
 	// Các số trang (đơn giản hóa: hiện tối đa 5 trang xung quanh hiện tại)
 	let start = Math.max(1, page - 2);
@@ -222,17 +345,17 @@ function renderPagination(containerId, pagination, onPageClick) {
 	if (end - start < 4) start = Math.max(1, end - 4);
 
 	for (let i = start; i <= end; i++) {
-		html += `<button class="p-btn ${i === page ? 'active' : ''}" data-page="${i}">${i}</button>`;
+		html += `<button class="p-btn ${i === page ? "active" : ""}" data-page="${i}">${i}</button>`;
 	}
 
 	// Nút Tiếp
-	html += `<button class="p-btn" ${page === total_pages ? 'disabled' : ''} data-page="${page + 1}"><i class="fa-solid fa-chevron-right"></i></button>`;
-	
-	html += '</div>';
+	html += `<button class="p-btn" ${page === total_pages ? "disabled" : ""} data-page="${page + 1}"><i class="fa-solid fa-chevron-right"></i></button>`;
+
+	html += "</div>";
 	container.innerHTML = html;
 
 	// Gán sự kiện
-	container.querySelectorAll(".p-btn[data-page]").forEach(btn => {
+	container.querySelectorAll(".p-btn[data-page]").forEach((btn) => {
 		btn.onclick = () => {
 			const p = parseInt(btn.dataset.page);
 			if (p >= 1 && p <= total_pages && p !== page) {
@@ -243,31 +366,42 @@ function renderPagination(containerId, pagination, onPageClick) {
 }
 
 async function loadReport(from, to) {
-	const { data } = await (await fetch(`${API}/api/stats/report?from=${from}&to=${to}`)).json();
+	const { data } = await (
+		await fetch(`${API}/api/stats/report?from=${from}&to=${to}`)
+	).json();
 	$("tb-revenue").textContent = fmt(data.revenue);
 	$("tb-bookings").textContent = data.booking_count;
 	$("tb-revenue-growth").innerHTML = growthBadge(data.growth.revenue);
 	$("tb-booking-growth").innerHTML = growthBadge(data.growth.booking);
 	$("tb-revenue-prev").textContent = `Kỳ trước: ${fmt(data.previous.revenue)}`;
-	$("tb-booking-prev").textContent = `Kỳ trước: ${data.previous.booking_count} booking`;
-
-
+	$("tb-booking-prev").textContent =
+		`Kỳ trước: ${data.previous.booking_count} booking`;
 }
 
 // --- Bộ lọc nhanh (preset) ---
 async function applyFilter(period) {
 	// Ẩn hiện ô chọn đặc thù
-	if ($("month-select-wrap")) $("month-select-wrap").style.display = (period === "month") ? "block" : "none";
-	if ($("year-select-wrap")) $("year-select-wrap").style.display = (period === "year") ? "block" : "none";
+	if ($("month-select-wrap"))
+		$("month-select-wrap").style.display =
+			period === "month" ? "block" : "none";
+	if ($("year-select-wrap"))
+		$("year-select-wrap").style.display = period === "year" ? "block" : "none";
 
 	const { from, to } = getDateRange(period);
-	if ($("time-label")) $("time-label").textContent = getPeriodLabel(period, from, to);
-	document.querySelectorAll(".time-filter-btn[data-period]").forEach(b => b.classList.toggle("active", b.dataset.period === period));
+	if ($("time-label"))
+		$("time-label").textContent = getPeriodLabel(period, from, to);
+	document
+		.querySelectorAll(".time-filter-btn[data-period]")
+		.forEach((b) => b.classList.toggle("active", b.dataset.period === period));
 
-	const resRev = await (await fetch(`${API}/api/stats/revenue?from=${from}&to=${to}`)).json();
-	initRevenueChart(resRev.data.labels, resRev.data.data);
+	const resRevenueTimeBased = await (
+		await fetch(`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=false`)
+	).json();
+	initRevenueChart(resRevenueTimeBased.data.labels, resRevenueTimeBased.data.data);
 
-	const resStatus = await (await fetch(`${API}/api/stats/bookings/status?from=${from}&to=${to}`)).json();
+	const resStatus = await (
+		await fetch(`${API}/api/stats/bookings/status?from=${from}&to=${to}`)
+	).json();
 	initStatusChart(resStatus.data);
 
 	loadReport(from, to);
@@ -289,12 +423,17 @@ async function applyCustomFilter() {
 
 	// Hiển thị label khoảng thời gian
 	const rangeLabel = $("custom-range-label");
-	if (rangeLabel) rangeLabel.textContent = `Đang xem: ${formatDateVN(from)} → ${formatDateVN(to)}`;
+	if (rangeLabel)
+		rangeLabel.textContent = `Đang xem: ${formatDateVN(from)} → ${formatDateVN(to)}`;
 
 	// Gọi API song song
-	const [reportRes, revenueRes] = await Promise.all([
-		fetch(`${API}/api/stats/report?from=${from}&to=${to}`).then(r => r.json()),
-		fetch(`${API}/api/stats/revenue?from=${from}&to=${to}`).then(r => r.json()),
+	const [reportRes, resRevenueCustom] = await Promise.all([
+		fetch(`${API}/api/stats/report?from=${from}&to=${to}`).then((r) =>
+			r.json(),
+		),
+		fetch(
+			`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=true`,
+		).then((r) => r.json()),
 	]);
 
 	const d = reportRes.data;
@@ -306,17 +445,19 @@ async function applyCustomFilter() {
 
 	$("cs-bookings").textContent = fmtNum(d.booking_count);
 	$("cs-booking-growth").innerHTML = growthBadge(d.growth.booking);
-	$("cs-booking-prev").textContent = `Kỳ trước: ${d.previous.booking_count} booking`;
+	$("cs-booking-prev").textContent =
+		`Kỳ trước: ${d.previous.booking_count} booking`;
 
 	$("cs-confirmed").textContent = fmtNum(d.confirmed);
 	$("cs-cancelled").textContent = fmtNum(d.cancelled);
 
 	// Label biểu đồ
 	const chartLabel = $("custom-chart-label");
-	if (chartLabel) chartLabel.textContent = `(${formatDateVN(from)} – ${formatDateVN(to)})`;
+	if (chartLabel)
+		chartLabel.textContent = `(${formatDateVN(from)} – ${formatDateVN(to)})`;
 
 	// Vẽ biểu đồ
-	initCustomRevenueChart(revenueRes.data.labels, revenueRes.data.data);
+	initCustomRevenueChart(resRevenueCustom.data.labels, resRevenueCustom.data.data);
 
 	// Hiện kết quả, ẩn placeholder
 	$("custom-stats-result").classList.remove("custom-stats-hidden");
@@ -326,46 +467,64 @@ async function applyCustomFilter() {
 // --- Analytics ---
 async function loadAnalytics() {
 	const [tours, reviews, users] = await Promise.all([
-		fetch(`${API}/api/stats/tours/top`).then(r => r.json()),
-		fetch(`${API}/api/stats/reviews`).then(r => r.json()),
-		fetch(`${API}/api/stats/users`).then(r => r.json())
+		fetch(`${API}/api/stats/tours/top`).then((r) => r.json()),
+		fetch(`${API}/api/stats/reviews`).then((r) => r.json()),
+		fetch(`${API}/api/stats/users`).then((r) => r.json()),
 	]);
 
-	$("top-tours-body").innerHTML = tours.data.map((t, i) => `
+	$("top-tours-body").innerHTML = tours.data
+		.map(
+			(t, i) => `
 		<tr>
-			<td><span class="tour-rank ${i < 3 ? `rank-${i+1}` : 'rank-other'}">${i+1}</span></td>
+			<td><span class="tour-rank ${i < 3 ? `rank-${i + 1}` : "rank-other"}">${i + 1}</span></td>
 			<td class="text-truncate" style="max-width:200px">${t.name}</td>
 			<td><span class="region-badge">${t.region}</span></td>
 			<td><b>${t.total_bookings}</b> đặt</td>
 			<td class="text-primary fw-bold">${fmt(t.total_revenue)}</td>
 			<td><div class="star-rating"><i class="fa-solid fa-star"></i> ${t.avg_rating} <small>(${t.review_count})</small></div></td>
-		</tr>`).join("");
+		</tr>`,
+		)
+		.join("");
 
 	const { overall, top_rated_tours } = reviews.data;
 	$("avg-rating-badge").textContent = overall.avg_rating || "0";
-	$("total-reviews-label").textContent = `Tổng ${overall.total_reviews} đánh giá`;
-	$("rating-bars").innerHTML = [5,4,3,2,1].map(s => {
-		const p = ((overall[`star${s}`] || 0) / (overall.total_reviews || 1) * 100).toFixed(1);
-		return `<div class="rating-bar-row">
+	$("total-reviews-label").textContent =
+		`Tổng ${overall.total_reviews} đánh giá`;
+	$("rating-bars").innerHTML = [5, 4, 3, 2, 1]
+		.map((s) => {
+			const p = (
+				((overall[`star${s}`] || 0) / (overall.total_reviews || 1)) *
+				100
+			).toFixed(1);
+			return `<div class="rating-bar-row">
 			<span class="rating-bar-label">${s}<i class="fa-solid fa-star"></i></span>
 			<div class="rating-bar-track"><div class="rating-bar-fill" style="width:${p}%"></div></div>
 			<span class="rating-bar-count">${overall[`star${s}`] || 0}</span>
 		</div>`;
-	}).join("");
+		})
+		.join("");
 
-	$("top-rated-list").innerHTML = top_rated_tours.map((t, i) => `
+	$("top-rated-list").innerHTML = top_rated_tours
+		.map(
+			(t, i) => `
 		<div class="top-item">
-			<div class="top-item-rank">${i+1}</div>
+			<div class="top-item-rank">${i + 1}</div>
 			<div class="top-item-body"><div class="top-item-name">${t.name}</div><div class="top-item-meta">${t.region} · ${t.review_count} đánh giá</div></div>
 			<div class="top-item-value"><span class="text-warning">★</span> ${t.avg_rating}</div>
-		</div>`).join("");
+		</div>`,
+		)
+		.join("");
 
-	$("top-passengers-list").innerHTML = users.data.top_passengers.map((c, i) => `
+	$("top-passengers-list").innerHTML = users.data.top_passengers
+		.map(
+			(c, i) => `
 		<div class="top-item">
-			<div class="top-item-rank">${i+1}</div>
+			<div class="top-item-rank">${i + 1}</div>
 			<div class="top-item-body"><div class="top-item-name">${c.fullname}</div><div class="top-item-meta">${c.email} · ${c.booking_count} booking</div></div>
 			<div class="top-item-value">${fmt(c.total_spent)}<small>Chi tiêu</small></div>
-		</div>`).join("");
+		</div>`,
+		)
+		.join("");
 }
 
 // --- Khởi tạo trang ---
@@ -379,18 +538,20 @@ window.initAdminStatisticsPage = async () => {
 	try {
 		const resYears = await (await fetch(`${API}/api/stats/years`)).json();
 		dbYears = resYears.data || [];
-	} catch (e) { console.error("Lỗi lấy năm từ DB", e); }
+	} catch (e) {
+		console.error("Lỗi lấy năm từ DB", e);
+	}
 
 	// Nếu DB chưa có dữ liệu, mặc định lấy năm hiện tại
 	if (dbYears.length === 0) dbYears = [currYear];
 
 	// Khởi tạo danh sách năm cho các select
 	const yearSelects = ["filter-month-y", "filter-year"];
-	yearSelects.forEach(id => {
+	yearSelects.forEach((id) => {
 		const el = $(id);
 		if (!el) return;
 		el.innerHTML = "";
-		dbYears.forEach(y => {
+		dbYears.forEach((y) => {
 			const opt = document.createElement("option");
 			opt.value = y;
 			opt.textContent = y;
@@ -407,13 +568,15 @@ window.initAdminStatisticsPage = async () => {
 	applyFilter("month");
 
 	// Bộ lọc nhanh (nút bấm)
-	document.querySelectorAll(".time-filter-btn[data-period]").forEach(b => {
+	document.querySelectorAll(".time-filter-btn[data-period]").forEach((b) => {
 		b.onclick = () => applyFilter(b.dataset.period);
 	});
 
 	// Lắng nghe thay đổi trên các ô chọn Month/Year
-	if ($("filter-month-m")) $("filter-month-m").onchange = () => applyFilter("month");
-	if ($("filter-month-y")) $("filter-month-y").onchange = () => applyFilter("month");
+	if ($("filter-month-m"))
+		$("filter-month-m").onchange = () => applyFilter("month");
+	if ($("filter-month-y"))
+		$("filter-month-y").onchange = () => applyFilter("month");
 	if ($("filter-year")) $("filter-year").onchange = () => applyFilter("year");
 
 	// Bộ lọc tùy chỉnh

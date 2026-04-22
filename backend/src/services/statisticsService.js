@@ -76,7 +76,7 @@ class StatisticsService {
 		};
 	}
 
-	static async getRevenueChartData(from, to) {
+	static async getRevenueChartData(from, to, limitChart) {
 		const daysDiff = Math.ceil((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24)) + 1;
 		let sqlExpr, labels = [];
 
@@ -100,12 +100,28 @@ class StatisticsService {
 			FROM bookings
 			WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY)
 				AND payment_status = 'paid' AND status != 'cancelled'
-			GROUP BY ${sqlExpr}
+			GROUP BY label
 			ORDER BY MIN(created_at)
 		`, [from, to]);
 
 		const dataMap = {};
 		rows.forEach(r => dataMap[r.label] = parseFloat(r.revenue));
+
+		if (limitChart === true || limitChart === "true") {
+			// Lấy top 20 labels có doanh thu cao nhất
+			const topLabels = [...rows]
+				.sort((a, b) => b.revenue - a.revenue)
+				.slice(0, 20)
+				.map(r => r.label);
+
+			// Lọc lại danh sách labels gốc để giữ thứ tự thời gian
+			const filteredLabels = labels.filter(l => topLabels.includes(l));
+			return {
+				labels: filteredLabels,
+				data: filteredLabels.map(l => dataMap[l] || 0)
+			};
+		}
+
 		return { labels, data: labels.map(l => dataMap[l] || 0) };
 	}
 
