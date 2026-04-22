@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bookingController = require("../controllers/bookingController");
 const { validateBookingTour } = require("../middlewares/validation/booking");
-const { verifyToken, isUser, isBookingStaff } = require("../middlewares/auth");
+const { verifyToken, isUser, isBookingStaff, isCustomer } = require("../middlewares/auth");
 
 //============================== User routes - Cần đăng nhập=====================
 
@@ -40,7 +40,7 @@ router.put(
 router.post(
 	"/create-payment-url",
 	verifyToken,
-	isUser,
+	isCustomer,
 	validateBookingTour,
 	bookingController.createVNPayUrl,
 );
