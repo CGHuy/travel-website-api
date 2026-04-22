@@ -375,6 +375,11 @@ INSERT INTO tour_departures
 (16,8,'TP.HCM','2026-05-02',900000,600000,30,28);
 
 Update tour_departures set status = 'full' where id in (9);
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE passengers;
+TRUNCATE TABLE reviews;
+TRUNCATE TABLE bookings;
+SET FOREIGN_KEY_CHECKS = 1;
 -- =========================
 -- 6. SERVICES (mô tả chuyên nghiệp)
 -- =========================
@@ -408,6 +413,12 @@ INSERT INTO tour_services (tour_id,service_id) VALUES
 (6,1),(6,2),(6,3),(6,4),
 (7,1),(7,2),(7,3),(7,4),
 (8,1),(8,2),(8,3),(8,4);
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE passengers;
+TRUNCATE TABLE reviews;
+TRUNCATE TABLE bookings;
+SET FOREIGN_KEY_CHECKS = 1;
 
 
 -- =========================
@@ -648,12 +659,12 @@ WHERE id > 0 AND departure_date < CURDATE();
 
 -- 6. BOOKINGS
 -- Batch 1: Tự động tăng ID
-INSERT INTO bookings (user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email) VALUES
-(4, 17, 2, 0, 8000000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
-(5, 18, 2, 1, 5600000, 'pending', 'pending', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
-(6, 19, 1, 0, 3800000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
-(7, 20, 4, 2, 3700000, 'refunded', 'cancelled', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
-(8, 24, 2, 0, 130000000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com');
+INSERT INTO bookings (id, user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email) VALUES
+(6, 4, 17, 2, 0, 8000000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com'),
+(7, 5, 18, 2, 1, 5600000, 'pending', 'pending', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com'),
+(8, 6, 19, 1, 0, 3800000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com'),
+(9, 7, 20, 4, 2, 3700000, 'refunded', 'cancelled', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com'),
+(10, 8, 24, 2, 0, 130000000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com');
 
 -- Batch 2: Chỉ định ID
 INSERT INTO bookings (id, user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email) VALUES
@@ -811,32 +822,32 @@ INSERT INTO users (fullname, phone, address, email, password, role) VALUES
 ('Nguyễn Duy Khánh', '0901000025', '5 Nguyễn Bỉnh Khiêm, Quận 1, TP.HCM', 'khanh25@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer');
 
 -- 13. BOOKINGS LẤP ĐẦY DEPARTURE 9
-INSERT INTO bookings (user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email, created_at) VALUES
-(9, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lâm Quốc Huy', '0901000001', 'huy1@gmail.com', '2026-03-03 09:10:00'),
-(10, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Phan Thị Bảo Trân', '0901000002', 'tran2@gmail.com', '2026-03-05 11:25:00'),
-(11, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Trịnh Minh Khoa', '0901000003', 'khoa3@gmail.com', '2026-03-08 14:40:00'),
-(12, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Nguyễn Hoài An', '0901000004', 'an4@gmail.com', '2026-03-10 10:05:00'),
-(13, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đặng Minh Phúc', '0901000005', 'phuc5@gmail.com', '2026-03-12 16:20:00'),
-(14, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Vũ Thảo Vy', '0901000006', 'vy6@gmail.com', '2026-03-15 09:30:00'),
-(15, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lê Đình Tài', '0901000007', 'tai7@gmail.com', '2026-03-18 13:10:00'),
-(16, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Hồ Ngọc Mai', '0901000008', 'mai8@gmail.com', '2026-03-20 08:45:00'),
-(17, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Bùi Công Minh', '0901000009', 'minh9@gmail.com', '2026-03-22 15:00:00'),
-(18, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đoàn Thị Yến Nhi', '0901000010', 'nhi10@gmail.com', '2026-03-25 10:30:00'),
-(19, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lương Văn Khải', '0901000011', 'khai11@gmail.com', '2026-03-28 14:15:00'),
-(20, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Tạ Thanh Vân', '0901000012', 'van12@gmail.com', '2026-03-30 09:55:00'),
-(21, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Ngô Đức Hòa', '0901000013', 'hoa13@gmail.com', '2026-04-02 11:40:00'),
-(22, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Mai Phương Linh', '0901000014', 'linh14@gmail.com', '2026-04-04 16:05:00'),
-(23, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Trần Nhật Nam', '0901000015', 'nam15@gmail.com', '2026-04-06 09:20:00'),
-(24, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Phạm Gia Hân', '0901000016', 'han16@gmail.com', '2026-04-08 13:35:00'),
-(25, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Châu Thanh Tùng', '0901000017', 'tung17@gmail.com', '2026-04-10 10:10:00'),
-(26, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Nguyễn Ánh Dương', '0901000018', 'duong18@gmail.com', '2026-04-12 15:45:00'),
-(27, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Phùng Đức Thịnh', '0901000019', 'thinh19@gmail.com', '2026-04-14 09:00:00'),
-(28, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đỗ Hải Yến', '0901000020', 'yen20@gmail.com', '2026-04-16 12:25:00'),
-(29, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Văn Quốc Bảo', '0901000021', 'bao21@gmail.com', '2026-04-18 14:50:00'),
-(30, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lý Thị Kim Ngân', '0901000022', 'ngan22@gmail.com', '2026-04-19 10:05:00'),
-(31, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đặng Quốc Việt', '0901000023', 'viet23@gmail.com', '2026-04-20 16:30:00'),
-(32, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Trần Thu Hằng', '0901000024', 'hang24@gmail.com', '2026-04-21 09:15:00'),
-(33, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Nguyễn Duy Khánh', '0901000025', 'khanh25@gmail.com', '2026-04-22 11:20:00');
+INSERT INTO bookings (id, user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email, created_at) VALUES
+(41, 9, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lâm Quốc Huy', '0901000001', 'huy1@gmail.com', '2026-03-03 09:10:00'),
+(42, 10, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Phan Thị Bảo Trân', '0901000002', 'tran2@gmail.com', '2026-03-05 11:25:00'),
+(43, 11, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Trịnh Minh Khoa', '0901000003', 'khoa3@gmail.com', '2026-03-08 14:40:00'),
+(44, 12, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Nguyễn Hoài An', '0901000004', 'an4@gmail.com', '2026-03-10 10:05:00'),
+(45, 13, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đặng Minh Phúc', '0901000005', 'phuc5@gmail.com', '2026-03-12 16:20:00'),
+(46, 14, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Vũ Thảo Vy', '0901000006', 'vy6@gmail.com', '2026-03-15 09:30:00'),
+(47, 15, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lê Đình Tài', '0901000007', 'tai7@gmail.com', '2026-03-18 13:10:00'),
+(48, 16, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Hồ Ngọc Mai', '0901000008', 'mai8@gmail.com', '2026-03-20 08:45:00'),
+(49, 17, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Bùi Công Minh', '0901000009', 'minh9@gmail.com', '2026-03-22 15:00:00'),
+(50, 18, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đoàn Thị Yến Nhi', '0901000010', 'nhi10@gmail.com', '2026-03-25 10:30:00'),
+(51, 19, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lương Văn Khải', '0901000011', 'khai11@gmail.com', '2026-03-28 14:15:00'),
+(52, 20, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Tạ Thanh Vân', '0901000012', 'van12@gmail.com', '2026-03-30 09:55:00'),
+(53, 21, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Ngô Đức Hòa', '0901000013', 'hoa13@gmail.com', '2026-04-02 11:40:00'),
+(54, 22, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Mai Phương Linh', '0901000014', 'linh14@gmail.com', '2026-04-04 16:05:00'),
+(55, 23, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Trần Nhật Nam', '0901000015', 'nam15@gmail.com', '2026-04-06 09:20:00'),
+(56, 24, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Phạm Gia Hân', '0901000016', 'han16@gmail.com', '2026-04-08 13:35:00'),
+(57, 25, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Châu Thanh Tùng', '0901000017', 'tung17@gmail.com', '2026-04-10 10:10:00'),
+(58, 26, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Nguyễn Ánh Dương', '0901000018', 'duong18@gmail.com', '2026-04-12 15:45:00'),
+(59, 27, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Phùng Đức Thịnh', '0901000019', 'thinh19@gmail.com', '2026-04-14 09:00:00'),
+(60, 28, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đỗ Hải Yến', '0901000020', 'yen20@gmail.com', '2026-04-16 12:25:00'),
+(61, 29, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Văn Quốc Bảo', '0901000021', 'bao21@gmail.com', '2026-04-18 14:50:00'),
+(62, 30, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lý Thị Kim Ngân', '0901000022', 'ngan22@gmail.com', '2026-04-19 10:05:00'),
+(63, 31, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đặng Quốc Việt', '0901000023', 'viet23@gmail.com', '2026-04-20 16:30:00'),
+(64, 32, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Trần Thu Hằng', '0901000024', 'hang24@gmail.com', '2026-04-21 09:15:00'),
+(65, 33, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Nguyễn Duy Khánh', '0901000025', 'khanh25@gmail.com', '2026-04-22 11:20:00');
 
 -- 14. PASSENGERS TƯƠNG ỨNG CHO DEPARTURE 9
 INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUES
@@ -912,38 +923,39 @@ INSERT INTO wishlist (user_id, tour_id) VALUES
 
 -- 10. BỔ SUNG BOOKINGS CHO CÁC DEPARTURES CHƯA CÓ BOOKING
 INSERT INTO bookings
-(user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email, created_at) VALUES
-(4, 1, 1, 0, 3700000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-02-10 09:15:00'),
-(5, 2, 1, 0, 3700000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-02-15 10:00:00'),
-(6, 3, 1, 0, 3200000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-02-20 11:00:00'),
-(7, 4, 1, 0, 3600000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-02-25 14:00:00'),
-(8, 5, 1, 0, 2800000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-03-01 09:45:00'),
-(4, 6, 1, 0, 2800000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-03-05 10:30:00'),
-(5, 7, 1, 0, 5200000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-03-10 13:00:00'),
-(6, 8, 1, 0, 5700000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-03-15 09:20:00'),
-(7, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-03-20 15:00:00'),
-(8, 10, 1, 0, 6700000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-03-25 08:50:00'),
-(4, 11, 1, 0, 3500000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-01 10:00:00'),
-(5, 12, 1, 0, 4300000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-03 11:30:00'),
-(6, 13, 1, 0, 3000000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-04-05 09:00:00'),
-(7, 14, 1, 0, 3200000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-04-07 14:15:00'),
-(8, 15, 1, 0, 2350000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-04-09 10:10:00'),
-(4, 16, 1, 0, 3100000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-10 09:40:00'),
-(5, 28, 1, 0, 3700000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-12 10:00:00'),
-(6, 30, 1, 0, 3600000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-04-14 10:30:00'),
-(7, 33, 1, 0, 6700000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-04-15 14:00:00'),
-(8, 34, 1, 0, 3500000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-04-16 09:10:00'),
-(4, 36, 1, 0, 4300000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-18 08:40:00'),
-(5, 37, 1, 0, 65000000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-19 11:20:00'),
-(6, 43, 1, 0, 2350000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-04-20 10:00:00'),
-(7, 45, 1, 0, 2100000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-04-21 09:00:00'),
-(8, 46, 1, 0, 4200000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-04-22 13:30:00'),
-(4, 48, 1, 0, 3300000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-23 09:15:00'),
-(5, 55, 1, 0, 2100000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-23 10:00:00');
+(id, user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email, created_at) VALUES
+(66, 4, 1, 1, 0, 3700000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-02-10 09:15:00'),
+(67, 5, 2, 1, 0, 3700000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-02-15 10:00:00'),
+(68, 6, 3, 1, 0, 3200000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-02-20 11:00:00'),
+(69, 7, 4, 1, 0, 3600000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-02-25 14:00:00'),
+(70, 8, 5, 1, 0, 2800000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-03-01 09:45:00'),
+(71, 4, 6, 1, 0, 2800000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-03-05 10:30:00'),
+(72, 5, 7, 1, 0, 5200000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-03-10 13:00:00'),
+(73, 6, 8, 1, 0, 5700000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-03-15 09:20:00'),
+(74, 7, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-03-20 15:00:00'),
+(75, 8, 10, 1, 0, 6700000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-03-25 08:50:00'),
+(76, 4, 11, 1, 0, 3500000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-01 10:00:00'),
+(77, 5, 12, 1, 0, 4300000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-03 11:30:00'),
+(78, 6, 13, 1, 0, 3000000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-04-05 09:00:00'),
+(79, 7, 14, 1, 0, 3200000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-04-07 14:15:00'),
+(80, 8, 15, 1, 0, 2350000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-04-09 10:10:00'),
+(81, 4, 16, 1, 0, 3100000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-10 09:40:00'),
+(82, 5, 28, 1, 0, 3700000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-12 10:00:00'),
+(83, 6, 30, 1, 0, 3600000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-04-14 10:30:00'),
+(84, 7, 33, 1, 0, 6700000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-04-15 14:00:00'),
+(85, 8, 34, 1, 0, 3500000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-04-16 09:10:00'),
+(86, 4, 36, 1, 0, 4300000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-18 08:40:00'),
+(87, 5, 37, 1, 0, 65000000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-19 11:20:00'),
+(88, 6, 43, 1, 0, 2350000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-04-20 10:00:00'),
+(89, 7, 45, 1, 0, 2100000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-04-21 09:00:00'),
+(90, 8, 46, 1, 0, 4200000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-04-22 13:30:00'),
+(91, 4, 48, 1, 0, 3300000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-23 09:15:00'),
+(92, 5, 55, 1, 0, 2100000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-23 10:00:00');
 
 -- 11. PASSENGERS TƯƠNG ỨNG CHO CÁC BOOKING BỔ SUNG
 INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUES
-
+(66, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
+(67, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult'),
 (68, 'Võ Hoàng Nam', 'Nam', '1988-12-05', 'adult'),
 (69, 'Bùi Thanh Trúc', 'Nữ', '1993-02-28', 'adult'),
 (70, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult'),
