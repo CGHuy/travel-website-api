@@ -188,17 +188,37 @@ function renderBookingDetail(booking) {
         window.print();
     });
 
-    // 7. Render Action Buttons (Demo Mode Logic)
+    // 7. Render Action Buttons
     const actionContainer = document.getElementById("booking-actions");
     actionContainer.innerHTML = ""; // Clear old
 
+    // Badge cho trạng thái đang chờ duyệt hủy
+    if (booking.status === "pending") {
+        actionContainer.innerHTML = `
+            <span class="badge rounded-pill py-2 px-3 fw-semibold" 
+                  style="background:#fff8e1;color:#f39c12;border:1.5px solid #f39c12;font-size:13px;">
+                <i class="fa-solid fa-clock me-1"></i>Yêu cầu hủy đang chờ xử lý
+            </span>`;
+        return;
+    }
+
+    // Badge khi đơn đã bị hủy
+    if (booking.status === "cancelled") {
+        actionContainer.innerHTML = `
+            <span class="badge rounded-pill py-2 px-3 fw-semibold" 
+                  style="background:#fff5f5;color:#e74c3c;border:1.5px solid #e74c3c;font-size:13px;">
+                <i class="fa-solid fa-ban me-1"></i>Đơn đã bị hủy
+            </span>`;
+        return;
+    }
+
     if (booking.status === "confirmed" && booking.payment_status === "paid") {
-        // A. Nút Hủy Tour
-        // Logic: Cho phép hủy nếu tour chưa diễn ra (Ngày khởi hành > Ngày hiện tại)
         const departureTime = new Date(booking.departure_date).getTime();
         const now = new Date().getTime();
         const isBeforeDeparture = departureTime > now;
+        const hasStarted = departureTime <= now;
 
+        // A. Nút Hủy Tour (chỉ khi chưa khởi hành)
         if (isBeforeDeparture) {
             const cancelBtn = document.createElement("button");
             cancelBtn.className = "btn btn-outline-danger btn-sm fw-bold rounded-pill px-3";
@@ -242,11 +262,7 @@ function renderBookingDetail(booking) {
             actionContainer.appendChild(cancelBtn);
         }
 
-        // B. Nút Đánh Giá Tour
-        // Logic Thực tế: Chỉ cho phép đánh giá khi tour đã bắt đầu hoặc kết thúc (Ngày khởi hành <= Ngày hiện tại)
-        // LƯU Ý DEMO: Nếu muốn hiện luôn để cô xem, hãy đổi dấu <= thành >= 
-        const hasStarted = departureTime <= now;
-
+        // B. Nút Đánh Giá Tour (sau ngày khởi hành, chưa review)
         if (hasStarted && !booking.is_reviewed) {
             const reviewBtn = document.createElement("button");
             reviewBtn.className = "btn btn-warning btn-sm fw-bold rounded-pill px-3 text-dark";
@@ -260,7 +276,7 @@ function renderBookingDetail(booking) {
                 const newReviewForm = reviewForm.cloneNode(true);
                 reviewForm.parentNode.replaceChild(newReviewForm, reviewForm);
 
-                // Logic chọn sao (Phải gán SAU KHI replaceChild vì cloneNode không copy event listener)
+                // Logic chọn sao
                 const stars = newReviewForm.querySelectorAll('.star-btn');
                 const ratingInput = newReviewForm.querySelector('#review-rating-value');
                 const ratingText = newReviewForm.querySelector('#rating-text');
@@ -330,6 +346,15 @@ function renderBookingDetail(booking) {
                 });
             };
             actionContainer.appendChild(reviewBtn);
+        }
+
+        // C. Badge "Đã đánh giá ✓" khi tour kết thúc và đã review
+        if (hasStarted && booking.is_reviewed) {
+            const reviewedBadge = document.createElement("span");
+            reviewedBadge.className = "badge rounded-pill py-2 px-3 fw-semibold";
+            reviewedBadge.style.cssText = "background:#f0fdf4;color:#16a34a;border:1.5px solid #16a34a;font-size:13px;";
+            reviewedBadge.innerHTML = `<i class="fa-solid fa-check me-1"></i>Đã đánh giá`;
+            actionContainer.appendChild(reviewedBadge);
         }
     }
 }

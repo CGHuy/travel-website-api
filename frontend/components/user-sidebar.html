@@ -36,22 +36,22 @@
             </ul>
         </div>
 
-        <!-- Other Static Items -->
-        <div class="nav-item-static mb-3">
+        <!-- Other Static Items – ẩn với staff/admin -->
+        <div class="nav-item-static mb-3" id="sidebar-bookings">
             <a href="/bookings-history" class="d-flex align-items-center text-decoration-none">
                 <i class="fa-solid fa-ticket-simple me-3 icon-bookings"></i>
                 <span class="fw-bold">Đơn đặt chỗ</span>
             </a>
         </div>
 
-        <div class="nav-item-static mb-3">
+        <div class="nav-item-static mb-3" id="sidebar-reviews">
             <a href="/reviews" class="d-flex align-items-center text-decoration-none">
                 <i class="fa-regular fa-comment-dots me-3 icon-reviews"></i>
                 <span class="fw-bold">Đánh giá của quý khách</span>
             </a>
         </div>
 
-        <div class="nav-item-static mb-3">
+        <div class="nav-item-static mb-3" id="sidebar-favorites">
             <a href="/favorite" class="d-flex align-items-center text-decoration-none">
                 <i class="fa-solid fa-heart me-3 icon-favorites"></i>
                 <span class="fw-bold">Yêu thích đã lưu</span>
@@ -63,6 +63,11 @@
 <script>
     (function () {
         const userData = localStorage.getItem("user");
+
+        // Các role không phải khách hàng → ẩn menu nghiệp vụ KH
+        // Sử dụng đúng format role theo DB (gạch ngang)
+        const STAFF_ROLES = ["admin", "booking-staff", "tour-staff"];
+
         if (userData) {
             try {
                 const user = JSON.parse(userData);
@@ -75,6 +80,17 @@
                 if (initialEl) {
                     const name = user.fullname || user.name || "K";
                     initialEl.textContent = name.charAt(0).toUpperCase();
+                }
+
+                // Ẩn các mục chỉ dành cho khách hàng nếu là staff/admin
+                const role = (user.role || "").toLowerCase();
+                if (STAFF_ROLES.includes(role)) {
+                    const bookingsEl   = document.getElementById("sidebar-bookings");
+                    const reviewsEl    = document.getElementById("sidebar-reviews");
+                    const favoritesEl  = document.getElementById("sidebar-favorites");
+                    if (bookingsEl)  bookingsEl.style.display  = "none";
+                    if (reviewsEl)   reviewsEl.style.display   = "none";
+                    if (favoritesEl) favoritesEl.style.display = "none";
                 }
             } catch (err) {
                 console.error("Error parsing user data for sidebar:", err);

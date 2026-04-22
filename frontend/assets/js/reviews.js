@@ -67,6 +67,15 @@ async function initReviewsPage() {
         return;
     }
 
+    // Chỉ khách hàng (customer) mới được xem trang này
+    // Sử dụng đúng format role theo DB (gạch ngang)
+    const _rv_user = JSON.parse(localStorage.getItem("user") || "{}");
+    const _rv_STAFF = ["admin", "booking-staff", "tour-staff"];
+    if (_rv_STAFF.includes((_rv_user.role || "").toLowerCase())) {
+        window.location.replace("/profile");
+        return;
+    }
+
     // Function to format date
     const formatDate = (dateString) => {
         const date = new Date(dateString);
