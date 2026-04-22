@@ -208,7 +208,7 @@ window.showToast = function(title, message = "", type = "success", duration = 50
             <i class="${icons[type] || icons.info}"></i>
         </div>
         <div class="toast-content">
-            <span class="toast-title">${title}</span>
+            ${title ? `<span class="toast-title">${title}</span>` : ""}
             ${message ? `<div class="toast-body">${message}</div>` : ""}
         </div>
         <button class="toast-close" title="Đóng">
