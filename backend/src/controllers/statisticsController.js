@@ -47,11 +47,11 @@ class StatisticsController {
 	// GET /api/stats/revenue?from=YYYY-MM-DD&to=YYYY-MM-DD
 	static async getRevenue(req, res) {
 		try {
-			const { from, to, limitChart } = req.query;
+			const { from, to } = req.query;
 			if (!from || !to) {
 				return res.status(400).json({ success: false, message: "Thiếu tham số from/to" });
 			}
-			const data = await StatisticsService.getRevenueChartData(from, to, limitChart);
+			const data = await StatisticsService.getRevenueChartData(from, to);
 			res.json({ success: true, data });
 		} catch (error) {
 			console.error("getRevenue error:", error);

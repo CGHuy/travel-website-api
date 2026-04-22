@@ -76,7 +76,7 @@ class StatisticsService {
 		};
 	}
 
-	static async getRevenueChartData(from, to, limitChart) {
+	static async getRevenueChartData(from, to) {
 		const daysDiff = Math.ceil((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24)) + 1;
 		let sqlExpr, labels = [];
 
@@ -91,8 +91,18 @@ class StatisticsService {
 				curr.setDate(curr.getDate() + 1);
 			}
 		} else {
-			sqlExpr = "CONCAT('Th', MONTH(created_at))";
-			labels = Array.from({ length: 12 }, (_, i) => `Th${i + 1}`);
+			sqlExpr = "DATE_FORMAT(created_at, '%m/%Y')";
+			let curr = new Date(from);
+			curr.setDate(1); // Đặt về ngày 1 để dễ tăng tháng
+			const endMonth = new Date(to);
+			endMonth.setDate(1);
+
+			while (curr <= endMonth) {
+				const mm = String(curr.getMonth() + 1).padStart(2, '0');
+				const yyyy = curr.getFullYear();
+				labels.push(`${mm}/${yyyy}`);
+				curr.setMonth(curr.getMonth() + 1);
+			}
 		}
 
 		const [rows] = await db.query(`
@@ -106,21 +116,6 @@ class StatisticsService {
 
 		const dataMap = {};
 		rows.forEach(r => dataMap[r.label] = parseFloat(r.revenue));
-
-		if (limitChart === true || limitChart === "true") {
-			// Lấy top 20 labels có doanh thu cao nhất
-			const topLabels = [...rows]
-				.sort((a, b) => b.revenue - a.revenue)
-				.slice(0, 20)
-				.map(r => r.label);
-
-			// Lọc lại danh sách labels gốc để giữ thứ tự thời gian
-			const filteredLabels = labels.filter(l => topLabels.includes(l));
-			return {
-				labels: filteredLabels,
-				data: filteredLabels.map(l => dataMap[l] || 0)
-			};
-		}
 
 		return { labels, data: labels.map(l => dataMap[l] || 0) };
 	}
