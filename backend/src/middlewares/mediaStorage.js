@@ -1,81 +1,37 @@
 const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 
-const upload = multer({
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_MIMES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
+
+const upload = multer({ // Sử dụng memory storage để lưu file tạm thời trong bộ nhớ
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 5 * 1024 * 1024, // Giới hạn 5MB
+        fileSize: MAX_FILE_SIZE,
     },
     fileFilter: (req, file, cb) => {
-        // Kiểm tra loại file
-        const allowedMimes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-
-        if (allowedMimes.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error("Chỉ chấp nhận file ảnh (jpg, png, gif, webp)"));
+        if (!ALLOWED_MIMES.has(file.mimetype)) {
+            return cb(new Error("Chỉ chấp nhận file ảnh (jpg, png, gif, webp)"));
         }
+        return cb(null, true);
     },
 });
 
-function uploadBufferToCloudinary(buffer) {
+function uploadBufferToCloudinary(buffer) { // Trả về một Promise để dễ dàng sử dụng async/await
     return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-            {
-                folder: "travel-website",
-                resource_type: "image",
-            },
-            (error, result) => {
-                if (error) return reject(error);
-                return resolve(result);
-            },
-        );
-
-        stream.end(buffer);
+        cloudinary.uploader
+            .upload_stream(
+                {
+                    folder: "travel-website",
+                    resource_type: "image",
+                },
+                (error, result) => (error ? reject(error) : resolve(result)),
+            )
+            .end(buffer);
     });
 }
 
-function extractCloudinaryPublicId(imageUrl) {
-    if (typeof imageUrl !== "string" || imageUrl.trim() === "") {
-        return "";
-    }
-
-    const uploadMarker = "/upload/";
-    const markerIndex = imageUrl.indexOf(uploadMarker);
-    if (markerIndex === -1) return "";
-
-    let pathAfterUpload = imageUrl.slice(markerIndex + uploadMarker.length);
-    const parts = pathAfterUpload.split("/");
-    if (parts.length === 0) return "";
-
-    if (/^v\d+$/.test(parts[0])) {
-        parts.shift();
-    }
-
-    pathAfterUpload = parts.join("/");
-    const dotIndex = pathAfterUpload.lastIndexOf(".");
-    if (dotIndex <= 0) return pathAfterUpload;
-
-    return pathAfterUpload.slice(0, dotIndex);
-}
-
-async function deleteFromCloudinaryByUrl(imageUrl) {
-    const publicId = extractCloudinaryPublicId(imageUrl);
-    if (!publicId) {
-        return { ok: false, reason: "empty-public-id" };
-    }
-
-    const result = await cloudinary.uploader.destroy(publicId, {
-        resource_type: "image",
-    });
-
-    return {
-        ok: result && (result.result === "ok" || result.result === "not found"),
-        result,
-    };
-}
-
-function buildUploadMiddleware(fieldName) {
+exports.single = function buildUploadMiddleware(fieldName) { // Trả về middleware để xử lý upload file
     return (req, res, next) => {
         upload.single(fieldName)(req, res, async (err) => {
             if (err) return next(err);
@@ -92,9 +48,35 @@ function buildUploadMiddleware(fieldName) {
             }
         });
     };
+};
+
+function extractCloudinaryPublicId(imageUrl) { // Trích xuất public_id từ URL Cloudinary
+    if (typeof imageUrl !== "string" || imageUrl.trim() === "") {
+        return "";
+    }
+
+    const uploadMarker = "/upload/";
+    const markerIndex = imageUrl.indexOf(uploadMarker);
+    if (markerIndex === -1) return "";
+
+    return imageUrl
+        .slice(markerIndex + uploadMarker.length)
+        .replace(/^v\d+\//, "")
+        .replace(/\.[^/.?#]+(?:[?#].*)?$/, "");
 }
 
-module.exports = {
-    single: buildUploadMiddleware,
-    deleteFromCloudinaryByUrl,
+exports.deleteFromCloudinaryByUrl = async function deleteFromCloudinaryByUrl(imageUrl) { // Xóa file khỏi Cloudinary dựa trên URL
+    const publicId = extractCloudinaryPublicId(imageUrl);
+    if (!publicId) {
+        return { ok: false, reason: "empty-public-id" };
+    }
+
+    const result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: "image",
+    });
+
+    return {
+        ok: result && (result.result === "ok" || result.result === "not found"),
+        result,
+    };
 };

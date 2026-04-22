@@ -1,5 +1,5 @@
-const TourItinerary = require("../models/TourItinerary");
 const Tour = require("../models/Tour");
+const TourItinerary = require("../models/TourItinerary");
 
 // Lấy tất cả tour kèm lịch trình để admin render 1 lần duy nhất
 exports.getToursForItineraryManagement = async (req, res) => {

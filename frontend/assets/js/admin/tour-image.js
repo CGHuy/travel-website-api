@@ -1,7 +1,7 @@
 (() => {
     const TOUR_IMAGE_TOURS_API_URL = "/api/tour-images/tours";
     const TOUR_IMAGE_API_URL = "/api/tour-images";
-    const DEFAULT_TOUR_IMAGE = "../../assets/images/image.png";
+    const DEFAULT_TOUR_IMAGE = "../../assets/images/image-default.webp";
 
     let adminTourImageCache = [];
     let currentTourImages = [];
@@ -483,18 +483,4 @@
     }
 
     window.initAdminTourImagePage = initAdminTourImagePage;
-
-    if (document.readyState !== "loading") {
-        const params = new URLSearchParams(window.location.search);
-        if (window.location.pathname.includes("tour-image.html") || params.get("page") === "tour-image") {
-            window.initAdminTourImagePage();
-        }
-    } else {
-        document.addEventListener("DOMContentLoaded", () => {
-            const params = new URLSearchParams(window.location.search);
-            if (window.location.pathname.includes("tour-image.html") || params.get("page") === "tour-image") {
-                window.initAdminTourImagePage();
-            }
-        });
-    }
 })();

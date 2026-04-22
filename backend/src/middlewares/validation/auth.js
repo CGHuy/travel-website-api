@@ -1,4 +1,4 @@
-// Validation cho dang ky user
+// Validation cho đăng ký
 const validateRegister = (req, res, next) => {
     const { fullname, phone, email, password } = req.body;
     const errors = {};
@@ -47,7 +47,7 @@ const validateRegister = (req, res, next) => {
     next();
 };
 
-// Validation cho dang nhap
+// Validation cho đăng nhập
 const validateLogin = (req, res, next) => {
     const { username, password } = req.body;
     const errors = {};

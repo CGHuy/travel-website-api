@@ -1,12 +1,18 @@
 const Tour = require("../models/Tour");
+const Departure = require("../models/Departure");
+const { deleteFromCloudinaryByUrl } = require("../middlewares/mediaStorage");
 
 exports.getAllTours = async (req, res) => {
     try {
         const tours = await Tour.getAll();
+        const data = tours.map((tour) => ({
+            ...tour,
+            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+        }));
 
         res.json({
             success: true,
-            data: tours,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -29,10 +35,14 @@ exports.searchTours = async (req, res) => {
         }
 
         const tours = await Tour.search(keyword);
+        const data = tours.map((tour) => ({
+            ...tour,
+            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+        }));
 
         res.json({
             success: true,
-            data: tours,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -55,10 +65,14 @@ exports.getToursByRegion = async (req, res) => {
         }
 
         const tours = await Tour.getByRegion(region);
+        const data = tours.map((tour) => ({
+            ...tour,
+            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+        }));
 
         res.json({
             success: true,
-            data: tours,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -88,9 +102,14 @@ exports.getTourById = async (req, res) => {
             });
         }
 
+        const data = {
+            ...tour,
+            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+        };
+
         res.json({
             success: true,
-            data: tour,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -121,11 +140,15 @@ exports.createTour = async (req, res) => {
         });
 
         const createdTour = await Tour.getById(tourId);
+        const data = {
+            ...createdTour,
+            code: `TOUR${String(createdTour.id).padStart(3, "0")}`,
+        };
 
         res.status(201).json({
             success: true,
             message: "Tạo tour thành công",
-            data: createdTour,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -148,6 +171,16 @@ exports.updateTour = async (req, res) => {
         }
 
         const { name, slug, description, price_default, price_child, region, duration, location } = req.body;
+        const existingTour = await Tour.getById(id);
+
+        if (!existingTour) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy tour",
+            });
+        }
+
+        const oldImageUrl = existingTour.cover_image || existingTour.image || null;
 
         // Giữ ảnh cũ nếu không upload ảnh mới
         let imageUrl = null;
@@ -156,8 +189,7 @@ exports.updateTour = async (req, res) => {
         } else if (req.body.image || req.body.cover_image || req.body.existing_image) {
             imageUrl = req.body.image || req.body.cover_image || req.body.existing_image;
         } else {
-            const existingTour = await Tour.getById(id);
-            imageUrl = existingTour ? existingTour.cover_image || existingTour.image || null : null;
+            imageUrl = oldImageUrl;
         }
 
         const updated = await Tour.update(id, {
@@ -179,12 +211,24 @@ exports.updateTour = async (req, res) => {
             });
         }
 
+        if (req.file && oldImageUrl && oldImageUrl !== req.file.path) {
+            try {
+                await deleteFromCloudinaryByUrl(oldImageUrl);
+            } catch (cloudinaryError) {
+                console.error("Không thể xóa ảnh cũ trên Cloudinary:", cloudinaryError.message || cloudinaryError);
+            }
+        }
+
         const updatedTour = await Tour.getById(id);
+        const data = {
+            ...updatedTour,
+            code: `TOUR${String(updatedTour.id).padStart(3, "0")}`,
+        };
 
         res.json({
             success: true,
             message: "Cập nhật tour thành công",
-            data: updatedTour,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -206,6 +250,25 @@ exports.deleteTour = async (req, res) => {
             });
         }
 
+        const existingTour = await Tour.getById(id);
+        if (!existingTour) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy tour",
+            });
+        }
+
+        // Kiểm tra xem tour có điểm khởi hành chưa
+        const departures = await Departure.getByTourId(id);
+        if (departures && departures.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Không thể xóa tour vì tour này đã có điểm khởi hành",
+            });
+        }
+
+        const oldImageUrl = existingTour.cover_image || existingTour.image || null;
+
         const deleted = await Tour.delete(id);
 
         if (!deleted) {
@@ -213,6 +276,14 @@ exports.deleteTour = async (req, res) => {
                 success: false,
                 message: "Không tìm thấy tour",
             });
+        }
+
+        if (oldImageUrl) {
+            try {
+                await deleteFromCloudinaryByUrl(oldImageUrl);
+            } catch (cloudinaryError) {
+                console.error("Không thể xóa ảnh tour trên Cloudinary:", cloudinaryError.message || cloudinaryError);
+            }
         }
 
         res.json({

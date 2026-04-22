@@ -93,7 +93,7 @@ class Tour {
 		}
 	}
 
-	//Lấy name,location,region,duration,cover_image,price_deafault,price_child theo tourId
+	// Lấy name,location,region,duration,cover_image,price_deafault,price_child theo tourId
 	static async getTourInfoForBookingById(id) {
 		try {
 			const [rows] = await db.query(
@@ -107,7 +107,7 @@ class Tour {
 		}
 	}
 
-	// === Thống kê ===
+	// Thống kê
 	static async totalTours() {
 		try {
 			const [rows] = await db.query(`SELECT COUNT(*) AS total_tours FROM tours`);
