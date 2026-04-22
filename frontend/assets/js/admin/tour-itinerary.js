@@ -1,4 +1,4 @@
-(function () {
+(() => {
     const ITINERARY_TOUR_API_URL = "/api/tourItinerary/tours";
     const ITINERARY_API_URL = "/api/tourItinerary";
 

@@ -346,8 +346,14 @@ function updateTourServiceTotal(tours) {
 }
 
 async function fetchJson(url, options = {}) {
+    const token = localStorage.getItem("token") || "";
+    const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+
     const res = await fetch(url, {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            ...authHeaders,
+        },
         ...options,
     });
 

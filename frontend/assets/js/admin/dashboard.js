@@ -5,23 +5,37 @@ const CONTENT_LOADING_HTML = `
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>`;
+const ROLE_PAGE_ACCESS_MAP = {
+    admin: new Set(["user", "tour", "tour-image", "statistics"]),
+    tour_staff: new Set(["departure", "itinerary", "service", "tour-service"]),
+    booking_staff: new Set(["booking"]),
+};
 
 document.addEventListener("DOMContentLoaded", async () => {
     await Promise.all([loadComponent("header-placeholder", "../../components/header.html"), loadComponent("footer-placeholder", "../../components/footer.html")]);
-    initAdminLayout();
+    await initAdminLayout();
 });
 
-function initAdminLayout() {
+async function initAdminLayout() {
     const menuItems = Array.from(document.querySelectorAll(".menu-item[data-page][data-file]"));
     if (menuItems.length === 0) return;
 
     initSidebar();
+
+    const role = await getCurrentUserRole();
+    const allowedPages = getAllowedPagesByRole(role);
+    applyRoleMenuPermissions(menuItems, allowedPages);
 
     menuItems.forEach((item) => {
         const link = item.querySelector("a");
         if (!link) return;
 
         link.addEventListener("click", (e) => {
+            if (item.classList.contains("disabled")) {
+                e.preventDefault();
+                return;
+            }
+
             e.preventDefault();
             const page = item.getAttribute("data-page");
             history.pushState({ page }, "", `${window.location.pathname}?page=${page}`);
@@ -36,11 +50,109 @@ function initAdminLayout() {
 
     const initialPage = getCurrentPageQuery();
     if (!initialPage) {
+        navigateToFirstAllowedPage(menuItems, allowedPages);
+        return;
+    }
+
+    if (!allowedPages.has(initialPage)) {
+        navigateToFirstAllowedPage(menuItems, allowedPages);
+        return;
+    }
+
+    setActiveMenu(initialPage, menuItems);
+}
+
+function applyRoleMenuPermissions(menuItems, allowedPages) {
+    menuItems.forEach((item) => {
+        const page = item.getAttribute("data-page") || "";
+        const isAllowed = allowedPages.has(page);
+        item.classList.toggle("disabled", !isAllowed);
+
+        const link = item.querySelector("a");
+        if (link) {
+            link.setAttribute("aria-disabled", String(!isAllowed));
+            link.tabIndex = isAllowed ? 0 : -1;
+        }
+    });
+}
+
+function navigateToFirstAllowedPage(menuItems, allowedPages) {
+    const firstAllowedItem = menuItems.find((item) => {
+        const page = item.getAttribute("data-page") || "";
+        return allowedPages.has(page);
+    });
+
+    if (!firstAllowedItem) {
         clearActiveMenu(menuItems);
         clearContent();
         return;
     }
-    setActiveMenu(initialPage, menuItems);
+
+    const firstPage = firstAllowedItem.getAttribute("data-page");
+    if (!firstPage) {
+        clearActiveMenu(menuItems);
+        clearContent();
+        return;
+    }
+
+    history.replaceState({ page: firstPage }, "", `${window.location.pathname}?page=${firstPage}`);
+    setActiveMenu(firstPage, menuItems);
+}
+
+async function getCurrentUserRole() {
+    const userRoleFromLocalStorage = getRoleFromLocalStorageUser();
+    if (userRoleFromLocalStorage) {
+        return userRoleFromLocalStorage;
+    }
+
+    const token = localStorage.getItem("token") || "";
+    if (!token) return "";
+
+    try {
+        const response = await fetch("/api/auth/verify", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) return "";
+
+        const result = await response.json().catch(() => ({}));
+        const backendRole = result?.data?.user?.role;
+        return normalizeRole(backendRole);
+    } catch (error) {
+        console.warn("Không thể xác thực role người dùng:", error);
+        return "";
+    }
+}
+
+function getRoleFromLocalStorageUser() {
+    try {
+        const rawUser = localStorage.getItem("user");
+        if (!rawUser) return "";
+
+        const user = JSON.parse(rawUser);
+        return normalizeRole(user?.role);
+    } catch (error) {
+        return "";
+    }
+}
+
+function normalizeRole(role) {
+    const rawRole = String(role || "")
+        .trim()
+        .toLowerCase();
+
+    if (rawRole === "tour-staff") return "tour_staff";
+    if (rawRole === "tour-booking") return "booking_staff";
+    if (rawRole === "booking-staff") return "booking_staff";
+    return rawRole;
+}
+
+function getAllowedPagesByRole(role) {
+    const normalizedRole = normalizeRole(role);
+    return ROLE_PAGE_ACCESS_MAP[normalizedRole] || new Set();
 }
 
 function initSidebar() {
