@@ -483,18 +483,4 @@
     }
 
     window.initAdminTourImagePage = initAdminTourImagePage;
-
-    if (document.readyState !== "loading") {
-        const params = new URLSearchParams(window.location.search);
-        if (window.location.pathname.includes("tour-image.html") || params.get("page") === "tour-image") {
-            window.initAdminTourImagePage();
-        }
-    } else {
-        document.addEventListener("DOMContentLoaded", () => {
-            const params = new URLSearchParams(window.location.search);
-            if (window.location.pathname.includes("tour-image.html") || params.get("page") === "tour-image") {
-                window.initAdminTourImagePage();
-            }
-        });
-    }
 })();

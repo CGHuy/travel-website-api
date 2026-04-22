@@ -4,10 +4,14 @@ const { deleteFromCloudinaryByUrl } = require("../middlewares/mediaStorage");
 exports.getAllTours = async (req, res) => {
     try {
         const tours = await Tour.getAll();
+        const data = tours.map((tour) => ({
+            ...tour,
+            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+        }));
 
         res.json({
             success: true,
-            data: tours,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -30,10 +34,14 @@ exports.searchTours = async (req, res) => {
         }
 
         const tours = await Tour.search(keyword);
+        const data = tours.map((tour) => ({
+            ...tour,
+            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+        }));
 
         res.json({
             success: true,
-            data: tours,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -56,10 +64,14 @@ exports.getToursByRegion = async (req, res) => {
         }
 
         const tours = await Tour.getByRegion(region);
+        const data = tours.map((tour) => ({
+            ...tour,
+            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+        }));
 
         res.json({
             success: true,
-            data: tours,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -89,9 +101,14 @@ exports.getTourById = async (req, res) => {
             });
         }
 
+        const data = {
+            ...tour,
+            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+        };
+
         res.json({
             success: true,
-            data: tour,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -122,11 +139,15 @@ exports.createTour = async (req, res) => {
         });
 
         const createdTour = await Tour.getById(tourId);
+        const data = {
+            ...createdTour,
+            code: `TOUR${String(createdTour.id).padStart(3, "0")}`,
+        };
 
         res.status(201).json({
             success: true,
             message: "Tạo tour thành công",
-            data: createdTour,
+            data,
         });
     } catch (error) {
         res.status(500).json({
@@ -198,11 +219,15 @@ exports.updateTour = async (req, res) => {
         }
 
         const updatedTour = await Tour.getById(id);
+        const data = {
+            ...updatedTour,
+            code: `TOUR${String(updatedTour.id).padStart(3, "0")}`,
+        };
 
         res.json({
             success: true,
             message: "Cập nhật tour thành công",
-            data: updatedTour,
+            data,
         });
     } catch (error) {
         res.status(500).json({
