@@ -1,5 +1,4 @@
 <!-- SECTION 1: 🔴 HIỆN TẠI -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <div class="stats-section">
     <div class="stats-section-header">
@@ -81,9 +80,9 @@
         </div>
 
         <!-- Ô chọn tháng (ẩn mặc định) -->
-        <div id="month-select-wrap" class="ms-2" style="display: none;">
+        <div id="month-select-wrap" class="ms-2" style="display: none">
             <div class="d-flex gap-1">
-                <select id="filter-month-m" class="time-filter-input" style="width: 100px;">
+                <select id="filter-month-m" class="time-filter-input" style="width: 100px">
                     <option value="01">Tháng 1</option>
                     <option value="02">Tháng 2</option>
                     <option value="03">Tháng 3</option>
@@ -97,13 +96,13 @@
                     <option value="11">Tháng 11</option>
                     <option value="12">Tháng 12</option>
                 </select>
-                <select id="filter-month-y" class="time-filter-input" style="width: 90px;"></select>
+                <select id="filter-month-y" class="time-filter-input" style="width: 90px"></select>
             </div>
         </div>
 
         <!-- Ô chọn năm (ẩn mặc định) -->
-        <div id="year-select-wrap" class="ms-2" style="display: none;">
-            <select id="filter-year" class="time-filter-input" style="width: 100px;"></select>
+        <div id="year-select-wrap" class="ms-2" style="display: none">
+            <select id="filter-year" class="time-filter-input" style="width: 100px"></select>
         </div>
 
         <div class="time-filter-label ms-auto" id="time-label">Tháng này</div>
@@ -140,7 +139,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <!-- SECTION 2.5: 📅 THỐNG KÊ LINH HOẠT (bộ lọc tùy chỉnh) -->
@@ -162,9 +160,7 @@
                 <label class="custom-filter-label">Đến ngày</label>
                 <input type="text" id="custom-to" class="time-filter-input" placeholder="dd/mm/yyyy" />
             </div>
-            <button class="time-filter-btn active" id="custom-apply">
-                <i class="fa-solid fa-magnifying-glass-chart"></i> Xem thống kê
-            </button>
+            <button class="time-filter-btn active" id="custom-apply"><i class="fa-solid fa-magnifying-glass-chart"></i> Xem thống kê</button>
         </div>
         <div class="custom-range-label" id="custom-range-label"></div>
     </div>
@@ -252,17 +248,17 @@
 
     <div class="row g-4 mb-4">
         <div class="col-lg-6">
-            <div class="stat-card" style="padding: 2rem;">
+            <div class="stat-card" style="padding: 2rem">
                 <div class="stat-card-header mb-4 border-0">
                     <h3 class="stat-card-title text-dark fs-5 fw-bold">Đánh giá</h3>
                     <div class="avg-rating-badge" id="avg-rating-badge">--</div>
                 </div>
                 <div id="rating-bars"></div>
-                <div class="mt-4 text-center fw-medium text-secondary" style="font-size: 0.95rem;" id="total-reviews-label"></div>
+                <div class="mt-4 text-center fw-medium text-secondary" style="font-size: 0.95rem" id="total-reviews-label"></div>
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="stat-card" style="padding: 2rem;">
+            <div class="stat-card" style="padding: 2rem">
                 <div class="stat-card-header mb-4 border-0"><h3 class="stat-card-title text-dark fs-5 fw-bold">Ưa thích nhất</h3></div>
                 <div id="top-rated-list"></div>
             </div>

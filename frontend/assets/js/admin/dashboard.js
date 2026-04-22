@@ -81,6 +81,8 @@ async function setActiveMenu(page, menuItems) {
     contentEl.innerHTML = CONTENT_LOADING_HTML;
 
     try {
+        await runPageTeardown();
+
         const res = await fetch(`/pages/admin/${filePath}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -140,6 +142,13 @@ async function runPageInitializer(page) {
     if (typeof window.initAdminPage === "function") {
         await window.initAdminPage();
         window.initAdminPage = null;
+    }
+}
+
+async function runPageTeardown() {
+    if (typeof window.cleanupCurrentAdminPage === "function") {
+        await window.cleanupCurrentAdminPage();
+        window.cleanupCurrentAdminPage = null;
     }
 }
 

@@ -2,305 +2,298 @@ const API = "";
 let revenueChart = null;
 let statusChart = null;
 let customRevenueChart = null;
+let customFromPicker = null;
+let customToPicker = null;
 
 // --- Định dạng hiển thị ---
 const fmt = (n) =>
-	new Intl.NumberFormat("vi-VN", {
-		style: "currency",
-		currency: "VND",
-		maximumFractionDigits: 0,
-	}).format(n);
+    new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        maximumFractionDigits: 0,
+    }).format(n);
 const fmtNum = (n) => new Intl.NumberFormat("vi-VN").format(n);
 const $ = (id) => document.getElementById(id);
 
 function growthBadge(pct) {
-	const val = parseFloat(pct);
-	if (isNaN(val) || val === 0)
-		return '<span class="tb-growth-tag neutral">0%</span>';
-	const up = val > 0;
-	const cls = up ? "up" : "down";
-	const icon = up ? "▲" : "▼";
-	const label = val === 100 ? "Mới" : `${Math.abs(val)}%`;
-	return `<span class="tb-growth-tag ${cls}">${icon} ${label}</span>`;
+    const val = parseFloat(pct);
+    if (isNaN(val) || val === 0) return '<span class="tb-growth-tag neutral">0%</span>';
+    const up = val > 0;
+    const cls = up ? "up" : "down";
+    const icon = up ? "▲" : "▼";
+    const label = val === 100 ? "Mới" : `${Math.abs(val)}%`;
+    return `<span class="tb-growth-tag ${cls}">${icon} ${label}</span>`;
 }
 
 function statusLabel(status) {
-	const map = {
-		confirmed: ["Đã xác nhận", "confirmed"],
-		pending: ["Chờ xử lý", "pending"],
-		cancelled: ["Đã huỷ", "cancelled"],
-		open: ["Đang mở", "open"],
-		closed: ["Đã đóng", "closed"],
-		full: ["Đã đầy", "full"],
-	};
-	const [label, cls] = map[status] || [status, ""];
-	return `<span class="status-badge status-${cls}">${label}</span>`;
+    const map = {
+        confirmed: ["Đã xác nhận", "confirmed"],
+        pending: ["Chờ xử lý", "pending"],
+        cancelled: ["Đã huỷ", "cancelled"],
+        open: ["Đang mở", "open"],
+        closed: ["Đã đóng", "closed"],
+        full: ["Đã đầy", "full"],
+    };
+    const [label, cls] = map[status] || [status, ""];
+    return `<span class="status-badge status-${cls}">${label}</span>`;
 }
 
 // --- Xử lý thời gian ---
 function getDateRange(period) {
-	const now = new Date();
-	const today = now.toISOString().split("T")[0];
-	let from, to;
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
+    let from, to;
 
-	switch (period) {
-		case "today":
-			from = to = today;
-			break;
-		case "7days":
-			to = today;
-			const d7 = new Date();
-			d7.setDate(d7.getDate() - 6);
-			from = d7.toISOString().split("T")[0];
-			break;
-		case "month":
-			const m = $("filter-month-m").value;
-			const y = $("filter-month-y").value;
-			if (m && y) {
-				from = `${y}-${m}-01`;
-				const lastDay = new Date(y, parseInt(m), 0).getDate();
-				to = `${y}-${m}-${String(lastDay).padStart(2, "0")}`;
-			} else {
-				from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-				to = today;
-			}
-			break;
-		case "year":
-			const yearVal = $("filter-year").value;
-			if (yearVal) {
-				from = `${yearVal}-01-01`;
-				to = `${yearVal}-12-31`;
-			} else {
-				from = `${now.getFullYear()}-01-01`;
-				to = today;
-			}
-			break;
-		default:
-			from = to = today;
-	}
-	return { from, to };
+    switch (period) {
+        case "today":
+            from = to = today;
+            break;
+        case "7days":
+            to = today;
+            const d7 = new Date();
+            d7.setDate(d7.getDate() - 6);
+            from = d7.toISOString().split("T")[0];
+            break;
+        case "month":
+            const m = $("filter-month-m").value;
+            const y = $("filter-month-y").value;
+            if (m && y) {
+                from = `${y}-${m}-01`;
+                const lastDay = new Date(y, parseInt(m), 0).getDate();
+                to = `${y}-${m}-${String(lastDay).padStart(2, "0")}`;
+            } else {
+                from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+                to = today;
+            }
+            break;
+        case "year":
+            const yearVal = $("filter-year").value;
+            if (yearVal) {
+                from = `${yearVal}-01-01`;
+                to = `${yearVal}-12-31`;
+            } else {
+                from = `${now.getFullYear()}-01-01`;
+                to = today;
+            }
+            break;
+        default:
+            from = to = today;
+    }
+    return { from, to };
 }
 
 function getPeriodLabel(period, from, to) {
-	if (period === "month") {
-		const [y, m] = from.split("-");
-		return `Tháng ${m}/${y}`;
-	}
-	if (period === "year") {
-		return `Năm ${from.split("-")[0]}`;
-	}
-	const map = { today: "Hôm nay", "7days": "7 ngày qua" };
-	return map[period] || `${formatDateVN(from)} → ${formatDateVN(to)}`;
+    if (period === "month") {
+        const [y, m] = from.split("-");
+        return `Tháng ${m}/${y}`;
+    }
+    if (period === "year") {
+        return `Năm ${from.split("-")[0]}`;
+    }
+    const map = { today: "Hôm nay", "7days": "7 ngày qua" };
+    return map[period] || `${formatDateVN(from)} → ${formatDateVN(to)}`;
 }
 
 function formatDateVN(dateStr) {
-	if (!dateStr) return "";
-	const d = new Date(dateStr);
-	return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
 }
 
 // --- Khởi tạo Biểu đồ ---
 function initRevenueChart(labels, data) {
-	try {
-		const canvas = $("revenueChart");
-		if (!canvas || typeof Chart === "undefined") return;
-		const ctx = canvas.getContext("2d");
-		if (revenueChart) revenueChart.destroy();
-		revenueChart = new Chart(ctx, {
-			type: "bar",
-			data: {
-				labels,
-				datasets: [
-					{
-						label: "Doanh thu",
-						data,
-						backgroundColor: "rgba(59,130,246,0.18)",
-						borderColor: "#3b82f6",
-						borderWidth: 2,
-						borderRadius: 8,
-						order: 2,
-					},
-					{
-						label: "Xu hướng",
-						data,
-						type: "line",
-						borderColor: "#8b5cf6",
-						borderWidth: 2.5,
-						pointRadius: 4,
-						tension: 0.4,
-						yAxisID: "y",
-						order: 1,
-					},
-				],
-			},
-			options: {
-				responsive: true,
-				maintainAspectRatio: false,
-				plugins: {
-					legend: { display: false },
-					tooltip: { callbacks: { label: (c) => " " + fmt(c.raw) } },
-				},
-				scales: {
-					y: {
-						beginAtZero: true,
-						ticks: {
-							callback: (v) => (v >= 1e6 ? (v / 1e6).toFixed(0) + "M" : v),
-						},
-					},
-					x: { grid: { display: false } },
-				},
-			},
-		});
-	} catch (e) {
-		console.error("Lỗi vẽ biểu đồ doanh thu", e);
-	}
+    try {
+        const canvas = $("revenueChart");
+        if (!canvas || typeof Chart === "undefined") return;
+        const ctx = canvas.getContext("2d");
+        if (revenueChart) revenueChart.destroy();
+        revenueChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: "Doanh thu",
+                        data,
+                        backgroundColor: "rgba(59,130,246,0.18)",
+                        borderColor: "#3b82f6",
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        order: 2,
+                    },
+                    {
+                        label: "Xu hướng",
+                        data,
+                        type: "line",
+                        borderColor: "#8b5cf6",
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        tension: 0.4,
+                        yAxisID: "y",
+                        order: 1,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (c) => " " + fmt(c.raw) } },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (v) => (v >= 1e6 ? (v / 1e6).toFixed(0) + "M" : v),
+                        },
+                    },
+                    x: { grid: { display: false } },
+                },
+            },
+        });
+    } catch (e) {
+        console.error("Lỗi vẽ biểu đồ doanh thu", e);
+    }
 }
 
 function initStatusChart(data) {
-	try {
-		const canvas = $("bookingStatusChart");
-		if (!canvas || typeof Chart === "undefined") return;
-		const colors = {
-			confirmed: "#10b981",
-			pending: "#f59e0b",
-			cancelled: "#ef4444",
-		};
-		const labelsMap = {
-			confirmed: "Đã xác nhận",
-			pending: "Chờ xử lý",
-			cancelled: "Đã huỷ",
-		};
-		if (statusChart) statusChart.destroy();
-		statusChart = new Chart(canvas.getContext("2d"), {
-			type: "doughnut",
-			data: {
-				labels: data.map((d) => labelsMap[d.status] || d.status),
-				datasets: [
-					{
-						data: data.map((d) => d.count),
-						backgroundColor: data.map((d) => colors[d.status] || "#94a3b8"),
-						borderWidth: 0,
-					},
-				],
-			},
-			options: {
-				responsive: true,
-				maintainAspectRatio: false,
-				cutout: "72%",
-				plugins: { legend: { display: false } },
-			},
-		});
-		const legend = $("booking-status-legend");
-		if (legend)
-			legend.innerHTML = data
-				.map(
-					(d) => `
+    try {
+        const canvas = $("bookingStatusChart");
+        if (!canvas || typeof Chart === "undefined") return;
+        const colors = {
+            confirmed: "#10b981",
+            pending: "#f59e0b",
+            cancelled: "#ef4444",
+        };
+        const labelsMap = {
+            confirmed: "Đã xác nhận",
+            pending: "Chờ xử lý",
+            cancelled: "Đã huỷ",
+        };
+        if (statusChart) statusChart.destroy();
+        statusChart = new Chart(canvas.getContext("2d"), {
+            type: "doughnut",
+            data: {
+                labels: data.map((d) => labelsMap[d.status] || d.status),
+                datasets: [
+                    {
+                        data: data.map((d) => d.count),
+                        backgroundColor: data.map((d) => colors[d.status] || "#94a3b8"),
+                        borderWidth: 0,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "72%",
+                plugins: { legend: { display: false } },
+            },
+        });
+        const legend = $("booking-status-legend");
+        if (legend)
+            legend.innerHTML = data
+                .map(
+                    (d) => `
 			<div class="legend-item">
 				<span class="legend-dot" style="background:${colors[d.status] || "#94a3b8"}"></span>
 				${labelsMap[d.status] || d.status}: <strong>${d.count}</strong>
 			</div>`,
-				)
-				.join("");
-	} catch (e) {
-		console.error("Lỗi vẽ biểu đồ booking", e);
-	}
+                )
+                .join("");
+    } catch (e) {
+        console.error("Lỗi vẽ biểu đồ booking", e);
+    }
 }
 
 function initCustomRevenueChart(labels, data) {
-	try {
-		const canvas = $("customRevenueChart");
-		if (!canvas || typeof Chart === "undefined") return;
-		const ctx = canvas.getContext("2d");
-		if (customRevenueChart) customRevenueChart.destroy();
-		customRevenueChart = new Chart(ctx, {
-			type: "bar",
-			data: {
-				labels,
-				datasets: [
-					{
-						label: "Doanh thu",
-						data,
-						backgroundColor: "rgba(16,185,129,0.18)",
-						borderColor: "#10b981",
-						borderWidth: 2,
-						borderRadius: 8,
-						order: 2,
-					},
-					{
-						label: "Xu hướng",
-						data,
-						type: "line",
-						borderColor: "#f59e0b",
-						borderWidth: 2.5,
-						pointRadius: 4,
-						tension: 0.4,
-						yAxisID: "y",
-						order: 1,
-					},
-				],
-			},
-			options: {
-				responsive: true,
-				maintainAspectRatio: false,
-				plugins: {
-					legend: { display: false },
-					tooltip: { callbacks: { label: (c) => " " + fmt(c.raw) } },
-				},
-				scales: {
-					y: {
-						beginAtZero: true,
-						ticks: {
-							callback: (v) => (v >= 1e6 ? (v / 1e6).toFixed(0) + "M" : v),
-						},
-					},
-					x: { grid: { display: false } },
-				},
-			},
-		});
-	} catch (e) {
-		console.error("Lỗi vẽ biểu đồ tùy chỉnh", e);
-	}
+    try {
+        const canvas = $("customRevenueChart");
+        if (!canvas || typeof Chart === "undefined") return;
+        const ctx = canvas.getContext("2d");
+        if (customRevenueChart) customRevenueChart.destroy();
+        customRevenueChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: "Doanh thu",
+                        data,
+                        backgroundColor: "rgba(16,185,129,0.18)",
+                        borderColor: "#10b981",
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        order: 2,
+                    },
+                    {
+                        label: "Xu hướng",
+                        data,
+                        type: "line",
+                        borderColor: "#f59e0b",
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        tension: 0.4,
+                        yAxisID: "y",
+                        order: 1,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (c) => " " + fmt(c.raw) } },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (v) => (v >= 1e6 ? (v / 1e6).toFixed(0) + "M" : v),
+                        },
+                    },
+                    x: { grid: { display: false } },
+                },
+            },
+        });
+    } catch (e) {
+        console.error("Lỗi vẽ biểu đồ tùy chỉnh", e);
+    }
 }
 
 // --- Tải dữ liệu ---
 async function loadRealTime() {
-	const { data } = await (await fetch(`${API}/api/stats/realtime`)).json();
-	$("rt-new-users").textContent = fmtNum(data.new_users_today);
-	$("rt-total-users").textContent = `Tổng: ${data.total_users}`;
-	$("rt-pending").textContent = data.pending_bookings;
-	$("rt-open-tours").textContent = data.open_departures + ``;
-	$("rt-total-tours").textContent =
-		`Tổng ${data.total_tours} Tour đang hoạt động`;
+    const { data } = await (await fetch(`${API}/api/stats/realtime`)).json();
+    $("rt-new-users").textContent = fmtNum(data.new_users_today);
+    $("rt-total-users").textContent = `Tổng: ${data.total_users}`;
+    $("rt-pending").textContent = data.pending_bookings;
+    $("rt-open-tours").textContent = data.open_departures + ``;
+    $("rt-total-tours").textContent = `Tổng ${data.total_tours} Tour đang hoạt động`;
 }
 
 async function loadOccupancy(page = 1) {
-	const limit = 10;
-	try {
-		const { data: result } = await (
-			await fetch(`${API}/api/stats/occupancy?page=${page}&limit=${limit}`)
-		).json();
-		const { data, pagination } = result;
-		const body = $("occupancy-body");
-		if (!body) return;
+    const limit = 10;
+    try {
+        const { data: result } = await (await fetch(`${API}/api/stats/occupancy?page=${page}&limit=${limit}`)).json();
+        const { data, pagination } = result;
+        const body = $("occupancy-body");
+        if (!body) return;
 
-		if (!data.length) {
-			body.innerHTML =
-				'<tr><td colspan="6" class="text-center py-4">Chưa có dữ liệu</td></tr>';
-			$("rt-avg-occupancy").textContent = "0%";
-			$("occupancy-pagination").innerHTML = "";
-			return;
-		}
+        if (!data.length) {
+            body.innerHTML = '<tr><td colspan="6" class="text-center py-4">Chưa có dữ liệu</td></tr>';
+            $("rt-avg-occupancy").textContent = "0%";
+            $("occupancy-pagination").innerHTML = "";
+            return;
+        }
 
-		// Tính trung bình lấp đầy cho thẻ real-time (từ trang hiện tại)
-		$("rt-avg-occupancy").textContent =
-			(
-				data.reduce((s, d) => s + parseFloat(d.occupancy_rate || 0), 0) /
-				data.length
-			).toFixed(1) + "%";
+        // Tính trung bình lấp đầy cho thẻ real-time (từ trang hiện tại)
+        $("rt-avg-occupancy").textContent = (data.reduce((s, d) => s + parseFloat(d.occupancy_rate || 0), 0) / data.length).toFixed(1) + "%";
 
-		body.innerHTML = data
-			.map(
-				(d) => `
+        body.innerHTML = data
+            .map(
+                (d) => `
 			<tr>
 				<td class="text-truncate" style="max-width:180px">${d.tour_name}</td>
 				<td>${new Date(d.departure_date).toLocaleDateString("vi-VN")}</td>
@@ -314,180 +307,151 @@ async function loadOccupancy(page = 1) {
 				</td>
 				<td>${statusLabel(d.status)}</td>
 			</tr>`,
-			)
-			.join("");
+            )
+            .join("");
 
-		renderPagination("occupancy-pagination", pagination, (p) =>
-			loadOccupancy(p),
-		);
-	} catch (e) {
-		console.error("Lỗi tải lấp đầy tour", e);
-	}
+        renderPagination("occupancy-pagination", pagination, (p) => loadOccupancy(p));
+    } catch (e) {
+        console.error("Lỗi tải lấp đầy tour", e);
+    }
 }
 
 function renderPagination(containerId, pagination, onPageClick) {
-	const container = $(containerId);
-	if (!container) return;
-	const { page, total_pages } = pagination;
-	if (total_pages <= 1) {
-		container.innerHTML = "";
-		return;
-	}
+    const container = $(containerId);
+    if (!container) return;
+    const { page, total_pages } = pagination;
+    if (total_pages <= 1) {
+        container.innerHTML = "";
+        return;
+    }
 
-	let html = '<div class="pagination-buttons">';
+    let html = '<div class="pagination-buttons">';
 
-	// Nút Trước
-	html += `<button class="p-btn" ${page === 1 ? "disabled" : ""} data-page="${page - 1}"><i class="fa-solid fa-chevron-left"></i></button>`;
+    // Nút Trước
+    html += `<button class="p-btn" ${page === 1 ? "disabled" : ""} data-page="${page - 1}"><i class="fa-solid fa-chevron-left"></i></button>`;
 
-	// Các số trang (đơn giản hóa: hiện tối đa 5 trang xung quanh hiện tại)
-	let start = Math.max(1, page - 2);
-	let end = Math.min(total_pages, start + 4);
-	if (end - start < 4) start = Math.max(1, end - 4);
+    // Các số trang (đơn giản hóa: hiện tối đa 5 trang xung quanh hiện tại)
+    let start = Math.max(1, page - 2);
+    let end = Math.min(total_pages, start + 4);
+    if (end - start < 4) start = Math.max(1, end - 4);
 
-	for (let i = start; i <= end; i++) {
-		html += `<button class="p-btn ${i === page ? "active" : ""}" data-page="${i}">${i}</button>`;
-	}
+    for (let i = start; i <= end; i++) {
+        html += `<button class="p-btn ${i === page ? "active" : ""}" data-page="${i}">${i}</button>`;
+    }
 
-	// Nút Tiếp
-	html += `<button class="p-btn" ${page === total_pages ? "disabled" : ""} data-page="${page + 1}"><i class="fa-solid fa-chevron-right"></i></button>`;
+    // Nút Tiếp
+    html += `<button class="p-btn" ${page === total_pages ? "disabled" : ""} data-page="${page + 1}"><i class="fa-solid fa-chevron-right"></i></button>`;
 
-	html += "</div>";
-	container.innerHTML = html;
+    html += "</div>";
+    container.innerHTML = html;
 
-	// Gán sự kiện
-	container.querySelectorAll(".p-btn[data-page]").forEach((btn) => {
-		btn.onclick = () => {
-			const p = parseInt(btn.dataset.page);
-			if (p >= 1 && p <= total_pages && p !== page) {
-				onPageClick(p);
-			}
-		};
-	});
+    // Gán sự kiện
+    container.querySelectorAll(".p-btn[data-page]").forEach((btn) => {
+        btn.onclick = () => {
+            const p = parseInt(btn.dataset.page);
+            if (p >= 1 && p <= total_pages && p !== page) {
+                onPageClick(p);
+            }
+        };
+    });
 }
 
 async function loadReport(from, to) {
-	const { data } = await (
-		await fetch(`${API}/api/stats/report?from=${from}&to=${to}`)
-	).json();
-	$("tb-revenue").textContent = fmt(data.revenue);
-	$("tb-bookings").textContent = data.booking_count;
-	$("tb-revenue-growth").innerHTML = growthBadge(data.growth.revenue);
-	$("tb-booking-growth").innerHTML = growthBadge(data.growth.booking);
-	$("tb-revenue-prev").textContent = `Kỳ trước: ${fmt(data.previous.revenue)}`;
-	$("tb-booking-prev").textContent =
-		`Kỳ trước: ${data.previous.booking_count} booking`;
+    const { data } = await (await fetch(`${API}/api/stats/report?from=${from}&to=${to}`)).json();
+    $("tb-revenue").textContent = fmt(data.revenue);
+    $("tb-bookings").textContent = data.booking_count;
+    $("tb-revenue-growth").innerHTML = growthBadge(data.growth.revenue);
+    $("tb-booking-growth").innerHTML = growthBadge(data.growth.booking);
+    $("tb-revenue-prev").textContent = `Kỳ trước: ${fmt(data.previous.revenue)}`;
+    $("tb-booking-prev").textContent = `Kỳ trước: ${data.previous.booking_count} booking`;
 }
 
 // --- Bộ lọc nhanh (preset) ---
 async function applyFilter(period) {
-	// Ẩn hiện ô chọn đặc thù
-	if ($("month-select-wrap"))
-		$("month-select-wrap").style.display =
-			period === "month" ? "block" : "none";
-	if ($("year-select-wrap"))
-		$("year-select-wrap").style.display = period === "year" ? "block" : "none";
+    // Ẩn hiện ô chọn đặc thù
+    if ($("month-select-wrap")) $("month-select-wrap").style.display = period === "month" ? "block" : "none";
+    if ($("year-select-wrap")) $("year-select-wrap").style.display = period === "year" ? "block" : "none";
 
-	const { from, to } = getDateRange(period);
-	if ($("time-label"))
-		$("time-label").textContent = getPeriodLabel(period, from, to);
-	document
-		.querySelectorAll(".time-filter-btn[data-period]")
-		.forEach((b) => b.classList.toggle("active", b.dataset.period === period));
+    const { from, to } = getDateRange(period);
+    if ($("time-label")) $("time-label").textContent = getPeriodLabel(period, from, to);
+    document.querySelectorAll(".time-filter-btn[data-period]").forEach((b) => b.classList.toggle("active", b.dataset.period === period));
 
-	const resRevenueTimeBased = await (
-		await fetch(`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=false`)
-	).json();
-	initRevenueChart(resRevenueTimeBased.data.labels, resRevenueTimeBased.data.data);
+    const resRevenueTimeBased = await (await fetch(`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=false`)).json();
+    initRevenueChart(resRevenueTimeBased.data.labels, resRevenueTimeBased.data.data);
 
-	const resStatus = await (
-		await fetch(`${API}/api/stats/bookings/status?from=${from}&to=${to}`)
-	).json();
-	initStatusChart(resStatus.data);
+    const resStatus = await (await fetch(`${API}/api/stats/bookings/status?from=${from}&to=${to}`)).json();
+    initStatusChart(resStatus.data);
 
-	loadReport(from, to);
+    loadReport(from, to);
 }
 
 // --- Bộ lọc tùy chỉnh (custom date range) → cards thống kê ---
 async function applyCustomFilter() {
-	const fromRaw = $("custom-from").value;
-	const toRaw = $("custom-to").value;
+    const fromRaw = $("custom-from").value;
+    const toRaw = $("custom-to").value;
 
-	if (!fromRaw || !toRaw) {
-		alert("Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc.");
-		return;
-	}
+    if (!fromRaw || !toRaw) {
+        alert("Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc.");
+        return;
+    }
 
-	// Chuyển đổi dd/mm/yyyy -> yyyy-mm-dd để gọi API
-	const parts1 = fromRaw.split("/");
-	const parts2 = toRaw.split("/");
+    // Chuyển đổi dd/mm/yyyy -> yyyy-mm-dd để gọi API
+    const parts1 = fromRaw.split("/");
+    const parts2 = toRaw.split("/");
 
-	if (parts1.length !== 3 || parts2.length !== 3) {
-		alert("Vui lòng nhập ngày theo định dạng dd/mm/yyyy");
-		return;
-	}
+    if (parts1.length !== 3 || parts2.length !== 3) {
+        alert("Vui lòng nhập ngày theo định dạng dd/mm/yyyy");
+        return;
+    }
 
-	const from = `${parts1[2]}-${parts1[1].padStart(2, "0")}-${parts1[0].padStart(2, "0")}`;
-	const to = `${parts2[2]}-${parts2[1].padStart(2, "0")}-${parts2[0].padStart(2, "0")}`;
+    const from = `${parts1[2]}-${parts1[1].padStart(2, "0")}-${parts1[0].padStart(2, "0")}`;
+    const to = `${parts2[2]}-${parts2[1].padStart(2, "0")}-${parts2[0].padStart(2, "0")}`;
 
-	if (new Date(from) > new Date(to)) {
-		alert("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.");
-		return;
-	}
+    if (new Date(from) > new Date(to)) {
+        alert("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.");
+        return;
+    }
 
-	// Hiển thị label khoảng thời gian
-	const rangeLabel = $("custom-range-label");
-	if (rangeLabel)
-		rangeLabel.textContent = `Đang xem: ${formatDateVN(from)} → ${formatDateVN(to)}`;
+    // Hiển thị label khoảng thời gian
+    const rangeLabel = $("custom-range-label");
+    if (rangeLabel) rangeLabel.textContent = `Đang xem: ${formatDateVN(from)} → ${formatDateVN(to)}`;
 
-	// Gọi API song song
-	const [reportRes, resRevenueCustom] = await Promise.all([
-		fetch(`${API}/api/stats/report?from=${from}&to=${to}`).then((r) =>
-			r.json(),
-		),
-		fetch(
-			`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=true`,
-		).then((r) => r.json()),
-	]);
+    // Gọi API song song
+    const [reportRes, resRevenueCustom] = await Promise.all([fetch(`${API}/api/stats/report?from=${from}&to=${to}`).then((r) => r.json()), fetch(`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=true`).then((r) => r.json())]);
 
-	const d = reportRes.data;
+    const d = reportRes.data;
 
-	// Điền vào cards
-	$("cs-revenue").textContent = fmt(d.revenue);
-	$("cs-revenue-growth").innerHTML = growthBadge(d.growth.revenue);
-	$("cs-revenue-prev").textContent = `Kỳ trước: ${fmt(d.previous.revenue)}`;
+    // Điền vào cards
+    $("cs-revenue").textContent = fmt(d.revenue);
+    $("cs-revenue-growth").innerHTML = growthBadge(d.growth.revenue);
+    $("cs-revenue-prev").textContent = `Kỳ trước: ${fmt(d.previous.revenue)}`;
 
-	$("cs-bookings").textContent = fmtNum(d.booking_count);
-	$("cs-booking-growth").innerHTML = growthBadge(d.growth.booking);
-	$("cs-booking-prev").textContent =
-		`Kỳ trước: ${d.previous.booking_count} booking`;
+    $("cs-bookings").textContent = fmtNum(d.booking_count);
+    $("cs-booking-growth").innerHTML = growthBadge(d.growth.booking);
+    $("cs-booking-prev").textContent = `Kỳ trước: ${d.previous.booking_count} booking`;
 
-	$("cs-confirmed").textContent = fmtNum(d.confirmed);
-	$("cs-cancelled").textContent = fmtNum(d.cancelled);
+    $("cs-confirmed").textContent = fmtNum(d.confirmed);
+    $("cs-cancelled").textContent = fmtNum(d.cancelled);
 
-	// Label biểu đồ
-	const chartLabel = $("custom-chart-label");
-	if (chartLabel)
-		chartLabel.textContent = `(${formatDateVN(from)} – ${formatDateVN(to)})`;
+    // Label biểu đồ
+    const chartLabel = $("custom-chart-label");
+    if (chartLabel) chartLabel.textContent = `(${formatDateVN(from)} – ${formatDateVN(to)})`;
 
-	// Vẽ biểu đồ
-	initCustomRevenueChart(resRevenueCustom.data.labels, resRevenueCustom.data.data);
+    // Vẽ biểu đồ
+    initCustomRevenueChart(resRevenueCustom.data.labels, resRevenueCustom.data.data);
 
-	// Hiện kết quả, ẩn placeholder
-	$("custom-stats-result").classList.remove("custom-stats-hidden");
-	$("custom-stats-placeholder").style.display = "none";
+    // Hiện kết quả, ẩn placeholder
+    $("custom-stats-result").classList.remove("custom-stats-hidden");
+    $("custom-stats-placeholder").style.display = "none";
 }
 
 // --- Analytics ---
 async function loadAnalytics() {
-	const [tours, reviews, users] = await Promise.all([
-		fetch(`${API}/api/stats/tours/top`).then((r) => r.json()),
-		fetch(`${API}/api/stats/reviews`).then((r) => r.json()),
-		fetch(`${API}/api/stats/users`).then((r) => r.json()),
-	]);
+    const [tours, reviews, users] = await Promise.all([fetch(`${API}/api/stats/tours/top`).then((r) => r.json()), fetch(`${API}/api/stats/reviews`).then((r) => r.json()), fetch(`${API}/api/stats/users`).then((r) => r.json())]);
 
-	$("top-tours-body").innerHTML = tours.data
-		.map(
-			(t, i) => `
+    $("top-tours-body").innerHTML = tours.data
+        .map(
+            (t, i) => `
 		<tr>
 			<td><span class="tour-rank ${i < 3 ? `rank-${i + 1}` : "rank-other"}">${i + 1}</span></td>
 			<td class="text-truncate" style="max-width:200px">${t.name}</td>
@@ -496,121 +460,141 @@ async function loadAnalytics() {
 			<td class="text-primary fw-bold">${fmt(t.total_revenue)}</td>
 			<td><div class="star-rating"><i class="fa-solid fa-star"></i> ${t.avg_rating} <small>(${t.review_count})</small></div></td>
 		</tr>`,
-		)
-		.join("");
+        )
+        .join("");
 
-	const { overall, top_rated_tours } = reviews.data;
-	$("avg-rating-badge").textContent = overall.avg_rating || "0";
-	$("total-reviews-label").textContent =
-		`Tổng ${overall.total_reviews} đánh giá`;
-	$("rating-bars").innerHTML = [5, 4, 3, 2, 1]
-		.map((s) => {
-			const p = (
-				((overall[`star${s}`] || 0) / (overall.total_reviews || 1)) *
-				100
-			).toFixed(1);
-			return `<div class="rating-bar-row">
+    const { overall, top_rated_tours } = reviews.data;
+    $("avg-rating-badge").textContent = overall.avg_rating || "0";
+    $("total-reviews-label").textContent = `Tổng ${overall.total_reviews} đánh giá`;
+    $("rating-bars").innerHTML = [5, 4, 3, 2, 1]
+        .map((s) => {
+            const p = (((overall[`star${s}`] || 0) / (overall.total_reviews || 1)) * 100).toFixed(1);
+            return `<div class="rating-bar-row">
 			<span class="rating-bar-label">${s}<i class="fa-solid fa-star"></i></span>
 			<div class="rating-bar-track"><div class="rating-bar-fill" style="width:${p}%"></div></div>
 			<span class="rating-bar-count">${overall[`star${s}`] || 0}</span>
 		</div>`;
-		})
-		.join("");
+        })
+        .join("");
 
-	$("top-rated-list").innerHTML = top_rated_tours
-		.map(
-			(t, i) => `
+    $("top-rated-list").innerHTML = top_rated_tours
+        .map(
+            (t, i) => `
 		<div class="top-item">
 			<div class="top-item-rank">${i + 1}</div>
 			<div class="top-item-body"><div class="top-item-name">${t.name}</div><div class="top-item-meta">${t.region} · ${t.review_count} đánh giá</div></div>
 			<div class="top-item-value"><span class="text-warning">★</span> ${t.avg_rating}</div>
 		</div>`,
-		)
-		.join("");
+        )
+        .join("");
 
-	$("top-passengers-list").innerHTML = users.data.top_passengers
-		.map(
-			(c, i) => `
+    $("top-passengers-list").innerHTML = users.data.top_passengers
+        .map(
+            (c, i) => `
 		<div class="top-item">
 			<div class="top-item-rank">${i + 1}</div>
 			<div class="top-item-body"><div class="top-item-name">${c.fullname}</div><div class="top-item-meta">${c.email} · ${c.booking_count} booking</div></div>
 			<div class="top-item-value">${fmt(c.total_spent)}<small>Chi tiêu</small></div>
 		</div>`,
-		)
-		.join("");
+        )
+        .join("");
 }
 
 // --- Khởi tạo trang ---
 window.initAdminStatisticsPage = async () => {
-	const now = new Date();
-	const currYear = now.getFullYear();
-	const currMonth = String(now.getMonth() + 1).padStart(2, "0");
+    const now = new Date();
+    const currYear = now.getFullYear();
+    const currMonth = String(now.getMonth() + 1).padStart(2, "0");
 
-	// Lấy danh sách năm có dữ liệu từ DB
-	let dbYears = [];
-	try {
-		const resYears = await (await fetch(`${API}/api/stats/years`)).json();
-		dbYears = resYears.data || [];
-	} catch (e) {
-		console.error("Lỗi lấy năm từ DB", e);
-	}
+    // Lấy danh sách năm có dữ liệu từ DB
+    let dbYears = [];
+    try {
+        const resYears = await (await fetch(`${API}/api/stats/years`)).json();
+        dbYears = resYears.data || [];
+    } catch (e) {
+        console.error("Lỗi lấy năm từ DB", e);
+    }
 
-	// Nếu DB chưa có dữ liệu, mặc định lấy năm hiện tại
-	if (dbYears.length === 0) dbYears = [currYear];
+    // Nếu DB chưa có dữ liệu, mặc định lấy năm hiện tại
+    if (dbYears.length === 0) dbYears = [currYear];
 
-	// Khởi tạo danh sách năm cho các select
-	const yearSelects = ["filter-month-y", "filter-year"];
-	yearSelects.forEach((id) => {
-		const el = $(id);
-		if (!el) return;
-		el.innerHTML = "";
-		dbYears.forEach((y) => {
-			const opt = document.createElement("option");
-			opt.value = y;
-			opt.textContent = y;
-			if (y === currYear) opt.selected = true;
-			el.appendChild(opt);
-		});
-	});
+    // Khởi tạo danh sách năm cho các select
+    const yearSelects = ["filter-month-y", "filter-year"];
+    yearSelects.forEach((id) => {
+        const el = $(id);
+        if (!el) return;
+        el.innerHTML = "";
+        dbYears.forEach((y) => {
+            const opt = document.createElement("option");
+            opt.value = y;
+            opt.textContent = y;
+            if (y === currYear) opt.selected = true;
+            el.appendChild(opt);
+        });
+    });
 
-	if ($("filter-month-m")) $("filter-month-m").value = currMonth;
+    if ($("filter-month-m")) $("filter-month-m").value = currMonth;
 
-	loadRealTime();
-	loadOccupancy();
-	loadAnalytics();
-	applyFilter("month");
+    loadRealTime();
+    loadOccupancy();
+    loadAnalytics();
+    applyFilter("month");
 
-	// Bộ lọc nhanh (nút bấm)
-	document.querySelectorAll(".time-filter-btn[data-period]").forEach((b) => {
-		b.onclick = () => applyFilter(b.dataset.period);
-	});
+    // Bộ lọc nhanh (nút bấm)
+    document.querySelectorAll(".time-filter-btn[data-period]").forEach((b) => {
+        b.onclick = () => applyFilter(b.dataset.period);
+    });
 
-	// Lắng nghe thay đổi trên các ô chọn Month/Year
-	if ($("filter-month-m"))
-		$("filter-month-m").onchange = () => applyFilter("month");
-	if ($("filter-month-y"))
-		$("filter-month-y").onchange = () => applyFilter("month");
-	if ($("filter-year")) $("filter-year").onchange = () => applyFilter("year");
+    // Lắng nghe thay đổi trên các ô chọn Month/Year
+    if ($("filter-month-m")) $("filter-month-m").onchange = () => applyFilter("month");
+    if ($("filter-month-y")) $("filter-month-y").onchange = () => applyFilter("month");
+    if ($("filter-year")) $("filter-year").onchange = () => applyFilter("year");
 
-	// Bộ lọc tùy chỉnh
-	if ($("custom-apply")) $("custom-apply").onclick = () => applyCustomFilter();
+    // Bộ lọc tùy chỉnh
+    if ($("custom-apply")) $("custom-apply").onclick = () => applyCustomFilter();
 
-	// Set ngày mặc định (dd/mm/yyyy)
-	const todayStr = now.getDate().toString().padStart(2, "0") + "/" + (now.getMonth() + 1).toString().padStart(2, "0") + "/" + now.getFullYear();
-	const firstDayStr = "01/" + (now.getMonth() + 1).toString().padStart(2, "0") + "/" + now.getFullYear();
+    // Set ngày mặc định (dd/mm/yyyy)
+    const todayStr = now.getDate().toString().padStart(2, "0") + "/" + (now.getMonth() + 1).toString().padStart(2, "0") + "/" + now.getFullYear();
+    const firstDayStr = "01/" + (now.getMonth() + 1).toString().padStart(2, "0") + "/" + now.getFullYear();
 
-	// Khởi tạo Flatpickr cho custom filter
-	const fpConfig = {
-		dateFormat: "d/m/Y",
-		locale: "vn",
-		allowInput: true,
-	};
-	if ($("custom-from")) {
-		const fpFrom = flatpickr("#custom-from", fpConfig);
-		fpFrom.setDate(firstDayStr);
-	}
-	if ($("custom-to")) {
-		const fpTo = flatpickr("#custom-to", fpConfig);
-		fpTo.setDate(todayStr);
-	}
+    // Khởi tạo Flatpickr cho custom filter
+    const fpConfig = {
+        dateFormat: "d/m/Y",
+        locale: "vn",
+        allowInput: true,
+    };
+    if ($("custom-from")) {
+        customFromPicker = flatpickr("#custom-from", fpConfig);
+        customFromPicker.setDate(firstDayStr);
+    }
+    if ($("custom-to")) {
+        customToPicker = flatpickr("#custom-to", fpConfig);
+        customToPicker.setDate(todayStr);
+    }
+
+    window.cleanupCurrentAdminPage = () => {
+        if (revenueChart) {
+            revenueChart.destroy();
+            revenueChart = null;
+        }
+        if (statusChart) {
+            statusChart.destroy();
+            statusChart = null;
+        }
+        if (customRevenueChart) {
+            customRevenueChart.destroy();
+            customRevenueChart = null;
+        }
+
+        if (customFromPicker) {
+            customFromPicker.destroy();
+            customFromPicker = null;
+        }
+        if (customToPicker) {
+            customToPicker.destroy();
+            customToPicker = null;
+        }
+
+        document.querySelectorAll(".flatpickr-calendar").forEach((el) => el.remove());
+    };
 };
