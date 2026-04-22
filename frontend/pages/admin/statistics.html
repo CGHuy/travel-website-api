@@ -1,4 +1,6 @@
 <!-- SECTION 1: 🔴 HIỆN TẠI -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 <div class="stats-section">
     <div class="stats-section-header">
         <h2 class="stats-section-title"><span class="section-dot dot-realtime"></span> Tình hình hiện tại</h2>
@@ -153,12 +155,12 @@
         <div class="custom-filter-inner">
             <div class="custom-filter-field">
                 <label class="custom-filter-label">Từ ngày</label>
-                <input type="date" id="custom-from" class="time-filter-input" />
+                <input type="text" id="custom-from" class="time-filter-input" placeholder="dd/mm/yyyy" />
             </div>
             <span class="custom-filter-arrow">→</span>
             <div class="custom-filter-field">
                 <label class="custom-filter-label">Đến ngày</label>
-                <input type="date" id="custom-to" class="time-filter-input" />
+                <input type="text" id="custom-to" class="time-filter-input" placeholder="dd/mm/yyyy" />
             </div>
             <button class="time-filter-btn active" id="custom-apply">
                 <i class="fa-solid fa-magnifying-glass-chart"></i> Xem thống kê
@@ -248,20 +250,20 @@
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-lg-5">
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <h3 class="stat-card-title">Đánh giá</h3>
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="stat-card" style="padding: 2rem;">
+                <div class="stat-card-header mb-4 border-0">
+                    <h3 class="stat-card-title text-dark fs-5 fw-bold">Đánh giá</h3>
                     <div class="avg-rating-badge" id="avg-rating-badge">--</div>
                 </div>
                 <div id="rating-bars"></div>
-                <div class="mt-2 text-center small text-muted" id="total-reviews-label"></div>
+                <div class="mt-4 text-center fw-medium text-secondary" style="font-size: 0.95rem;" id="total-reviews-label"></div>
             </div>
         </div>
-        <div class="col-lg-7">
-            <div class="stat-card">
-                <div class="stat-card-header"><h3 class="stat-card-title">Ưa thích nhất</h3></div>
+        <div class="col-lg-6">
+            <div class="stat-card" style="padding: 2rem;">
+                <div class="stat-card-header mb-4 border-0"><h3 class="stat-card-title text-dark fs-5 fw-bold">Ưa thích nhất</h3></div>
                 <div id="top-rated-list"></div>
             </div>
         </div>
@@ -273,4 +275,6 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
 <script src="../../assets/js/admin/statistics.js"></script>

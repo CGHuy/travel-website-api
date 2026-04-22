@@ -242,46 +242,46 @@
     background: #fef3c7;
     color: #b45309;
     font-weight: 800;
-    font-size: 1.1rem;
-    padding: 4px 14px;
-    border-radius: 10px;
+    font-size: 1.25rem;
+    padding: 6px 16px;
+    border-radius: 12px;
 }
 
 .rating-bar-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 .rating-bar-label {
-    min-width: 40px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #475569;
+    min-width: 35px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #334155;
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
 }
-.rating-bar-label i { color: #f59e0b; font-size: 0.7rem; }
+.rating-bar-label i { color: #f59e0b; font-size: 0.8rem; }
 .rating-bar-track {
     flex: 1;
-    height: 8px;
+    height: 10px;
     background: #f1f5f9;
     border-radius: 100px;
     overflow: hidden;
 }
 .rating-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    background: #f59e0b;
     border-radius: 100px;
     transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .rating-bar-count {
-    min-width: 28px;
+    min-width: 30px;
     text-align: right;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    color: #64748b;
+    color: #475569;
 }
 
 /* ─── Top Item List ─────────────────────────────── */

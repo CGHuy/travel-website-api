@@ -19,9 +19,9 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 1. USERS
 -- =========================
 INSERT INTO users (fullname, phone, address, email, password, role) VALUES
-('Nguyễn Văn Hùng', '0987654321', '123 Lê Lợi, Quận 1, TP.HCM', 'hung@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'admin'),
-('Trần Thị Mai', '0912345678', '456 Nguyễn Trãi, Thanh Xuân, Hà Nội', 'mai@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'tour-staff'),
-('Lê Quốc Bảo', '0934567890', '789 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', 'bao.staff@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'booking-staff'),
+('Nguyễn Văn Hùng', '0987654321', '123 Lê Lợi, Quận 1, TP.HCM', 'admin@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'admin'),
+('Trần Thị Mai', '0912345678', '456 Nguyễn Trãi, Thanh Xuân, Hà Nội', 'tour-staff@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'tour-staff'),
+('Lê Quốc Bảo', '0934567890', '789 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', 'booking-staff@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'booking-staff'),
 ('Phạm Minh Tuấn', '0978123456', '12 Trần Phú, Ngô Quyền, Hải Phòng', 'tuan@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
 ('Đỗ Thị Ngọc Anh', '0967123456', '88 Lý Thường Kiệt, TP. Đà Nẵng', 'ngocanh@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
 ('Võ Hoàng Nam', '0945123789', '234 Hùng Vương, TP. Cần Thơ', 'nam@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
@@ -362,7 +362,7 @@ INSERT INTO tour_departures
 (7,4,'TP.HCM','2026-05-01',700000,400000,30,24),
 (8,4,'Hà Nội','2026-05-10',1200000,800000,30,26),
 
-(9,5,'TP.HCM','2026-05-05',800000,500000,30,25),
+(9,5,'TP.HCM','2026-05-05',800000,500000,30,0),
 (10,5,'Hà Nội','2026-05-15',1500000,1000000,30,27),
 
 (11,6,'Hà Nội','2026-05-10',400000,200000,25,20),
@@ -374,7 +374,7 @@ INSERT INTO tour_departures
 (15,8,'Hà Nội','2026-04-18',150000,80000,30,27),
 (16,8,'TP.HCM','2026-05-02',900000,600000,30,28);
 
-
+Update tour_departures set status = 'full' where id in (9);
 -- =========================
 -- 6. SERVICES (mô tả chuyên nghiệp)
 -- =========================
@@ -777,6 +777,90 @@ INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUE
 (39, 'Trần Hữu Danh', 'Nam', '2018-01-01', 'child'),
 (40, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult');
 
+-- 12. USERS CUSTOMER BỔ SUNG CHO DEPARTURE 9
+INSERT INTO users (fullname, phone, address, email, password, role) VALUES
+('Lâm Quốc Huy', '0901000001', '12 Lý Tự Trọng, Quận 1, TP.HCM', 'huy1@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Phan Thị Bảo Trân', '0901000002', '25 Hai Bà Trưng, Quận 3, TP.HCM', 'tran2@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Trịnh Minh Khoa', '0901000003', '88 Trần Hưng Đạo, Quận 5, TP.HCM', 'khoa3@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Nguyễn Hoài An', '0901000004', '14 Nguyễn Huệ, Quận 1, TP.HCM', 'an4@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Đặng Minh Phúc', '0901000005', '71 Pasteur, Quận 3, TP.HCM', 'phuc5@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Vũ Thảo Vy', '0901000006', '9 Võ Văn Tần, Quận 3, TP.HCM', 'vy6@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Lê Đình Tài', '0901000007', '33 Cách Mạng Tháng 8, Quận 10, TP.HCM', 'tai7@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Hồ Ngọc Mai', '0901000008', '117 Điện Biên Phủ, Bình Thạnh, TP.HCM', 'mai8@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Bùi Công Minh', '0901000009', '52 Nguyễn Văn Cừ, Quận 5, TP.HCM', 'minh9@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Đoàn Thị Yến Nhi', '0901000010', '18 Phạm Ngũ Lão, Quận 1, TP.HCM', 'nhi10@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Lương Văn Khải', '0901000011', '90 Lê Lai, Quận 1, TP.HCM', 'khai11@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Tạ Thanh Vân', '0901000012', '64 Bùi Viện, Quận 1, TP.HCM', 'van12@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Ngô Đức Hòa', '0901000013', '27 Nguyễn Trãi, Quận 5, TP.HCM', 'hoa13@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Mai Phương Linh', '0901000014', '101 Trường Chinh, Tân Bình, TP.HCM', 'linh14@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Trần Nhật Nam', '0901000015', '8 Hoàng Sa, Quận 3, TP.HCM', 'nam15@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Phạm Gia Hân', '0901000016', '73 Nguyễn Đình Chiểu, Quận 3, TP.HCM', 'han16@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Châu Thanh Tùng', '0901000017', '45 Võ Thị Sáu, Quận 3, TP.HCM', 'tung17@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Nguyễn Ánh Dương', '0901000018', '29 Nguyễn Văn Thủ, Quận 1, TP.HCM', 'duong18@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Phùng Đức Thịnh', '0901000019', '66 Điện Biên Phủ, Bình Thạnh, TP.HCM', 'thinh19@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Đỗ Hải Yến', '0901000020', '15 Lý Chính Thắng, Quận 3, TP.HCM', 'yen20@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Văn Quốc Bảo', '0901000021', '38 Nguyễn Văn Đậu, Bình Thạnh, TP.HCM', 'bao21@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Lý Thị Kim Ngân', '0901000022', '11 Pasteur, Quận 1, TP.HCM', 'ngan22@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Đặng Quốc Việt', '0901000023', '19 Nam Kỳ Khởi Nghĩa, Quận 3, TP.HCM', 'viet23@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Trần Thu Hằng', '0901000024', '77 Võ Văn Kiệt, Quận 1, TP.HCM', 'hang24@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer'),
+('Nguyễn Duy Khánh', '0901000025', '5 Nguyễn Bỉnh Khiêm, Quận 1, TP.HCM', 'khanh25@gmail.com', '$2b$10$oQphIt4vnkHttKmP6dgzzOtFHp.E3Xb3FQvpDtLkpgIDXrUeIi8tm', 'customer');
+
+-- 13. BOOKINGS LẤP ĐẦY DEPARTURE 9
+INSERT INTO bookings (user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email, created_at) VALUES
+(9, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lâm Quốc Huy', '0901000001', 'huy1@gmail.com', '2026-03-03 09:10:00'),
+(10, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Phan Thị Bảo Trân', '0901000002', 'tran2@gmail.com', '2026-03-05 11:25:00'),
+(11, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Trịnh Minh Khoa', '0901000003', 'khoa3@gmail.com', '2026-03-08 14:40:00'),
+(12, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Nguyễn Hoài An', '0901000004', 'an4@gmail.com', '2026-03-10 10:05:00'),
+(13, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đặng Minh Phúc', '0901000005', 'phuc5@gmail.com', '2026-03-12 16:20:00'),
+(14, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Vũ Thảo Vy', '0901000006', 'vy6@gmail.com', '2026-03-15 09:30:00'),
+(15, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lê Đình Tài', '0901000007', 'tai7@gmail.com', '2026-03-18 13:10:00'),
+(16, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Hồ Ngọc Mai', '0901000008', 'mai8@gmail.com', '2026-03-20 08:45:00'),
+(17, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Bùi Công Minh', '0901000009', 'minh9@gmail.com', '2026-03-22 15:00:00'),
+(18, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đoàn Thị Yến Nhi', '0901000010', 'nhi10@gmail.com', '2026-03-25 10:30:00'),
+(19, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lương Văn Khải', '0901000011', 'khai11@gmail.com', '2026-03-28 14:15:00'),
+(20, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Tạ Thanh Vân', '0901000012', 'van12@gmail.com', '2026-03-30 09:55:00'),
+(21, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Ngô Đức Hòa', '0901000013', 'hoa13@gmail.com', '2026-04-02 11:40:00'),
+(22, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Mai Phương Linh', '0901000014', 'linh14@gmail.com', '2026-04-04 16:05:00'),
+(23, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Trần Nhật Nam', '0901000015', 'nam15@gmail.com', '2026-04-06 09:20:00'),
+(24, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Phạm Gia Hân', '0901000016', 'han16@gmail.com', '2026-04-08 13:35:00'),
+(25, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Châu Thanh Tùng', '0901000017', 'tung17@gmail.com', '2026-04-10 10:10:00'),
+(26, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Nguyễn Ánh Dương', '0901000018', 'duong18@gmail.com', '2026-04-12 15:45:00'),
+(27, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Phùng Đức Thịnh', '0901000019', 'thinh19@gmail.com', '2026-04-14 09:00:00'),
+(28, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đỗ Hải Yến', '0901000020', 'yen20@gmail.com', '2026-04-16 12:25:00'),
+(29, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Văn Quốc Bảo', '0901000021', 'bao21@gmail.com', '2026-04-18 14:50:00'),
+(30, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Lý Thị Kim Ngân', '0901000022', 'ngan22@gmail.com', '2026-04-19 10:05:00'),
+(31, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Đặng Quốc Việt', '0901000023', 'viet23@gmail.com', '2026-04-20 16:30:00'),
+(32, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Trần Thu Hằng', '0901000024', 'hang24@gmail.com', '2026-04-21 09:15:00'),
+(33, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Nguyễn Duy Khánh', '0901000025', 'khanh25@gmail.com', '2026-04-22 11:20:00');
+
+-- 14. PASSENGERS TƯƠNG ỨNG CHO DEPARTURE 9
+INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUES
+(41, 'Lâm Quốc Huy', 'Nam', '1992-06-12', 'adult'),
+(42, 'Phan Thị Bảo Trân', 'Nữ', '1994-08-03', 'adult'),
+(43, 'Trịnh Minh Khoa', 'Nam', '1990-01-20', 'adult'),
+(44, 'Nguyễn Hoài An', 'Nữ', '1996-11-15', 'adult'),
+(45, 'Đặng Minh Phúc', 'Nam', '1989-09-09', 'adult'),
+(46, 'Vũ Thảo Vy', 'Nữ', '1998-04-28', 'adult'),
+(47, 'Lê Đình Tài', 'Nam', '1991-12-19', 'adult'),
+(48, 'Hồ Ngọc Mai', 'Nữ', '1993-07-07', 'adult'),
+(49, 'Bùi Công Minh', 'Nam', '1995-03-21', 'adult'),
+(50, 'Đoàn Thị Yến Nhi', 'Nữ', '1997-10-10', 'adult'),
+(51, 'Lương Văn Khải', 'Nam', '1992-05-05', 'adult'),
+(52, 'Tạ Thanh Vân', 'Nữ', '1994-02-14', 'adult'),
+(53, 'Ngô Đức Hòa', 'Nam', '1988-08-18', 'adult'),
+(54, 'Mai Phương Linh', 'Nữ', '1999-01-26', 'adult'),
+(55, 'Trần Nhật Nam', 'Nam', '1990-10-30', 'adult'),
+(56, 'Phạm Gia Hân', 'Nữ', '1996-06-06', 'adult'),
+(57, 'Châu Thanh Tùng', 'Nam', '1993-11-11', 'adult'),
+(58, 'Nguyễn Ánh Dương', 'Nữ', '1995-12-12', 'adult'),
+(59, 'Phùng Đức Thịnh', 'Nam', '1991-07-02', 'adult'),
+(60, 'Đỗ Hải Yến', 'Nữ', '1998-09-29', 'adult'),
+(61, 'Văn Quốc Bảo', 'Nam', '1992-03-03', 'adult'),
+(62, 'Lý Thị Kim Ngân', 'Nữ', '1997-05-17', 'adult'),
+(63, 'Đặng Quốc Việt', 'Nam', '1989-04-04', 'adult'),
+(64, 'Trần Thu Hằng', 'Nữ', '1994-09-24', 'adult'),
+(65, 'Nguyễn Duy Khánh', 'Nam', '1991-01-08', 'adult');
+
 -- 8. REVIEWS
 -- Lưu ý: Mỗi user chỉ được review 1 tour duy nhất 1 lần (UNIQUE KEY uk_user_tour_review)
 -- Các booking trùng user+tour (11,12,13,20,21,28,31,38,39) sẽ không có review
@@ -820,4 +904,65 @@ INSERT INTO wishlist (user_id, tour_id) VALUES
 (6, 9), (6, 16),
 (7, 12),
 (8, 13), (8, 14), (8, 17);
+
+-- 10. BỔ SUNG BOOKINGS CHO CÁC DEPARTURES CHƯA CÓ BOOKING
+INSERT INTO bookings
+(user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email, created_at) VALUES
+(4, 1, 1, 0, 3700000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-03-20 09:15:00'),
+(5, 2, 1, 0, 3700000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-02 10:00:00'),
+(6, 3, 1, 0, 3200000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-03-22 11:00:00'),
+(7, 4, 1, 0, 3600000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-04-08 14:00:00'),
+(8, 5, 1, 0, 2800000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-04-20 09:45:00'),
+(4, 6, 1, 0, 2800000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-22 10:30:00'),
+(5, 7, 1, 0, 5200000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-04-18 13:00:00'),
+(6, 8, 1, 0, 5700000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-04-24 09:20:00'),
+(7, 9, 1, 0, 6000000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-04-19 15:00:00'),
+(8, 10, 1, 0, 6700000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-04-26 08:50:00'),
+(4, 11, 1, 0, 3500000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-28 10:00:00'),
+(5, 12, 1, 0, 4300000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2026-05-01 11:30:00'),
+(6, 13, 1, 0, 3000000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-03-30 09:00:00'),
+(7, 14, 1, 0, 3200000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-04-10 14:15:00'),
+(8, 15, 1, 0, 2350000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-04-03 10:10:00'),
+(4, 16, 1, 0, 3100000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-04-16 09:40:00'),
+(5, 28, 1, 0, 3700000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2025-11-05 10:00:00'),
+(6, 30, 1, 0, 3600000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2025-11-20 10:30:00'),
+(7, 33, 1, 0, 6700000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2025-10-02 14:00:00'),
+(8, 34, 1, 0, 3500000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2025-11-01 09:10:00'),
+(4, 36, 1, 0, 4300000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2025-08-28 08:40:00'),
+(5, 37, 1, 0, 65000000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2025-07-01 11:20:00'),
+(6, 43, 1, 0, 2350000, 'paid', 'confirmed', 'Võ Hoàng Nam', '0945123789', 'nam@gmail.com', '2026-09-30 10:00:00'),
+(7, 45, 1, 0, 2100000, 'paid', 'confirmed', 'Bùi Thanh Trúc', '0923456789', 'truc@gmail.com', '2026-08-10 09:00:00'),
+(8, 46, 1, 0, 4200000, 'paid', 'confirmed', 'Nguyễn Thị Hồng Nhung', '0398765432', 'nhung@gmail.com', '2026-09-05 13:30:00'),
+(4, 48, 1, 0, 3300000, 'paid', 'confirmed', 'Phạm Minh Tuấn', '0978123456', 'tuan@gmail.com', '2026-11-01 15:15:00'),
+(5, 55, 1, 0, 2100000, 'paid', 'confirmed', 'Đỗ Thị Ngọc Anh', '0967123456', 'ngocanh@gmail.com', '2025-10-08 10:00:00');
+
+-- 11. PASSENGERS TƯƠNG ỨNG CHO CÁC BOOKING BỔ SUNG
+INSERT INTO passengers (booking_id, fullname, gender, dob, passenger_type) VALUES
+(41, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
+(42, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult'),
+(43, 'Võ Hoàng Nam', 'Nam', '1988-12-05', 'adult'),
+(44, 'Bùi Thanh Trúc', 'Nữ', '1993-02-28', 'adult'),
+(45, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult'),
+(46, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
+(47, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult'),
+(48, 'Võ Hoàng Nam', 'Nam', '1988-12-05', 'adult'),
+(49, 'Bùi Thanh Trúc', 'Nữ', '1993-02-28', 'adult'),
+(50, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult'),
+(51, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
+(52, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult'),
+(53, 'Võ Hoàng Nam', 'Nam', '1988-12-05', 'adult'),
+(54, 'Bùi Thanh Trúc', 'Nữ', '1993-02-28', 'adult'),
+(55, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult'),
+(56, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
+(57, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult'),
+(58, 'Võ Hoàng Nam', 'Nam', '1988-12-05', 'adult'),
+(59, 'Bùi Thanh Trúc', 'Nữ', '1993-02-28', 'adult'),
+(60, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult'),
+(61, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
+(62, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult'),
+(63, 'Võ Hoàng Nam', 'Nam', '1988-12-05', 'adult'),
+(64, 'Bùi Thanh Trúc', 'Nữ', '1993-02-28', 'adult'),
+(65, 'Nguyễn Thị Hồng Nhung', 'Nữ', '1997-09-02', 'adult'),
+(66, 'Phạm Minh Tuấn', 'Nam', '1990-05-15', 'adult'),
+(67, 'Đỗ Thị Ngọc Anh', 'Nữ', '1995-08-25', 'adult');
 

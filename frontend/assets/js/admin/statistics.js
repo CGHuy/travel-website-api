@@ -409,13 +409,26 @@ async function applyFilter(period) {
 
 // --- Bộ lọc tùy chỉnh (custom date range) → cards thống kê ---
 async function applyCustomFilter() {
-	const from = $("custom-from").value;
-	const to = $("custom-to").value;
+	const fromRaw = $("custom-from").value;
+	const toRaw = $("custom-to").value;
 
-	if (!from || !to) {
+	if (!fromRaw || !toRaw) {
 		alert("Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc.");
 		return;
 	}
+
+	// Chuyển đổi dd/mm/yyyy -> yyyy-mm-dd để gọi API
+	const parts1 = fromRaw.split("/");
+	const parts2 = toRaw.split("/");
+
+	if (parts1.length !== 3 || parts2.length !== 3) {
+		alert("Vui lòng nhập ngày theo định dạng dd/mm/yyyy");
+		return;
+	}
+
+	const from = `${parts1[2]}-${parts1[1].padStart(2, "0")}-${parts1[0].padStart(2, "0")}`;
+	const to = `${parts2[2]}-${parts2[1].padStart(2, "0")}-${parts2[0].padStart(2, "0")}`;
+
 	if (new Date(from) > new Date(to)) {
 		alert("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.");
 		return;
@@ -582,9 +595,22 @@ window.initAdminStatisticsPage = async () => {
 	// Bộ lọc tùy chỉnh
 	if ($("custom-apply")) $("custom-apply").onclick = () => applyCustomFilter();
 
-	// Set ngày mặc định cho custom filter (tháng này)
-	const today = now.toISOString().split("T")[0];
-	const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-	if ($("custom-from")) $("custom-from").value = firstDay;
-	if ($("custom-to")) $("custom-to").value = today;
+	// Set ngày mặc định (dd/mm/yyyy)
+	const todayStr = now.getDate().toString().padStart(2, "0") + "/" + (now.getMonth() + 1).toString().padStart(2, "0") + "/" + now.getFullYear();
+	const firstDayStr = "01/" + (now.getMonth() + 1).toString().padStart(2, "0") + "/" + now.getFullYear();
+
+	// Khởi tạo Flatpickr cho custom filter
+	const fpConfig = {
+		dateFormat: "d/m/Y",
+		locale: "vn",
+		allowInput: true,
+	};
+	if ($("custom-from")) {
+		const fpFrom = flatpickr("#custom-from", fpConfig);
+		fpFrom.setDate(firstDayStr);
+	}
+	if ($("custom-to")) {
+		const fpTo = flatpickr("#custom-to", fpConfig);
+		fpTo.setDate(todayStr);
+	}
 };
