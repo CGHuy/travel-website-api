@@ -179,7 +179,7 @@ function renderAdminBookingDetails(data) {
     const cancelActionArea = document.getElementById('cancellation-action-area');
     const modal = document.getElementById('cancel-confirm-modal');
     
-    if (cancelActionArea && data.status === 'pending' && data.payment_status === 'pending') {
+    if (cancelActionArea && data.status === 'pending') {
         cancelActionArea.style.display = 'block';
         
         // Modal Event Listeners
@@ -187,6 +187,7 @@ function renderAdminBookingDetails(data) {
         const closeModalX = modal.querySelector('.close-modal');
         const closeModalBtn = document.getElementById('btn-close-modal');
         const approveBtn = document.getElementById('btn-approve-cancel');
+        const rejectBtn = document.getElementById('btn-reject-cancel');
         const refundAmtEl = document.getElementById('modal-refund-amount');
 
         if (refundAmtEl) refundAmtEl.textContent = formatCurrency(data.total_price);
@@ -195,16 +196,19 @@ function renderAdminBookingDetails(data) {
         closeModalX.onclick = () => modal.style.display = 'none';
         closeModalBtn.onclick = () => modal.style.display = 'none';
         
+        // 1. Logic Phê Duyệt
         approveBtn.onclick = async () => {
-            approveBtn.disabled = true;
-            approveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+            if (!confirm('Xác nhận phê duyệt hủy và hoàn tiền?')) return;
+            
+            setLoading(approveBtn, true);
+            rejectBtn.disabled = true;
             
             try {
                 const response = await fetch(`/api/bookings/${data.id}/status`, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                        'Authorization': `Bearer ${localStorage.token}` 
                     },
                     body: JSON.stringify({ 
                         status: 'cancelled', 
@@ -213,16 +217,50 @@ function renderAdminBookingDetails(data) {
                 });
 
                 if (response.ok) {
-                    alert('Phê duyệt yêu cầu hủy và hoàn tiền thành công!');
+                    alert('Đã phê duyệt hủy tour và hoàn tiền cho khách hàng.');
                     window.location.reload();
                 } else {
                     throw new Error('Lỗi phê duyệt');
                 }
             } catch (err) {
                 console.error(err);
-                alert('Không thể phê duyệt yêu cầu hủy');
+                alert('Không thể thực hiện phê duyệt');
+                setLoading(approveBtn, false, 'Phê duyệt & Hoàn tiền');
+                rejectBtn.disabled = false;
+            }
+        };
+
+        // 2. Logic Từ Chối
+        rejectBtn.onclick = async () => {
+            if (!confirm('Bạn chắc chắn muốn TỪ CHỐI yêu cầu hủy này? Đơn hàng sẽ quay lại trạng thái Đã xác nhận.')) return;
+
+            setLoading(rejectBtn, true);
+            approveBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/bookings/${data.id}/status`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.token}` 
+                    },
+                    body: JSON.stringify({ 
+                        status: 'confirmed', 
+                        payment_status: 'paid' 
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Đã từ chối yêu cầu hủy. Đơn hàng hiện đã quay lại trạng thái Đã xác nhận.');
+                    window.location.reload();
+                } else {
+                    throw new Error('Lỗi từ chối');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Không thể thực hiện từ chối yêu cầu');
+                setLoading(rejectBtn, false, 'Từ chối yêu cầu');
                 approveBtn.disabled = false;
-                approveBtn.textContent = 'Đồng ý phê duyệt';
             }
         };
     } else if (cancelActionArea) {
@@ -330,4 +368,14 @@ function addDays(date, days) {
     const d = new Date(date);
     d.setDate(d.getDate() + days);
     return d;
+}
+
+function setLoading(btn, isLoading, defaultText = '') {
+    if (isLoading) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = defaultText;
+    }
 }
