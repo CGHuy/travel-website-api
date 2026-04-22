@@ -12,6 +12,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 		return;
 	}
 
+	// Chỉ khách hàng (customer) mới được xem trang này
+	// Hỗ trợ cả 2 format role: gạch dưới (frontend) và gạch ngang (DB)
+	const _bh_user = JSON.parse(localStorage.getItem("user") || "{}");
+	const _bh_STAFF = ["admin", "booking-staff", "tour-staff"];
+	if (_bh_STAFF.includes((_bh_user.role || "").toLowerCase())) {
+		window.location.replace("/profile");
+		return;
+	}
+
 	// Load components
 	await Promise.all([
 		loadComponent("header-placeholder", "../../components/header.html"),

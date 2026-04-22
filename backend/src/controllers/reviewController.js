@@ -1,5 +1,6 @@
 const Review = require("../models/Review");
 const bookingService = require("../services/bookingService");
+const Booking = require("../models/Booking");
 
 // Lấy danh sách đánh giá của user hiện tại
 exports.getUserReviews = async (req, res) => {
@@ -26,6 +27,17 @@ exports.createReview = async (req, res) => {
     try {
         const userId = req.user.id;
         const { tour_id, rating, comment, booking_id } = req.body;
+
+        // 0. Xác thực booking_id thuộc về user hiện tại
+        if (booking_id) {
+            const bookingRecord = await Booking.getById(booking_id);
+            if (!bookingRecord || bookingRecord.user_id !== userId) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Booking không hợp lệ hoặc không thuộc về tài khoản này!"
+                });
+            }
+        }
 
         // 1. Kiểm tra xem tour đã hoàn thành (đã đi) bởi user này chưa
         const hasCompleted = await bookingService.checkCompletedBooking(userId, tour_id);

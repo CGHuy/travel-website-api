@@ -12,6 +12,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
+    // Chỉ khách hàng (customer) mới được xem trang này
+    // Sử dụng đúng format role theo DB (gạch ngang)
+    const _fv_STAFF = ["admin", "booking-staff", "tour-staff"];
+    if (_fv_STAFF.includes((user.role || "").toLowerCase())) {
+        window.location.replace("/profile");
+        return;
+    }
+
     // Load components
     await Promise.all([loadComponent("header-placeholder", "../../components/header.html"), loadComponent("footer-placeholder", "../../components/footer.html"), loadComponent("side-placeholder", "../../components/user-sidebar.html")]);
 

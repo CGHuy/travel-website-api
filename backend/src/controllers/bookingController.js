@@ -65,7 +65,7 @@ exports.getAllBookings = async (req, res) => {
 	}
 };
 
-// Admin: Cập nhật status
+// Admin: Cập nhật status (và hoàn trả ghế nếu huỷ)
 exports.updateStatus = async (req, res) => {
 	try {
 		const bookingId = req.params.id;
@@ -73,7 +73,20 @@ exports.updateStatus = async (req, res) => {
 
 		if (status) {
 			await Booking.updateStatus(bookingId, "status", status);
+
+			// Hoàn trả ghế khi admin duyệt hủy đơn
+			if (status === "cancelled") {
+				const booking = await bookingService.getById(bookingId);
+				if (booking) {
+					const totalPax = (booking.adults || 0) + (booking.children || 0);
+					await db.query(
+						`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`,
+						[totalPax, booking.departure_id]
+					);
+				}
+			}
 		}
+
 		if (payment_status) {
 			await Booking.updateStatus(bookingId, "payment_status", payment_status);
 		}
@@ -215,32 +228,9 @@ exports.getBookingDetailsByUserId = async (req, res) => {
 	}
 };
 
-// User gửi yêu cầu hủy booking (chuyển trạng thái sang pending)
+// NOTE: requestCancellation đã được tích hợp vào cancelBooking ở trên.
+// Hàm này đầy cũ không được sử dụng, giữ comment để tham khảo.
 
-exports.requestCancellation = async (req, res) => {
-	try {
-		const bookingId = req.params.id;
-		const userId = req.user.id;
-
-		const booking = await Booking.getById(bookingId);
-		if (!booking) {
-			return res
-				.status(404)
-				.json({ success: false, message: "Không tìm thấy booking" });
-		}
-		if (booking.status === "pending") {
-			return res
-				.status(400)
-				.json({ success: true, message: "Gửi yêu cầu hủy thành công" });
-		}
-	} catch (error) {
-		res.status(500).json({
-			success: false,
-			message: "Lỗi khi gửi yêu cầu hủy booking",
-			error: error.message,
-		});
-	}
-};
 
 // Bộ nhớ tạm lưu thông tin booking đang chờ thanh toán
 const pendingBookingsCache = new Map();
