@@ -140,7 +140,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Display tour info
         document.getElementById("bc-tour-name").innerText = tour.name;
         document.getElementById("tour-name-display").innerText = tour.name;
-        document.getElementById("tour-code").innerText = String(tour.code || "");
+        const formattedCode = `#TOUR${String(tour.id).padStart(3, "0")}`;
+        document.getElementById("tour-code").innerText = formattedCode;
         document.getElementById("tour-img").src = tour.cover_image;
         document.getElementById("tour-duration").innerText = tour.duration;
 

@@ -98,7 +98,7 @@ class Tour {
 		try {
 			const [rows] = await db.query(
 				`
-                SELECT name, location, region, duration, cover_image, price_default, price_child FROM tours WHERE id = ?`,
+                SELECT id, name, location, region, duration, cover_image, price_default, price_child FROM tours WHERE id = ?`,
 				[id],
 			);
 			return rows[0];
