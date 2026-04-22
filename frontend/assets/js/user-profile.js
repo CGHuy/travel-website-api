@@ -276,10 +276,16 @@ function initChangePasswordForm() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ currentPassword, newPassword }),
+                body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
             });
             const data = await res.json();
-            if (!data.success) throw new Error(data.message);
+            if (!data.success) throw new Error(data.message || data.errors?.confirmPassword || "Lỗi khi đổi mật khẩu");
+            
+            // Lưu token mới nếu backend trả về
+            if (data.data?.token) {
+                localStorage.setItem("token", data.data.token);
+            }
+            
             showToast("Đổi mật khẩu thành công!", "success");
             form.reset();
         } catch (err) {

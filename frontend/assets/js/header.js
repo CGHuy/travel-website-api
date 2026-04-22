@@ -48,22 +48,39 @@ async function updateAdminNavVisibility(token) {
     const adminNavLink = document.getElementById("adminNavLink");
     if (!adminNavLink) return;
 
-    if (!token) {
-        adminNavLink.classList.add("d-none");
-        return;
+    // Ẩn mặc định
+    adminNavLink.classList.add("d-none");
+
+    if (!token) return;
+
+    let role = "";
+    try {
+        // Ưu tiên lấy role từ localStorage để hiển thị tức thì (tránh flicker)
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+            const user = JSON.parse(userStr);
+            role = String(user.role || "").toLowerCase();
+        }
+
+        // Nếu localStorage không có hoặc cần verify lại, mới gọi backend
+        if (!role) {
+            role = await getCurrentRoleFromBackend(token);
+        }
+    } catch (e) {
+        console.error("Lỗi lấy role:", e);
     }
 
-    const role = await getCurrentRoleFromBackend(token);
     const canViewAdminRoles = new Set([
         "admin",
-        "tour_staff",
-        "booking_staff",
         "tour-staff",
         "booking-staff",
+        "tour_staff",
+        "booking_staff",
     ]);
-    const canViewAdmin = canViewAdminRoles.has(role);
 
-    adminNavLink.classList.toggle("d-none", !canViewAdmin);
+    if (role && canViewAdminRoles.has(role)) {
+        adminNavLink.classList.remove("d-none");
+    }
 }
 
 // ================== AUTH UI ==================

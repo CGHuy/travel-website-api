@@ -104,8 +104,18 @@ exports.changePassword = async (req, res) => {
 			});
 		}
 
+		// Lấy lại thông tin user để ký token mới đầy đủ (id, email, role)
+		const user = await User.findById(userId);
 		const secret = process.env.JWT_SECRET || "change_pwd_secret";
-		const token = jwt.sign({ id: userId }, secret, { expiresIn: "7d" });
+		const token = jwt.sign(
+			{ 
+				id: user.id, 
+				email: user.email, 
+				role: user.role 
+			}, 
+			secret, 
+			{ expiresIn: "7d" }
+		);
 
 		return res.json({
 			success: true,
