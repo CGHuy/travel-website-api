@@ -13,7 +13,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             window.showToast(title, message, type, duration);
             return;
         }
-        alert(message ? `${title}: ${message}` : title);
+        // Fallback alert: bỏ phần "title: " để tránh bị lặp hoặc thêm "phần đầu" không mong muốn
+        alert(message || title);
     };
 
     await Promise.all([loadComponent("header-placeholder", "../../components/header.html"), loadComponent("footer-placeholder", "../../components/footer.html")]);
@@ -53,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const warningEl = document.getElementById("booking-role-warning");
         if (!submitBtn) return;
 
-        const isAllowed = role === "customer" || role === "admin";
+        const isAllowed = role === "customer";
         submitBtn.disabled = !isAllowed;
 
         if (isAllowed) {
@@ -410,8 +411,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("submitBooking").addEventListener("click", async (e) => {
         e.preventDefault();
 
-        if (currentUserRole !== "customer" && currentUserRole !== "admin") {
-            notify("Không có quyền đặt tour", "Chỉ tài khoản khách hàng hoặc quản trị viên mới có thể đặt tour.", "warning");
+        if (currentUserRole !== "customer") {
+            notify("", "Chỉ tài khoản khách hàng mới có thể đặt tour.", "warning");
             return;
         }
 
@@ -509,7 +510,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 // Chuyển hướng sang trang thanh toán của VNPay
                 window.location.href = result.vnpayUrl;
             } else {
-                notify("Không thể tạo liên kết thanh toán", result.message || "Vui lòng thử lại sau.", "error");
+                notify("", result.message || "Vui lòng thử lại sau.", "error");
                 btn.disabled = false;
                 btn.innerHTML = originalContent;
             }
