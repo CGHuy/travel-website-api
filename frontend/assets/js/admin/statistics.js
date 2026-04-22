@@ -1,4 +1,14 @@
 const API = "";
+const fetchWithAuth = async (url, options = {}) => {
+    const token = localStorage.getItem("token");
+    const headers = {
+        "Content-Type": "application/json",
+        ...options.headers,
+        "Authorization": `Bearer ${token}`
+    };
+    return fetch(url, { ...options, headers });
+};
+
 let revenueChart = null;
 let statusChart = null;
 let customRevenueChart = null;
@@ -265,7 +275,7 @@ function initCustomRevenueChart(labels, data) {
 
 // --- Tải dữ liệu ---
 async function loadRealTime() {
-    const { data } = await (await fetch(`${API}/api/stats/realtime`)).json();
+    const { data } = await (await fetchWithAuth(`${API}/api/stats/realtime`)).json();
     $("rt-new-users").textContent = fmtNum(data.new_users_today);
     $("rt-total-users").textContent = `Tổng: ${data.total_users}`;
     $("rt-pending").textContent = data.pending_bookings;
@@ -276,7 +286,7 @@ async function loadRealTime() {
 async function loadOccupancy(page = 1) {
     const limit = 10;
     try {
-        const { data: result } = await (await fetch(`${API}/api/stats/occupancy?page=${page}&limit=${limit}`)).json();
+        const { data: result } = await (await fetchWithAuth(`${API}/api/stats/occupancy?page=${page}&limit=${limit}`)).json();
         const { data, pagination } = result;
         const body = $("occupancy-body");
         if (!body) return;
@@ -357,7 +367,7 @@ function renderPagination(containerId, pagination, onPageClick) {
 }
 
 async function loadReport(from, to) {
-    const { data } = await (await fetch(`${API}/api/stats/report?from=${from}&to=${to}`)).json();
+    const { data } = await (await fetchWithAuth(`${API}/api/stats/report?from=${from}&to=${to}`)).json();
     $("tb-revenue").textContent = fmt(data.revenue);
     $("tb-bookings").textContent = data.booking_count;
     $("tb-revenue-growth").innerHTML = growthBadge(data.growth.revenue);
@@ -376,10 +386,10 @@ async function applyFilter(period) {
     if ($("time-label")) $("time-label").textContent = getPeriodLabel(period, from, to);
     document.querySelectorAll(".time-filter-btn[data-period]").forEach((b) => b.classList.toggle("active", b.dataset.period === period));
 
-    const resRevenueTimeBased = await (await fetch(`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=false`)).json();
+    const resRevenueTimeBased = await (await fetchWithAuth(`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=false`)).json();
     initRevenueChart(resRevenueTimeBased.data.labels, resRevenueTimeBased.data.data);
 
-    const resStatus = await (await fetch(`${API}/api/stats/bookings/status?from=${from}&to=${to}`)).json();
+    const resStatus = await (await fetchWithAuth(`${API}/api/stats/bookings/status?from=${from}&to=${to}`)).json();
     initStatusChart(resStatus.data);
 
     loadReport(from, to);
@@ -417,7 +427,7 @@ async function applyCustomFilter() {
     if (rangeLabel) rangeLabel.textContent = `Đang xem: ${formatDateVN(from)} → ${formatDateVN(to)}`;
 
     // Gọi API song song
-    const [reportRes, resRevenueCustom] = await Promise.all([fetch(`${API}/api/stats/report?from=${from}&to=${to}`).then((r) => r.json()), fetch(`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=true`).then((r) => r.json())]);
+    const [reportRes, resRevenueCustom] = await Promise.all([fetchWithAuth(`${API}/api/stats/report?from=${from}&to=${to}`).then((r) => r.json()), fetchWithAuth(`${API}/api/stats/revenue?from=${from}&to=${to}&limitChart=true`).then((r) => r.json())]);
 
     const d = reportRes.data;
 
@@ -447,7 +457,7 @@ async function applyCustomFilter() {
 
 // --- Analytics ---
 async function loadAnalytics() {
-    const [tours, reviews, users] = await Promise.all([fetch(`${API}/api/stats/tours/top`).then((r) => r.json()), fetch(`${API}/api/stats/reviews`).then((r) => r.json()), fetch(`${API}/api/stats/users`).then((r) => r.json())]);
+    const [tours, reviews, users] = await Promise.all([fetchWithAuth(`${API}/api/stats/tours/top`).then((r) => r.json()), fetchWithAuth(`${API}/api/stats/reviews`).then((r) => r.json()), fetchWithAuth(`${API}/api/stats/users`).then((r) => r.json())]);
 
     $("top-tours-body").innerHTML = tours.data
         .map(
@@ -509,7 +519,7 @@ window.initAdminStatisticsPage = async () => {
     // Lấy danh sách năm có dữ liệu từ DB
     let dbYears = [];
     try {
-        const resYears = await (await fetch(`${API}/api/stats/years`)).json();
+        const resYears = await (await fetchWithAuth(`${API}/api/stats/years`)).json();
         dbYears = resYears.data || [];
     } catch (e) {
         console.error("Lỗi lấy năm từ DB", e);
