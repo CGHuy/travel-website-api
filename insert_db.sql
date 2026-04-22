@@ -641,6 +641,11 @@ INSERT INTO tour_departures (id, tour_id, departure_location, departure_date, pr
 (69, 18, 'TP.HCM', '2026-12-05', 500000, 300000, 20, 18),
 (70, 4, 'Hà Nội', '2026-05-15', 1200000, 800000, 30, 12);
 
+-- Đóng các lịch khởi hành đã qua ngày hiện tại
+UPDATE tour_departures
+SET status = 'closed'
+WHERE id > 0 AND departure_date < CURDATE();
+
 -- 6. BOOKINGS
 -- Batch 1: Tự động tăng ID
 INSERT INTO bookings (user_id, departure_id, adults, children, total_price, payment_status, status, contact_name, contact_phone, contact_email) VALUES
