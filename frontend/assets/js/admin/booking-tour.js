@@ -18,6 +18,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await Promise.all([loadComponent("header-placeholder", "../../components/header.html"), loadComponent("footer-placeholder", "../../components/footer.html")]);
 
+    // Helper fetch có kèm token
+    const fetchWithAuth = async (url, options = {}) => {
+        const token = localStorage.getItem("token");
+        const headers = {
+            "Content-Type": "application/json",
+            ...options.headers,
+            "Authorization": `Bearer ${token}`
+        };
+        return fetch(url, { ...options, headers });
+    };
+
     // 1. Get tourId from URL query string
     const urlParams = new URLSearchParams(window.location.search);
     const tourId = urlParams.get("tour_id");
@@ -42,10 +53,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const warningEl = document.getElementById("booking-role-warning");
         if (!submitBtn) return;
 
-        const isCustomer = role === "customer";
-        submitBtn.disabled = !isCustomer;
+        const isAllowed = role === "customer" || role === "admin";
+        submitBtn.disabled = !isAllowed;
 
-        if (isCustomer) {
+        if (isAllowed) {
             submitBtn.classList.remove("disabled");
             submitBtn.removeAttribute("title");
             if (warningEl) warningEl.classList.add("d-none");
@@ -68,11 +79,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
-            const response = await fetch(`/api/list-tours/tour-departures/${tourId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await fetchWithAuth(`/api/list-tours/tour-departures/${tourId}`);
 
             if (response.status === 401 || response.status === 403) {
                 window.location.replace(`/login?redirect=${encodeURIComponent(window.location.href)}`);
@@ -100,11 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const token = localStorage.getItem("token");
             if (!token) return;
 
-            const response = await fetch("/api/users/profile", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await fetchWithAuth("/api/users/profile");
 
             const result = await response.json();
             if (result.success && result.data) {
@@ -407,8 +410,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("submitBooking").addEventListener("click", async (e) => {
         e.preventDefault();
 
-        if (currentUserRole !== "customer") {
-            notify("Không có quyền đặt tour", "Chỉ tài khoản khách hàng mới có thể đặt tour.", "warning");
+        if (currentUserRole !== "customer" && currentUserRole !== "admin") {
+            notify("Không có quyền đặt tour", "Chỉ tài khoản khách hàng hoặc quản trị viên mới có thể đặt tour.", "warning");
             return;
         }
 
@@ -495,12 +498,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 passengers: passengers,
             };
 
-            const response = await fetch("/api/bookings/create-payment-url", {
+            const response = await fetchWithAuth("/api/bookings/create-payment-url", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
                 body: JSON.stringify(bookingData),
             });
 
