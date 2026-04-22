@@ -50,7 +50,7 @@
                 form.reset();
                 hideModalById("addTourModal");
                 await fetchAndRenderTours();
-                showNotification("Thông báo", "Thêm tour thành công", "green");
+                showNotification("bg-success", "Thông báo", "Thêm tour thành công");
             } catch (error) {
                 console.error("Lỗi thêm tour:", error);
             } finally {
@@ -97,7 +97,7 @@
 
                 hideModalById("editTourModal");
                 await fetchAndRenderTours();
-                showNotification("Thông báo", "Cập nhật tour thành công", "blue");
+                showNotification("bg-primary", "Thông báo", "Cập nhật tour thành công");
             } catch (error) {
                 console.error("Lỗi cập nhật tour:", error);
             } finally {
@@ -140,9 +140,11 @@
                 hideModalById("deleteTourModal");
                 form.reset();
                 await fetchAndRenderTours();
-                showNotification("Thông báo", "Xóa tour thành công", "red");
+                showNotification("bg-danger", "Thông báo", "Xóa tour thành công");
             } catch (error) {
                 console.error("Lỗi xóa tour:", error);
+                hideModalById("deleteTourModal");
+                showNotification("bg-danger", "Thông báo lỗi", error.message);
             } finally {
                 setSubmitButtonState(submitBtn, { disabled: false, text: "Xóa" });
             }
@@ -433,18 +435,23 @@
         modalInstance.hide();
     }
 
-    function showNotification(title, message, color) {
+    function showNotification(header, title, message) {
+        const modalHeaderEl = document.getElementById("TypeDialog");
         const modalEl = document.getElementById("notificationModal");
         const titleEl = document.getElementById("notificationModalLabel");
         const messageEl = document.getElementById("notificationMessage");
 
-        if (!modalEl || !messageEl) return;
+        if (!modalEl || !messageEl || !modalHeaderEl) return;
+
+        modalHeaderEl.classList.remove("bg-success", "bg-primary", "bg-danger");
+        if (header) {
+            modalHeaderEl.classList.add(header);
+        }
 
         if (titleEl) {
             titleEl.textContent = title;
         }
         messageEl.textContent = message;
-        messageEl.style.color = color || "inherit";
 
         const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
         modalInstance.show();

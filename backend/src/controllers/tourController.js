@@ -1,4 +1,5 @@
 const Tour = require("../models/Tour");
+const Departure = require("../models/Departure");
 const { deleteFromCloudinaryByUrl } = require("../middlewares/mediaStorage");
 
 exports.getAllTours = async (req, res) => {
@@ -254,6 +255,15 @@ exports.deleteTour = async (req, res) => {
             return res.status(404).json({
                 success: false,
                 message: "Không tìm thấy tour",
+            });
+        }
+
+        // Kiểm tra xem tour có điểm khởi hành chưa
+        const departures = await Departure.getByTourId(id);
+        if (departures && departures.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Không thể xóa tour vì tour này đã có điểm khởi hành",
             });
         }
 
