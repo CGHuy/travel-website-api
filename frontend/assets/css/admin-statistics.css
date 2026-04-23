@@ -212,7 +212,7 @@
 .status-pending { background: #fef3c7; color: #d97706; }
 .status-cancelled { background: #fef2f2; color: #ef4444; }
 .status-open { background: #dbeafe; color: #2563eb; }
-.status-closed { background: #f1f5f9; color: #64748b; }
+.status-closed { background: #fee2e2; color: #ef4444; }
 .status-full { background: #fce7f3; color: #db2777; }
 
 /* ─── Occupancy Bars ────────────────────────────── */

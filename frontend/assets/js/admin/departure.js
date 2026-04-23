@@ -1,67 +1,96 @@
 window.initAdminDeparturePage = async function () {
-    const departureList = document.getElementById("departureList");
-    const searchInput = document.getElementById("searchDepartureInput");
-    const searchBtn = document.getElementById("searchDepartureBtn");
+	const departureList = document.getElementById("departureList");
+	const searchInput = document.getElementById("searchDepartureInput");
+	const searchBtn = document.getElementById("searchDepartureBtn");
 
-    let currentDeparturesList = []; // Global state
+	let currentDeparturesList = []; // Global state
 
-    let actionToastEl = document.getElementById("actionToast");
-    let actionToast = actionToastEl ? new bootstrap.Toast(actionToastEl, { delay: 3000 }) : null;
+	let actionToastEl = document.getElementById("actionToast");
+	let actionToast = actionToastEl
+		? new bootstrap.Toast(actionToastEl, { delay: 3000 })
+		: null;
 
-    function showToast(message, type = "success") {
-        if (!actionToast) return alert(message);
-        const toastBody = document.getElementById("actionToastBody");
-        toastBody.textContent = message;
+	function showToast(message, type = "success") {
+		if (!actionToast) return alert(message);
+		const toastBody = document.getElementById("actionToastBody");
+		toastBody.textContent = message;
 
-        actionToastEl.classList.remove("bg-success", "bg-danger", "bg-warning", "bg-info", "text-white");
-        actionToastEl.classList.add(`bg-${type}`, "text-white");
+		actionToastEl.classList.remove(
+			"bg-success",
+			"bg-danger",
+			"bg-warning",
+			"bg-info",
+			"text-white",
+		);
+		actionToastEl.classList.add(`bg-${type}`, "text-white");
 
-        actionToast.show();
-    }
+		actionToast.show();
+	}
 
-    const addDepartureModal = new bootstrap.Modal(document.getElementById("addDepartureModal") || document.createElement("div"));
+	const addDepartureModal = new bootstrap.Modal(
+		document.getElementById("addDepartureModal") ||
+			document.createElement("div"),
+	);
 
     document.getElementById("saveAddDepartureBtn")?.addEventListener("click", async () => {
         const tour_id = document.getElementById("addTourId").value;
-        const departure_date = document.getElementById("addDepartureDate").value;
+        const departureDateDisplay = document.getElementById("addDepartureDate").value;
+        const departure_date = parseDisplayDateToYmd(departureDateDisplay);
         const departure_location = document.getElementById("addDepartureLocation").value.trim();
         const price_moving = document.getElementById("addPriceMoving").value;
         const price_moving_child = document.getElementById("addPriceMovingChild").value;
         const seats_total = document.getElementById("addSeatsTotal").value;
 
-        if (!tour_id || !departure_date || !departure_location || !price_moving || !price_moving_child || !seats_total) {
+        if (!tour_id || !departureDateDisplay || !departure_location || !price_moving || !price_moving_child || !seats_total) {
             showToast("Vui lòng nhập đầy đủ các trường bắt buộc!", "warning");
             return;
         }
+        if (!departure_date) {
+            showToast("Ngày khởi hành phải đúng định dạng dd/MM/yyyy.", "warning");
+            return;
+        }
+        document.getElementById("addDepartureDate").value = formatDateForDisplay(departure_date);
+        const addDatePicker = document.getElementById("addDepartureDatePicker");
+        if (addDatePicker) {
+            addDatePicker.value = departure_date;
+        }
 
-        const payload = {
-            tour_id: Number(tour_id),
-            departure_date: departure_date,
-            departure_location: departure_location,
-            price_moving: Number(price_moving),
-            price_moving_child: Number(price_moving_child),
-            seats_total: Number(seats_total),
-        };
+			const payload = {
+				tour_id: Number(tour_id),
+				departure_date: departure_date,
+				departure_location: departure_location,
+				price_moving: Number(price_moving),
+				price_moving_child: Number(price_moving_child),
+				seats_total: Number(seats_total),
+			};
 
-        const token = localStorage.getItem("token");
-        if (!token) return;
+			const token = localStorage.getItem("token");
+			if (!token) return;
 
-        try {
-            const response = await fetch("/api/departures", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(payload),
-            });
+			try {
+				const response = await fetch("/api/departures", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify(payload),
+				});
 
             const result = await response.json();
             if (result.success) {
                 showToast("Thêm điểm khởi hành thành công!", "success");
                 addDepartureModal.hide();
                 document.getElementById("addDepartureForm").reset();
-                await fetchDepartures();
+
+                const createdDeparture = normalizeDeparture(result.data);
+                const currentQuery = searchInput.value.trim();
+                if (currentQuery) {
+                    await doSearchDeparture(currentQuery);
+                } else {
+                    currentDeparturesList = [createdDeparture, ...currentDeparturesList];
+                    renderDepartures(currentDeparturesList);
+                }
             } else {
                 showToast(result.message || "Có lỗi xảy ra khi thêm mới.", "danger");
             }
@@ -71,98 +100,258 @@ window.initAdminDeparturePage = async function () {
         }
     });
 
-    // Hàm format currency
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ";
+	// Hàm format currency
+	function formatCurrency(amount) {
+		return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ";
+	}
+
+	// Hàm format date (từ YYYY-MM-DDTHH:mm... -> DD/MM/YYYY)
+	function formatDate(dateStr) {
+		const date = new Date(dateStr);
+		const hasTimezone = /z$/i.test(dateStr) || /[+-]\d{2}:\d{2}$/.test(dateStr);
+		const d = (hasTimezone ? date.getUTCDate() : date.getDate())
+			.toString()
+			.padStart(2, "0");
+		const m = (hasTimezone ? date.getUTCMonth() + 1 : date.getMonth() + 1)
+			.toString()
+			.padStart(2, "0");
+		const y = hasTimezone ? date.getUTCFullYear() : date.getFullYear();
+		return `${d}/${m}/${y}`;
+	}
+
+	function formatDateForInput(dateStr) {
+		if (!dateStr) return "";
+		// Preserve API date part to avoid timezone shift in date input.
+		if (
+			typeof dateStr === "string" &&
+			dateStr.length >= 10 &&
+			/^\d{4}-\d{2}-\d{2}/.test(dateStr)
+		) {
+			return dateStr.slice(0, 10);
+		}
+		const date = new Date(dateStr);
+		if (Number.isNaN(date.getTime())) return "";
+		const d = date.getDate().toString().padStart(2, "0");
+		const m = (date.getMonth() + 1).toString().padStart(2, "0");
+		const y = date.getFullYear();
+		return `${y}-${m}-${d}`;
+	}
+
+    function formatDateForDisplay(dateStr) {
+        const ymd = formatDateForInput(dateStr);
+        if (!ymd) return "";
+        const [year, month, day] = ymd.split("-");
+        return `${day}/${month}/${year}`;
     }
 
-    // Hàm format date (từ YYYY-MM-DDTHH:mm... -> DD/MM/YYYY)
-    function formatDate(dateStr) {
-        const date = new Date(dateStr);
-        const d = date.getDate().toString().padStart(2, "0");
-        const m = (date.getMonth() + 1).toString().padStart(2, "0");
-        const y = date.getFullYear();
-        return `${d}/${m}/${y}`;
+    function parseDisplayDateToYmd(displayDate) {
+        if (!displayDate) return "";
+        const value = displayDate.trim();
+
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            return value;
+        }
+
+        let day;
+        let month;
+        let year;
+
+        if (/^\d{8}$/.test(value)) {
+            day = value.slice(0, 2);
+            month = value.slice(2, 4);
+            year = value.slice(4, 8);
+        } else {
+            const match = value.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+            if (!match) return "";
+            day = match[1].padStart(2, "0");
+            month = match[2].padStart(2, "0");
+            year = match[3];
+        }
+
+        const dayNum = Number(day);
+        const monthNum = Number(month);
+        const yearNum = Number(year);
+        if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) return "";
+
+        const normalized = `${year}-${month}-${day}`;
+        const parsed = new Date(`${normalized}T00:00:00`);
+
+        if (Number.isNaN(parsed.getTime())) return "";
+        if (parsed.getFullYear() !== yearNum || parsed.getMonth() + 1 !== monthNum || parsed.getDate() !== dayNum) return "";
+        return normalized;
     }
 
-    // Lấy danh sách departures
-    async function fetchDepartures() {
-        try {
-            const token = localStorage.getItem("token") || "";
-            if (!token) {
-                departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Bạn cần đăng nhập để xem danh sách điểm khởi hành.</div>`;
-                return;
+    function normalizeDisplayDateValue(displayDate) {
+        const ymd = parseDisplayDateToYmd(displayDate);
+        return ymd ? formatDateForDisplay(ymd) : "";
+    }
+
+    function bindDateField({ textInputId, pickerInputId, openButtonId }) {
+        const textInput = document.getElementById(textInputId);
+        const pickerInput = document.getElementById(pickerInputId);
+        const openButton = document.getElementById(openButtonId);
+
+        if (!textInput) return;
+
+        textInput.addEventListener("blur", () => {
+            const normalized = normalizeDisplayDateValue(textInput.value);
+            if (!normalized) return;
+
+            textInput.value = normalized;
+            if (pickerInput) {
+                pickerInput.value = parseDisplayDateToYmd(normalized);
             }
+        });
 
-            const response = await fetch("/api/departures/all", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        if (pickerInput) {
+            pickerInput.addEventListener("change", () => {
+                textInput.value = formatDateForDisplay(pickerInput.value);
             });
-            const result = await response.json();
+        }
 
-            if (result.success && result.data) {
-                currentDeparturesList = Array.isArray(result.data) ? result.data : [result.data];
-                renderDepartures(currentDeparturesList);
-            } else {
-                departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Lỗi: ${result.message || "Không thể tải dữ liệu"}</div>`;
-            }
-        } catch (error) {
-            console.error("Lỗi khi gọi API:", error);
-            departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Đã xảy ra lỗi kết nối với máy chủ.</div>`;
+        if (openButton && pickerInput) {
+            openButton.addEventListener("click", () => {
+                const currentYmd = parseDisplayDateToYmd(textInput.value);
+                if (currentYmd) pickerInput.value = currentYmd;
+
+                if (typeof pickerInput.showPicker === "function") {
+                    pickerInput.showPicker();
+                } else {
+                    pickerInput.focus();
+                    pickerInput.click();
+                }
+            });
         }
     }
 
-    // Hiển thị dữ liệu ra HTML
-    function renderDepartures(departures) {
-        departureList.innerHTML = ""; // Clear placeholder
+    bindDateField({
+        textInputId: "addDepartureDate",
+        pickerInputId: "addDepartureDatePicker",
+        openButtonId: "openAddDepartureDatePicker",
+    });
 
-        // Update total badge if it exists
-        const badgeTotal = document.querySelector(".badge-total");
-        if (badgeTotal) {
-            badgeTotal.innerText = `Tổng: ${Array.isArray(departures) ? departures.length : 0} điểm khởi hành`;
-        }
+    bindDateField({
+        textInputId: "editDepDate",
+        pickerInputId: "editDepDatePicker",
+        openButtonId: "openEditDepartureDatePicker",
+    });
 
-        if (!Array.isArray(departures) || departures.length === 0) {
-            departureList.innerHTML = `<div style="text-align: center; padding: 2rem; color: #6b7280;">Không có điểm khởi hành nào.</div>`;
-            return;
-        }
+    function getTodayYmd() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, "0");
+        const d = String(now.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    }
 
-        departures.forEach((dep) => {
-            // Formatting data
-            const price = formatCurrency(Number(dep.price_moving) || 0);
-            const priceChild = formatCurrency(Number(dep.price_moving_child) || 0);
-            const date = dep.departure_date ? formatDate(dep.departure_date) : "-";
+    function calculateDepartureStatus(departureDate, seatsAvailable) {
+        const depDate = formatDateForInput(departureDate);
+        const today = getTodayYmd();
+        const seats = Number(seatsAvailable);
 
-            const seatsTotal = Number(dep.seats_total) || 0;
-            const seatsAvailable = Number(dep.seats_available) || 0;
-            const seatsBooked = seatsTotal > 0 ? seatsTotal - seatsAvailable : 0;
-            const fillRatio = seatsTotal > 0 ? seatsBooked / seatsTotal : 0;
+        if (depDate && depDate < today) return "closed";
+        if (!Number.isNaN(seats) && seats <= 0) return "full";
+        return "open";
+    }
 
-            // Trạng thái (status)
-            let statusClass = "status-open";
-            let statusText = "Mở";
-            if (dep.status === "closed") {
-                statusClass = "status-closed";
-                statusText = "Đóng";
-            } else if (dep.status === "full" || seatsAvailable <= 0) {
-                statusClass = "status-full";
-                statusText = "Đầy";
-            }
+    function normalizeDeparture(item) {
+        return {
+            id: Number(item?.id ?? item?.departure_id ?? 0),
+            tour_id: Number(item?.tour_id ?? item?.tourId ?? 0),
+            departure_location: String(item?.departure_location ?? item?.location ?? ""),
+            departure_date: item?.departure_date ?? item?.date ?? "",
+            price_moving: Number(item?.price_moving ?? item?.priceMoving ?? 0),
+            price_moving_child: Number(item?.price_moving_child ?? item?.priceMovingChild ?? 0),
+            seats_total: Number(item?.seats_total ?? item?.seatsTotal ?? 0),
+            seats_available: Number(item?.seats_available ?? item?.seatsAvailable ?? 0),
+            status: String(item?.status ?? "open"),
+            created_at: item?.created_at,
+            updated_at: item?.updated_at,
+        };
+    }
 
-            let seatsColorClass = "";
-            if (fillRatio >= 1) {
-                seatsColorClass = "full";
-            } else if (fillRatio >= 0.8) {
-                seatsColorClass = "almost-full";
-            }
+	function normalizeDepartureList(data) {
+		const list = Array.isArray(data) ? data : data ? [data] : [];
+		return list.map(normalizeDeparture);
+	}
 
-            const cardHtml = `
+	// Lấy danh sách departures
+	async function fetchDepartures() {
+		try {
+			const token = localStorage.getItem("token") || "";
+			if (!token) {
+				departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Bạn cần đăng nhập để xem danh sách điểm khởi hành.</div>`;
+				return;
+			}
+
+			const response = await fetch("/api/departures/all", {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+			const result = await response.json();
+
+			if (result.success) {
+				currentDeparturesList = normalizeDepartureList(result.data);
+				renderDepartures(currentDeparturesList);
+			} else {
+				departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Lỗi: ${result.message || "Không thể tải dữ liệu"}</div>`;
+			}
+		} catch (error) {
+			console.error("Lỗi khi gọi API:", error);
+			departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Đã xảy ra lỗi kết nối với máy chủ.</div>`;
+		}
+	}
+
+	// Hiển thị dữ liệu ra HTML
+	function renderDepartures(departures) {
+		departureList.innerHTML = ""; // Clear placeholder
+
+		// Update total badge if it exists
+		const badgeTotal = document.querySelector(".badge-total");
+		if (badgeTotal) {
+			badgeTotal.innerText = `Tổng: ${Array.isArray(departures) ? departures.length : 0} điểm khởi hành`;
+		}
+
+		if (!Array.isArray(departures) || departures.length === 0) {
+			departureList.innerHTML = `<div style="text-align: center; padding: 2rem; color: #6b7280;">Không có điểm khởi hành nào.</div>`;
+			return;
+		}
+
+		departures.forEach((dep) => {
+			// Formatting data
+			const price = formatCurrency(Number(dep.price_moving) || 0);
+			const priceChild = formatCurrency(Number(dep.price_moving_child) || 0);
+			const date = dep.departure_date ? formatDate(dep.departure_date) : "-";
+
+			const seatsTotal = Number(dep.seats_total) || 0;
+			const seatsAvailable = Math.max(0, Number(dep.seats_available) || 0);
+			const availableRatio = seatsTotal > 0 ? seatsAvailable / seatsTotal : 0;
+
+			// Trạng thái (status)
+			let statusClass = "status-open";
+			let statusText = "Mở";
+			if (dep.status === "closed") {
+				statusClass = "status-closed";
+				statusText = "Đóng";
+			} else if (dep.status === "full" || seatsAvailable <= 0) {
+				statusClass = "status-full";
+				statusText = "Đầy";
+			}
+
+			let seatsColorClass = "";
+			if (seatsAvailable <= 0) {
+				seatsColorClass = "full";
+			} else if (availableRatio <= 0.2) {
+				seatsColorClass = "almost-full";
+			}
+
+			const cardHtml = `
 				<div class="departure-card">
 					<div class="card-top">
 						<div class="card-title-area">
 							<div class="tour-name-group">
-                                <h3 class="tour-name">Tour ID: ${String(dep.code || dep.tour_id || "")}</h3>
+                                <h3 class="tour-name">Tour ID: TOUR${dep.tour_id.toString().padStart(3, "0")}</h3>
 								<span class="status-badge ${statusClass}" style="cursor:pointer;" onclick="window.quickEditStatus(${dep.id})" title="Nhấn để đổi trạng thái">${statusText}</span>
 							</div>
 							<span class="tour-code">Mã: DEP${dep.id.toString().padStart(3, "0")}</span>
@@ -191,240 +380,331 @@ window.initAdminDeparturePage = async function () {
 						</div>
 						<div class="detail-item seats-indicator" style="cursor: pointer;" onclick="window.quickEditSeats(${dep.id})" title="Nhấn để đổi lượng chỗ trống">
 							<i class="fa-solid fa-users"></i>
-							<span>Chỗ ngồi: <strong class="seats-text ${seatsColorClass}">${seatsBooked}/${dep.seats_total}</strong> <i class="fa-solid fa-pen" style="font-size: 0.75rem; color: #3b82f6; margin-left: 2px;"></i></span>
+                            <span>Còn trống: <strong class="seats-text ${seatsColorClass}">${seatsAvailable}/${seatsTotal}</strong> <i class="fa-solid fa-pen" style="font-size: 0.75rem; color: #3b82f6; margin-left: 2px;"></i></span>
 						</div>
 					</div>
 				</div>
 			`;
 
-            departureList.insertAdjacentHTML("beforeend", cardHtml);
-        });
-    }
+			departureList.insertAdjacentHTML("beforeend", cardHtml);
+		});
+	}
 
-    // Search logic
-    async function doSearchDeparture(query) {
-        departureList.innerHTML = `<div style="text-align: center; padding: 2rem; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tìm kiếm...</div>`;
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) return;
+	// Search logic
+	async function doSearchDeparture(query) {
+		departureList.innerHTML = `<div style="text-align: center; padding: 2rem; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tìm kiếm...</div>`;
+		try {
+			const token = localStorage.getItem("token");
+			if (!token) return;
 
-            let apiUrl = `/api/departures/search`;
-            if (query) {
-                // Simple heuristic matching
-                if (!isNaN(query) && query.length < 5) {
-                    apiUrl += `?id=${query}`;
-                } else if (["open", "closed", "full"].includes(query.toLowerCase())) {
-                    apiUrl += `?status=${query.toLowerCase()}`;
-                } else {
-                    apiUrl += `?departure_location=${encodeURIComponent(query)}`;
-                } // To make it robust: API searches only one condition here.
-            } else {
-                apiUrl = `/api/departures/all`;
-            }
+			let apiUrl = `/api/departures/search`;
+			if (query) {
+				// Simple heuristic matching
+				if (!isNaN(query) && query.length < 5) {
+					apiUrl += `?id=${query}`;
+				} else if (["open", "closed", "full"].includes(query.toLowerCase())) {
+					apiUrl += `?status=${query.toLowerCase()}`;
+				} else {
+					apiUrl += `?departure_location=${encodeURIComponent(query)}`;
+				} // To make it robust: API searches only one condition here.
+			} else {
+				apiUrl = `/api/departures/all`;
+			}
 
-            const response = await fetch(apiUrl, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const result = await response.json();
+			const response = await fetch(apiUrl, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			const result = await response.json();
 
-            if (result.success && result.data) {
-                currentDeparturesList = Array.isArray(result.data) ? result.data : [result.data];
-                renderDepartures(currentDeparturesList);
-            } else {
-                departureList.innerHTML = `<div style="text-align: center; padding: 2rem; color: #6b7280;">Không tìm thấy điểm khởi hành nào khớp.</div>`;
-            }
-        } catch (error) {
-            console.error(error);
-            departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Lỗi khi tìm kiếm.</div>`;
-        }
-    }
+			if (result.success) {
+				currentDeparturesList = normalizeDepartureList(result.data);
+				renderDepartures(currentDeparturesList);
+			} else {
+				departureList.innerHTML = `<div style="text-align: center; padding: 2rem; color: #6b7280;">Không tìm thấy điểm khởi hành nào khớp.</div>`;
+			}
+		} catch (error) {
+			console.error(error);
+			departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Lỗi khi tìm kiếm.</div>`;
+		}
+	}
 
-    searchBtn?.addEventListener("click", () => {
-        doSearchDeparture(searchInput.value.trim());
-    });
+	searchBtn?.addEventListener("click", () => {
+		doSearchDeparture(searchInput.value.trim());
+	});
 
-    searchInput?.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-            doSearchDeparture(searchInput.value.trim());
-        }
-    });
+	searchInput?.addEventListener("keypress", (e) => {
+		if (e.key === "Enter") {
+			doSearchDeparture(searchInput.value.trim());
+		}
+	});
 
-    // Edit Modal Logic
-    const editDepartureModal = new bootstrap.Modal(document.getElementById("editDepartureModal") || document.createElement("div"));
+	// Edit Modal Logic
+	const editDepartureModal = new bootstrap.Modal(
+		document.getElementById("editDepartureModal") ||
+			document.createElement("div"),
+	);
 
-    window.openEditDepartureModal = function (id) {
-        const dep = currentDeparturesList.find((d) => d.id === id);
-        if (!dep) return;
+	window.openEditDepartureModal = function (id) {
+		const dep = currentDeparturesList.find((d) => d.id === id);
+		if (!dep) return;
 
-        document.getElementById("editDepId").value = dep.id;
-        document.getElementById("editDepTourId").value = dep.tour_id;
+		document.getElementById("editDepId").value = dep.id;
+		document.getElementById("editDepTourId").value = dep.tour_id;
 
-        // Format date YYYY-MM-DD for input
-        let formattedDate = "";
-        if (dep.departure_date) {
-            const dateObj = new Date(dep.departure_date);
-            formattedDate = dateObj.toISOString().split("T")[0];
-        }
+        // Hiển thị ngày theo định dạng dd/MM/yyyy trong modal sửa.
+        const formattedDate = formatDateForDisplay(dep.departure_date);
         document.getElementById("editDepDate").value = formattedDate;
+        const editDatePicker = document.getElementById("editDepDatePicker");
+        if (editDatePicker) {
+            editDatePicker.value = formatDateForInput(dep.departure_date);
+        }
         document.getElementById("editDepLocation").value = dep.departure_location;
         document.getElementById("editDepPrice").value = dep.price_moving;
         document.getElementById("editDepPriceChild").value = dep.price_moving_child;
         document.getElementById("editDepSeatsTotal").value = dep.seats_total;
         document.getElementById("editDepSeatsAvail").value = dep.seats_available;
 
-        editDepartureModal.show();
-    };
+		editDepartureModal.show();
+	};
 
     document.getElementById("saveEditDepartureBtn")?.addEventListener("click", async () => {
         const id = document.getElementById("editDepId").value;
-        const payload = {
-            tour_id: Number(document.getElementById("editDepTourId").value),
-            departure_date: document.getElementById("editDepDate").value,
-            departure_location: document.getElementById("editDepLocation").value.trim(),
-            price_moving: Number(document.getElementById("editDepPrice").value),
-            price_moving_child: Number(document.getElementById("editDepPriceChild").value),
-            seats_total: Number(document.getElementById("editDepSeatsTotal").value),
-            seats_available: Number(document.getElementById("editDepSeatsAvail").value),
-        };
+        const tourId = Number(document.getElementById("editDepTourId").value);
+        const departureDateDisplay = document.getElementById("editDepDate").value;
+        const departureDate = parseDisplayDateToYmd(departureDateDisplay);
+        const departureLocation = document.getElementById("editDepLocation").value.trim();
+        const priceMoving = Number(document.getElementById("editDepPrice").value);
+        const priceMovingChild = Number(document.getElementById("editDepPriceChild").value);
+        const seatsTotal = Number(document.getElementById("editDepSeatsTotal").value);
+        const seatsAvailable = Number(document.getElementById("editDepSeatsAvail").value);
 
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        try {
-            const response = await fetch(`/api/departures/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify(payload),
-            });
-            const result = await response.json();
-            if (result.success) {
-                showToast("Cập nhật điểm khởi hành thành công!", "success");
-                editDepartureModal.hide();
-
-                const currentQuery = searchInput.value.trim();
-                if (currentQuery) await doSearchDeparture(currentQuery);
-                else await fetchDepartures();
-            } else {
-                showToast(result.message || "Có lỗi xảy ra", "danger");
-            }
-        } catch (err) {
-            console.error(err);
-            showToast("Lỗi kết nối máy chủ", "danger");
+        if (!id || !tourId || !departureDateDisplay || !departureLocation) {
+            showToast("Vui lòng nhập đầy đủ thông tin bắt buộc.", "warning");
+            return;
         }
-    });
-
-    // Delete Logic
-    window.deleteDeparture = async function (id) {
-        const dep = currentDeparturesList.find((d) => d.id === id);
-        if (!dep) return;
-
-        if (!confirm(`Bạn có chắc chắn muốn xóa điểm khởi hành mã DEP${id.toString().padStart(5, "0")} (Tour #${dep.tour_id}) không?`)) {
+        if (!departureDate) {
+            showToast("Ngày khởi hành phải đúng định dạng dd/MM/yyyy.", "warning");
+            return;
+        }
+        document.getElementById("editDepDate").value = formatDateForDisplay(departureDate);
+        const editDatePicker = document.getElementById("editDepDatePicker");
+        if (editDatePicker) {
+            editDatePicker.value = departureDate;
+        }
+        if ([priceMoving, priceMovingChild, seatsTotal, seatsAvailable].some((value) => Number.isNaN(value) || value < 0)) {
+            showToast("Giá và số ghế phải là số hợp lệ, không âm.", "warning");
+            return;
+        }
+        if (seatsAvailable > seatsTotal) {
+            showToast("Số chỗ còn trống không được lớn hơn tổng số chỗ.", "warning");
             return;
         }
 
-        const token = localStorage.getItem("token");
-        if (!token) return;
+			const payload = {
+				tour_id: tourId,
+				departure_date: departureDate,
+				departure_location: departureLocation,
+				price_moving: priceMoving,
+				price_moving_child: priceMovingChild,
+				seats_total: seatsTotal,
+				seats_available: seatsAvailable,
+			};
 
-        try {
-            const response = await fetch(`/api/departures/${id}`, {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const result = await response.json();
+			const token = localStorage.getItem("token");
+			if (!token) return;
 
-            if (result.success) {
-                showToast("Xóa điểm khởi hành thành công!", "success");
-                const currentQuery = searchInput.value.trim();
-                if (currentQuery) await doSearchDeparture(currentQuery);
-                else await fetchDepartures();
-            } else {
-                showToast(result.message || "Lỗi: Không được phép xóa", "danger");
-            }
-        } catch (err) {
-            console.error(err);
-            showToast("Lỗi máy chủ", "danger");
-        }
-    };
+			try {
+				const response = await fetch(`/api/departures/${id}`, {
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify(payload),
+				});
+				const result = await response.json();
+				if (result.success) {
+					showToast("Cập nhật điểm khởi hành thành công!", "success");
+					editDepartureModal.hide();
 
-    // --- QUICK EDIT LOGIC ---
-    const quickPriceModal = new bootstrap.Modal(document.getElementById("quickPriceModal") || document.createElement("div"));
-    const quickStatusModal = new bootstrap.Modal(document.getElementById("quickStatusModal") || document.createElement("div"));
-    const quickSeatsModal = new bootstrap.Modal(document.getElementById("quickSeatsModal") || document.createElement("div"));
+					const currentQuery = searchInput.value.trim();
+					if (currentQuery) await doSearchDeparture(currentQuery);
+					else await fetchDepartures();
+				} else {
+					showToast(result.message || "Có lỗi xảy ra", "danger");
+				}
+			} catch (err) {
+				console.error(err);
+				showToast("Lỗi kết nối máy chủ", "danger");
+			}
+		});
 
-    window.quickEditPrice = function (id) {
-        const dep = currentDeparturesList.find((d) => d.id === id);
-        if (!dep) return;
-        document.getElementById("quickPriceId").value = id;
-        document.getElementById("quickPriceAdult").value = dep.price_moving;
-        document.getElementById("quickPriceChild").value = dep.price_moving_child;
-        quickPriceModal.show();
-    };
+	// Delete Logic
+	window.deleteDeparture = async function (id) {
+		const dep = currentDeparturesList.find((d) => d.id === id);
+		if (!dep) return;
 
-    window.quickEditStatus = function (id) {
-        const dep = currentDeparturesList.find((d) => d.id === id);
-        if (!dep) return;
-        document.getElementById("quickStatusId").value = id;
-        document.getElementById("quickStatusSelect").value = dep.status || "open";
-        quickStatusModal.show();
-    };
+		if (
+			!confirm(
+				`Bạn có chắc chắn muốn xóa điểm khởi hành mã DEP${id.toString().padStart(5, "0")} (Tour #${dep.tour_id}) không?`,
+			)
+		) {
+			return;
+		}
 
-    window.quickEditSeats = function (id) {
-        const dep = currentDeparturesList.find((d) => d.id === id);
-        if (!dep) return;
-        document.getElementById("quickSeatsId").value = id;
-        document.getElementById("quickSeatsCurrentAvailable").value = dep.seats_available;
-        document.getElementById("quickSeatsAvailable").value = dep.seats_available;
-        quickSeatsModal.show();
-    };
+		const token = localStorage.getItem("token");
+		if (!token) return;
 
-    async function doQuickUpdate(url, payload, modalInstance) {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        try {
-            const response = await fetch(url, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify(payload),
-            });
-            const result = await response.json();
-            if (result.success) {
-                showToast("Cập nhật nhanh thành công!", "success");
-                if (modalInstance) modalInstance.hide();
-                const currentQuery = searchInput.value.trim();
-                if (currentQuery) await doSearchDeparture(currentQuery);
-                else await fetchDepartures();
-            } else {
-                showToast(result.message || "Có lỗi xảy ra", "danger");
-            }
-        } catch (err) {
-            console.error(err);
-            showToast("Lỗi kết nối máy chủ", "danger");
-        }
-    }
+		try {
+			const response = await fetch(`/api/departures/${id}`, {
+				method: "DELETE",
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			const result = await response.json();
 
-    document.getElementById("saveQuickPriceBtn")?.addEventListener("click", () => {
-        const id = document.getElementById("quickPriceId").value;
-        const pm = Number(document.getElementById("quickPriceAdult").value);
-        const pmc = Number(document.getElementById("quickPriceChild").value);
-        doQuickUpdate(`/api/departures/${id}/price`, { price_moving: pm, price_moving_child: pmc }, quickPriceModal);
-    });
+			if (result.success) {
+				showToast("Xóa điểm khởi hành thành công!", "success");
+				const currentQuery = searchInput.value.trim();
+				if (currentQuery) await doSearchDeparture(currentQuery);
+				else await fetchDepartures();
+			} else {
+				showToast(result.message || "Lỗi: Không được phép xóa", "danger");
+			}
+		} catch (err) {
+			console.error(err);
+			showToast("Lỗi máy chủ", "danger");
+		}
+	};
 
-    document.getElementById("saveQuickStatusBtn")?.addEventListener("click", () => {
-        const id = document.getElementById("quickStatusId").value;
-        const status = document.getElementById("quickStatusSelect").value;
-        doQuickUpdate(`/api/departures/${id}/status`, { status: status }, quickStatusModal);
-    });
+	// --- QUICK EDIT LOGIC ---
+	const quickPriceModal = new bootstrap.Modal(
+		document.getElementById("quickPriceModal") || document.createElement("div"),
+	);
+	const quickStatusModal = new bootstrap.Modal(
+		document.getElementById("quickStatusModal") ||
+			document.createElement("div"),
+	);
+	const quickSeatsModal = new bootstrap.Modal(
+		document.getElementById("quickSeatsModal") || document.createElement("div"),
+	);
 
-    document.getElementById("saveQuickSeatsBtn")?.addEventListener("click", () => {
-        const id = document.getElementById("quickSeatsId").value;
-        const targetAvailable = Number(document.getElementById("quickSeatsAvailable").value);
-        const currentAvailable = Number(document.getElementById("quickSeatsCurrentAvailable").value);
-        const change = targetAvailable - currentAvailable;
+	window.quickEditPrice = function (id) {
+		const dep = currentDeparturesList.find((d) => d.id === id);
+		if (!dep) return;
+		document.getElementById("quickPriceId").value = id;
+		document.getElementById("quickPriceAdult").value = dep.price_moving;
+		document.getElementById("quickPriceChild").value = dep.price_moving_child;
+		quickPriceModal.show();
+	};
 
-        if (change === 0) return quickSeatsModal.hide();
-        doQuickUpdate(`/api/departures/${id}/seats`, { seatsChange: change }, quickSeatsModal);
-    });
+	window.quickEditStatus = function (id) {
+		const dep = currentDeparturesList.find((d) => d.id === id);
+		if (!dep) return;
+		document.getElementById("quickStatusId").value = id;
+		document.getElementById("quickStatusSelect").value = dep.status || "open";
+		quickStatusModal.show();
+	};
 
-    // Thực thi việc fetch dữ liệu
-    fetchDepartures();
+	window.quickEditSeats = function (id) {
+		const dep = currentDeparturesList.find((d) => d.id === id);
+		if (!dep) return;
+		document.getElementById("quickSeatsId").value = id;
+		document.getElementById("quickSeatsTotal").value = dep.seats_total;
+		document.getElementById("quickSeatsCurrentAvailable").value =
+			dep.seats_available;
+		document.getElementById("quickSeatsAvailable").value = dep.seats_available;
+		quickSeatsModal.show();
+	};
+
+	async function doQuickUpdate(url, payload, modalInstance) {
+		const token = localStorage.getItem("token");
+		if (!token) return;
+		try {
+			const response = await fetch(url, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify(payload),
+			});
+			const result = await response.json();
+			if (result.success) {
+				showToast("Cập nhật nhanh thành công!", "success");
+				if (modalInstance) modalInstance.hide();
+				const currentQuery = searchInput.value.trim();
+				if (currentQuery) await doSearchDeparture(currentQuery);
+				else await fetchDepartures();
+			} else {
+				showToast(result.message || "Có lỗi xảy ra", "danger");
+			}
+		} catch (err) {
+			console.error(err);
+			showToast("Lỗi kết nối máy chủ", "danger");
+		}
+	}
+
+	document
+		.getElementById("saveQuickPriceBtn")
+		?.addEventListener("click", () => {
+			const id = document.getElementById("quickPriceId").value;
+			const pm = Number(document.getElementById("quickPriceAdult").value);
+			const pmc = Number(document.getElementById("quickPriceChild").value);
+			doQuickUpdate(
+				`/api/departures/${id}/price`,
+				{ price_moving: pm, price_moving_child: pmc },
+				quickPriceModal,
+			);
+		});
+
+	document
+		.getElementById("saveQuickStatusBtn")
+		?.addEventListener("click", () => {
+			const id = document.getElementById("quickStatusId").value;
+			const status = document.getElementById("quickStatusSelect").value;
+			doQuickUpdate(
+				`/api/departures/${id}/status`,
+				{ status: status },
+				quickStatusModal,
+			);
+		});
+
+	document
+		.getElementById("saveQuickSeatsBtn")
+		?.addEventListener("click", () => {
+			const id = document.getElementById("quickSeatsId").value;
+			const seatsTotal = Number(
+				document.getElementById("quickSeatsTotal").value,
+			);
+			const targetAvailable = Number(
+				document.getElementById("quickSeatsAvailable").value,
+			);
+			const currentAvailable = Number(
+				document.getElementById("quickSeatsCurrentAvailable").value,
+			);
+
+			if (Number.isNaN(targetAvailable) || targetAvailable < 0) {
+				showToast("Số chỗ còn trống phải là số không âm.", "warning");
+				return;
+			}
+			if (!Number.isNaN(seatsTotal) && targetAvailable > seatsTotal) {
+				showToast(
+					"Số chỗ còn trống không được lớn hơn tổng số chỗ.",
+					"warning",
+				);
+				return;
+			}
+
+			const change = targetAvailable - currentAvailable;
+
+			if (change === 0) return quickSeatsModal.hide();
+			doQuickUpdate(
+				`/api/departures/${id}/seats`,
+				{ seatsChange: change },
+				quickSeatsModal,
+			);
+		});
+
+	// Thực thi việc fetch dữ liệu
+	fetchDepartures();
 };

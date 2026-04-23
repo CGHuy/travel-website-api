@@ -153,22 +153,22 @@
                     <h3><i class="fa-solid fa-triangle-exclamation"></i> Xác nhận phê duyệt hủy</h3>
                     <span class="close-modal">&times;</span>
                 </div>
-                <div class="modal-body">
-                    <p>Bạn đang thực hiện phê duyệt yêu cầu hủy cho booking này.</p>
+                 <div class="modal-body">
+                    <p>Bạn đang xử lý yêu cầu hủy cho booking này. Hãy xem xét kỹ thông tin trước khi quyết định.</p>
                     <div class="alert-warning" style="padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 0.9em; background: #fffbeb; color: #92400e; border: 1px solid #fde68a;">
                         <i class="fa-solid fa-circle-info"></i> 
-                        <b>Lưu ý:</b> Khi phê duyệt, hệ thống sẽ:
+                        <b>Hành động:</b>
                         <ul style="margin-top: 8px; margin-left: 20px;">
-                            <li>Cập nhật trạng thái thành: <b>Đã hủy (Cancelled)</b></li>
-                            <li>Trạng thái thanh toán: <b>Đã hoàn tiền (Refunded)</b></li>
-                            <li>Tự động hoàn trả số lượng ghế vào lịch khởi hành.</li>
+                            <li><b>Phê duyệt:</b> Chuyển thành Đã hủy, Đã hoàn tiền và cộng lại chỗ.</li>
+                            <li><b>Từ chối:</b> Giữ nguyên Đã xác nhận, Đã thanh toán và tiếp tục tour.</li>
                         </ul>
                     </div>
-                    <p>Xác nhận số tiền sẽ hoàn trả: <b class="text-danger" id="modal-refund-amount">0đ</b></p>
+                    <p>Số tiền liên quan: <b class="text-danger" id="modal-refund-amount">0đ</b></p>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary" id="btn-close-modal">Hủy bỏ</button>
-                    <button class="btn-danger" id="btn-approve-cancel">Đồng ý phê duyệt</button>
+                    <button class="btn-secondary" id="btn-close-modal">Đóng</button>
+                    <button class="btn-outline-danger" id="btn-reject-cancel">Từ chối yêu cầu</button>
+                    <button class="btn-danger" id="btn-approve-cancel">Phê duyệt & Hoàn tiền</button>
                 </div>
             </div>
         </div>

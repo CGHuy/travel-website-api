@@ -44,7 +44,13 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="addDepartureDate" class="form-label" style="font-weight: 500; font-size: 0.9rem">Ngày Khởi Hành *</label>
-                            <input type="date" class="form-control" id="addDepartureDate" required style="border-radius: 10px; padding: 10px 16px" />
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="addDepartureDate" required placeholder="dd/MM/yyyy" style="border-radius: 10px 0 0 10px; padding: 10px 16px" />
+                                <button type="button" class="btn btn-outline-secondary" id="openAddDepartureDatePicker" title="Chọn ngày" style="border-radius: 0 10px 10px 0; min-width: 48px">
+                                    <i class="fa-regular fa-calendar-days"></i>
+                                </button>
+                            </div>
+                            <input type="date" id="addDepartureDatePicker" class="visually-hidden" tabindex="-1" aria-hidden="true" />
                         </div>
                     </div>
                     <div class="mb-3">
@@ -93,7 +99,13 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="editDepDate" class="form-label" style="font-weight: 500; font-size: 0.9rem">Ngày Khởi Hành *</label>
-                            <input type="date" class="form-control" id="editDepDate" required style="border-radius: 10px; padding: 10px 16px" />
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="editDepDate" required placeholder="dd/MM/yyyy" style="border-radius: 10px 0 0 10px; padding: 10px 16px" />
+                                <button type="button" class="btn btn-outline-secondary" id="openEditDepartureDatePicker" title="Chọn ngày" style="border-radius: 0 10px 10px 0; min-width: 48px">
+                                    <i class="fa-regular fa-calendar-days"></i>
+                                </button>
+                            </div>
+                            <input type="date" id="editDepDatePicker" class="visually-hidden" tabindex="-1" aria-hidden="true" />
                         </div>
                     </div>
                     <div class="mb-3">
@@ -181,6 +193,7 @@
                 <h6 style="font-weight: 700; margin-bottom: 12px; color: #1e293b">Cập nhật tổng số chỗ trống</h6>
                 <p style="font-size: 0.85rem; color: #6b7280; line-height: 1.4; margin-bottom: 16px">Nhập trực tiếp số lượng chỗ còn trống thực tế hiện tại vào ô bên dưới.</p>
                 <input type="hidden" id="quickSeatsId" />
+                <input type="hidden" id="quickSeatsTotal" />
                 <input type="hidden" id="quickSeatsCurrentAvailable" />
                 <div class="mb-4">
                     <input type="number" id="quickSeatsAvailable" class="form-control" placeholder="VD: 15" style="border-radius: 8px" />

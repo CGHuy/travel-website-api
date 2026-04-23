@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function renderTourDetail(tour) {
         // --- Thông tin cơ bản ---
-        document.title = `${tour.name} - VietTour`;
+        document.title = `${tour.name} - VietTravel`;
         document.getElementById("tour-name").innerText = tour.name;
         document.getElementById("breadcrumb-tour-name").innerText = tour.name;
         document.getElementById("tour-location").innerText = tour.location;
