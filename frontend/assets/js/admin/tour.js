@@ -159,6 +159,15 @@
         if (!listEl || listEl.dataset.bound === "true") return;
 
         listEl.addEventListener("click", (event) => {
+            const viewBtn = event.target.closest(".js-view-tour");
+            if (viewBtn) {
+                const id = toFiniteNumber(viewBtn.dataset.tourId);
+                if (!Number.isFinite(id)) return;
+
+                window.open(`/detail-tour?id=${id}`, "_blank", "noopener");
+                return;
+            }
+
             const editBtn = event.target.closest(".js-edit-tour");
             if (editBtn) {
                 const id = toFiniteNumber(editBtn.dataset.tourId);
@@ -296,6 +305,7 @@
         const durationEl = node.querySelector(".tour-item-duration");
         const priceDefaultEl = node.querySelector(".tour-item-price-default");
         const priceChildEl = node.querySelector(".tour-item-price-child");
+        const viewBtn = node.querySelector(".js-view-tour");
         const editBtn = node.querySelector(".js-edit-tour");
         const deleteBtn = node.querySelector(".js-delete-tour");
 
@@ -310,6 +320,9 @@
         if (priceDefaultEl) priceDefaultEl.textContent = viewModel.price_default;
         if (priceChildEl) priceChildEl.textContent = viewModel.price_child;
 
+        if (viewBtn) {
+            viewBtn.dataset.tourId = viewModel.id;
+        }
         if (editBtn) {
             editBtn.dataset.tourId = viewModel.id;
         }
