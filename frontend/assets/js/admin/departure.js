@@ -162,7 +162,7 @@ window.initAdminDeparturePage = async function () {
 					<div class="card-top">
 						<div class="card-title-area">
 							<div class="tour-name-group">
-                                <h3 class="tour-name">Tour ID: ${String(dep.code || dep.tour_id || "")}</h3>
+                                <h3 class="tour-name">Tour ID: TOUR${dep.tour_id.toString().padStart(3, "0")}</h3>
 								<span class="status-badge ${statusClass}" style="cursor:pointer;" onclick="window.quickEditStatus(${dep.id})" title="Nhấn để đổi trạng thái">${statusText}</span>
 							</div>
 							<span class="tour-code">Mã: DEP${dep.id.toString().padStart(3, "0")}</span>
