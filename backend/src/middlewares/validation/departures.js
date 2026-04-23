@@ -3,6 +3,37 @@ const isPositiveInteger = (value) => Number.isInteger(Number(value)) && Number(v
 const isNonNegativeInteger = (value) => Number.isInteger(Number(value)) && Number(value) >= 0;
 const isNonNegativeNumber = (value) => !Number.isNaN(Number(value)) && Number(value) >= 0;
 
+const toYmd = (dateInput) => {
+	if (!dateInput) return "";
+	if (typeof dateInput === "string" && /^\d{4}-\d{2}-\d{2}/.test(dateInput)) {
+		return dateInput.slice(0, 10);
+	}
+	const date = new Date(dateInput);
+	if (Number.isNaN(date.getTime())) return "";
+	const y = date.getFullYear();
+	const m = String(date.getMonth() + 1).padStart(2, "0");
+	const d = String(date.getDate()).padStart(2, "0");
+	return `${y}-${m}-${d}`;
+};
+
+const getTodayYmd = () => {
+	const now = new Date();
+	const y = now.getFullYear();
+	const m = String(now.getMonth() + 1).padStart(2, "0");
+	const d = String(now.getDate()).padStart(2, "0");
+	return `${y}-${m}-${d}`;
+};
+
+const deriveDepartureStatus = (departureDate, seatsAvailable) => {
+	const dateYmd = toYmd(departureDate);
+	const todayYmd = getTodayYmd();
+	const seats = Number(seatsAvailable);
+
+	if (dateYmd && dateYmd < todayYmd) return "closed";
+	if (!Number.isNaN(seats) && seats <= 0) return "full";
+	return "open";
+};
+
 const validateCreateDeparture = (req, res, next) => {
 	const {
 		tour_id,
@@ -117,6 +148,16 @@ const validateUpdateDeparture = (req, res, next) => {
 
 	if (seats_available !== undefined && !isNonNegativeInteger(seats_available)) {
 		errors.seats_available = "Số chỗ trống phải là số nguyên lớn hơn hoặc bằng 0";
+	}
+
+	if (
+		seats_total !== undefined &&
+		seats_available !== undefined &&
+		isPositiveInteger(seats_total) &&
+		isNonNegativeInteger(seats_available) &&
+		Number(seats_available) > Number(seats_total)
+	) {
+		errors.seats_available = "Số chỗ trống không được lớn hơn tổng số chỗ";
 	}
 
 	if (Object.keys(errors).length > 0) {

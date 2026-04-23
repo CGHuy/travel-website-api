@@ -5,10 +5,11 @@ const Departure = require("../models/Departure");
 exports.createDeparture = async (req, res) => {
 	try {
 		const departureId = await Departure.create(req.body);
+		const departure = await Departure.getById(departureId);
 		return res.status(201).json({
 			success: true,
 			message: "Tạo điểm khởi hành thành công!",
-			data: { id: departureId },
+			data: departure,
 		});
 	} catch (error) {
 		return res.status(500).json({
