@@ -84,7 +84,7 @@ app.use(errorHandler);
 
 app.listen(process.env.PORT || 3000, () => {
     console.log(`
-          🚀 VietTour Server đang chạy
+          🚀 VietTravel Server đang chạy
           📍 Website:  http://localhost:${process.env.PORT || 3000}/pages/index.html
           📍 API:      http://localhost:${process.env.PORT || 3000}/api
           💾 Database: ${process.env.DB_NAME}

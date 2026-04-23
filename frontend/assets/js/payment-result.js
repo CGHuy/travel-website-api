@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <i class="fa-solid fa-check"></i>
                     </div>
                     <h2 class="fw-bold mb-3 text-dark">Thanh Toán Thành Công!</h2>
-                    <p class="text-muted mb-4">Cảm ơn bạn đã lựa chọn VietTour. Chuyến đi của bạn đã được xác nhận.</p>
+                    <p class="text-muted mb-4">Cảm ơn bạn đã lựa chọn VietTravel. Chuyến đi của bạn đã được xác nhận.</p>
                     
                     <div class="bg-light p-4 rounded-4 mb-4 text-start">
                         <div class="d-flex justify-content-between align-items-center mb-3">
