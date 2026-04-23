@@ -160,9 +160,18 @@ class Departure {
             if (!departure) {
                 return false;
             }
+
+            // 1. Kiểm tra trạng thái
             if (departure.status === 'open' || departure.status === 'full') {
-                throw new Error('Không được phép xóa điểm khởi hành khi đang ở trạng thái Mở hoặc Đầy');
+                throw new Error('Không được phép xóa điểm khởi hành khi đang ở trạng thái Mở hoặc Đầy. Vui lòng chuyển sang Đóng trước khi xóa.');
             }
+
+            // 2. Kiểm tra xem đã có booking nào chưa
+            const [bookings] = await db.query(`SELECT id FROM bookings WHERE departure_id = ? LIMIT 1`, [id]);
+            if (bookings.length > 0) {
+                throw new Error('Không thể xóa điểm khởi hành này vì đã có đơn đặt chỗ (Booking) liên quan. Bạn chỉ có thể ẩn hoặc đóng điểm khởi hành này.');
+            }
+
             const [result] = await db.query(`DELETE FROM tour_departures WHERE id = ?`, [id]);
             return result.affectedRows > 0;
         } catch (error) {
