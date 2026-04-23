@@ -80,6 +80,12 @@ async function updateAdminNavVisibility(token) {
 
     if (role && canViewAdminRoles.has(role)) {
         adminNavLink.classList.remove("d-none");
+        
+        // Ẩn mục lịch sử và yêu thích đối với staff/admin
+        const navHistory = document.getElementById("navHistory");
+        const navFavorites = document.getElementById("navFavorites");
+        if (navHistory) navHistory.parentElement.classList.add("d-none");
+        if (navFavorites) navFavorites.parentElement.classList.add("d-none");
     }
 }
 

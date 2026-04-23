@@ -232,8 +232,8 @@ function filterBookings(status) {
 	} else {
 		const filtered = allBookings.filter((b) => {
 			if (status === "paid") return b.booking_status === "confirmed";
-			if (status === "canceled") return b.booking_status === "cancelled";
-			if (status === "canceling") return b.booking_status === "pending";
+			if (status === "cancelled") return b.booking_status === "cancelled";
+			if (status === "pending") return b.booking_status === "pending";
 			return false;
 		});
 		renderBookings(filtered);
