@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         limit: 6,
     };
 
+    let priceFilterEnabled = false;
+
     if (!tourListContainer) return;
 
     // Debounce function to limit API calls during rapid input
@@ -86,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         params.append("limit", currentFilters.limit);
 
         if (searchInput && searchInput.value) params.append("search", searchInput.value);
-        if (priceRange && priceRange.value) params.append("max_price", priceRange.value);
+        if (priceFilterEnabled && priceRange && priceRange.value) params.append("max_price", priceRange.value);
         if (regionSelect && regionSelect.value) params.append("region", regionSelect.value);
         if (sortSelect && sortSelect.value) params.append("sort", sortSelect.value);
 
@@ -344,6 +346,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             priceRange.value = 10000000;
             priceMin.innerText = "10.000.000đ";
         }
+        priceFilterEnabled = false;
         if (regionSelect) regionSelect.value = "";
         if (sortSelect) sortSelect.value = "";
         document.getElementById("dur_all").checked = true;
@@ -355,7 +358,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const debouncedFetch = debounce(() => fetchTours(1), 500);
 
     if (priceRange && priceMin) {
+        priceRange.value = priceRange.max || 10000000;
+        priceMin.innerText = parseInt(priceRange.value).toLocaleString("vi-VN") + "đ+";
         priceRange.addEventListener("input", function () {
+            priceFilterEnabled = true;
             priceMin.innerText = parseInt(this.value).toLocaleString("vi-VN") + "đ";
             debouncedFetch();
         });
