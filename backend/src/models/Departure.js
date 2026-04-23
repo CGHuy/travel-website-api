@@ -1,6 +1,23 @@
 const db = require("../config/database");
 
 class Departure {
+    // Đồng bộ trạng thái theo ngày khởi hành và số chỗ còn trống
+    static async syncStatus(id) {
+        await db.query(
+            `
+                UPDATE tour_departures
+                SET status = CASE
+                    WHEN departure_date < CURDATE() THEN 'closed'
+                    WHEN seats_available <= 0 THEN 'full'
+                    ELSE 'open'
+                END,
+                updated_at = NOW()
+                WHERE id = ?
+            `,
+            [id],
+        );
+    }
+
     // Lấy tất cả departures
     static async getAll() {
         try {
@@ -63,6 +80,7 @@ class Departure {
                 `,
                 [tourId, departureLocation, departureDate, priceMoving, priceMovingChild, seatsTotal, seatsAvailable],
             );
+            await this.syncStatus(result.insertId);
             return result.insertId;
         } catch (error) {
             throw error;
@@ -126,6 +144,9 @@ class Departure {
             params.push(id);
 
             const [result] = await db.query(query, params);
+            if (result.affectedRows > 0) {
+                await this.syncStatus(id);
+            }
             return result.affectedRows > 0;
         } catch (error) {
             throw error;
@@ -155,6 +176,9 @@ class Departure {
                 `UPDATE tour_departures SET seats_available = GREATEST(0, LEAST(seats_total, seats_available + ?)) WHERE id = ?`,
                 [seatsChange, id],
             );
+            if (result.affectedRows > 0) {
+                await this.syncStatus(id);
+            }
             return result.affectedRows > 0;
         }
         catch (error) {

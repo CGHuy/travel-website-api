@@ -44,7 +44,13 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="addDepartureDate" class="form-label" style="font-weight: 500; font-size: 0.9rem">Ngày Khởi Hành *</label>
-                            <input type="date" class="form-control" id="addDepartureDate" required style="border-radius: 10px; padding: 10px 16px" />
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="addDepartureDate" required placeholder="dd/MM/yyyy" style="border-radius: 10px 0 0 10px; padding: 10px 16px" />
+                                <button type="button" class="btn btn-outline-secondary" id="openAddDepartureDatePicker" title="Chọn ngày" style="border-radius: 0 10px 10px 0; min-width: 48px">
+                                    <i class="fa-regular fa-calendar-days"></i>
+                                </button>
+                            </div>
+                            <input type="date" id="addDepartureDatePicker" class="visually-hidden" tabindex="-1" aria-hidden="true" />
                         </div>
                     </div>
                     <div class="mb-3">
@@ -93,7 +99,13 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="editDepDate" class="form-label" style="font-weight: 500; font-size: 0.9rem">Ngày Khởi Hành *</label>
-                            <input type="date" class="form-control" id="editDepDate" required style="border-radius: 10px; padding: 10px 16px" />
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="editDepDate" required placeholder="dd/MM/yyyy" style="border-radius: 10px 0 0 10px; padding: 10px 16px" />
+                                <button type="button" class="btn btn-outline-secondary" id="openEditDepartureDatePicker" title="Chọn ngày" style="border-radius: 0 10px 10px 0; min-width: 48px">
+                                    <i class="fa-regular fa-calendar-days"></i>
+                                </button>
+                            </div>
+                            <input type="date" id="editDepDatePicker" class="visually-hidden" tabindex="-1" aria-hidden="true" />
                         </div>
                     </div>
                     <div class="mb-3">

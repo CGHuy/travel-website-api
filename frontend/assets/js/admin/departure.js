@@ -32,31 +32,28 @@ window.initAdminDeparturePage = async function () {
 			document.createElement("div"),
 	);
 
-	document
-		.getElementById("saveAddDepartureBtn")
-		?.addEventListener("click", async () => {
-			const tour_id = document.getElementById("addTourId").value;
-			const departure_date = document.getElementById("addDepartureDate").value;
-			const departure_location = document
-				.getElementById("addDepartureLocation")
-				.value.trim();
-			const price_moving = document.getElementById("addPriceMoving").value;
-			const price_moving_child = document.getElementById(
-				"addPriceMovingChild",
-			).value;
-			const seats_total = document.getElementById("addSeatsTotal").value;
+    document.getElementById("saveAddDepartureBtn")?.addEventListener("click", async () => {
+        const tour_id = document.getElementById("addTourId").value;
+        const departureDateDisplay = document.getElementById("addDepartureDate").value;
+        const departure_date = parseDisplayDateToYmd(departureDateDisplay);
+        const departure_location = document.getElementById("addDepartureLocation").value.trim();
+        const price_moving = document.getElementById("addPriceMoving").value;
+        const price_moving_child = document.getElementById("addPriceMovingChild").value;
+        const seats_total = document.getElementById("addSeatsTotal").value;
 
-			if (
-				!tour_id ||
-				!departure_date ||
-				!departure_location ||
-				!price_moving ||
-				!price_moving_child ||
-				!seats_total
-			) {
-				showToast("Vui lòng nhập đầy đủ các trường bắt buộc!", "warning");
-				return;
-			}
+        if (!tour_id || !departureDateDisplay || !departure_location || !price_moving || !price_moving_child || !seats_total) {
+            showToast("Vui lòng nhập đầy đủ các trường bắt buộc!", "warning");
+            return;
+        }
+        if (!departure_date) {
+            showToast("Ngày khởi hành phải đúng định dạng dd/MM/yyyy.", "warning");
+            return;
+        }
+        document.getElementById("addDepartureDate").value = formatDateForDisplay(departure_date);
+        const addDatePicker = document.getElementById("addDepartureDatePicker");
+        if (addDatePicker) {
+            addDatePicker.value = departure_date;
+        }
 
 			const payload = {
 				tour_id: Number(tour_id),
@@ -80,20 +77,28 @@ window.initAdminDeparturePage = async function () {
 					body: JSON.stringify(payload),
 				});
 
-				const result = await response.json();
-				if (result.success) {
-					showToast("Thêm điểm khởi hành thành công!", "success");
-					addDepartureModal.hide();
-					document.getElementById("addDepartureForm").reset();
-					await fetchDepartures();
-				} else {
-					showToast(result.message || "Có lỗi xảy ra khi thêm mới.", "danger");
-				}
-			} catch (error) {
-				console.error("Lỗi khi thêm mới:", error);
-				showToast("Lỗi kết nối tới máy chủ.", "danger");
-			}
-		});
+            const result = await response.json();
+            if (result.success) {
+                showToast("Thêm điểm khởi hành thành công!", "success");
+                addDepartureModal.hide();
+                document.getElementById("addDepartureForm").reset();
+
+                const createdDeparture = normalizeDeparture(result.data);
+                const currentQuery = searchInput.value.trim();
+                if (currentQuery) {
+                    await doSearchDeparture(currentQuery);
+                } else {
+                    currentDeparturesList = [createdDeparture, ...currentDeparturesList];
+                    renderDepartures(currentDeparturesList);
+                }
+            } else {
+                showToast(result.message || "Có lỗi xảy ra khi thêm mới.", "danger");
+            }
+        } catch (error) {
+            console.error("Lỗi khi thêm mới:", error);
+            showToast("Lỗi kết nối tới máy chủ.", "danger");
+        }
+    });
 
 	// Hàm format currency
 	function formatCurrency(amount) {
@@ -132,27 +137,138 @@ window.initAdminDeparturePage = async function () {
 		return `${y}-${m}-${d}`;
 	}
 
-	function normalizeDeparture(item) {
-		return {
-			id: Number(item?.id ?? item?.departure_id ?? 0),
-			tour_id: Number(item?.tour_id ?? item?.tourId ?? 0),
-			departure_location: String(
-				item?.departure_location ?? item?.location ?? "",
-			),
-			departure_date: item?.departure_date ?? item?.date ?? "",
-			price_moving: Number(item?.price_moving ?? item?.priceMoving ?? 0),
-			price_moving_child: Number(
-				item?.price_moving_child ?? item?.priceMovingChild ?? 0,
-			),
-			seats_total: Number(item?.seats_total ?? item?.seatsTotal ?? 0),
-			seats_available: Number(
-				item?.seats_available ?? item?.seatsAvailable ?? 0,
-			),
-			status: String(item?.status ?? "open"),
-			created_at: item?.created_at,
-			updated_at: item?.updated_at,
-		};
-	}
+    function formatDateForDisplay(dateStr) {
+        const ymd = formatDateForInput(dateStr);
+        if (!ymd) return "";
+        const [year, month, day] = ymd.split("-");
+        return `${day}/${month}/${year}`;
+    }
+
+    function parseDisplayDateToYmd(displayDate) {
+        if (!displayDate) return "";
+        const value = displayDate.trim();
+
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            return value;
+        }
+
+        let day;
+        let month;
+        let year;
+
+        if (/^\d{8}$/.test(value)) {
+            day = value.slice(0, 2);
+            month = value.slice(2, 4);
+            year = value.slice(4, 8);
+        } else {
+            const match = value.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+            if (!match) return "";
+            day = match[1].padStart(2, "0");
+            month = match[2].padStart(2, "0");
+            year = match[3];
+        }
+
+        const dayNum = Number(day);
+        const monthNum = Number(month);
+        const yearNum = Number(year);
+        if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) return "";
+
+        const normalized = `${year}-${month}-${day}`;
+        const parsed = new Date(`${normalized}T00:00:00`);
+
+        if (Number.isNaN(parsed.getTime())) return "";
+        if (parsed.getFullYear() !== yearNum || parsed.getMonth() + 1 !== monthNum || parsed.getDate() !== dayNum) return "";
+        return normalized;
+    }
+
+    function normalizeDisplayDateValue(displayDate) {
+        const ymd = parseDisplayDateToYmd(displayDate);
+        return ymd ? formatDateForDisplay(ymd) : "";
+    }
+
+    function bindDateField({ textInputId, pickerInputId, openButtonId }) {
+        const textInput = document.getElementById(textInputId);
+        const pickerInput = document.getElementById(pickerInputId);
+        const openButton = document.getElementById(openButtonId);
+
+        if (!textInput) return;
+
+        textInput.addEventListener("blur", () => {
+            const normalized = normalizeDisplayDateValue(textInput.value);
+            if (!normalized) return;
+
+            textInput.value = normalized;
+            if (pickerInput) {
+                pickerInput.value = parseDisplayDateToYmd(normalized);
+            }
+        });
+
+        if (pickerInput) {
+            pickerInput.addEventListener("change", () => {
+                textInput.value = formatDateForDisplay(pickerInput.value);
+            });
+        }
+
+        if (openButton && pickerInput) {
+            openButton.addEventListener("click", () => {
+                const currentYmd = parseDisplayDateToYmd(textInput.value);
+                if (currentYmd) pickerInput.value = currentYmd;
+
+                if (typeof pickerInput.showPicker === "function") {
+                    pickerInput.showPicker();
+                } else {
+                    pickerInput.focus();
+                    pickerInput.click();
+                }
+            });
+        }
+    }
+
+    bindDateField({
+        textInputId: "addDepartureDate",
+        pickerInputId: "addDepartureDatePicker",
+        openButtonId: "openAddDepartureDatePicker",
+    });
+
+    bindDateField({
+        textInputId: "editDepDate",
+        pickerInputId: "editDepDatePicker",
+        openButtonId: "openEditDepartureDatePicker",
+    });
+
+    function getTodayYmd() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, "0");
+        const d = String(now.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    }
+
+    function calculateDepartureStatus(departureDate, seatsAvailable) {
+        const depDate = formatDateForInput(departureDate);
+        const today = getTodayYmd();
+        const seats = Number(seatsAvailable);
+
+        if (depDate && depDate < today) return "closed";
+        if (!Number.isNaN(seats) && seats <= 0) return "full";
+        return "open";
+    }
+
+    function normalizeDeparture(item) {
+        return {
+            id: Number(item?.id ?? item?.departure_id ?? 0),
+            tour_id: Number(item?.tour_id ?? item?.tourId ?? 0),
+            departure_location: String(item?.departure_location ?? item?.location ?? ""),
+            departure_date: item?.departure_date ?? item?.date ?? "",
+            price_moving: Number(item?.price_moving ?? item?.priceMoving ?? 0),
+            price_moving_child: Number(item?.price_moving_child ?? item?.priceMovingChild ?? 0),
+            seats_total: Number(item?.seats_total ?? item?.seatsTotal ?? 0),
+            seats_available: Number(item?.seats_available ?? item?.seatsAvailable ?? 0),
+            status: String(item?.status ?? "open"),
+            created_at: item?.created_at,
+            updated_at: item?.updated_at,
+        };
+    }
 
 	function normalizeDepartureList(data) {
 		const list = Array.isArray(data) ? data : data ? [data] : [];
@@ -335,57 +451,54 @@ window.initAdminDeparturePage = async function () {
 		document.getElementById("editDepId").value = dep.id;
 		document.getElementById("editDepTourId").value = dep.tour_id;
 
-		// Format date YYYY-MM-DD for input
-		const formattedDate = formatDateForInput(dep.departure_date);
-		document.getElementById("editDepDate").value = formattedDate;
-		document.getElementById("editDepLocation").value = dep.departure_location;
-		document.getElementById("editDepPrice").value = dep.price_moving;
-		document.getElementById("editDepPriceChild").value = dep.price_moving_child;
-		document.getElementById("editDepSeatsTotal").value = dep.seats_total;
-		document.getElementById("editDepSeatsAvail").value = dep.seats_available;
+        // Hiển thị ngày theo định dạng dd/MM/yyyy trong modal sửa.
+        const formattedDate = formatDateForDisplay(dep.departure_date);
+        document.getElementById("editDepDate").value = formattedDate;
+        const editDatePicker = document.getElementById("editDepDatePicker");
+        if (editDatePicker) {
+            editDatePicker.value = formatDateForInput(dep.departure_date);
+        }
+        document.getElementById("editDepLocation").value = dep.departure_location;
+        document.getElementById("editDepPrice").value = dep.price_moving;
+        document.getElementById("editDepPriceChild").value = dep.price_moving_child;
+        document.getElementById("editDepSeatsTotal").value = dep.seats_total;
+        document.getElementById("editDepSeatsAvail").value = dep.seats_available;
 
 		editDepartureModal.show();
 	};
 
-	document
-		.getElementById("saveEditDepartureBtn")
-		?.addEventListener("click", async () => {
-			const id = document.getElementById("editDepId").value;
-			const tourId = Number(document.getElementById("editDepTourId").value);
-			const departureDate = document.getElementById("editDepDate").value;
-			const departureLocation = document
-				.getElementById("editDepLocation")
-				.value.trim();
-			const priceMoving = Number(document.getElementById("editDepPrice").value);
-			const priceMovingChild = Number(
-				document.getElementById("editDepPriceChild").value,
-			);
-			const seatsTotal = Number(
-				document.getElementById("editDepSeatsTotal").value,
-			);
-			const seatsAvailable = Number(
-				document.getElementById("editDepSeatsAvail").value,
-			);
+    document.getElementById("saveEditDepartureBtn")?.addEventListener("click", async () => {
+        const id = document.getElementById("editDepId").value;
+        const tourId = Number(document.getElementById("editDepTourId").value);
+        const departureDateDisplay = document.getElementById("editDepDate").value;
+        const departureDate = parseDisplayDateToYmd(departureDateDisplay);
+        const departureLocation = document.getElementById("editDepLocation").value.trim();
+        const priceMoving = Number(document.getElementById("editDepPrice").value);
+        const priceMovingChild = Number(document.getElementById("editDepPriceChild").value);
+        const seatsTotal = Number(document.getElementById("editDepSeatsTotal").value);
+        const seatsAvailable = Number(document.getElementById("editDepSeatsAvail").value);
 
-			if (!id || !tourId || !departureDate || !departureLocation) {
-				showToast("Vui lòng nhập đầy đủ thông tin bắt buộc.", "warning");
-				return;
-			}
-			if (
-				[priceMoving, priceMovingChild, seatsTotal, seatsAvailable].some(
-					(value) => Number.isNaN(value) || value < 0,
-				)
-			) {
-				showToast("Giá và số ghế phải là số hợp lệ, không âm.", "warning");
-				return;
-			}
-			if (seatsAvailable > seatsTotal) {
-				showToast(
-					"Số chỗ còn trống không được lớn hơn tổng số chỗ.",
-					"warning",
-				);
-				return;
-			}
+        if (!id || !tourId || !departureDateDisplay || !departureLocation) {
+            showToast("Vui lòng nhập đầy đủ thông tin bắt buộc.", "warning");
+            return;
+        }
+        if (!departureDate) {
+            showToast("Ngày khởi hành phải đúng định dạng dd/MM/yyyy.", "warning");
+            return;
+        }
+        document.getElementById("editDepDate").value = formatDateForDisplay(departureDate);
+        const editDatePicker = document.getElementById("editDepDatePicker");
+        if (editDatePicker) {
+            editDatePicker.value = departureDate;
+        }
+        if ([priceMoving, priceMovingChild, seatsTotal, seatsAvailable].some((value) => Number.isNaN(value) || value < 0)) {
+            showToast("Giá và số ghế phải là số hợp lệ, không âm.", "warning");
+            return;
+        }
+        if (seatsAvailable > seatsTotal) {
+            showToast("Số chỗ còn trống không được lớn hơn tổng số chỗ.", "warning");
+            return;
+        }
 
 			const payload = {
 				tour_id: tourId,
