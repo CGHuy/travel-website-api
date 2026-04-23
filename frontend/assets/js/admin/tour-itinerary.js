@@ -341,7 +341,10 @@
 
                 hideModalById("itineraryModal");
                 await fetchAndRenderItineraryTours();
+                showNotification("bg-primary", "Thông báo", "Lưu lịch trình thành công");
             } catch (error) {
+                console.error("Lỗi lưu lịch trình:", error);
+                showNotification("bg-danger", "Thông báo lỗi", error.message || "Không thể lưu lịch trình.");
             } finally {
                 setSubmitButtonState(submitBtn, { disabled: false, text: "Lưu Lịch Trình" });
             }
@@ -384,8 +387,10 @@
 
                 hideModalById("itineraryModal");
                 await fetchAndRenderItineraryTours();
+                showNotification("bg-danger", "Thông báo", "Xóa toàn bộ lịch trình thành công");
             } catch (error) {
-                window.alert(error.message || "Không thể xóa toàn bộ lịch trình.");
+                console.error("Lỗi xóa toàn bộ lịch trình:", error);
+                showNotification("bg-danger", "Thông báo lỗi", error.message || "Không thể xóa toàn bộ lịch trình.");
             } finally {
                 deleteAllBtn.disabled = false;
             }
@@ -447,6 +452,28 @@
         if (!button) return;
         button.disabled = state.disabled;
         button.textContent = state.text;
+    }
+
+    function showNotification(header, title, message) {
+        const modalHeaderEl = document.getElementById("TypeDialog");
+        const modalEl = document.getElementById("notificationModal");
+        const titleEl = document.getElementById("notificationModalLabel");
+        const messageEl = document.getElementById("notificationMessage");
+
+        if (!modalEl || !messageEl || !modalHeaderEl) return;
+
+        modalHeaderEl.classList.remove("bg-success", "bg-primary", "bg-danger");
+        if (header) {
+            modalHeaderEl.classList.add(header);
+        }
+
+        if (titleEl) {
+            titleEl.textContent = title;
+        }
+        messageEl.textContent = message;
+
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
     }
 
     async function parseJsonSafe(response) {
