@@ -1,287 +1,318 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Đơn đặt chỗ | VietTour</title>
-        <link rel="icon" href="/assets/images/icon.svg" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-        <link rel="stylesheet" href="../../assets/css/index.css" />
-        <link rel="stylesheet" href="../../assets/css/user-sidebar.css" />
-        <style>
-            .main-title {
-                text-align: center;
-                color: #2c3e50;
-                font-weight: 800;
-                font-size: 2.5rem;
-                margin-bottom: 40px;
-                color: #0056b3;
-            }
-            .back-link {
-                color: #2c3e50;
-                text-decoration: none;
-                font-weight: 600;
-                margin-bottom: 20px;
-                display: inline-block;
-            }
-            .back-link:hover {
-                color: #3498db;
-            }
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Đơn đặt chỗ | VietTour</title>
+		<link rel="icon" href="/assets/images/icon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+		/>
+		<link rel="stylesheet" href="../../assets/css/index.css" />
+		<link rel="stylesheet" href="../../assets/css/user-sidebar.css" />
+		<style>
+			.main-title {
+				text-align: center;
+				color: #2c3e50;
+				font-weight: 800;
+				font-size: 2.5rem;
+				margin-bottom: 40px;
+				color: #0056b3;
+			}
+			.back-link {
+				color: #2c3e50;
+				text-decoration: none;
+				font-weight: 600;
+				margin-bottom: 20px;
+				display: inline-block;
+			}
+			.back-link:hover {
+				color: #3498db;
+			}
 
-            /* Search Bar */
-            .search-booking-container {
-                position: relative;
-                margin-bottom: 25px;
-            }
-            .search-booking-container i {
-                position: absolute;
-                left: 15px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #6c757d;
-            }
-            .search-booking-input {
-                padding-left: 45px;
-                border: 1px solid #dee2e6;
-                border-radius: 8px;
-                height: 50px;
-                width: 100%;
-            }
+			/* Search Bar */
+			.search-booking-container {
+				position: relative;
+				margin-bottom: 25px;
+			}
+			.search-booking-container i {
+				position: absolute;
+				left: 15px;
+				top: 50%;
+				transform: translateY(-50%);
+				color: #6c757d;
+			}
+			.search-booking-input {
+				padding-left: 45px;
+				border: 1px solid #dee2e6;
+				border-radius: 8px;
+				height: 50px;
+				width: 100%;
+			}
 
-            /* Filter Tabs */
-            .filter-tabs {
-                display: flex;
-                background: #fff;
-                border: 1px solid #e9ecef;
-                border-radius: 8px;
-                padding: 10px;
-                margin-bottom: 30px;
-                overflow-x: auto;
-            }
-            .filter-tab {
-                flex: 1;
-                text-align: center;
-                padding: 10px 15px;
-                cursor: pointer;
-                border-radius: 6px;
-                font-weight: 600;
-                color: #495057;
-                white-space: nowrap;
-                transition: all 0.2s;
-            }
-            .filter-tab.active {
-                color: #0056b3;
-                background: #f0f7ff;
-                position: relative;
-            }
-            .filter-tab.active::after {
-                content: "";
-                position: absolute;
-                bottom: 0;
-                left: 20%;
-                right: 20%;
-                height: 3px;
-                background: #0056b3;
-                border-radius: 3px;
-            }
+			/* Filter Tabs */
+			.filter-tabs {
+				display: flex;
+				background: #fff;
+				border: 1px solid #e9ecef;
+				border-radius: 8px;
+				padding: 10px;
+				margin-bottom: 30px;
+				overflow-x: auto;
+			}
+			.filter-tab {
+				flex: 1;
+				text-align: center;
+				padding: 10px 15px;
+				cursor: pointer;
+				border-radius: 6px;
+				font-weight: 600;
+				color: #495057;
+				white-space: nowrap;
+				transition: all 0.2s;
+			}
+			.filter-tab.active {
+				color: #0056b3;
+				background: #f0f7ff;
+				position: relative;
+			}
+			.filter-tab.active::after {
+				content: "";
+				position: absolute;
+				bottom: 0;
+				left: 20%;
+				right: 20%;
+				height: 3px;
+				background: #0056b3;
+				border-radius: 3px;
+			}
 
-            /* Booking Cards */
-            .booking-item {
-                margin-bottom: 30px;
-            }
-            .booking-date {
-                font-size: 14px;
-                color: #2c3e50;
-                font-weight: 600;
-                margin-bottom: 10px;
-            }
-            .booking-card {
-                background: #fff;
-                border: 1px solid #e9ecef;
-                border-radius: 12px;
-                padding: 20px;
-                display: flex;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                transition: transform 0.2s;
-            }
-            .booking-card:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-            }
-            .booking-img {
-                width: 250px;
-                height: 150px;
-                border-radius: 8px;
-                object-fit: cover;
-                margin-right: 25px;
-            }
-            .booking-info {
-                flex: 1;
-            }
-            .booking-info h4 {
-                font-weight: 800;
-                color: #2c3e50;
-                font-size: 20px;
-                margin-bottom: 15px;
-            }
-            .info-row {
-                display: flex;
-                align-items: center;
-                margin-bottom: 8px;
-                font-size: 15px;
-                color: #495057;
-            }
-            .info-row i {
-                width: 25px;
-                color: #6c757d;
-            }
-            .info-label {
-                font-weight: 600;
-                margin-right: 5px;
-            }
-            
-            .booking-status-price {
-                text-align: right;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                min-width: 200px;
-            }
-            .status-tag {
-                font-weight: 800;
-                font-size: 18px;
-                margin-bottom: 10px;
-            }
-            .status-paid { color: #2ecc71; }
-            .status-canceled { color: #e74c3c; }
-            .status-pending { color: #f39c12; }
-            
-            .booking-price {
-                font-size: 22px;
-                font-weight: 800;
-                color: #e74c3c;
-            }
-            .currency-symbol {
-                text-decoration: underline;
-                margin-left: 2px;
-            }
+			/* Booking Cards */
+			.booking-item {
+				margin-bottom: 30px;
+			}
+			.booking-date {
+				font-size: 14px;
+				color: #2c3e50;
+				font-weight: 600;
+				margin-bottom: 10px;
+			}
+			.booking-card {
+				background: #fff;
+				border: 1px solid #e9ecef;
+				border-radius: 12px;
+				padding: 20px;
+				display: flex;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+				transition: transform 0.2s;
+			}
+			.booking-card:hover {
+				transform: translateY(-3px);
+				box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+			}
+			.booking-img {
+				width: 250px;
+				height: 150px;
+				border-radius: 8px;
+				object-fit: cover;
+				margin-right: 25px;
+			}
+			.booking-info {
+				flex: 1;
+			}
+			.booking-info h4 {
+				font-weight: 800;
+				color: #2c3e50;
+				font-size: 20px;
+				margin-bottom: 15px;
+			}
+			.info-row {
+				display: flex;
+				align-items: center;
+				margin-bottom: 8px;
+				font-size: 15px;
+				color: #495057;
+			}
+			.info-row i {
+				width: 25px;
+				color: #6c757d;
+			}
+			.info-label {
+				font-weight: 600;
+				margin-right: 5px;
+			}
 
-            @media (max-width: 991px) {
-                .booking-card {
-                    flex-direction: column;
-                }
-                .booking-img {
-                    width: 100%;
-                    height: 200px;
-                    margin-right: 0;
-                    margin-bottom: 20px;
-                }
-                .booking-status-price {
-                    text-align: left;
-                    margin-top: 15px;
-                    align-items: flex-start;
-                }
-            }
-        </style>
-    </head>
+			.booking-status-price {
+				text-align: right;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				min-width: 200px;
+			}
+			.status-tag {
+				font-weight: 800;
+				font-size: 18px;
+				margin-bottom: 10px;
+			}
+			.status-paid {
+				color: #2ecc71;
+			}
+			.status-canceled {
+				color: #e74c3c;
+			}
+			.status-pending {
+				color: #f39c12;
+			}
 
-    <body>
-        <div id="header-placeholder"></div>
+			.booking-price {
+				font-size: 22px;
+				font-weight: 800;
+				color: #e74c3c;
+			}
+			.currency-symbol {
+				text-decoration: underline;
+				margin-left: 2px;
+			}
 
-        <div class="container my-5">
-            <a href="/index" class="back-link">
-                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
-            </a>
+			@media (max-width: 991px) {
+				.booking-card {
+					flex-direction: column;
+				}
+				.booking-img {
+					width: 100%;
+					height: 200px;
+					margin-right: 0;
+					margin-bottom: 20px;
+				}
+				.booking-status-price {
+					text-align: left;
+					margin-top: 15px;
+					align-items: flex-start;
+				}
+			}
+		</style>
+	</head>
 
-            <h1 class="main-title">Tài khoản của bạn</h1>
+	<body>
+		<div id="header-placeholder"></div>
 
-            <div class="row">
-                <!-- Sidebar Column -->
-                <div class="col-lg-3 col-md-4">
-                    <div id="side-placeholder" class="user-sidebar-container">
-                        <!-- User Sidebar content will be loaded here -->
-                    </div>
-                </div>
+		<div class="container my-5">
+			<a href="/index" class="back-link">
+				<i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+			</a>
 
-                <!-- Content Column -->
-                <div class="col-lg-9 col-md-8">
-                    <!-- Search Bar -->
-                    <div class="search-booking-container">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" class="search-booking-input" placeholder="Tìm kiếm theo mã booking, mã tour hoặc tên tour">
-                    </div>
+			<h1 class="main-title">Tài khoản của bạn</h1>
 
-                    <!-- Filter Tabs -->
-                    <div class="filter-tabs">
-                        <div class="filter-tab active" data-status="all">Tất cả</div>
-                        <div class="filter-tab" data-status="paid">Đã thanh toán</div>
-                        <div class="filter-tab" data-status="canceled">Đã hủy</div>
-                        <div class="filter-tab" data-status="canceling">Yêu cầu hủy</div>
-                    </div>
+			<div class="row">
+				<!-- Sidebar Column -->
+				<div class="col-lg-3 col-md-4">
+					<div id="side-placeholder" class="user-sidebar-container">
+						<!-- User Sidebar content will be loaded here -->
+					</div>
+				</div>
 
-                    <!-- Booking List -->
-                    <div id="booking-list">
-                        <!-- Mock Item 1 -->
-                        <div class="booking-item">
-                            <div class="booking-date">Ngày tạo: 27/11/2025 11:11:27</div>
-                            <div class="booking-card">
-                                <img src="/assets/images/seoul_thumbnail.png" alt="Tour image" class="booking-img">
-                                <div class="booking-info">
-                                    <h4>Đông Bắc Á</h4>
-                                    <div class="info-row">
-                                        <i class="fa-solid fa-ticket"></i>
-                                        <span class="info-label">Số booking:</span>
-                                        <span class="info-value">OB006179/1125</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <i class="fa-solid fa-barcode"></i>
-                                        <span class="info-label">Mã tour:</span>
-                                        <span class="info-value">NNSGN5006-012-061225VJ-H</span>
-                                    </div>
-                                </div>
-                                <div class="booking-status-price">
-                                    <div class="status-tag status-canceled">Đã hủy</div>
-                                    <div class="booking-price">15.490.000 <span class="currency-symbol">đ</span></div>
-                                </div>
-                            </div>
-                        </div>
+				<!-- Content Column -->
+				<div class="col-lg-9 col-md-8">
+					<!-- Search Bar -->
+					<div class="search-booking-container">
+						<i class="fa-solid fa-magnifying-glass"></i>
+						<input
+							type="text"
+							class="search-booking-input"
+							placeholder="Tìm kiếm theo mã booking, mã tour hoặc tên tour"
+						/>
+					</div>
 
-                        <!-- Mock Item 2 -->
-                        <div class="booking-item">
-                            <div class="booking-date">Ngày tạo: 15/10/2025 09:30:00</div>
-                            <div class="booking-card">
-                                <img src="/assets/images/ha_long_thumbnail.png" alt="Tour image" class="booking-img">
-                                <div class="booking-info">
-                                    <h4>Kỳ quan Vịnh Hạ Long</h4>
-                                    <div class="info-row">
-                                        <i class="fa-solid fa-ticket"></i>
-                                        <span class="info-label">Số booking:</span>
-                                        <span class="info-value">OB004521/1025</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <i class="fa-solid fa-barcode"></i>
-                                        <span class="info-label">Mã tour:</span>
-                                        <span class="info-value">VNMB102-045-151025-V</span>
-                                    </div>
-                                </div>
-                                <div class="booking-status-price">
-                                    <div class="status-tag status-paid">Đã thanh toán</div>
-                                    <div class="booking-price">3.250.000 <span class="currency-symbol">đ</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+					<!-- Filter Tabs -->
+					<div class="filter-tabs">
+						<div class="filter-tab active" data-status="all">Tất cả</div>
+						<div class="filter-tab" data-status="paid">Đã thanh toán</div>
+						<div class="filter-tab" data-status="canceled">Đã hủy</div>
+						<div class="filter-tab" data-status="canceling">Yêu cầu hủy</div>
+					</div>
 
-        <div id="footer-placeholder"></div>
+					<!-- Booking List -->
+					<div id="booking-list">
+						<!-- Mock Item 1 -->
+						<div class="booking-item">
+							<div class="booking-date">Ngày tạo: 27/11/2025 11:11:27</div>
+							<div class="booking-card">
+								<img
+									src="/assets/images/seoul_thumbnail.png"
+									alt="Tour image"
+									class="booking-img"
+								/>
+								<div class="booking-info">
+									<h4>Đông Bắc Á</h4>
+									<div class="info-row">
+										<i class="fa-solid fa-ticket"></i>
+										<span class="info-label">Số booking:</span>
+										<span class="info-value">OB006179/1125</span>
+									</div>
+									<div class="info-row">
+										<i class="fa-solid fa-barcode"></i>
+										<span class="info-label">Mã tour:</span>
+										<span class="info-value">NNSGN5006-012-061225VJ-H</span>
+									</div>
+								</div>
+								<div class="booking-status-price">
+									<div class="status-tag status-canceled">Đã hủy</div>
+									<div class="booking-price">
+										15.490.000 <span class="currency-symbol">đ</span>
+									</div>
+								</div>
+							</div>
+						</div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="../../assets/js/bookings-history.js"></script>
-    </body>
+						<!-- Mock Item 2 -->
+						<div class="booking-item">
+							<div class="booking-date">Ngày tạo: 15/10/2025 09:30:00</div>
+							<div class="booking-card">
+								<img
+									src="/assets/images/ha_long_thumbnail.png"
+									alt="Tour image"
+									class="booking-img"
+								/>
+								<div class="booking-info">
+									<h4>Kỳ quan Vịnh Hạ Long</h4>
+									<div class="info-row">
+										<i class="fa-solid fa-ticket"></i>
+										<span class="info-label">Số booking:</span>
+										<span class="info-value">OB004521/1025</span>
+									</div>
+									<div class="info-row">
+										<i class="fa-solid fa-barcode"></i>
+										<span class="info-label">Mã tour:</span>
+										<span class="info-value">VNMB102-045-151025-V</span>
+									</div>
+								</div>
+								<div class="booking-status-price">
+									<div class="status-tag status-paid">Đã thanh toán</div>
+									<div class="booking-price">
+										3.250.000 <span class="currency-symbol">đ</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="footer-placeholder"></div>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="../../assets/js/bookings-history.js"></script>
+	</body>
 </html>
