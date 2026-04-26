@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     let priceFilterEnabled = false;
+    let isAiMode = false; // Flag: đang hiển thị kết quả AI, chặn fetchTours ghi đè
 
     if (!tourListContainer) return;
 
@@ -70,6 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Phase 2: Fetch and Render Tours
     const fetchTours = async (page = 1) => {
+        if (isAiMode) return; // Đang ở chế độ AI, không fetch tours thông thường
         currentFilters.page = page;
 
         // Show loading state
@@ -389,6 +391,137 @@ document.addEventListener("DOMContentLoaded", async () => {
         applyFilterBtn.classList.replace("btn-primary", "btn-outline-secondary");
         applyFilterBtn.addEventListener("click", clearFilters);
     }
+
+    // --- XỬ LÝ TÌM KIẾM BẰNG AI (FLOATING WIDGET) ---
+    const aiFabBtn = document.getElementById("aiFabBtn");
+    const aiChatPanel = document.getElementById("aiChatPanel");
+    const closeAiPanelBtn = document.getElementById("closeAiPanelBtn");
+    
+    const aiSearchInput = document.getElementById("aiSearchInput");
+    const btnAiSearch = document.getElementById("btnAiSearch");
+    const aiResponseContainer = document.getElementById("aiResponseContainer");
+    const aiResponseText = document.getElementById("aiResponseText");
+    const exitAiModeBtn = document.getElementById("exitAiModeBtn");
+
+    // Toggle Chat Panel
+    if (aiFabBtn && aiChatPanel) {
+        aiFabBtn.addEventListener("click", () => {
+            aiChatPanel.classList.toggle("d-none");
+            if (!aiChatPanel.classList.contains("d-none")) {
+                aiSearchInput.focus();
+            }
+        });
+    }
+
+    if (closeAiPanelBtn && aiChatPanel) {
+        closeAiPanelBtn.addEventListener("click", () => {
+            aiChatPanel.classList.add("d-none");
+        });
+    }
+
+    if (btnAiSearch && aiSearchInput) {
+        const handleAiSearch = async () => {
+            const message = aiSearchInput.value.trim();
+            if (!message) return;
+
+            // Show loading state
+            btnAiSearch.disabled = true;
+            btnAiSearch.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            
+            tourListContainer.innerHTML = `
+                <div class="text-center py-5 w-100">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted fw-bold">Trợ lý AI đang tìm kiếm và đọc lịch trình các tour...</p>
+                    <p class="small text-muted">Quá trình này có thể mất vài giây tùy độ phức tạp của câu hỏi.</p>
+                </div>
+            `;
+            aiResponseContainer.classList.add("d-none");
+            paginationContainer.innerHTML = "";
+
+            try {
+                const response = await fetch("/api/list-tours/suggestions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.length > 0) {
+                    // Bật chế độ AI, chặn các trigger fetchTours khác
+                    isAiMode = true;
+
+                    // Hiển thị lời tư vấn của AI
+                    aiResponseContainer.classList.remove("d-none");
+                    aiResponseText.innerText = result.message;
+
+                    // Hiển thị nút thoát chế độ AI
+                    if (exitAiModeBtn) exitAiModeBtn.classList.remove("d-none");
+                    
+                    // Lấy wishlist để render (giống fetchTours)
+                    const token = localStorage.getItem("token");
+                    let wishlistTourIds = [];
+                    if (token) {
+                        try {
+                            const wishlistRes = await fetch("/api/list-tours/wishlist/all", {
+                                headers: { "Authorization": `Bearer ${token}` }
+                            });
+                            const wishlistData = await wishlistRes.json();
+                            if (wishlistData.success) {
+                                wishlistTourIds = wishlistData.data.map(item => item.tour_id);
+                            }
+                        } catch (e) {
+                            console.error("Error fetching wishlist for marking:", e);
+                        }
+                    }
+
+                    renderTours(result.data, wishlistTourIds);
+                    // Ẩn pagination khi đang ở chế độ AI (giới hạn 5 kết quả)
+                    paginationContainer.innerHTML = "";
+                    
+                    // Tự động cuộn tới danh sách tour vì panel AI nổi không cuộn theo
+                    window.scrollTo({ top: document.querySelector(".main-container").offsetTop - 100, behavior: "smooth" });
+                } else {
+                    // AI phản hồi nhưng không tìm thấy tour
+                    aiResponseContainer.classList.remove("d-none");
+                    aiResponseText.innerText = result.message || "Rất tiếc, AI không tìm thấy tour nào phù hợp.";
+                    tourListContainer.innerHTML = `
+                        <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light w-100">
+                            <img src="https://illustrations.popsy.co/amber/no-results.svg" style="width: 200px; opacity: 0.8;" alt="No results">
+                            <h4 class="fw-bold text-dark mt-4">Không tìm thấy tour nào</h4>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error("Lỗi gọi AI:", error);
+                tourListContainer.innerHTML = '<div class="alert alert-danger w-100 shadow-sm">Đã có lỗi xảy ra khi kết nối tới hệ thống AI. Vui lòng đảm bảo Ollama đang chạy!</div>';
+            } finally {
+                btnAiSearch.disabled = false;
+                btnAiSearch.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+            }
+        };
+
+        btnAiSearch.addEventListener("click", handleAiSearch);
+        aiSearchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleAiSearch();
+        });
+    }
+
+    // Nút thoát chế độ AI, về lại danh sách bình thường
+    if (exitAiModeBtn) {
+        exitAiModeBtn.addEventListener("click", () => {
+            isAiMode = false;
+            aiResponseContainer.classList.add("d-none");
+            exitAiModeBtn.classList.add("d-none");
+            aiSearchInput.value = "";
+            fetchTours(1);
+        });
+    }
+    // --- KẾT THÚC XỬ LÝ AI ---
 
     // Initial sequence
     fetchServices().then(() => fetchTours(1));
