@@ -17,6 +17,7 @@
         "jsonwebtoken": "^9.0.3",
         "multer": "^2.0.2",
         "mysql2": "^3.16.1",
+        "ollama": "^0.6.3",
         "vnpay": "^2.5.0"
     },
     "devDependencies": {
