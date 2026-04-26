@@ -165,10 +165,13 @@
                     </div>
                     <p>Số tiền liên quan: <b class="text-danger" id="modal-refund-amount">0đ</b></p>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn-secondary" id="btn-close-modal">Đóng</button>
-                    <button class="btn-outline-danger" id="btn-reject-cancel">Từ chối yêu cầu</button>
-                    <button class="btn-danger" id="btn-approve-cancel">Phê duyệt & Hoàn tiền</button>
+                <div class="modal-footer-flex">
+                    <button class="btn-outline-danger-premium" id="btn-reject-cancel" style="flex: 1;">
+                        <i class="fa-solid fa-xmark"></i> Từ chối yêu cầu
+                    </button>
+                    <button class="btn-danger" id="btn-approve-cancel" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px;">
+                        <i class="fa-solid fa-check"></i> Phê duyệt & Hoàn tiền
+                    </button>
                 </div>
             </div>
         </div>

@@ -194,7 +194,6 @@ function renderAdminBookingDetails(data) {
 
         showModalBtn.onclick = () => modal.style.display = 'flex';
         closeModalX.onclick = () => modal.style.display = 'none';
-        closeModalBtn.onclick = () => modal.style.display = 'none';
         
         // 1. Logic Phê Duyệt
         approveBtn.onclick = async () => {
@@ -225,7 +224,7 @@ function renderAdminBookingDetails(data) {
             } catch (err) {
                 console.error(err);
                 alert('Không thể thực hiện phê duyệt');
-                setLoading(approveBtn, false, 'Phê duyệt & Hoàn tiền');
+                setLoading(approveBtn, false, '<i class="fa-solid fa-check"></i> Phê duyệt & Hoàn tiền');
                 rejectBtn.disabled = false;
             }
         };
@@ -259,7 +258,7 @@ function renderAdminBookingDetails(data) {
             } catch (err) {
                 console.error(err);
                 alert('Không thể thực hiện từ chối yêu cầu');
-                setLoading(rejectBtn, false, 'Từ chối yêu cầu');
+                setLoading(rejectBtn, false, '<i class="fa-solid fa-xmark"></i> Từ chối yêu cầu');
                 approveBtn.disabled = false;
             }
         };
