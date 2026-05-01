@@ -185,36 +185,26 @@
                     <button id="closeAiPanelBtn" class="btn btn-sm text-white border-0 p-0 shadow-none"><i class="fa-solid fa-xmark fs-5"></i></button>
                 </div>
                 
-                <!-- Chat Body (Scrollable) -->
-                <div class="p-3 overflow-auto bg-light bg-opacity-50" style="flex-grow: 1;">
-                    <div class="d-flex gap-2 mb-3">
-                        <div class="bg-primary text-white p-2 rounded-circle" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-robot"></i>
+                <!-- Chat Body (Scrollable - tích lũy hội thoại) -->
+                <div id="chatMessages" class="p-3 overflow-auto" style="flex-grow: 1; background: #f8f9fa; display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Tin nhắn chào mừng mặc định -->
+                    <div class="d-flex gap-2 align-items-end">
+                        <div class="bg-primary text-white rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                            <i class="fa-solid fa-robot" style="font-size: 0.75rem;"></i>
                         </div>
-                        <div class="bg-white p-3 rounded-3 shadow-sm border border-light flex-grow-1" style="border-top-left-radius: 0 !important;">
-                            <p class="text-dark small mb-0 fw-medium">Chào bạn! Nhập yêu cầu bằng ngôn ngữ tự nhiên, AI sẽ tìm tour phù hợp nhất cho bạn. 
-                            <br><span class="text-muted" style="font-size: 0.8rem;">Ví dụ: Tìm tour đi Đà Lạt giá dưới 5 triệu trong 3 ngày...</span></p>
-                        </div>
-                    </div>
-                    
-                    <!-- AI Response Area -->
-                    <div id="aiResponseContainer" class="d-flex gap-2 mb-3 d-none">
-                        <div class="bg-success text-white p-2 rounded-circle" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        </div>
-                        <div class="bg-white p-3 rounded-3 shadow-sm border border-success border-opacity-25 flex-grow-1" style="border-top-left-radius: 0 !important;">
-                            <p id="aiResponseText" class="mb-0 text-dark small fw-medium" style="line-height: 1.5;"></p>
-                            <div class="mt-2 text-end">
-                                <button id="exitAiModeBtn" class="btn btn-sm btn-outline-danger py-1 px-2 small d-none" style="font-size: 0.75rem;">
-                                    Hủy tìm kiếm AI
-                                </button>
-                            </div>
+                        <div class="bg-white p-3 rounded-3 shadow-sm" style="border-top-left-radius: 4px !important; max-width: 85%; font-size: 0.85rem; line-height: 1.5;">
+                            Xin chào! Mình có thể giúp bạn tìm tour du lịch phù hợp. Hãy mô tả bạn muốn đi đâu, trong bao lâu hoặc ngân sách bao nhiêu nhé! 😊
                         </div>
                     </div>
                 </div>
 
                 <!-- Footer (Input Area) -->
-                <div class="p-3 bg-white border-top border-light shadow-sm">
+                <div class="p-2 bg-white border-top border-light">
+                    <div id="exitAiModeBtnWrapper" class="d-none px-1 pb-2">
+                        <button id="exitAiModeBtn" class="btn btn-sm btn-outline-secondary w-100 py-1" style="font-size: 0.78rem;">
+                            <i class="fa-solid fa-rotate-left me-1"></i> Xem lại tất cả tour
+                        </button>
+                    </div>
                     <div class="input-group">
                         <input id="aiSearchInput" type="text" class="form-control bg-light border-0 shadow-none" placeholder="Nhập yêu cầu..." style="font-size: 0.9rem;" />
                         <button id="btnAiSearch" class="btn btn-primary rounded-end"><i class="fa-solid fa-paper-plane"></i></button>
