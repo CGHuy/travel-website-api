@@ -1,0 +1,578 @@
+/* Scoped CSS for Booking Detail Component */
+.booking-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.booking-title-info h1 {
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.status-badge {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-confirmed {
+    background: #dcfce7;
+    color: #15803d;
+}
+.status-pending {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+.status-cancelled {
+    background: #f1f5f9;
+    color: #475569;
+}
+.status-warning {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #ffedd5;
+}
+
+/* Payment Status Badges */
+.status-paid-alt {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+.status-pending-alt {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #ffedd5;
+}
+.status-refunded {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+.status-unpaid {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.btn-danger-premium {
+    background: #ef4444 !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 24px !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger-premium:hover {
+    background: #dc2626 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
+}
+
+.meta-info {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-premium {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.btn-premium:hover {
+    background: #f8fafc;
+}
+.btn-primary-premium {
+    background: #0d6efd;
+    color: white;
+    border: none;
+}
+.btn-primary-premium:hover {
+    background: #0b5ed7;
+}
+
+/* Content Grid */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+}
+
+.detail-grid .card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detail-grid .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(13, 110, 253, 0.1);
+    border-color: #bae6fd;
+}
+
+.card-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #e0f2fe;
+    background: #f0f9ff; /* Light blue background */
+    border-radius: 12px 12px 0 0;
+}
+
+.card-header i {
+    color: #0369a1;
+}
+
+.card-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    color: #1e293b;
+}
+
+.table-header-flex {
+    justify-content: space-between;
+}
+
+.btn-export {
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0369a1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-export:hover {
+    background: #f0f9ff;
+    border-color: #0369a1;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Customer Info */
+.info-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+.info-item label {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+.info-item span {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Tour Summary */
+.tour-summary-box {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.tour-img-display {
+    width: 120px;
+    height: 80px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.tour-short-info h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+.tour-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+}
+.tour-meta-item label {
+    font-size: 10px;
+    color: #64748b;
+    text-transform: uppercase;
+    display: block;
+}
+.tour-meta-item span {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Itinerary */
+.itinerary-section h4 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    color: #64748b;
+}
+.itinerary-timeline {
+    position: relative;
+    padding-left: 20px;
+}
+.itinerary-timeline::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 5px;
+    bottom: 5px;
+    width: 2px;
+    background: #e2e8f0;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 15px;
+}
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -20px;
+    top: 5px;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border: 2px solid #0d6efd;
+    border-radius: 50%;
+}
+.timeline-item h5 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.timeline-item p {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Table */
+.premium-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.premium-table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #64748b;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.premium-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #f8fafc;
+}
+.passenger-name {
+    font-weight: 600;
+    display: block;
+}
+
+/* Financials */
+.sidebar-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: block;
+    color: #0369a1; /* Light blue text */
+    letter-spacing: 0.5px;
+}
+.premium-select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+.btn-save {
+    width: 100%;
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #64748b;
+}
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+.summary-total label {
+    font-weight: 700;
+    color: #1e293b;
+}
+.summary-total span {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0d6efd;
+}
+
+.collected-box {
+    background: #eff6ff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+}
+.collected-header {
+    color: #0d6efd;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.collected-amount {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0d6efd;
+}
+.collected-meta {
+    font-size: 10px;
+    color: #64748b;
+}
+
+.history-timeline {
+    padding-left: 16px;
+    position: relative;
+}
+.history-timeline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 2px;
+    background: #f1f5f9;
+}
+.history-item {
+    position: relative;
+    padding-bottom: 16px;
+}
+.history-item::before {
+    content: "";
+    position: absolute;
+    left: -19px;
+    top: 6px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+.history-item.success::before {
+    background: #22c55e;
+}
+.history-item.info::before {
+    background: #3b82f6;
+}
+.history-item.warning::before {
+    background: #f59e0b;
+}
+.history-item.danger::before {
+    background: #ef4444;
+}
+.history-content h5 {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0;
+}
+.history-content span {
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* Refund Receipt Styles */
+.refund-detail-box {
+    background: #fffafa;
+    border: 1px dashed #feb2b2;
+    border-radius: 8px;
+    padding: 15px;
+}
+.refund-detail-box p {
+    margin: 8px 0;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+}
+.refund-detail-box hr {
+    border: none;
+    border-top: 1px solid #fee2e2;
+    margin: 12px 0;
+}
+.refund-detail-box .note {
+    font-size: 11px;
+    color: #991b1b;
+    display: block;
+    text-align: center;
+}
+.text-danger {
+    color: #e74c3c;
+    font-weight: 700;
+}
+
+/* Modal & Cancellation Actions */
+.btn-danger-premium {
+    background: #fff5f5;
+    color: #c53030;
+    border: 1px solid #feb2b2;
+}
+.btn-danger-premium:hover {
+    background: #c53030;
+    color: white;
+}
+
+.premium-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    animation: modalSlide 0.3s ease-out;
+}
+
+@keyframes modalSlide {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: 20px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-modal {
+    font-size: 24px;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.modal-body {
+    padding: 24px;
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-secondary {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-danger {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #ef4444;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.w-100 {
+    width: 100%;
+}
