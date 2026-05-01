@@ -395,27 +395,19 @@ Câu nói của khách: "${userMessage}"
 
             // Bước 3: Đưa dữ liệu thô cho Ollama để tạo câu trả lời
             const toursContext = foundTours.map(t => {
-                let context = `- Tên tour: ${t.name}\n  Giá: ${t.price_default.toLocaleString('vi-VN')} VND\n  Thời gian: ${t.duration}`;
-                
-                if (t.itineraries && t.itineraries.length > 0) {
-                    const itinStr = t.itineraries.map(i => `Ngày ${i.day_number}: ${i.description}`).join(' | ');
-                    // Cắt bớt độ dài nếu lịch trình quá dài để tránh tràn bộ nhớ của model
-                    context += `\n  Lịch trình tóm tắt: ${itinStr.substring(0, 300)}...`;
-                }
+                let ctx = `• ${t.name} — ${Number(t.price_default).toLocaleString('vi-VN')} VND — ${t.duration}`;
                 if (t.services && t.services.length > 0) {
-                    const srvStr = t.services.map(s => s.name).join(', ');
-                    context += `\n  Dịch vụ bao gồm: ${srvStr}`;
+                    ctx += ` (Dịch vụ: ${t.services.map(s => s.name).join(', ')})`;
                 }
-                return context;
-            }).join('\n\n');
+                return ctx;
+            }).join('\n');
 
-            const generatePrompt = `
-Bạn là một nhân viên tư vấn du lịch nhiệt tình. Khách hàng vừa nói: "${userMessage}"
-Hệ thống đã tự động lọc ra các tour phù hợp sau (KHÔNG tự bịa thêm tour nào khác ngoài danh sách này):
+            const generatePrompt = `Bạn là tư vấn viên du lịch. Khách hỏi: "${userMessage}"
+Danh sách tour phù hợp:
 ${toursContext}
 
-Hãy viết một câu trả lời ngắn gọn, thân thiện bằng tiếng Việt để giới thiệu các tour này cho khách hàng. Đừng quên nhắc đến giá và thời gian.
-`;
+Yêu cầu: Trả lời NGẮN GỌN trong 2-4 câu bằng tiếng Việt. Chỉ giới thiệu tên tour, giá, và 1 điểm nổi bật. KHÔNG liệt kê chi tiết lịch trình.`;
+
 
             const finalResponse = await fetch('http://localhost:11434/api/generate', {
                 method: 'POST',

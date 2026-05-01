@@ -396,12 +396,62 @@ document.addEventListener("DOMContentLoaded", async () => {
     const aiFabBtn = document.getElementById("aiFabBtn");
     const aiChatPanel = document.getElementById("aiChatPanel");
     const closeAiPanelBtn = document.getElementById("closeAiPanelBtn");
-    
+    const chatMessages = document.getElementById("chatMessages");
     const aiSearchInput = document.getElementById("aiSearchInput");
     const btnAiSearch = document.getElementById("btnAiSearch");
-    const aiResponseContainer = document.getElementById("aiResponseContainer");
-    const aiResponseText = document.getElementById("aiResponseText");
     const exitAiModeBtn = document.getElementById("exitAiModeBtn");
+    const exitAiModeBtnWrapper = document.getElementById("exitAiModeBtnWrapper");
+
+    // Helper: cuộn chat xuống cuối
+    const scrollChatToBottom = () => {
+        if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    // Helper: thêm bong bóng chat user
+    const appendUserBubble = (text) => {
+        const div = document.createElement("div");
+        div.className = "d-flex justify-content-end";
+        div.innerHTML = `
+            <div class="text-white rounded-3 px-3 py-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd, #0dcaf0); max-width: 85%; font-size: 0.85rem; line-height: 1.5; border-bottom-right-radius: 4px !important;">
+                ${text}
+            </div>`;
+        chatMessages.appendChild(div);
+        scrollChatToBottom();
+    };
+
+    // Helper: thêm bong bóng loading AI
+    const appendLoadingBubble = () => {
+        const div = document.createElement("div");
+        div.id = "aiLoadingBubble";
+        div.className = "d-flex gap-2 align-items-end";
+        div.innerHTML = `
+            <div class="bg-primary text-white rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                <i class="fa-solid fa-robot" style="font-size: 0.75rem;"></i>
+            </div>
+            <div class="bg-white p-3 rounded-3 shadow-sm" style="border-top-left-radius: 4px !important; font-size: 0.85rem;">
+                <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                <span class="ms-2 text-muted">Đang tìm kiếm...</span>
+            </div>`;
+        chatMessages.appendChild(div);
+        scrollChatToBottom();
+    };
+
+    // Helper: thay loading bubble bằng câu trả lời AI
+    const replaceLoadingWithAiReply = (text) => {
+        const loading = document.getElementById("aiLoadingBubble");
+        if (loading) loading.remove();
+        const div = document.createElement("div");
+        div.className = "d-flex gap-2 align-items-end";
+        div.innerHTML = `
+            <div class="bg-primary text-white rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                <i class="fa-solid fa-robot" style="font-size: 0.75rem;"></i>
+            </div>
+            <div class="bg-white p-3 rounded-3 shadow-sm" style="border-top-left-radius: 4px !important; max-width: 85%; font-size: 0.85rem; line-height: 1.6;">
+                ${text}
+            </div>`;
+        chatMessages.appendChild(div);
+        scrollChatToBottom();
+    };
 
     // Toggle Chat Panel
     if (aiFabBtn && aiChatPanel) {
@@ -409,6 +459,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             aiChatPanel.classList.toggle("d-none");
             if (!aiChatPanel.classList.contains("d-none")) {
                 aiSearchInput.focus();
+                scrollChatToBottom();
             }
         });
     }
@@ -424,45 +475,34 @@ document.addEventListener("DOMContentLoaded", async () => {
             const message = aiSearchInput.value.trim();
             if (!message) return;
 
-            // Show loading state
+            // Append bong bóng người dùng + loading
+            appendUserBubble(message);
+            aiSearchInput.value = "";
             btnAiSearch.disabled = true;
-            btnAiSearch.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-            
+            btnAiSearch.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+            appendLoadingBubble();
+
+            // Loading state trên danh sách tour
             tourListContainer.innerHTML = `
                 <div class="text-center py-5 w-100">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-3 text-muted fw-bold">Trợ lý AI đang tìm kiếm và đọc lịch trình các tour...</p>
-                    <p class="small text-muted">Quá trình này có thể mất vài giây tùy độ phức tạp của câu hỏi.</p>
-                </div>
-            `;
-            aiResponseContainer.classList.add("d-none");
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-3 text-muted fw-bold">AI đang tìm kiếm tour phù hợp...</p>
+                </div>`;
             paginationContainer.innerHTML = "";
 
             try {
                 const response = await fetch("/api/list-tours/suggestions", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message })
                 });
-                
                 const result = await response.json();
 
                 if (result.success && result.data && result.data.length > 0) {
-                    // Bật chế độ AI, chặn các trigger fetchTours khác
                     isAiMode = true;
+                    replaceLoadingWithAiReply(result.message.replace(/\n/g, "<br>"));
+                    if (exitAiModeBtnWrapper) exitAiModeBtnWrapper.classList.remove("d-none");
 
-                    // Hiển thị lời tư vấn của AI
-                    aiResponseContainer.classList.remove("d-none");
-                    aiResponseText.innerText = result.message;
-
-                    // Hiển thị nút thoát chế độ AI
-                    if (exitAiModeBtn) exitAiModeBtn.classList.remove("d-none");
-                    
-                    // Lấy wishlist để render (giống fetchTours)
                     const token = localStorage.getItem("token");
                     let wishlistTourIds = [];
                     if (token) {
@@ -471,34 +511,26 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 headers: { "Authorization": `Bearer ${token}` }
                             });
                             const wishlistData = await wishlistRes.json();
-                            if (wishlistData.success) {
-                                wishlistTourIds = wishlistData.data.map(item => item.tour_id);
-                            }
-                        } catch (e) {
-                            console.error("Error fetching wishlist for marking:", e);
-                        }
+                            if (wishlistData.success) wishlistTourIds = wishlistData.data.map(item => item.tour_id);
+                        } catch (e) {}
                     }
 
                     renderTours(result.data, wishlistTourIds);
-                    // Ẩn pagination khi đang ở chế độ AI (giới hạn 5 kết quả)
                     paginationContainer.innerHTML = "";
-                    
-                    // Tự động cuộn tới danh sách tour vì panel AI nổi không cuộn theo
                     window.scrollTo({ top: document.querySelector(".main-container").offsetTop - 100, behavior: "smooth" });
                 } else {
-                    // AI phản hồi nhưng không tìm thấy tour
-                    aiResponseContainer.classList.remove("d-none");
-                    aiResponseText.innerText = result.message || "Rất tiếc, AI không tìm thấy tour nào phù hợp.";
+                    const msg = result.message || "Rất tiếc, mình không tìm thấy tour nào phù hợp. Bạn thử mô tả lại hoặc thay đổi ngân sách nhé!";
+                    replaceLoadingWithAiReply(msg);
                     tourListContainer.innerHTML = `
                         <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light w-100">
-                            <img src="https://illustrations.popsy.co/amber/no-results.svg" style="width: 200px; opacity: 0.8;" alt="No results">
-                            <h4 class="fw-bold text-dark mt-4">Không tìm thấy tour nào</h4>
-                        </div>
-                    `;
+                            <img src="https://illustrations.popsy.co/amber/no-results.svg" style="width: 180px; opacity: 0.8;" alt="No results">
+                            <h5 class="fw-bold text-dark mt-4">Không tìm thấy tour nào</h5>
+                        </div>`;
                 }
             } catch (error) {
                 console.error("Lỗi gọi AI:", error);
-                tourListContainer.innerHTML = '<div class="alert alert-danger w-100 shadow-sm">Đã có lỗi xảy ra khi kết nối tới hệ thống AI. Vui lòng đảm bảo Ollama đang chạy!</div>';
+                replaceLoadingWithAiReply("⚠️ Đã xảy ra lỗi kết nối tới AI. Vui lòng đảm bảo Ollama đang chạy!");
+                tourListContainer.innerHTML = "";
             } finally {
                 btnAiSearch.disabled = false;
                 btnAiSearch.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
@@ -511,13 +543,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Nút thoát chế độ AI, về lại danh sách bình thường
+    // Nút thoát chế độ AI
     if (exitAiModeBtn) {
         exitAiModeBtn.addEventListener("click", () => {
             isAiMode = false;
-            aiResponseContainer.classList.add("d-none");
-            exitAiModeBtn.classList.add("d-none");
-            aiSearchInput.value = "";
+            if (exitAiModeBtnWrapper) exitAiModeBtnWrapper.classList.add("d-none");
             fetchTours(1);
         });
     }
