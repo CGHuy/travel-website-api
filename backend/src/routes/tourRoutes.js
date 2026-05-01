@@ -7,7 +7,6 @@ const mediaStorage = require("../middlewares/mediaStorage");
 
 // Public routes - Không cần đăng nhập
 router.get("/", tourController.getAllTours);
-router.get("/search", tourController.searchTours);
 router.get("/region/:region", tourController.getToursByRegion);
 router.get("/:id", tourController.getTourById);
 

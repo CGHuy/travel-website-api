@@ -1,8 +1,13 @@
 (() => {
     const TOUR_API_URL = "/api/tours";
     const DEFAULT_TOUR_IMAGE = "../../assets/images/image-default.webp";
+    const ITEMS_PER_PAGE = 5;
 
     let adminTourCache = [];
+    let currentPage = 1;
+    let totalPages = 1;
+    let totalTours = 0;
+    let currentKeyword = "";
 
     // Hàm khởi tạo chính cho trang quản lý tour.
     async function initAdminTourPage() {
@@ -17,7 +22,7 @@
         bindEditImagePreview();
         bindEditModalReset();
 
-        await fetchAndRenderTours();
+        await fetchAndRenderTours({ page: 1 });
     }
 
     function bindAddTourForm() {
@@ -49,7 +54,7 @@
 
                 form.reset();
                 hideModalById("addTourModal");
-                await fetchAndRenderTours();
+                await fetchAndRenderTours({ page: currentPage, keyword: currentKeyword });
                 showNotification("bg-success", "Thông báo", "Thêm tour thành công");
             } catch (error) {
                 console.error("Lỗi thêm tour:", error);
@@ -96,7 +101,7 @@
                 }
 
                 hideModalById("editTourModal");
-                await fetchAndRenderTours();
+                await fetchAndRenderTours({ page: currentPage, keyword: currentKeyword });
                 showNotification("bg-primary", "Thông báo", "Cập nhật tour thành công");
             } catch (error) {
                 console.error("Lỗi cập nhật tour:", error);
@@ -139,7 +144,7 @@
 
                 hideModalById("deleteTourModal");
                 form.reset();
-                await fetchAndRenderTours();
+                await fetchAndRenderTours({ page: currentPage, keyword: currentKeyword });
                 showNotification("bg-danger", "Thông báo", "Xóa tour thành công");
             } catch (error) {
                 console.error("Lỗi xóa tour:", error);
@@ -192,27 +197,50 @@
         listEl.dataset.bound = "true";
     }
 
-    async function fetchAndRenderTours() {
+    async function fetchAndRenderTours(options = {}) {
         const listEl = document.getElementById("tour-list-container");
+        const paginationEl = document.getElementById("tour-pagination-container");
         if (!listEl) return;
+
+        const page = Math.max(Number(options.page) || 1, 1);
+        const keyword = typeof options.keyword === "string" ? options.keyword.trim() : currentKeyword;
 
         try {
             console.log("Đang tải danh sách tour...");
             listEl.innerHTML = "";
 
-            const res = await fetch(TOUR_API_URL);
+            const params = new URLSearchParams({
+                page: String(page),
+                limit: String(ITEMS_PER_PAGE),
+            });
+            if (keyword) {
+                params.set("keyword", keyword);
+            }
+
+            const res = await fetch(`${TOUR_API_URL}?${params.toString()}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const payload = await parseJsonSafe(res);
             adminTourCache = payload.success && Array.isArray(payload.data) ? payload.data : [];
 
+            const pagination = payload && typeof payload === "object" ? payload.pagination : null;
+            currentPage = Number(pagination && pagination.currentPage) || page;
+            totalPages = Number(pagination && pagination.totalPages) || 1;
+            totalTours = Number(pagination && pagination.total) || 0;
+            currentKeyword = keyword;
+
             const totalEl = document.getElementById("tour-total-count");
-            if (totalEl) totalEl.textContent = String(adminTourCache.length);
+            if (totalEl) totalEl.textContent = String(totalTours);
+
             renderTourList(adminTourCache);
+            if (paginationEl) {
+                renderPaginationButtons(paginationEl);
+            }
         } catch (error) {
             console.error("Không tải được dữ liệu tour từ API.", error);
             const totalEl = document.getElementById("tour-total-count");
             if (totalEl) totalEl.textContent = "0";
+            if (paginationEl) paginationEl.innerHTML = "";
         }
     }
 
@@ -225,8 +253,7 @@
             const keyword = String(input.value || "")
                 .trim()
                 .toLowerCase();
-            const filteredTours = adminTourCache.filter((tour) => isTourMatchedKeyword(tour, keyword));
-            renderTourList(filteredTours);
+            fetchAndRenderTours({ page: 1, keyword });
         };
 
         input.addEventListener("keydown", (event) => {
@@ -235,24 +262,11 @@
             runSearch();
         });
 
-        input.addEventListener("input", () => {
-            if (String(input.value || "").trim() !== "") return;
-            renderTourList(adminTourCache);
-        });
-
         if (searchBtn) {
             searchBtn.addEventListener("click", runSearch);
         }
 
         input.dataset.bound = "true";
-    }
-
-    function isTourMatchedKeyword(tour, keyword) {
-        const idText = String(tour.id ?? "").toLowerCase();
-        const codeText = String(tour.code ?? "").toLowerCase();
-        const nameText = String(tour.name ?? "").toLowerCase();
-        const regionText = String(tour.region ?? "").toLowerCase();
-        return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword) || regionText.includes(keyword);
     }
 
     // Render danh sách tour từ template để tách UI khỏi logic lấy dữ liệu.
@@ -281,6 +295,45 @@
 
         listEl.innerHTML = "";
         listEl.appendChild(fragment);
+    }
+
+    // Render nút phân trang
+    function renderPaginationButtons(container) {
+        container.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        let html = '<div class="pagination-buttons">';
+
+        // Nút Trước
+        html += `<button class="p-btn" ${currentPage === 1 ? "disabled" : ""} data-page="${currentPage - 1}"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+        // Các số trang (hiện tối đa 5 trang)
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(totalPages, start + 4);
+        if (end - start < 4) start = Math.max(1, end - 4);
+
+        for (let i = start; i <= end; i++) {
+            html += `<button class="p-btn ${i === currentPage ? "active" : ""}" data-page="${i}">${i}</button>`;
+        }
+
+        // Nút Tiếp
+        html += `<button class="p-btn" ${currentPage === totalPages ? "disabled" : ""} data-page="${currentPage + 1}"><i class="fa-solid fa-chevron-right"></i></button>`;
+
+        html += "</div>";
+        container.innerHTML = html;
+
+        // Gán sự kiện click cho các nút
+        container.querySelectorAll(".p-btn[data-page]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const page = parseInt(btn.dataset.page);
+                if (page >= 1 && page <= totalPages && page !== currentPage) {
+                    fetchAndRenderTours({ page, keyword: currentKeyword });
+                    // Scroll to top of list
+                    document.getElementById("tour-list-container")?.scrollIntoView({ behavior: "smooth" });
+                }
+            });
+        });
     }
 
     function buildTourListItemNode(template, tour) {
