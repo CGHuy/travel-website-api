@@ -425,8 +425,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         div.id = "aiLoadingBubble";
         div.className = "d-flex gap-2 align-items-end";
         div.innerHTML = `
-            <div class="bg-primary text-white rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
-                <i class="fa-solid fa-robot" style="font-size: 0.75rem;"></i>
+            <div class="bg-primary text-white rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center overflow-hidden" style="width: 30px; height: 30px; border: 1px solid #0d6efd;">
+                <img src="https://res.cloudinary.com/dvnad2fcg/image/upload/v1777626275/logo_real_tnail6.png" alt="AI" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.6);" />
             </div>
             <div class="bg-white p-3 rounded-3 shadow-sm" style="border-top-left-radius: 4px !important; font-size: 0.85rem;">
                 <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
@@ -443,8 +443,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const div = document.createElement("div");
         div.className = "d-flex gap-2 align-items-end";
         div.innerHTML = `
-            <div class="bg-primary text-white rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
-                <i class="fa-solid fa-robot" style="font-size: 0.75rem;"></i>
+            <div class="bg-primary text-white rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center overflow-hidden" style="width: 30px; height: 30px; border: 1px solid #0d6efd;">
+                <img src="https://res.cloudinary.com/dvnad2fcg/image/upload/v1777626275/logo_real_tnail6.png" alt="AI" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.6);" />
             </div>
             <div class="bg-white p-3 rounded-3 shadow-sm" style="border-top-left-radius: 4px !important; max-width: 85%; font-size: 0.85rem; line-height: 1.6;">
                 ${text}
@@ -456,17 +456,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Toggle Chat Panel
     if (aiFabBtn && aiChatPanel) {
         aiFabBtn.addEventListener("click", () => {
-            aiChatPanel.classList.toggle("d-none");
-            if (!aiChatPanel.classList.contains("d-none")) {
-                aiSearchInput.focus();
-                scrollChatToBottom();
-            }
+            aiChatPanel.classList.remove("d-none");
+            aiFabBtn.classList.add("d-none"); // Ẩn nút icon khi mở chat
+            aiSearchInput.focus();
+            scrollChatToBottom();
         });
     }
 
     if (closeAiPanelBtn && aiChatPanel) {
         closeAiPanelBtn.addEventListener("click", () => {
             aiChatPanel.classList.add("d-none");
+            aiFabBtn.classList.remove("d-none"); // Hiện lại nút icon khi đóng chat
         });
     }
 
