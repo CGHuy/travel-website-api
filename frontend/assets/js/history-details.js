@@ -231,6 +231,35 @@ function renderBookingDetail(booking) {
             cancelBtn.innerHTML = `<i class="fa-solid fa-xmark me-1"></i> Yêu cầu hủy`;
             cancelBtn.onclick = () => {
                 const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
+                
+                // --- Bắt đầu tính toán phí hủy ---
+                const currentDate = new Date();
+                const departureDate = new Date(booking.departure_date);
+                
+                // Tính số ngày chênh lệch
+                const timeDiff = departureDate.getTime() - currentDate.getTime();
+                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Làm tròn lên số ngày
+                
+                let penaltyPercent = 0;
+                if (daysDiff >= 30) {
+                    penaltyPercent = 0;
+                } else if (daysDiff >= 15 && daysDiff < 30) {
+                    penaltyPercent = 50;
+                } else {
+                    penaltyPercent = 100;
+                }
+                
+                const penaltyAmount = (booking.total_price * penaltyPercent) / 100;
+                const refundAmount = booking.total_price - penaltyAmount;
+                
+                // Render vào Modal
+                document.getElementById('modal-dep-date').textContent = departureDate.toLocaleDateString('vi-VN');
+                document.getElementById('modal-days-left').textContent = `${daysDiff} ngày`;
+                document.getElementById('modal-total-price').textContent = `${new Intl.NumberFormat('vi-VN').format(booking.total_price)}đ`;
+                document.getElementById('modal-penalty-percent').textContent = `${penaltyPercent}%`;
+                document.getElementById('modal-refund-amount').textContent = `${new Intl.NumberFormat('vi-VN').format(refundAmount)}đ`;
+                // --- Kết thúc tính toán ---
+
                 cancelModal.show();
 
                 const confirmBtn = document.getElementById("confirm-cancel-btn");

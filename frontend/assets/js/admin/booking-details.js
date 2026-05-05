@@ -198,9 +198,36 @@ function renderAdminBookingDetails(data) {
         const closeModalBtn = document.getElementById("btn-close-modal");
         const approveBtn = document.getElementById("btn-approve-cancel");
         const rejectBtn = document.getElementById("btn-reject-cancel");
+
+        // Admin Penalty Calculation Logic based on updated_at
+        const reqDateStr = data.updated_at || data.created_at;
+        const reqDate = new Date(reqDateStr);
+        const depDate = new Date(data.departure_date);
+        
+        const timeDiff = depDate.getTime() - reqDate.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        
+        let penaltyPercent = 0;
+        if (daysDiff >= 30) {
+            penaltyPercent = 0;
+        } else if (daysDiff >= 15 && daysDiff < 30) {
+            penaltyPercent = 50;
+        } else {
+            penaltyPercent = 100;
+        }
+        
+        const penaltyAmount = (data.total_price * penaltyPercent) / 100;
+        const refundAmount = data.total_price - penaltyAmount;
+
+        const reqDateEl = document.getElementById("modal-req-date");
+        const daysLeftEl = document.getElementById("modal-admin-days-left");
+        const penPercentEl = document.getElementById("modal-admin-penalty-percent");
         const refundAmtEl = document.getElementById("modal-refund-amount");
 
-        if (refundAmtEl) refundAmtEl.textContent = formatCurrency(data.total_price);
+        if (reqDateEl) reqDateEl.textContent = reqDate.toLocaleDateString("vi-VN");
+        if (daysLeftEl) daysLeftEl.textContent = `${daysDiff} ngày`;
+        if (penPercentEl) penPercentEl.textContent = `${penaltyPercent}%`;
+        if (refundAmtEl) refundAmtEl.textContent = formatCurrency(refundAmount);
 
         showModalBtn.onclick = () => (modal.style.display = "flex");
         closeModalX.onclick = () => (modal.style.display = "none");

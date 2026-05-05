@@ -415,8 +415,43 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Bạn có chắc chắn muốn gửi Yêu cầu Hủy cho chuyến đi này không? Việc hủy có thể làm phát sinh phí phạt (10% - 50%) theo chính sách hủy tuỳ thuộc vào thời gian từ nay đến trước khởi hành.</p>
-                        <p class="mb-0 fw-bold">Trạng thái sẽ chuyển qua Đợi xử lý hủy để bộ phận xét duyệt liên hệ hoàn tiền!</p>
+                        <p>Bạn có chắc chắn muốn gửi <strong>Yêu cầu Hủy</strong> cho chuyến đi này không? Xin lưu ý chính sách hoàn tiền của chúng tôi:</p>
+                        
+                        <div class="alert alert-info py-2 mb-3" style="background-color: #f0f7ff; border-color: #ddecfa; color: #0056b3;">
+                            <ul class="mb-0 ps-3 small" style="list-style-type: disc;">
+                                <li class="mb-1"><strong>Trước 30 ngày:</strong> Miễn phí hủy (Hoàn 100%)</li>
+                                <li class="mb-1"><strong>Từ 15 - 29 ngày:</strong> Phạt 50% (Hoàn 50%)</li>
+                                <li><strong>Dưới 15 ngày:</strong> Phạt 100% (Không hoàn)</li>
+                            </ul>
+                        </div>
+
+                        <!-- Dynamic Penalty Calculation Box -->
+                        <div class="p-3 mb-3" style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
+                            <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-calculator text-warning me-2"></i> Dự tính phí hủy (tại thời điểm này)</h6>
+                            <div class="d-flex justify-content-between mb-1 small">
+                                <span>Ngày khởi hành:</span>
+                                <strong id="modal-dep-date">--/--/----</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1 small">
+                                <span>Thời gian còn lại:</span>
+                                <strong id="modal-days-left" class="text-primary">-- ngày</strong>
+                            </div>
+                            <hr class="my-2" style="border-color: #fcd34d;">
+                            <div class="d-flex justify-content-between mb-1 small">
+                                <span>Tổng tiền Tour:</span>
+                                <strong id="modal-total-price">0đ</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1 small">
+                                <span>Tỉ lệ phạt áp dụng:</span>
+                                <strong id="modal-penalty-percent" class="text-danger">0%</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span class="fw-bold">Số tiền hoàn dự kiến:</span>
+                                <strong id="modal-refund-amount" class="text-success fs-5">0đ</strong>
+                            </div>
+                        </div>
+
+                        <p class="mb-0 fw-bold small text-danger"><i class="fa-solid fa-circle-info me-1"></i> Trạng thái sẽ chuyển qua "Yêu cầu hủy". Admin sẽ xác nhận và xử lý yêu cầu hoàn tiền trong vòng 3-5 ngày làm việc!</p>
                     </div>
                     <div class="modal-footer border-top-0 pt-0">
                         <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Không, Quay lại</button>
