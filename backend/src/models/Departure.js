@@ -8,6 +8,7 @@ class Departure {
                 UPDATE tour_departures
                 SET status = CASE
                     WHEN departure_date < CURDATE() THEN 'closed'
+                    WHEN status = 'closed' THEN 'closed'
                     WHEN seats_available <= 0 THEN 'full'
                     ELSE 'open'
                 END,
@@ -161,8 +162,15 @@ class Departure {
                 return false;
             }
 
+            const depDate = new Date(departure.departure_date);
+            const today = new Date();
+            depDate.setHours(0,0,0,0);
+            today.setHours(0,0,0,0);
+            
+            const actualStatus = (depDate < today) ? 'closed' : departure.status;
+
             // 1. Kiểm tra trạng thái
-            if (departure.status === 'open' || departure.status === 'full') {
+            if (actualStatus === 'open' || actualStatus === 'full') {
                 throw new Error('Không được phép xóa điểm khởi hành khi đang ở trạng thái Mở hoặc Đầy. Vui lòng chuyển sang Đóng trước khi xóa.');
             }
 
@@ -213,12 +221,22 @@ class Departure {
                 throw new Error('Trạng thái không hợp lệ');
             }
 
+            const departure = await this.getById(id);
+            if (!departure) {
+                throw new Error('Không tìm thấy điểm khởi hành');
+            }
+
+            const depDate = new Date(departure.departure_date);
+            const today = new Date();
+            depDate.setHours(0,0,0,0);
+            today.setHours(0,0,0,0);
+
+            if (depDate < today && status !== 'closed') {
+                throw new Error('Chuyến đi đã qua ngày khởi hành, bắt buộc phải ở trạng thái Đóng');
+            }
+
             // Nếu chuyển sang 'open', kiểm tra có chỗ trống không
             if (status === 'open') {
-                const departure = await this.getById(id);
-                if (!departure) {
-                    throw new Error('Không tìm thấy điểm khởi hành');
-                }
                 if (departure.seats_available <= 0) {
                     throw new Error('Không thể mở điểm khởi hành khi đã hết chỗ');
                 }

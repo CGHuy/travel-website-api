@@ -244,27 +244,32 @@ window.initAdminDeparturePage = async function () {
         return `${y}-${m}-${d}`;
     }
 
-    function calculateDepartureStatus(departureDate, seatsAvailable) {
+    function calculateDepartureStatus(departureDate, seatsAvailable, currentStatus) {
         const depDate = formatDateForInput(departureDate);
         const today = getTodayYmd();
         const seats = Number(seatsAvailable);
 
         if (depDate && depDate < today) return "closed";
+        if (currentStatus === "closed") return "closed";
         if (!Number.isNaN(seats) && seats <= 0) return "full";
         return "open";
     }
 
     function normalizeDeparture(item) {
+        const currentStatus = String(item?.status ?? "open");
+        const depDate = item?.departure_date ?? item?.date ?? "";
+        const seatsAvail = item?.seats_available ?? item?.seatsAvailable ?? 0;
+
         return {
             id: Number(item?.id ?? item?.departure_id ?? 0),
             tour_id: Number(item?.tour_id ?? item?.tourId ?? 0),
             departure_location: String(item?.departure_location ?? item?.location ?? ""),
-            departure_date: item?.departure_date ?? item?.date ?? "",
+            departure_date: depDate,
             price_moving: Number(item?.price_moving ?? item?.priceMoving ?? 0),
             price_moving_child: Number(item?.price_moving_child ?? item?.priceMovingChild ?? 0),
             seats_total: Number(item?.seats_total ?? item?.seatsTotal ?? 0),
-            seats_available: Number(item?.seats_available ?? item?.seatsAvailable ?? 0),
-            status: String(item?.status ?? "open"),
+            seats_available: Number(seatsAvail),
+            status: calculateDepartureStatus(depDate, seatsAvail, currentStatus),
             created_at: item?.created_at,
             updated_at: item?.updated_at,
         };
@@ -334,7 +339,7 @@ window.initAdminDeparturePage = async function () {
 			if (dep.status === "closed") {
 				statusClass = "status-closed";
 				statusText = "Đóng";
-			} else if (dep.status === "full" || seatsAvailable <= 0) {
+			} else if (dep.status === "full") {
 				statusClass = "status-full";
 				statusText = "Đầy";
 			}
@@ -600,6 +605,14 @@ window.initAdminDeparturePage = async function () {
 	window.quickEditStatus = function (id) {
 		const dep = currentDeparturesList.find((d) => d.id === id);
 		if (!dep) return;
+
+		const depDate = formatDateForInput(dep.departure_date);
+		const today = getTodayYmd();
+		if (depDate && depDate < today) {
+			showToast("Không thể đổi trạng thái của điểm khởi hành đã qua ngày.", "warning");
+			return;
+		}
+
 		document.getElementById("quickStatusId").value = id;
 		document.getElementById("quickStatusSelect").value = dep.status || "open";
 		quickStatusModal.show();
