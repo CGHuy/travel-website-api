@@ -189,7 +189,34 @@ exports.getWishListByUser = async (req, res) => {
     }
 };
 
-exports.demo = async (req, res) => {};
+exports.getTourSuggestions = async (req, res) => {
+    const userMessage = req.body.message;
+    if (!userMessage) {
+        return res.status(400).json({ success: false, message: "Vui lòng cung cấp yêu cầu" });
+    }
+    
+    try {
+        const result = await ListTourService.getTourSuggestions(userMessage);
+        res.json({ 
+            success: true, 
+            message: result.reply, // Lấy câu trả lời của AI làm message để hiển thị
+            data: result.tours,    // Mảng tours y hệt cấu trúc lấy từ db
+            pagination: {
+                totalCount: result.totalCount,
+                currentPage: result.currentPage,
+                totalPages: result.totalPages,
+                limit: 5 // Đã fix cứng limit là 5 trong hàm gợi ý
+            }
+        });
+    } catch (error) {
+        console.error("Lỗi gợi ý tour:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Lỗi AI gợi ý tour", 
+            error: error.message 
+        });
+    }
+};
 
 
 

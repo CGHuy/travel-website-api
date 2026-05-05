@@ -571,37 +571,6 @@
 
 .btn-danger:hover {
     background: #dc2626;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-}
-
-.btn-outline-danger-premium {
-    padding: 12px 20px;
-    border-radius: 8px;
-    border: 1px solid #ef4444;
-    background: white;
-    color: #ef4444;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.btn-outline-danger-premium:hover {
-    background: #fef2f2;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
-}
-
-.modal-footer-flex {
-    padding: 20px 24px;
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    display: flex;
-    gap: 12px;
 }
 
 .w-100 {

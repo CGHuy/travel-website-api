@@ -4,38 +4,17 @@ const { deleteFromCloudinaryByUrl } = require("../middlewares/mediaStorage");
 
 exports.getAllTours = async (req, res) => {
     try {
-        const tours = await Tour.getAll();
-        const data = tours.map((tour) => ({
-            ...tour,
-            code: `TOUR${String(tour.id).padStart(3, "0")}`,
-        }));
-
-        res.json({
-            success: true,
-            data,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
-    }
-};
-
-// Tìm kiếm tours
-exports.searchTours = async (req, res) => {
-    try {
+        const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+        const limit = Math.max(parseInt(req.query.limit, 10) || 5, 1);
         const keyword = (req.query.keyword || req.query.q || "").toString().trim();
 
-        if (!keyword) {
-            return res.status(400).json({
-                success: false,
-                message: "Vui lòng nhập từ khóa tìm kiếm",
-            });
-        }
+        const result = await Tour.getAllPaginated({
+            page,
+            limit,
+            keyword,
+        });
 
-        const tours = await Tour.search(keyword);
-        const data = tours.map((tour) => ({
+        const data = (Array.isArray(result.data) ? result.data : []).map((tour) => ({
             ...tour,
             code: `TOUR${String(tour.id).padStart(3, "0")}`,
         }));
@@ -43,6 +22,7 @@ exports.searchTours = async (req, res) => {
         res.json({
             success: true,
             data,
+            pagination: result.pagination,
         });
     } catch (error) {
         res.status(500).json({

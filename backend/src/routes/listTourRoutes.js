@@ -37,4 +37,7 @@ router.get("/wishlist/:id", verifyToken, isUser, listTourController.checkWishLis
 //Xóa tour khỏi wishlist
 router.delete("/wishlist/:id", verifyToken, isUser, listTourController.removeWishList);
 
+//Nhận yêu cầu người dùng để gợi ý Tour
+router.post("/suggestions",listTourController.getTourSuggestions);
+
 module.exports = router;
