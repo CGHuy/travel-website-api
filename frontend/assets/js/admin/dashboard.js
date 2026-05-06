@@ -8,7 +8,7 @@ const CONTENT_LOADING_HTML = `
 const ROLE_PAGE_ACCESS_MAP = {
     admin: new Set(["user", "tour", "tour-image", "statistics"]),
     tour_staff: new Set(["departure", "itinerary", "service", "tour-service"]),
-    booking_staff: new Set(["booking"]),
+    booking_staff: new Set(["booking", "booking-details"]),
 };
 
 document.addEventListener("DOMContentLoaded", async () => {

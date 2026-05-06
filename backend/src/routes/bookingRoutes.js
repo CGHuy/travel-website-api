@@ -44,8 +44,7 @@ router.put(
 router.get("/vnpay-return", bookingController.vnpayReturn);
 
 // Callback hoàn tiền từ VNPay
-router.get("/vnpay-refund-return", bookingController.vnpayRefundReturn);
-router.get("/vnpay-refund", bookingController.vnpayRefundReturn); // Alias cho callback hoàn tiền
+router.get("/vnpay-refund", bookingController.vnpayRefundReturn);
 
 //============================== Tích hợp VNPay - Người dùng =====================
 

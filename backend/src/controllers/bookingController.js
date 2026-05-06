@@ -441,6 +441,11 @@ exports.createRefundUrl = async (req, res) => {
 };
 
 exports.vnpayRefundReturn = async (req, res) => {
+	let cachedBookingId = null;
+	let fallbackBookingId = null;
+	const toDetail = (id) => `/pages/admin/dashboard.html?page=booking-details&id=${id}`;
+	const toList = () => `/pages/admin/dashboard.html?page=booking`;
+
 	try {
 		const vnpay = new VNPay({
 			tmnCode: process.env.VNP_TMN_CODE,
@@ -451,81 +456,47 @@ exports.vnpayRefundReturn = async (req, res) => {
 
 		const verify = vnpay.verifyReturnUrl(req.query);
 		const txnRef = req.query.vnp_TxnRef;
-		let cachedBookingId = null;
+		const orderInfo = req.query.vnp_OrderInfo || "";
+		const orderMatch = String(orderInfo).match(/(\d+)/);
+		const txnMatch = String(txnRef || "").match(/(\d+)/);
+		fallbackBookingId = orderMatch ? Number(orderMatch[1]) : txnMatch ? Number(txnMatch[1]) : null;
 
 		if (verify.isSuccess) {
 			let refundedBookingId = null;
 
-			// Kiểm tra và lấy dữ liệu từ bộ nhớ tạm
 			if (pendingBookingsCache.has(txnRef)) {
 				const { bookingId } = pendingBookingsCache.get(txnRef);
 				cachedBookingId = bookingId;
 
-				try {
-					// Lấy booking hiện tại để xử lý giống luồng cancelBooking
-					const booking = await bookingService.getById(bookingId);
-
-					if (!booking) {
-						pendingBookingsCache.delete(txnRef);
-						return res.redirect(
-							`/pages/admin/dashboard.html?page=booking-details&id=${bookingId}&refund=error&message=Không%20tìm%20thấy%20booking`,
-						);
-					}
-
-					// Đổi trạng thái booking sang cancelled
-					await Booking.updateStatus(bookingId, "status", "cancelled");
-
-					// Đổi payment_status sang refunded
-					await Booking.updateStatus(bookingId, "payment_status", "refunded");
-
-					// Hoàn trả ghế cho departure
-					const totalPax = (booking.adults || 0) + (booking.children || 0);
-					await db.query(
-						`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`,
-						[totalPax, booking.departure_id],
-					);
-
-					refundedBookingId = bookingId;
-
-					// Dọn dẹp bộ nhớ tạm
+				const booking = await bookingService.getById(bookingId);
+				if (!booking) {
 					pendingBookingsCache.delete(txnRef);
-				} catch (err) {
-					console.error("Refund Error:", err);
-					pendingBookingsCache.delete(txnRef);
-					return res.redirect(
-						`/pages/admin/dashboard.html?page=booking-details&id=${bookingId}&refund=error&message=Lỗi%20khi%20xử%20lý%20hoàn%20tiền`,
-					);
+					return res.redirect(toDetail(bookingId));
 				}
-			}
 
-			if (!refundedBookingId) {
-				return res.redirect(
-					`/pages/admin/dashboard.html?page=booking&refund=error&message=Không%20tìm%20thấy%20dữ%20liệu%20hoàn%20tiền`,
+				await Booking.updateStatus(bookingId, "status", "cancelled");
+				await Booking.updateStatus(bookingId, "payment_status", "refunded");
+				const totalPax = (booking.adults || 0) + (booking.children || 0);
+				await db.query(
+					`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`,
+					[totalPax, booking.departure_id],
 				);
+
+				refundedBookingId = bookingId;
+				pendingBookingsCache.delete(txnRef);
 			}
 
-			// Chuyển hướng về trang chi tiết booking trên Admin Dashboard
-			return res.redirect(
-				`/pages/admin/dashboard.html?page=booking-details&id=${refundedBookingId}&refund=success`,
-			);
-		} else {
-			// Xóa dữ liệu tạm nếu giao dịch thất bại hoặc bị hủy
-			pendingBookingsCache.delete(txnRef);
-
-			// Chuyển hướng về danh sách booking nếu không có id để quay về chi tiết
-			return res.redirect(
-				cachedBookingId
-					? `/pages/admin/dashboard.html?page=booking-details&id=${cachedBookingId}&refund=error&message=Giao%20dịch%20hoàn%20tiền%20thất%20bại%20hoặc%20bị%20hủy`
-					: `/pages/admin/dashboard.html?page=booking&refund=error&message=Giao%20dịch%20hoàn%20tiền%20thất%20bại%20hoặc%20bị%20hủy`,
-			);
+			const redirectId = refundedBookingId || cachedBookingId || fallbackBookingId;
+			return res.redirect(redirectId ? toDetail(redirectId) : toList());
 		}
+
+		pendingBookingsCache.delete(txnRef);
+		const redirectId = cachedBookingId || fallbackBookingId;
+		return res.redirect(redirectId ? toDetail(redirectId) : toList());
 	} catch (error) {
 		console.error("VNPay Refund Return Error:", error);
-		return res.redirect(
-			cachedBookingId
-				? `/pages/admin/dashboard.html?page=booking-details&id=${cachedBookingId}&refund=error&message=Lỗi%20máy%20chủ%20khi%20xử%20lý%20hoàn%20tiền`
-				: `/pages/admin/dashboard.html?page=booking&refund=error&message=Lỗi%20máy%20chủ%20khi%20xử%20lý%20hoàn%20tiền`,
-		);
+		const redirectId = cachedBookingId || fallbackBookingId;
+		return res.redirect(redirectId ? toDetail(redirectId) : toList());
 	}
 };
 
