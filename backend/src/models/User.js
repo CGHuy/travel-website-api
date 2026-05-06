@@ -90,6 +90,46 @@ class User {
 		}
 	}
 
+	// Lấy danh sách users có phân trang (cho admin)
+	static async getAllPaginated(page = 1, limit = 10) {
+		try {
+			const offset = (page - 1) * limit;
+			const [[{ total }]] = await db.query(`SELECT COUNT(*) AS total FROM users`);
+			const [rows] = await db.query(
+				`SELECT id, fullname, phone, email, role, status, created_at FROM users ORDER BY id DESC LIMIT ? OFFSET ?`,
+				[limit, offset]
+			);
+			return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	// Tìm kiếm users có phân trang (cho admin)
+	static async searchUsersPaginated(filters = {}, page = 1, limit = 10) {
+		try {
+			const offset = (page - 1) * limit;
+			let baseQuery = `FROM users WHERE 1=1`;
+			const params = [];
+
+			if (filters.id) { baseQuery += ` AND id = ?`; params.push(filters.id); }
+			if (filters.phone) { baseQuery += ` AND phone LIKE ?`; params.push(`%${filters.phone}%`); }
+			if (filters.role) { baseQuery += ` AND role = ?`; params.push(filters.role); }
+			if (filters.status !== undefined) { baseQuery += ` AND status = ?`; params.push(filters.status); }
+			if (filters.fullname) { baseQuery += ` AND fullname LIKE ?`; params.push(`%${filters.fullname}%`); }
+			if (filters.email) { baseQuery += ` AND email LIKE ?`; params.push(`%${filters.email}%`); }
+
+			const [[{ total }]] = await db.query(`SELECT COUNT(*) AS total ${baseQuery}`, params);
+			const [rows] = await db.query(
+				`SELECT id, fullname, phone, email, role, status, created_at ${baseQuery} ORDER BY id DESC LIMIT ? OFFSET ?`,
+				[...params, limit, offset]
+			);
+			return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
+		} catch (error) {
+			throw error;
+		}
+	}
+
 	// Cập nhật thông tin user danh cho admin
 	static async updateUser(id, userData) {
 		try {

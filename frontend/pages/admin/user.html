@@ -253,6 +253,174 @@
         border-color: #fecaca;
         color: #dc2626;
     }
+
+    /* Pagination */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-top: 1px solid #f1f5f9;
+        background: #fafafa;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .pagination-info {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .pagination-controls {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .page-btn {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 10px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        color: #374151;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-btn:hover:not(:disabled) {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #2563eb;
+    }
+
+    .page-btn.active {
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+    }
+
+    .page-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    /* Form Validation Styles */
+    .is-invalid {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+    }
+
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.8rem;
+        color: #ef4444;
+        font-weight: 500;
+        animation: fadeInDown 0.2s ease-out;
+    }
+
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .password-wrapper .invalid-feedback {
+        position: absolute;
+        top: 100%;
+        left: 0;
+    }
+
+    .mb-3, .col-md-6 {
+        position: relative;
+        margin-bottom: 1.5rem !important; /* Tăng khoảng cách để hiện lỗi không bị đè */
+    }
+
+    /* Create Staff Modal */
+    .password-wrapper {
+        position: relative;
+    }
+
+    .password-wrapper .form-control {
+        padding-right: 44px;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9ca3af;
+        font-size: 0.95rem;
+        padding: 0;
+        transition: color 0.2s;
+    }
+
+    .toggle-password:hover {
+        color: #4f46e5;
+    }
+
+    .role-option-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 4px;
+    }
+
+    .role-option {
+        position: relative;
+    }
+
+    .role-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .role-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 10px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        background: #f9fafb;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #6b7280;
+        text-align: center;
+    }
+
+    .role-option label i {
+        font-size: 1.3rem;
+    }
+
+    .role-option input[type="radio"]:checked + label {
+        border-color: #4f46e5;
+        background: #eef2ff;
+        color: #4338ca;
+        box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+    }
+
+    .role-option label:hover {
+        border-color: #a5b4fc;
+        background: #f5f3ff;
+    }
 </style>
 
 <div class="user-management-wrapper">
@@ -261,6 +429,9 @@
             <h4>Quản lý User</h4>
             <p>Danh sách các người dùng</p>
         </div>
+        <button class="btn-add-user" id="openCreateStaffBtn">
+            <i class="fa-solid fa-user-plus"></i> Tạo tài khoản nhân viên
+        </button>
     </div>
 
     <div class="search-wrapper">
@@ -296,6 +467,106 @@
                 </tr>
             </tbody>
         </table>
+        <div class="pagination-wrapper" id="paginationWrapper" style="display:none;">
+            <span class="pagination-info" id="paginationInfo"></span>
+            <div class="pagination-controls" id="paginationControls"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tạo Tài Khoản Nhân Viên -->
+<div class="modal fade" id="createStaffModal" tabindex="-1" aria-labelledby="createStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 12px 40px rgba(0,0,0,0.12);">
+            <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 22px 28px; background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%); border-radius: 18px 18px 0 0;">
+                <div>
+                    <h5 class="modal-title mb-1" id="createStaffModalLabel" style="font-weight: 700; color: #1e293b; font-size: 1.15rem;"><i class="fa-solid fa-user-tie me-2" style="color: #4f46e5;"></i>Tạo tài khoản nhân viên</h5>
+                    <p class="mb-0" style="font-size: 0.85rem; color: #6b7280;">Tài khoản mới sẽ được kích hoạt ngay và có thể đăng nhập được liền.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 28px;">
+                <form id="createStaffForm" novalidate>
+                    <!-- Role selection -->
+                    <div class="mb-4">
+                        <label class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #374151;">Vị trí / Vai trò <span class="text-danger">*</span></label>
+                        <div class="role-option-grid">
+                            <div class="role-option">
+                                <input type="radio" name="staffRole" id="roleBooking" value="booking-staff" checked>
+                                <label for="roleBooking">
+                                    <i class="fa-solid fa-calendar-check" style="color: #0ea5e9;"></i>
+                                    NV Booking
+                                </label>
+                            </div>
+                            <div class="role-option">
+                                <input type="radio" name="staffRole" id="roleTour" value="tour-staff">
+                                <label for="roleTour">
+                                    <i class="fa-solid fa-map-location-dot" style="color: #10b981;"></i>
+                                    NV Tour
+                                </label>
+                            </div>
+                            <div class="role-option">
+                                <input type="radio" name="staffRole" id="roleAdmin" value="admin">
+                                <label for="roleAdmin">
+                                    <i class="fa-solid fa-shield-halved" style="color: #f59e0b;"></i>
+                                    Admin
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fullname + Phone -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="staffFullname" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Họ và tên <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="staffFullname" placeholder="Nguyễn Văn A" style="border-radius: 10px; padding: 12px 16px;">
+                            <div class="invalid-feedback">Họ tên không được để trống</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="staffPhone" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Số điện thoại</label>
+                            <input type="text" class="form-control" id="staffPhone" placeholder="09xxxxxxxx" style="border-radius: 10px; padding: 12px 16px;">
+                            <div class="invalid-feedback">Số điện thoại không hợp lệ</div>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="staffEmail" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="staffEmail" placeholder="nhanvien@viettravel.com" style="border-radius: 10px; padding: 12px 16px;">
+                        <div class="invalid-feedback">Email không hợp lệ</div>
+                    </div>
+
+                    <!-- Password + Confirm -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="staffPassword" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Mật khẩu <span class="text-danger">*</span></label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control" id="staffPassword" placeholder="Tối thiểu 6 ký tự" style="border-radius: 10px; padding: 12px 16px;">
+                                <button type="button" class="toggle-password" data-target="staffPassword"><i class="fa-regular fa-eye"></i></button>
+                                <div class="invalid-feedback">Mật khẩu tối thiểu 6 ký tự</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="staffConfirmPassword" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control" id="staffConfirmPassword" placeholder="Nhập lại mật khẩu" style="border-radius: 10px; padding: 12px 16px;">
+                                <button type="button" class="toggle-password" data-target="staffConfirmPassword"><i class="fa-regular fa-eye"></i></button>
+                                <div class="invalid-feedback">Mật khẩu xác nhận không khớp</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error message -->
+                    <div id="staffFormError" class="alert alert-danger mt-3 mb-0 py-2" style="display:none; border-radius: 10px; font-size: 0.9rem;"></div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 18px 28px; gap: 10px;">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500; padding: 10px 22px;">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveCreateStaffBtn" style="border-radius: 10px; font-weight: 500; padding: 10px 24px; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border: none; min-width: 140px;">
+                    <i class="fa-solid fa-user-plus me-1"></i> Tạo tài khoản
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -313,14 +584,17 @@
                     <div class="mb-3">
                         <label for="editFullname" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Họ và tên</label>
                         <input type="text" class="form-control" id="editFullname" required style="border-radius: 10px; padding: 12px 16px;">
+                        <div class="invalid-feedback">Họ tên không được để trống</div>
                     </div>
                     <div class="mb-3">
                         <label for="editEmail" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Email</label>
                         <input type="email" class="form-control" id="editEmail" required style="border-radius: 10px; padding: 12px 16px;">
+                        <div class="invalid-feedback">Email không hợp lệ</div>
                     </div>
                     <div class="mb-3">
                         <label for="editPhone" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Số điện thoại</label>
                         <input type="text" class="form-control" id="editPhone" required style="border-radius: 10px; padding: 12px 16px;">
+                        <div class="invalid-feedback">Số điện thoại không hợp lệ</div>
                     </div>
                     <div class="mb-3">
                         <label for="editStatus" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Trạng thái</label>
@@ -329,11 +603,32 @@
                             <option value="0">Đã khóa</option>
                         </select>
                     </div>
+                    <!-- Error message -->
+                    <div id="editUserError" class="alert alert-danger mt-3 mb-0 py-2" style="display:none; border-radius: 10px; font-size: 0.9rem;"></div>
                 </form>
             </div>
             <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 16px 24px;">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500; padding: 10px 20px;">Hủy</button>
                 <button type="button" class="btn btn-primary" id="saveEditUserBtn" style="border-radius: 10px; font-weight: 500; padding: 10px 20px; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border: none;">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác nhận Xóa -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width: 380px;">
+        <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 15px 50px rgba(0,0,0,0.15);">
+            <div class="modal-body" style="padding: 30px 25px; text-align: center;">
+                <div style="width: 65px; height: 65px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 1.8rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 10px;">Xác nhận xóa?</h5>
+                <p id="deleteConfirmMessage" style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin-bottom: 0;">Bạn có chắc chắn muốn xóa người dùng này không? Hành động này không thể hoàn tác.</p>
+            </div>
+            <div class="modal-footer" style="border: none; padding: 0 25px 25px; gap: 10px;">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="flex: 1; border-radius: 12px; font-weight: 600; padding: 12px; background: #f1f5f9; border: none; color: #64748b;">Hủy</button>
+                <button type="button" id="btnConfirmDelete" class="btn btn-danger" style="flex: 1; border-radius: 12px; font-weight: 600; padding: 12px; background: #ef4444; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">Xóa ngay</button>
             </div>
         </div>
     </div>
@@ -357,6 +652,8 @@
         const searchBtn = document.getElementById('searchBtn');
 
         let currentUsersList = []; // Lưu lại danh sách user để hiển thị lên form sửa
+        let currentPage = 1;       // Trang hiện tại
+        const PAGE_LIMIT = 10;     // Số user mỗi trang
 
         let actionToastEl = document.getElementById('actionToast');
         let actionToast = actionToastEl ? new bootstrap.Toast(actionToastEl, { delay: 3000 }) : null;
@@ -381,15 +678,17 @@
         }
 
         // Lấy danh sách users từ API
-        async function fetchUsers() {
+        async function fetchUsers(page = 1) {
             const token = localStorage.getItem('token');
             if (!token) {
                 userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Vui lòng đăng nhập để xem dữ liệu.</td></tr>`;
                 return;
             }
 
+            userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>`;
+
             try {
-                const response = await fetch('/api/users/all', {
+                const response = await fetch(`/api/users/all?page=${page}&limit=${PAGE_LIMIT}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
@@ -400,13 +699,80 @@
                 if (result.success && result.data) {
                     currentUsersList = Array.isArray(result.data) ? result.data : [result.data];
                     renderUsers(currentUsersList);
+                    renderPagination(result.pagination, fetchUsers);
                 } else {
                     userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Lỗi: ${result.message || 'Không thể tải dữ liệu'}</td></tr>`;
+                    hidePagination();
                 }
             } catch (error) {
                 console.error('Lỗi khi gọi API:', error);
                 userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Đã xảy ra lỗi kết nối với máy chủ.</td></tr>`;
+                hidePagination();
             }
+        }
+
+        // Render thanh phân trang
+        function renderPagination(pagination, navigateFn) {
+            const wrapper = document.getElementById('paginationWrapper');
+            const info = document.getElementById('paginationInfo');
+            const controls = document.getElementById('paginationControls');
+
+            if (!pagination || pagination.totalPages <= 1) {
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            const { total, page, limit, totalPages } = pagination;
+            const from = (page - 1) * limit + 1;
+            const to = Math.min(page * limit, total);
+
+            info.textContent = `Hiển thị ${from}–${to} trong tổng số ${total} người dùng`;
+            controls.innerHTML = '';
+            wrapper.style.display = 'flex';
+
+            // Nút Trước
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+            prevBtn.disabled = page <= 1;
+            prevBtn.addEventListener('click', () => { currentPage = page - 1; navigateFn(currentPage); });
+            controls.appendChild(prevBtn);
+
+            // Danh sách số trang
+            const pageRange = getPaginationRange(page, totalPages);
+            pageRange.forEach(p => {
+                if (p === '...') {
+                    const dots = document.createElement('span');
+                    dots.textContent = '…';
+                    dots.style.cssText = 'padding: 0 4px; color: #9ca3af; line-height: 36px;';
+                    controls.appendChild(dots);
+                } else {
+                    const btn = document.createElement('button');
+                    btn.className = 'page-btn' + (p === page ? ' active' : '');
+                    btn.textContent = p;
+                    btn.addEventListener('click', () => { currentPage = p; navigateFn(currentPage); });
+                    controls.appendChild(btn);
+                }
+            });
+
+            // Nút Tiếp
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+            nextBtn.disabled = page >= totalPages;
+            nextBtn.addEventListener('click', () => { currentPage = page + 1; navigateFn(currentPage); });
+            controls.appendChild(nextBtn);
+        }
+
+        function getPaginationRange(current, total) {
+            if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+            if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
+            if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+            return [1, '...', current - 1, current, current + 1, '...', total];
+        }
+
+        function hidePagination() {
+            document.getElementById('paginationWrapper').style.display = 'none';
         }
 
         // Hiển thị dữ liệu ra bảng
@@ -460,16 +826,17 @@
         }
 
         // Thực thi việc fetch dữ liệu
-        await fetchUsers();
+        await fetchUsers(1);
 
         // Xử lý sự kiện tìm kiếm
         const handleSearch = async () => {
             const query = searchInput.value.trim();
+            currentPage = 1; // Reset về trang 1 khi tìm kiếm mới
             if (!query) {
-                await fetchUsers();
+                await fetchUsers(1);
                 return;
             }
-            await doSearchUser(query);
+            await doSearchUser(query, 1);
         };
 
         searchBtn.addEventListener('click', handleSearch);
@@ -492,18 +859,19 @@
                 return filters;
             }
 
-            if (['hoạt động', 'hoat dong', 'active'].includes(lower)) {
-                filters.status = 1;
-                return filters;
-            }
-
-            if (['đã khóa', 'da khoa', 'inactive'].includes(lower)) {
+            if (['đã khóa', 'da khoa', 'inactive', 'khóa'].includes(lower)) {
                 filters.status = 0;
                 return filters;
             }
 
+            if (['đang hoạt động', 'hoạt động', 'hoat dong', 'active'].includes(lower)) {
+                filters.status = 1;
+                return filters;
+            }
+
+            // [Fix #4] Số điện thoại VN luôn bắt đầu bằng '0' hoặc có ít nhất 10 chữ số
             if (/^\d+$/.test(normalized)) {
-                if (normalized.startsWith('0') || normalized.length >= 9) {
+                if (normalized.startsWith('0') || normalized.length >= 10) {
                     filters.phone = normalized;
                 } else {
                     filters.id = normalized;
@@ -516,12 +884,12 @@
         }
 
         // Hàm gọi API tìm kiếm
-        async function doSearchUser(query) {
+        async function doSearchUser(query, page = 1) {
             const token = localStorage.getItem('token');
             if (!token) return;
 
             const filters = buildSearchFilters(query);
-            const searchParams = new URLSearchParams(filters).toString();
+            const searchParams = new URLSearchParams({ ...filters, page, limit: PAGE_LIMIT }).toString();
             userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tìm kiếm...</td></tr>`;
 
             try {
@@ -536,12 +904,16 @@
                 if (result.success && result.data) {
                     currentUsersList = Array.isArray(result.data) ? result.data : [result.data];
                     renderUsers(currentUsersList);
+                    // Trang phân trang của search navigate vào doSearchUser
+                    renderPagination(result.pagination, (p) => doSearchUser(query, p));
                 } else {
                     userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #6b7280;">Không tìm thấy người dùng. Vui lòng thử tiêu chí khác.</td></tr>`;
+                    hidePagination();
                 }
             } catch (error) {
                 console.error('Lỗi khi tìm kiếm:', error);
                 userTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626;">Đã xảy ra lỗi khi tìm kiếm.</td></tr>`;
+                hidePagination();
             }
         }
 
@@ -558,26 +930,199 @@
             document.getElementById('editPhone').value = user.phone || '';
             document.getElementById('editStatus').value = user.status;
 
+            // Reset validation states
+            document.getElementById('editUserError').style.display = 'none';
+            [editInputs.fullname, editInputs.email, editInputs.phone].forEach(el => el.classList.remove('is-invalid'));
+
             editUserModal.show();
         };
 
-        document.getElementById('saveEditUserBtn').addEventListener('click', async () => {
-            const id = document.getElementById('editUserId').value;
-            const fullname = document.getElementById('editFullname').value.trim();
-            const email = document.getElementById('editEmail').value.trim();
-            const phone = document.getElementById('editPhone').value.trim();
-            const status = parseInt(document.getElementById('editStatus').value);
+        // Xử lý Xóa User
+        const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        let userIdToDelete = null;
 
-            if (!fullname || !email) {
-                alert('Vui lòng nhập họ tên và email!');
-                return;
+        window.deleteUser = function(id) {
+            const user = currentUsersList.find(u => u.id === id);
+            if (!user) return;
+
+            userIdToDelete = id;
+            document.getElementById('deleteConfirmMessage').innerHTML = `Bạn có chắc chắn muốn xóa người dùng <strong>${user.fullname}</strong>? Hành động này không thể hoàn tác.`;
+            confirmDeleteModal.show();
+        };
+
+        document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+            if (!userIdToDelete) return;
+
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            // Đổi trạng thái nút khi đang xóa
+            const btn = document.getElementById('btnConfirmDelete');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xóa...';
+
+            try {
+                const response = await fetch(`/api/users/${userIdToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Xóa người dùng thành công!', 'success');
+                    confirmDeleteModal.hide();
+                    
+                    const currentQuery = searchInput.value.trim();
+                    if (currentQuery) {
+                        await doSearchUser(currentQuery, currentPage);
+                    } else {
+                        await fetchUsers(currentPage);
+                    }
+                } else {
+                    showToast(result.message || 'Có lỗi xảy ra khi xóa user.', 'danger');
+                    confirmDeleteModal.hide();
+                }
+            } catch (error) {
+                console.error('Lỗi khi xóa user:', error);
+                showToast('Lỗi kết nối máy chủ!', 'danger');
+                confirmDeleteModal.hide();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                userIdToDelete = null;
             }
+        });
+
+        // Helper hiển thị danh sách lỗi từ backend
+        function showFormErrors(errorElement, errors) {
+            errorElement.innerHTML = '';
+            const ul = document.createElement('ul');
+            ul.className = 'mb-0 ps-3';
+            Object.values(errors).forEach(msg => {
+                const li = document.createElement('li');
+                li.textContent = msg;
+                ul.appendChild(li);
+            });
+            errorElement.appendChild(ul);
+            errorElement.style.display = 'block';
+        }
+
+        // Logic Tạo Tài Khoản Nhân Viên
+        const createStaffModal = new bootstrap.Modal(document.getElementById('createStaffModal'));
+        const createStaffForm = document.getElementById('createStaffForm');
+        const staffFormError = document.getElementById('staffFormError');
+
+        document.getElementById('openCreateStaffBtn').addEventListener('click', () => {
+            createStaffForm.reset();
+            staffFormError.style.display = 'none';
+            // Reset validation states
+            Object.values(staffInputs).forEach(el => el.classList.remove('is-invalid'));
+            createStaffModal.show();
+        });
+
+        // Toggle Password Visibility
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const targetInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                
+                if (targetInput.type === 'password') {
+                    targetInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    targetInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        // --- HỆ THỐNG VALIDATE TẠI CHỖ (INLINE VALIDATION) ---
+        
+        function validateField(input, validationFn, errorMessage) {
+            const wrapper = input.closest('.mb-3') || input.closest('.col-md-6');
+            const feedback = wrapper.querySelector('.invalid-feedback');
+            const isValid = validationFn(input.value);
+
+            if (!isValid) {
+                input.classList.add('is-invalid');
+                if (feedback) {
+                    if (errorMessage) feedback.textContent = errorMessage;
+                    feedback.style.display = 'block';
+                }
+            } else {
+                input.classList.remove('is-invalid');
+                if (feedback) feedback.style.display = 'none';
+            }
+            return isValid;
+        }
+
+        const validators = {
+            required: (val) => val.trim().length > 0,
+            email: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+            phone: (val) => !val || /^0[0-9]{9}$/.test(val.trim()),
+            password: (val) => val.length >= 6,
+            confirmPassword: (val, originalPass) => val === originalPass
+        };
+
+        const staffInputs = {
+            fullname: document.getElementById('staffFullname'),
+            email: document.getElementById('staffEmail'),
+            phone: document.getElementById('staffPhone'),
+            password: document.getElementById('staffPassword'),
+            confirm: document.getElementById('staffConfirmPassword')
+        };
+
+        staffInputs.fullname.addEventListener('input', () => validateField(staffInputs.fullname, validators.required));
+        staffInputs.email.addEventListener('input', () => validateField(staffInputs.email, validators.email));
+        staffInputs.phone.addEventListener('input', () => validateField(staffInputs.phone, validators.phone));
+        staffInputs.password.addEventListener('input', () => {
+            validateField(staffInputs.password, validators.password);
+            if (staffInputs.confirm.value) {
+                validateField(staffInputs.confirm, (val) => validators.confirmPassword(val, staffInputs.password.value));
+            }
+        });
+        staffInputs.confirm.addEventListener('input', () => {
+            validateField(staffInputs.confirm, (val) => validators.confirmPassword(val, staffInputs.password.value));
+        });
+
+        const editInputs = {
+            fullname: document.getElementById('editFullname'),
+            email: document.getElementById('editEmail'),
+            phone: document.getElementById('editPhone')
+        };
+
+        editInputs.fullname.addEventListener('input', () => validateField(editInputs.fullname, validators.required));
+        editInputs.email.addEventListener('input', () => validateField(editInputs.email, validators.email));
+        editInputs.phone.addEventListener('input', () => validateField(editInputs.phone, (val) => val.trim().length > 0 && validators.phone(val)));
+
+        // Cập nhật logic Save Edit User
+        document.getElementById('saveEditUserBtn').addEventListener('click', async () => {
+            const v1 = validateField(editInputs.fullname, validators.required);
+            const v2 = validateField(editInputs.email, validators.email);
+            const v3 = validateField(editInputs.phone, (val) => val.trim().length > 0 && validators.phone(val));
+
+            if (!v1 || !v2 || !v3) return;
+
+            const id = document.getElementById('editUserId').value;
+            const fullname = editInputs.fullname.value.trim();
+            const email = editInputs.email.value.trim();
+            const phone = editInputs.phone.value.trim();
+            const status = parseInt(document.getElementById('editStatus').value);
+            const errorDiv = document.getElementById('editUserError');
+
+            errorDiv.style.display = 'none';
 
             const token = localStorage.getItem('token');
             if (!token) return;
 
             try {
-                // Backend endpoint is PUT /api/users/:id update theo controller updateUser()
                 const response = await fetch(`/api/users/${id}`, {
                     method: 'PUT',
                     headers: {
@@ -593,61 +1138,75 @@
                     showToast('Cập nhật user thành công!', 'success');
                     editUserModal.hide();
                     
-                    // Nếu đang dùng tìm kiếm, fetchUsers sẽ load mặc định, có thể gọi handleSearch() để giữ bộ lọc
                     const currentQuery = searchInput.value.trim();
                     if (currentQuery) {
-                        await doSearchUser(currentQuery);
+                        await doSearchUser(currentQuery, currentPage);
                     } else {
-                        await fetchUsers();
+                        await fetchUsers(currentPage);
                     }
                 } else {
-                    showToast(result.message || 'Có lỗi xảy ra khi cập nhật.', 'danger');
+                    if (result.errors) {
+                        showFormErrors(errorDiv, result.errors);
+                    } else {
+                        errorDiv.textContent = result.message || 'Có lỗi xảy ra khi cập nhật.';
+                        errorDiv.style.display = 'block';
+                    }
                 }
             } catch (error) {
                 console.error('Lỗi khi cập nhật:', error);
-                showToast('Có lỗi xảy ra khi cập nhật.', 'danger');
+                errorDiv.textContent = 'Lỗi kết nối máy chủ!';
+                errorDiv.style.display = 'block';
             }
         });
 
-        // Xử lý Xóa User
-        window.deleteUser = async function(id) {
-            const user = currentUsersList.find(u => u.id === id);
-            if (!user) return;
+        // Cập nhật logic Save Create Staff
+        document.getElementById('saveCreateStaffBtn').addEventListener('click', async () => {
+            const v1 = validateField(staffInputs.fullname, validators.required);
+            const v2 = validateField(staffInputs.email, validators.email);
+            const v3 = validateField(staffInputs.phone, validators.phone);
+            const v4 = validateField(staffInputs.password, validators.password);
+            const v5 = validateField(staffInputs.confirm, (val) => validators.confirmPassword(val, staffInputs.password.value));
 
-            if (!confirm(`Bạn có chắc chắn muốn xóa user "${user.fullname}" không?`)) {
-                return;
-            }
+            if (!v1 || !v2 || !v3 || !v4 || !v5) return;
 
+            const role = document.querySelector('input[name="staffRole"]:checked').value;
             const token = localStorage.getItem('token');
-            if (!token) return;
 
             try {
-                const response = await fetch(`/api/users/${id}`, {
-                    method: 'DELETE',
+                const response = await fetch('/api/users/staff', {
+                    method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
-                    }
+                    },
+                    body: JSON.stringify({ 
+                        fullname: staffInputs.fullname.value.trim(), 
+                        phone: staffInputs.phone.value.trim(), 
+                        email: staffInputs.email.value.trim(), 
+                        password: staffInputs.password.value, 
+                        role 
+                    })
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
-                    showToast('Xóa user thành công!', 'success');
-                    
-                    const currentQuery = searchInput.value.trim();
-                    if (currentQuery) {
-                        await doSearchUser(currentQuery);
-                    } else {
-                        await fetchUsers();
-                    }
+                    showToast(result.message, 'success');
+                    createStaffModal.hide();
+                    await fetchUsers(1);
                 } else {
-                    // Hiển thị message từ backend (ví dụ: Không được phép xóa admin, hoặc user đang hoạt động)
-                    showToast(result.message || 'Có lỗi xảy ra khi xóa user.', 'danger');
+                    if (result.errors) {
+                        showFormErrors(staffFormError, result.errors);
+                    } else {
+                        staffFormError.textContent = result.message || 'Lỗi khi tạo tài khoản';
+                        staffFormError.style.display = 'block';
+                    }
                 }
             } catch (error) {
-                console.error('Lỗi khi xóa user:', error);
-                showToast('Có lỗi xảy ra kết nối với máy chủ.', 'danger');
+                console.error('Lỗi khi tạo staff:', error);
+                staffFormError.textContent = 'Đã xảy ra lỗi kết nối với máy chủ';
+                staffFormError.style.display = 'block';
             }
-        };
+        });
     };
 </script>

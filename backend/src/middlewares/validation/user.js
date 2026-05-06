@@ -69,32 +69,32 @@ const validateChangePassword = (req, res, next) => {
 // Validation cho cập nhật tai khoản user - Tuy chỉnh theo yêu cầu của admin
 // Có thể thêm validate cho role, status nếu cần
 const validateUpdateUser = (req, res, next) => {
-	const { fullname, phone, email, role, status } = req.body;
+	const { fullname, phone, email, status } = req.body;
 	const errors = {};
+
 	if (!fullname || fullname.trim().length === 0) {
 		errors.fullname = "Họ và tên không được để trống";
-	} else if (fullname.length < 3) {
+	} else if (fullname.trim().length < 3) {
 		errors.fullname = "Họ và tên phải có ít nhất 3 ký tự";
 	}
+	
 	if (!phone || phone.trim().length === 0) {
 		errors.phone = "Số điện thoại không được để trống";
 	} else if (!/^0[0-9]{9}$/.test(phone.trim())) {
 		errors.phone = "Số điện thoại không hợp lệ (10 chữ số, bắt đầu bằng 0)";
 	}
+
 	if (!email || email.trim().length === 0) {
 		errors.email = "Email không được để trống";
-	} else if (email.length > 255) {
-		errors.email = "Email không được vượt quá 255 ký tự";
 	} else {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email.trim())) {
 			errors.email = "Email không hợp lệ";
 		}
 	}
-	if (!role || role.trim().length === 0) {
-		errors.role = "Vai trò không được để trống";
-	}
-	if (!status || status.trim().length === 0) {
+
+	// Status có thể là 0 (Locked) nên dùng undefined check
+	if (status === undefined || status === null || status === "") {
 		errors.status = "Trạng thái không được để trống";
 	}
 
@@ -110,8 +110,52 @@ const validateUpdateUser = (req, res, next) => {
 };
 
 
+// Validation cho tạo tài khoản nhân viên (admin tạo)
+const validateCreateStaff = (req, res, next) => {
+	const { fullname, phone, email, password, role } = req.body;
+	const errors = {};
+
+	const value = (v) => (typeof v === "string" ? v.trim() : "");
+
+	const f = value(fullname);
+	if (!f) errors.fullname = "Họ và tên không được để trống";
+	else if (f.length < 3) errors.fullname = "Họ và tên phải có ít nhất 3 ký tự";
+
+	const e = value(email);
+	if (!e) errors.email = "Email không được để trống";
+	else {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(e)) errors.email = "Email không hợp lệ";
+	}
+
+	const p = value(phone);
+	if (p && !/^0[0-9]{9}$/.test(p)) {
+		errors.phone = "Số điện thoại không hợp lệ (10 chữ số, bắt đầu bằng 0)";
+	}
+
+	const pass = value(password);
+	if (!pass) errors.password = "Mật khẩu không được để trống";
+	else if (pass.length < 6) errors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+
+	const r = value(role);
+	const allowedRoles = ["booking-staff", "tour-staff", "admin"];
+	if (!r) errors.role = "Vai trò không được để trống";
+	else if (!allowedRoles.includes(r)) errors.role = "Vai trò không hợp lệ";
+
+	if (Object.keys(errors).length > 0) {
+		return res.status(400).json({
+			success: false,
+			message: "Dữ liệu không hợp lệ",
+			errors,
+		});
+	}
+
+	next();
+};
+
 module.exports = {
 	validateUpdateProfile,
 	validateChangePassword,
 	validateUpdateUser,
+	validateCreateStaff,
 };

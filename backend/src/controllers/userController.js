@@ -131,28 +131,108 @@ exports.changePassword = async (req, res) => {
 	}
 };
 
-// Lay danh sach tat ca user (dành cho admin) 
-exports.getAllUsers = async (req, res) => {
+// Tạo tài khoản nhân viên (dành cho admin)
+exports.createStaff = async (req, res) => {
 	try {
-		const users = await User.getAll();
-		return res.json({
+		const { fullname, phone, email, password, role } = req.body;
+
+		// Chỉ cho phép tạo các role nhân viên/admin
+		const allowedRoles = ['booking-staff', 'tour-staff', 'admin'];
+		if (!allowedRoles.includes(role)) {
+			return res.status(400).json({
+				success: false,
+				message: "Vai trò không hợp lệ. Chỉ chấp nhận: booking-staff, tour-staff, admin",
+			});
+		}
+
+		// Validate bắt buộc
+		if (!fullname || !email || !password) {
+			return res.status(400).json({
+				success: false,
+				message: "Vui lòng nhập đầy đủ họ tên, email và mật khẩu",
+			});
+		}
+
+		if (password.length < 6) {
+			return res.status(400).json({
+				success: false,
+				message: "Mật khẩu phải có ít nhất 6 ký tự",
+			});
+		}
+
+		// Kiểm tra email trùng
+		const existingEmail = await User.findByEmail(email);
+		if (existingEmail) {
+			return res.status(409).json({
+				success: false,
+				message: "Email này đã được sử dụng bởi tài khoản khác!",
+			});
+		}
+
+		// Kiểm tra phone trùng (nếu có nhập)
+		if (phone) {
+			const existingPhone = await User.findByPhone(phone);
+			if (existingPhone) {
+				return res.status(409).json({
+					success: false,
+					message: "Số điện thoại này đã được sử dụng bởi tài khoản khác!",
+				});
+			}
+		}
+
+		// Tạo tài khoản (User.create() đã tự hash password)
+		const userId = await User.create({ fullname, phone, email, password, role });
+
+		// Cập nhật status = 1 (active) ngay sau khi tạo
+		await User.updateStatus(userId, 1);
+
+		return res.status(201).json({
 			success: true,
-			message: "Lấy danh sách users thành công!",
-			data: users,
+			message: `Tạo tài khoản ${role} thành công!`,
+			data: { id: userId, fullname, email, phone, role },
 		});
 	} catch (error) {
 		return res.status(500).json({
-			success: false,							
+			success: false,
+			message: "Lỗi khi tạo tài khoản nhân viên",
+			error: error.message,
+		});
+	}
+};
+
+// Lay danh sach tat ca user có phân trang (dành cho admin)
+exports.getAllUsers = async (req, res) => {
+	try {
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;
+
+		const result = await User.getAllPaginated(page, limit);
+		return res.json({
+			success: true,
+			message: "Lấy danh sách users thành công!",
+			data: result.data,
+			pagination: {
+				total: result.total,
+				page: result.page,
+				limit: result.limit,
+				totalPages: result.totalPages,
+			},
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
 			message: "Lỗi khi lấy danh sách users",
 			error: error.message,
 		});
-	}		
+	}
 };
 
-// Tìm kiếm users với nhiều tiêu chí (dành cho admin)
+// Tìm kiếm users với nhiều tiêu chí có phân trang (dành cho admin)
 exports.searchUsers = async (req, res) => {
 	try {
 		const { id, phone, role, status, fullname } = req.query;
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;
 		const filters = {};
 
 		if (id) filters.id = id;
@@ -161,11 +241,17 @@ exports.searchUsers = async (req, res) => {
 		if (status !== undefined) filters.status = parseInt(status);
 		if (fullname) filters.fullname = fullname;
 
-		const users = await User.searchUsers(filters);
+		const result = await User.searchUsersPaginated(filters, page, limit);
 		return res.json({
 			success: true,
 			message: "Tìm kiếm users thành công!",
-			data: users,
+			data: result.data,
+			pagination: {
+				total: result.total,
+				page: result.page,
+				limit: result.limit,
+				totalPages: result.totalPages,
+			},
 		});
 	} catch (error) {
 		return res.status(500).json({
@@ -224,13 +310,24 @@ exports.updateUser = async (req, res) => {
 		const userId = req.params.id;
 		const { fullname, phone, email, role, status } = req.body;
 
-		// Lấy thông tin user hiện tại để kiểm tra role
+		// Lấy thông tin user hiện tại để kiểm tra
 		const currentUser = await User.findById(userId);
 		if (!currentUser) {
 			return res.status(404).json({
 				success: false,
 				message: "Không tìm thấy user để cập nhật",
 			});
+		}
+
+		// [Fix #1] Kiểm tra email đã tồn tại cho user khác chưa
+		if (email && email !== currentUser.email) {
+			const existingUser = await User.findByEmail(email);
+			if (existingUser && existingUser.id !== parseInt(userId)) {
+				return res.status(400).json({
+					success: false,
+					message: "Email này đã được sử dụng bởi người dùng khác!",
+				});
+			}
 		}
 
 		// Kiểm tra xem role có bị thay đổi không
