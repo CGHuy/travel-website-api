@@ -47,14 +47,14 @@ window.initAdminBookingDetailsPage = async function () {
                     });
 
                     if (updateRes.ok) {
-                        alert("Cập nhật trạng thái thành công!");
-                        window.location.reload(); // Refresh to see updated history & UI
+                        showToast("Thành công", "Cập nhật trạng thái thành công!", "success", 3000);
+                        setTimeout(() => window.location.reload(), 1500);
                     } else {
                         throw new Error("Lỗi cập nhật");
                     }
                 } catch (err) {
                     console.error(err);
-                    alert("Không thể cập nhật trạng thái");
+                    showToast("Lỗi", "Không thể cập nhật trạng thái", "error", 3000);
                 }
             };
         }
@@ -234,12 +234,12 @@ function renderAdminBookingDetails(data) {
 
         // 1. Logic Phê Duyệt
         approveBtn.onclick = async () => {
-            if (!confirm("Xác nhận phê duyệt hủy và hoàn tiền?")) return;
-
+            // Modal already confirms action; no native confirm() popup
             setLoading(approveBtn, true);
             rejectBtn.disabled = true;
 
             try {
+                //============================== Cập nhật status thành cancelled =====================
                 const response = await fetch(`/api/bookings/${data.id}/status`, {
                     method: "PUT",
                     headers: {
@@ -248,19 +248,45 @@ function renderAdminBookingDetails(data) {
                     },
                     body: JSON.stringify({
                         status: "cancelled",
-                        payment_status: "refunded",
+                        payment_status: "pending",
                     }),
                 });
 
-                if (response.ok) {
-                    alert("Đã phê duyệt hủy tour và hoàn tiền cho khách hàng.");
-                    window.location.reload();
+                if (!response.ok) {
+                    throw new Error("Lỗi cập nhật trạng thái");
+                }
+
+                //============================== Tạo link hoàn tiền VNPay =====================
+                const refundRes = await fetch(`/api/bookings/create-refund-url`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.token}`,
+                    },
+                    body: JSON.stringify({
+                        bookingId: data.id,
+                        amount: data.total_price, // VNPay tính bằng VND trực tiếp
+                    }),
+                });
+
+                if (!refundRes.ok) {
+                    throw new Error("Không thể tạo liên kết hoàn tiền");
+                }
+
+                const refundData = await refundRes.json();
+                
+                if (refundData.success && refundData.vnpayUrl) {
+                    //============================== Chuyển hướng đến VNPay hoàn tiền =====================
+                    showToast("Thông báo", "Đang chuyển hướng đến VNPay hoàn tiền...", "info", 2000);
+                    setTimeout(() => {
+                        window.location.href = refundData.vnpayUrl;
+                    }, 1500);
                 } else {
-                    throw new Error("Lỗi phê duyệt");
+                    throw new Error("Không nhận được link hoàn tiền");
                 }
             } catch (err) {
                 console.error(err);
-                alert("Không thể thực hiện phê duyệt");
+                showToast("Lỗi", `Không thể thực hiện phê duyệt: ${err.message}`, "error", 4000);
                 setLoading(approveBtn, false, '<i class="fa-solid fa-check"></i> Phê duyệt & Hoàn tiền');
                 rejectBtn.disabled = false;
             }
@@ -287,14 +313,14 @@ function renderAdminBookingDetails(data) {
                 });
 
                 if (response.ok) {
-                    alert("Đã từ chối yêu cầu hủy. Đơn hàng hiện đã quay lại trạng thái Đã xác nhận.");
-                    window.location.reload();
+                    showToast("Thành công", "Đã từ chối yêu cầu hủy. Đơn hàng quay lại trạng thái Đã xác nhận.", "success", 3000);
+                    setTimeout(() => window.location.reload(), 1500);
                 } else {
                     throw new Error("Lỗi từ chối");
                 }
             } catch (err) {
                 console.error(err);
-                alert("Không thể thực hiện từ chối yêu cầu");
+                showToast("Lỗi", "Không thể thực hiện từ chối yêu cầu", "error", 3000);
                 setLoading(rejectBtn, false, '<i class="fa-solid fa-xmark"></i> Từ chối yêu cầu');
                 approveBtn.disabled = false;
             }

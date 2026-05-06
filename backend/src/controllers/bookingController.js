@@ -371,3 +371,133 @@ exports.vnpayReturn = async (req, res) => {
 		);
 	}
 };
+
+exports.createRefundUrl = async (req, res) => {
+	try {
+		const vnpay = new VNPay({
+			tmnCode: process.env.VNP_TMN_CODE,
+			secureSecret: process.env.VNP_SECURE_SECRET,
+			vnpayHost: process.env.VNP_HOST,
+			testMode: true,
+			hashAlgorithm: "SHA512",
+			loggerFn: ignoreLogger,
+		});
+
+		// Thiết lập thời gian hết hạn thanh toán (30 phút)
+		const expireDate = new Date();
+		expireDate.setMinutes(expireDate.getMinutes() + 30);
+
+		// Hiển thị số tiền và bookings_id
+		const { bookingId, amount} = req.body;
+		
+		// VNPay có thể lỗi nếu nội dung chứa ký tự đặc biệt, nên loại bỏ dấu và ký tự lạ
+		const orderInfo = `Hoan tien ${bookingId}`.slice(0, 250);
+		const uniqueStr = Math.random().toString(36).substring(2, 10).toUpperCase();
+		const txnRef = `VNPAY_${Date.now()}_${uniqueStr}`;
+
+		// Lưu dữ liệu vào cache để truy xuất sau khi thanh toán thành công
+		pendingBookingsCache.set(txnRef, {
+			bookingId: req.body.bookingId
+		});
+
+		// Tự động xóa dữ liệu sau 30 phút để giải phóng bộ nhớ
+		setTimeout(() => pendingBookingsCache.delete(txnRef), 30 * 60 * 1000);
+
+		const ipAddr =
+			req.headers["x-forwarded-for"] ||
+			req.connection.remoteAddress ||
+			"127.0.0.1";
+
+		const vnpayResponse = await vnpay.buildPaymentUrl({
+			vnp_Amount: amount,
+			vnp_IpAddr: ipAddr,
+			vnp_TxnRef: txnRef,
+			vnp_OrderInfo: orderInfo,
+			vnp_OrderType: ProductCode.Other,
+			vnp_ReturnUrl: process.env.VNP_RETURN_REFUND_URL,
+			vnp_Locale: VnpLocale.VN,
+			vnp_CreateDate: dateFormat(new Date()),
+			vnp_ExpireDate: dateFormat(expireDate),
+		});
+
+		// Tính tương thích: Bọc kết quả vào JSON có format chuẩn để Frontend nhận diện
+		const paymentUrl =
+			typeof vnpayResponse === "string"
+				? vnpayResponse
+				: vnpayResponse.url || vnpayResponse.paymentUrl;
+
+		return res.status(201).json({
+			success: true,
+			vnpayUrl: paymentUrl || vnpayResponse,
+		});
+	} catch (error) {
+		console.error("VNPay Error:", error);
+		res.status(500).json({
+			success: false,
+			message: "Không thể tạo liên kết thanh toán",
+			error: error.message,
+		});
+	}
+};
+
+exports.vnpayRefundReturn = async (req, res) => {
+	let cachedBookingId = null;
+	let fallbackBookingId = null;
+	const toDetail = (id) => `/pages/admin/dashboard.html?page=booking-details&id=${id}`;
+	const toList = () => `/pages/admin/dashboard.html?page=booking`;
+
+	try {
+		const vnpay = new VNPay({
+			tmnCode: process.env.VNP_TMN_CODE,
+			secureSecret: process.env.VNP_SECURE_SECRET,
+			vnpayHost: process.env.VNP_HOST,
+			hashAlgorithm: "SHA512",
+		});
+
+		const verify = vnpay.verifyReturnUrl(req.query);
+		const txnRef = req.query.vnp_TxnRef;
+		const orderInfo = req.query.vnp_OrderInfo || "";
+		const orderMatch = String(orderInfo).match(/(\d+)/);
+		const txnMatch = String(txnRef || "").match(/(\d+)/);
+		fallbackBookingId = orderMatch ? Number(orderMatch[1]) : txnMatch ? Number(txnMatch[1]) : null;
+
+		if (verify.isSuccess) {
+			let refundedBookingId = null;
+
+			if (pendingBookingsCache.has(txnRef)) {
+				const { bookingId } = pendingBookingsCache.get(txnRef);
+				cachedBookingId = bookingId;
+
+				const booking = await bookingService.getById(bookingId);
+				if (!booking) {
+					pendingBookingsCache.delete(txnRef);
+					return res.redirect(toDetail(bookingId));
+				}
+
+				await Booking.updateStatus(bookingId, "status", "cancelled");
+				await Booking.updateStatus(bookingId, "payment_status", "refunded");
+				const totalPax = (booking.adults || 0) + (booking.children || 0);
+				await db.query(
+					`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`,
+					[totalPax, booking.departure_id],
+				);
+
+				refundedBookingId = bookingId;
+				pendingBookingsCache.delete(txnRef);
+			}
+
+			const redirectId = refundedBookingId || cachedBookingId || fallbackBookingId;
+			return res.redirect(redirectId ? toDetail(redirectId) : toList());
+		}
+
+		pendingBookingsCache.delete(txnRef);
+		const redirectId = cachedBookingId || fallbackBookingId;
+		return res.redirect(redirectId ? toDetail(redirectId) : toList());
+	} catch (error) {
+		console.error("VNPay Refund Return Error:", error);
+		const redirectId = cachedBookingId || fallbackBookingId;
+		return res.redirect(redirectId ? toDetail(redirectId) : toList());
+	}
+};
+
+
