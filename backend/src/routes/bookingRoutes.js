@@ -6,7 +6,7 @@ const { verifyToken, isUser, isBookingStaff, isCustomer } = require("../middlewa
 
 //============================== User routes - Cần đăng nhập=====================
 
-// Xem danh sach booking ma user da dat
+// Xem danh sách booking mà user đã đặt
 router.get(
 	"/my-bookings",
 	verifyToken,
@@ -14,7 +14,7 @@ router.get(
 	bookingController.getBookingsByUserId,
 );
 
-// Xem chi tiết booking ma user da dat
+// Xem chi tiết booking mà user đã đặt
 router.get(
 	"/:id/details",
 	verifyToken,
@@ -22,13 +22,14 @@ router.get(
 	bookingController.getBookingDetailsByUserId,
 );
 
-// User gui yeu cau huy booking
+// Người dùng gửi yêu cầu hủy booking
 router.put("/:id/cancel", verifyToken, isUser, bookingController.cancelBooking);
 
 ///===================================================================
 // Booking Staff routes - Cần quyền quản lý
 router.get("/", verifyToken, isBookingStaff, bookingController.getAllBookings);
 
+// Cập nhật trạng thái booking
 router.put(
 	"/:id/status",
 	verifyToken,
@@ -36,7 +37,19 @@ router.put(
 	bookingController.updateStatus,
 );
 
-// Integrations
+//============================== VNPay Callback - Không cần token =====================
+// QUAN TRỌNG: Phải đặt TRƯỚC route /:id để tránh bị match với parametrized route
+
+// Callback thanh toán booking từ VNPay
+router.get("/vnpay-return", bookingController.vnpayReturn);
+
+// Callback hoàn tiền từ VNPay
+router.get("/vnpay-refund-return", bookingController.vnpayRefundReturn);
+router.get("/vnpay-refund", bookingController.vnpayRefundReturn); // Alias cho callback hoàn tiền
+
+//============================== Tích hợp VNPay - Người dùng =====================
+
+// Tạo URL thanh toán VNPay cho booking
 router.post(
 	"/create-payment-url",
 	verifyToken,
@@ -44,7 +57,8 @@ router.post(
 	validateBookingTour,
 	bookingController.createVNPayUrl,
 );
-router.get("/vnpay-return", bookingController.vnpayReturn);
+
+// Tìm kiếm booking theo mã tour, mã user, lọc trạng thái
 router.get(
 	"/search",
 	verifyToken,
@@ -52,6 +66,12 @@ router.get(
 	bookingController.searchBookings,
 );
 
+// Tạo URL hoàn tiền qua VNPay
+router.post("/create-refund-url", verifyToken, isBookingStaff, bookingController.createRefundUrl);
+
+//============================== Route có tham số - Phải đặt cuối cùng =====================
+
+// Xem chi tiết booking theo ID
 router.get("/:id", verifyToken, bookingController.getBookingDetails);
 
 module.exports = router;

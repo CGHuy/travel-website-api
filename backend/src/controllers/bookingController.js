@@ -371,3 +371,162 @@ exports.vnpayReturn = async (req, res) => {
 		);
 	}
 };
+
+exports.createRefundUrl = async (req, res) => {
+	try {
+		const vnpay = new VNPay({
+			tmnCode: process.env.VNP_TMN_CODE,
+			secureSecret: process.env.VNP_SECURE_SECRET,
+			vnpayHost: process.env.VNP_HOST,
+			testMode: true,
+			hashAlgorithm: "SHA512",
+			loggerFn: ignoreLogger,
+		});
+
+		// Thiết lập thời gian hết hạn thanh toán (30 phút)
+		const expireDate = new Date();
+		expireDate.setMinutes(expireDate.getMinutes() + 30);
+
+		// Hiển thị số tiền và bookings_id
+		const { bookingId, amount} = req.body;
+		
+		// VNPay có thể lỗi nếu nội dung chứa ký tự đặc biệt, nên loại bỏ dấu và ký tự lạ
+		const orderInfo = `Hoan tien ${bookingId}`.slice(0, 250);
+		const uniqueStr = Math.random().toString(36).substring(2, 10).toUpperCase();
+		const txnRef = `VNPAY_${Date.now()}_${uniqueStr}`;
+
+		// Lưu dữ liệu vào cache để truy xuất sau khi thanh toán thành công
+		pendingBookingsCache.set(txnRef, {
+			bookingId: req.body.bookingId
+		});
+
+		// Tự động xóa dữ liệu sau 30 phút để giải phóng bộ nhớ
+		setTimeout(() => pendingBookingsCache.delete(txnRef), 30 * 60 * 1000);
+
+		const ipAddr =
+			req.headers["x-forwarded-for"] ||
+			req.connection.remoteAddress ||
+			"127.0.0.1";
+
+		const vnpayResponse = await vnpay.buildPaymentUrl({
+			vnp_Amount: amount,
+			vnp_IpAddr: ipAddr,
+			vnp_TxnRef: txnRef,
+			vnp_OrderInfo: orderInfo,
+			vnp_OrderType: ProductCode.Other,
+			vnp_ReturnUrl: process.env.VNP_RETURN_REFUND_URL,
+			vnp_Locale: VnpLocale.VN,
+			vnp_CreateDate: dateFormat(new Date()),
+			vnp_ExpireDate: dateFormat(expireDate),
+		});
+
+		// Tính tương thích: Bọc kết quả vào JSON có format chuẩn để Frontend nhận diện
+		const paymentUrl =
+			typeof vnpayResponse === "string"
+				? vnpayResponse
+				: vnpayResponse.url || vnpayResponse.paymentUrl;
+
+		return res.status(201).json({
+			success: true,
+			vnpayUrl: paymentUrl || vnpayResponse,
+		});
+	} catch (error) {
+		console.error("VNPay Error:", error);
+		res.status(500).json({
+			success: false,
+			message: "Không thể tạo liên kết thanh toán",
+			error: error.message,
+		});
+	}
+};
+
+exports.vnpayRefundReturn = async (req, res) => {
+	try {
+		const vnpay = new VNPay({
+			tmnCode: process.env.VNP_TMN_CODE,
+			secureSecret: process.env.VNP_SECURE_SECRET,
+			vnpayHost: process.env.VNP_HOST,
+			hashAlgorithm: "SHA512",
+		});
+
+		const verify = vnpay.verifyReturnUrl(req.query);
+		const txnRef = req.query.vnp_TxnRef;
+		let cachedBookingId = null;
+
+		if (verify.isSuccess) {
+			let refundedBookingId = null;
+
+			// Kiểm tra và lấy dữ liệu từ bộ nhớ tạm
+			if (pendingBookingsCache.has(txnRef)) {
+				const { bookingId } = pendingBookingsCache.get(txnRef);
+				cachedBookingId = bookingId;
+
+				try {
+					// Lấy booking hiện tại để xử lý giống luồng cancelBooking
+					const booking = await bookingService.getById(bookingId);
+
+					if (!booking) {
+						pendingBookingsCache.delete(txnRef);
+						return res.redirect(
+							`/pages/admin/dashboard.html?page=booking-details&id=${bookingId}&refund=error&message=Không%20tìm%20thấy%20booking`,
+						);
+					}
+
+					// Đổi trạng thái booking sang cancelled
+					await Booking.updateStatus(bookingId, "status", "cancelled");
+
+					// Đổi payment_status sang refunded
+					await Booking.updateStatus(bookingId, "payment_status", "refunded");
+
+					// Hoàn trả ghế cho departure
+					const totalPax = (booking.adults || 0) + (booking.children || 0);
+					await db.query(
+						`UPDATE tour_departures SET seats_available = seats_available + ? WHERE id = ?`,
+						[totalPax, booking.departure_id],
+					);
+
+					refundedBookingId = bookingId;
+
+					// Dọn dẹp bộ nhớ tạm
+					pendingBookingsCache.delete(txnRef);
+				} catch (err) {
+					console.error("Refund Error:", err);
+					pendingBookingsCache.delete(txnRef);
+					return res.redirect(
+						`/pages/admin/dashboard.html?page=booking-details&id=${bookingId}&refund=error&message=Lỗi%20khi%20xử%20lý%20hoàn%20tiền`,
+					);
+				}
+			}
+
+			if (!refundedBookingId) {
+				return res.redirect(
+					`/pages/admin/dashboard.html?page=booking&refund=error&message=Không%20tìm%20thấy%20dữ%20liệu%20hoàn%20tiền`,
+				);
+			}
+
+			// Chuyển hướng về trang chi tiết booking trên Admin Dashboard
+			return res.redirect(
+				`/pages/admin/dashboard.html?page=booking-details&id=${refundedBookingId}&refund=success`,
+			);
+		} else {
+			// Xóa dữ liệu tạm nếu giao dịch thất bại hoặc bị hủy
+			pendingBookingsCache.delete(txnRef);
+
+			// Chuyển hướng về danh sách booking nếu không có id để quay về chi tiết
+			return res.redirect(
+				cachedBookingId
+					? `/pages/admin/dashboard.html?page=booking-details&id=${cachedBookingId}&refund=error&message=Giao%20dịch%20hoàn%20tiền%20thất%20bại%20hoặc%20bị%20hủy`
+					: `/pages/admin/dashboard.html?page=booking&refund=error&message=Giao%20dịch%20hoàn%20tiền%20thất%20bại%20hoặc%20bị%20hủy`,
+			);
+		}
+	} catch (error) {
+		console.error("VNPay Refund Return Error:", error);
+		return res.redirect(
+			cachedBookingId
+				? `/pages/admin/dashboard.html?page=booking-details&id=${cachedBookingId}&refund=error&message=Lỗi%20máy%20chủ%20khi%20xử%20lý%20hoàn%20tiền`
+				: `/pages/admin/dashboard.html?page=booking&refund=error&message=Lỗi%20máy%20chủ%20khi%20xử%20lý%20hoàn%20tiền`,
+		);
+	}
+};
+
+
