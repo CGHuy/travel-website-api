@@ -217,35 +217,14 @@ async function saveProfile() {
         editingCount = 0;
         originalValues = {};
 
-        showToast("Cập nhật thông tin thành công!", "success");
+        window.showToast("Cập nhật thông tin thành công!", "success");
     } catch (err) {
         console.error("Lỗi khi lưu profile:", err);
-        showToast(err.message || "Lỗi khi cập nhật. Vui lòng thử lại!", "error");
+        window.showToast(err.message || "Lỗi khi cập nhật. Vui lòng thử lại!", "error");
     } finally {
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Lưu thay đổi';
     }
-}
-
-// ─── Toast notification ──────────────────────────────────────────────────────
-function showToast(message, type = "success") {
-    const existing = document.getElementById("profile-toast");
-    if (existing) existing.remove();
-
-    const toast = document.createElement("div");
-    toast.id = "profile-toast";
-    toast.style.cssText = `
-        position: fixed; bottom: 24px; right: 24px;
-        background: ${type === "success" ? "#27ae60" : "#e74c3c"};
-        color: white; padding: 14px 22px; border-radius: 10px;
-        font-size: 15px; font-weight: 500;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-        z-index: 9999; animation: slideUp 0.3s ease;
-    `;
-    toast.innerHTML = `<i class="fa-solid fa-${type === "success" ? "check" : "xmark"} me-2"></i>${message}`;
-    document.body.appendChild(toast);
-
-    setTimeout(() => toast.remove(), 3000);
 }
 
 // ─── Change Password Form ────────────────────────────────────────────────────
@@ -260,11 +239,11 @@ function initChangePasswordForm() {
         const confirmPassword = document.getElementById("confirmPassword").value;
 
         if (newPassword !== confirmPassword) {
-            showToast("Mật khẩu mới và xác nhận không khớp!", "error");
+            window.showToast("Mật khẩu mới và xác nhận không khớp!", "danger");
             return;
         }
         if (newPassword.length < 6) {
-            showToast("Mật khẩu mới phải có ít nhất 6 ký tự!", "error");
+            window.showToast("Mật khẩu mới phải có ít nhất 6 ký tự!", "danger");
             return;
         }
 
@@ -286,10 +265,10 @@ function initChangePasswordForm() {
                 localStorage.setItem("token", data.data.token);
             }
             
-            showToast("Đổi mật khẩu thành công!", "success");
+            window.showToast("Đổi mật khẩu thành công!", "success");
             form.reset();
         } catch (err) {
-            showToast(err.message || "Lỗi khi đổi mật khẩu!", "error");
+            window.showToast(err.message || "Lỗi khi đổi mật khẩu!", "danger");
         }
     });
 }

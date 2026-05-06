@@ -142,13 +142,11 @@ function setupLogout() {
 
     logoutBtn.addEventListener("click", (e) => {
         e.preventDefault();
-
-        if (!confirm("Bạn có chắc chắn muốn đăng xuất?")) return;
-
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-
-        window.location.href = "/pages/index.html";
+        window.showConfirm("Bạn có chắc chắn muốn đăng xuất?", () => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "/pages/index.html";
+        });
     });
 }
 
@@ -182,71 +180,62 @@ function closeUserDropdown() {
     const dropdown = document.getElementById("userDropdown");
     if (dropdown) dropdown.style.display = "none";
 }
-// ================== TOAST NOTIFICATIONS (FLASH MESSAGES) ==================
+
+// ================== GLOBAL UI UTILITIES (MODALS & TOASTS) ==================
+
 /**
- * Hiển thị thông báo kiểu Flash Message
- * @param {string} title - Tiêu đề
- * @param {string} message - Nội dung tóm tắt
- * @param {string} type - success | error | warning | info
- * @param {number} duration - Thời gian hiển thị (ms)
+ * Global Confirm Dialog
+ * @param {string} message 
+ * @param {function} onConfirm 
  */
-window.showToast = function(title, message = "", type = "success", duration = 5000) {
-    const container = document.getElementById("toast-container");
-    if (!container) {
-        console.warn("Toast container not found!");
-        // Fallback to alert if container is missing
-        alert(`${title}: ${message}`);
+window.showConfirm = function(message, onConfirm) {
+    const modalEl = document.getElementById('globalConfirmModal');
+    if (!modalEl) {
+        if (confirm(message)) onConfirm();
         return;
     }
 
-    const icons = {
-        success: "fa-solid fa-circle-check",
-        error: "fa-solid fa-circle-xmark",
-        warning: "fa-solid fa-triangle-exclamation",
-        info: "fa-solid fa-circle-info"
-    };
-
-    const toast = document.createElement("div");
-    toast.className = `toast-message toast-${type}`;
+    const modal = new bootstrap.Modal(modalEl);
+    document.getElementById('globalConfirmMessage').innerHTML = message;
     
-    toast.innerHTML = `
-        <div class="toast-icon">
-            <i class="${icons[type] || icons.info}"></i>
-        </div>
-        <div class="toast-content">
-            ${title ? `<span class="toast-title">${title}</span>` : ""}
-            ${message ? `<div class="toast-body">${message}</div>` : ""}
-        </div>
-        <button class="toast-close" title="Đóng">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    `;
-
-    container.appendChild(toast);
-
-    // Đóng bằng nút X
-    const closeBtn = toast.querySelector(".toast-close");
-    closeBtn.onclick = (e) => {
-        e.stopPropagation();
-        removeToast(toast);
-    };
-
-    // Tự động đóng sau n giây
-    const timer = setTimeout(() => {
-        removeToast(toast);
-    }, duration);
-
-    // Dừng timer nếu hover vào (giống Krayin/Admin dashboard)
-    toast.onmouseenter = () => clearTimeout(timer);
-    toast.onmouseleave = () => {
-        setTimeout(() => removeToast(toast), 2000); // Đợi thêm 2s khi rời chuột
-    };
+    const submitBtn = document.getElementById('globalConfirmSubmit');
+    // Clear old listeners
+    const newSubmitBtn = submitBtn.cloneNode(true);
+    submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+    
+    newSubmitBtn.addEventListener('click', () => {
+        onConfirm();
+        modal.hide();
+    });
+    
+    modal.show();
 };
 
-function removeToast(toast) {
-    if (toast.classList.contains("closing")) return;
-    toast.classList.add("closing");
-    toast.addEventListener("animationend", () => {
-        toast.remove();
-    });
-}
+/**
+ * Global Toast Notification (Bootstrap version)
+ * @param {string} message 
+ * @param {string} type - success | danger | warning | info
+ */
+window.showToast = function(message, type = "success") {
+    const toastEl = document.getElementById('globalToast');
+    const toastBody = document.getElementById('globalToastBody');
+    if (!toastEl || !toastBody) {
+        alert(message);
+        return;
+    }
+
+    toastBody.textContent = message;
+    
+    // Set color based on type
+    toastEl.className = `toast align-items-center border-0 text-white bg-${type === 'error' ? 'danger' : type}`;
+    
+    const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+    toast.show();
+};
+
+/**
+ * Alias for showToast for backward compatibility or general alerts
+ */
+window.showAlert = function(message, type = "info") {
+    window.showToast(message, type);
+};

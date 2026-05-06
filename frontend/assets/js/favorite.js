@@ -181,68 +181,43 @@ let deleteModal;
 let tourIdToDelete = null;
 
 async function handleRemoveFavorite(tourId) {
-    tourIdToDelete = tourId;
-    if (!deleteModal) {
-        deleteModal = new bootstrap.Modal(document.getElementById("deleteConfirmModal"));
-    }
-    deleteModal.show();
-}
+    window.showConfirm("Bạn có chắc chắn muốn xóa tour này khỏi danh sách yêu thích không?", async () => {
+        const token = localStorage.getItem("token");
+        const user = JSON.parse(localStorage.getItem("user"));
+        const card = document.querySelector(`.favorite-card[data-tour-id="${tourId}"]`);
 
-async function executeRemoveFavorite(tourId) {
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
-    const card = document.querySelector(`.favorite-card[data-tour-id="${tourId}"]`);
-    const confirmBtn = document.getElementById("confirmDeleteBtn");
-
-    // Disable button and show loading
-    const originalText = confirmBtn.innerHTML;
-    confirmBtn.disabled = true;
-    confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xóa...';
-
-    try {
-        const response = await fetch(`${API_URL}/wishlist/${user.id}/${tourId}`, {
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            deleteModal.hide();
-            card.classList.add("animate__fadeOutLeft");
-            card.addEventListener(
-                "animationend",
-                () => {
-                    favoriteTours = favoriteTours.filter((t) => t.tour_id !== tourId);
-                    renderFavorites(favoriteTours);
+        try {
+            const response = await fetch(`${API_URL}/wishlist/${user.id}/${tourId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
                 },
-                { once: true },
-            );
-        } else {
-            alert("Lỗi: " + (result.message || "Không thể xóa tour"));
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                card.classList.add("animate__fadeOutLeft");
+                card.addEventListener(
+                    "animationend",
+                    () => {
+                        favoriteTours = favoriteTours.filter((t) => t.tour_id !== tourId);
+                        renderFavorites(favoriteTours);
+                        window.showToast("Đã xóa khỏi danh sách yêu thích", "success");
+                    },
+                    { once: true },
+                );
+            } else {
+                window.showToast(result.message || "Không thể xóa tour", "error");
+            }
+        } catch (error) {
+            console.error("Remove favorite error:", error);
+            window.showToast("Lỗi kết nối tới server", "error");
         }
-    } catch (error) {
-        console.error("Remove favorite error:", error);
-        alert("Lỗi kết nối tới server");
-    } finally {
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = originalText;
-    }
+    });
 }
 
 function initFavoritePage() {
-    // Add listener to confirm button in modal
-    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-    if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener("click", () => {
-            if (tourIdToDelete) {
-                executeRemoveFavorite(tourIdToDelete);
-            }
-        });
-    }
-
     // Search Filtering
     const searchInput = document.getElementById("searchFavorite");
     if (searchInput) {

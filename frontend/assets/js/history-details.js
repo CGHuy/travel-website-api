@@ -14,8 +14,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const bookingId = urlParams.get("id");
 
     if (!bookingId) {
-        alert("Không tìm thấy mã đặt chỗ!");
-        window.location.href = "bookings-history.html";
+        window.showToast("Không tìm thấy mã đặt chỗ!", "error");
+        setTimeout(() => window.location.href = "bookings-history.html", 1500);
         return;
     }
 
@@ -304,14 +304,14 @@ function renderBookingDetail(booking) {
                         });
                         const resData = await response.json();
                         if (resData.success) {
-                            alert("Đã gửi yêu cầu hủy thành công!");
-                            window.location.reload();
+                            window.showToast("Đã gửi yêu cầu hủy thành công!", "success");
+                            setTimeout(() => window.location.reload(), 1500);
                         } else {
-                            alert(resData.message || "Không thể hủy lúc này.");
+                            window.showToast(resData.message || "Không thể hủy lúc này.", "error");
                         }
                     } catch (error) {
                         console.error("Cancel API error", error);
-                        alert("Có lỗi xảy ra khi gọi máy chủ!");
+                        window.showToast("Có lỗi xảy ra khi gọi máy chủ!", "error");
                         newConfirmBtn.innerHTML = `Chắc chắn Hủy`;
                         newConfirmBtn.disabled = false;
                     }
@@ -388,16 +388,16 @@ function renderBookingDetail(booking) {
                         });
                         const resData = await response.json();
                         if (resData.success) {
-                            alert("Cảm ơn bạn đã gửi đánh giá thành công!");
-                            window.location.reload();
+                            window.showToast("Cảm ơn bạn đã gửi đánh giá thành công!", "success");
+                            setTimeout(() => window.location.reload(), 1500);
                         } else {
-                            alert(resData.message || "Không thể gửi đánh giá.");
+                            window.showToast(resData.message || "Không thể gửi đánh giá.", "error");
                             submitBtn.innerHTML = `Gửi đánh giá`;
                             submitBtn.disabled = false;
                         }
                     } catch (error) {
                         console.error("Review API error", error);
-                        alert("Có lỗi xảy ra khi gọi máy chủ!");
+                        window.showToast("Có lỗi xảy ra khi gọi máy chủ!", "error");
                         submitBtn.innerHTML = `Gửi đánh giá`;
                         submitBtn.disabled = false;
                     }

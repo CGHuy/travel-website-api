@@ -47,14 +47,14 @@ window.initAdminBookingDetailsPage = async function () {
                     });
 
                     if (updateRes.ok) {
-                        showToast("Thành công", "Cập nhật trạng thái thành công!", "success", 3000);
+                        window.showToast("Cập nhật trạng thái thành công!", "success");
                         setTimeout(() => window.location.reload(), 1500);
                     } else {
                         throw new Error("Lỗi cập nhật");
                     }
                 } catch (err) {
                     console.error(err);
-                    showToast("Lỗi", "Không thể cập nhật trạng thái", "error", 3000);
+                    window.showToast("Không thể cập nhật trạng thái", "error");
                 }
             };
         }
@@ -277,7 +277,7 @@ function renderAdminBookingDetails(data) {
                 
                 if (refundData.success && refundData.vnpayUrl) {
                     //============================== Chuyển hướng đến VNPay hoàn tiền =====================
-                    showToast("Thông báo", "Đang chuyển hướng đến VNPay hoàn tiền...", "info", 2000);
+                    window.showToast("Đang chuyển hướng đến VNPay hoàn tiền...", "info");
                     setTimeout(() => {
                         window.location.href = refundData.vnpayUrl;
                     }, 1500);
@@ -286,7 +286,7 @@ function renderAdminBookingDetails(data) {
                 }
             } catch (err) {
                 console.error(err);
-                showToast("Lỗi", `Không thể thực hiện phê duyệt: ${err.message}`, "error", 4000);
+                window.showToast(`Không thể thực hiện phê duyệt: ${err.message}`, "error");
                 setLoading(approveBtn, false, '<i class="fa-solid fa-check"></i> Phê duyệt & Hoàn tiền');
                 rejectBtn.disabled = false;
             }
@@ -294,36 +294,36 @@ function renderAdminBookingDetails(data) {
 
         // 2. Logic Từ Chối
         rejectBtn.onclick = async () => {
-            if (!confirm("Bạn chắc chắn muốn TỪ CHỐI yêu cầu hủy này? Đơn hàng sẽ quay lại trạng thái Đã xác nhận.")) return;
+            window.showConfirm("Bạn chắc chắn muốn TỪ CHỐI yêu cầu hủy này? Đơn hàng sẽ quay lại trạng thái Đã xác nhận.", async () => {
+                setLoading(rejectBtn, true);
+                approveBtn.disabled = true;
 
-            setLoading(rejectBtn, true);
-            approveBtn.disabled = true;
+                try {
+                    const response = await fetch(`/api/bookings/${data.id}/status`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${localStorage.token}`,
+                        },
+                        body: JSON.stringify({
+                            status: "confirmed",
+                            payment_status: "paid",
+                        }),
+                    });
 
-            try {
-                const response = await fetch(`/api/bookings/${data.id}/status`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.token}`,
-                    },
-                    body: JSON.stringify({
-                        status: "confirmed",
-                        payment_status: "paid",
-                    }),
-                });
-
-                if (response.ok) {
-                    showToast("Thành công", "Đã từ chối yêu cầu hủy. Đơn hàng quay lại trạng thái Đã xác nhận.", "success", 3000);
-                    setTimeout(() => window.location.reload(), 1500);
-                } else {
-                    throw new Error("Lỗi từ chối");
+                    if (response.ok) {
+                        window.showToast("Đã từ chối yêu cầu hủy. Đơn hàng quay lại trạng thái Đã xác nhận.", "success");
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        throw new Error("Lỗi từ chối");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    window.showToast("Không thể thực hiện từ chối yêu cầu", "error");
+                    setLoading(rejectBtn, false, '<i class="fa-solid fa-xmark"></i> Từ chối yêu cầu');
+                    approveBtn.disabled = false;
                 }
-            } catch (err) {
-                console.error(err);
-                showToast("Lỗi", "Không thể thực hiện từ chối yêu cầu", "error", 3000);
-                setLoading(rejectBtn, false, '<i class="fa-solid fa-xmark"></i> Từ chối yêu cầu');
-                approveBtn.disabled = false;
-            }
+            });
         };
     } else if (cancelActionArea) {
         cancelActionArea.style.display = "none";
