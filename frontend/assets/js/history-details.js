@@ -139,29 +139,52 @@ function renderBookingDetail(booking) {
     const breakdownEl = document.getElementById("price-breakdown");
     let breakdownHtml = "";
     
-    // Tính toán breakdown
+    const fmt = (n) => new Intl.NumberFormat("vi-VN").format(n || 0);
+
+    // --- Người lớn ---
     if (booking.adults > 0) {
-        const adultPrice = booking.price_default || 0;
-        const totalAdult = adultPrice * booking.adults;
+        const adultTourPrice  = parseFloat(booking.price_default  || 0);
+        const adultMovePrice  = parseFloat(booking.price_moving   || 0);
+        const totalAdultTour  = adultTourPrice * booking.adults;
+        const totalAdultMove  = adultMovePrice * booking.adults;
+
         breakdownHtml += `
             <div class="price-breakdown-item">
-                <span>Người lớn (x${booking.adults})</span>
-                <strong>${new Intl.NumberFormat("vi-VN").format(totalAdult)}đ</strong>
-            </div>
-        `;
+                <span>Tour người lớn (x${booking.adults})</span>
+                <strong>${fmt(totalAdultTour)}đ</strong>
+            </div>`;
+
+        if (adultMovePrice > 0) {
+            breakdownHtml += `
+            <div class="price-breakdown-item" style="color:#64748b;">
+                <span style="padding-left:12px;"><i class="fa-solid fa-plane-departure" style="font-size:11px;margin-right:4px;"></i>Di chuyển NL (x${booking.adults})</span>
+                <strong>${fmt(totalAdultMove)}đ</strong>
+            </div>`;
+        }
     }
     
+    // --- Trẻ em ---
     if (booking.children > 0) {
-        const childPrice = booking.price_child || 0;
-        const totalChild = childPrice * booking.children;
+        const childTourPrice  = parseFloat(booking.price_child        || 0);
+        const childMovePrice  = parseFloat(booking.price_moving_child || 0);
+        const totalChildTour  = childTourPrice * booking.children;
+        const totalChildMove  = childMovePrice * booking.children;
+
         breakdownHtml += `
             <div class="price-breakdown-item">
-                <span>Trẻ em (x${booking.children})</span>
-                <strong>${new Intl.NumberFormat("vi-VN").format(totalChild)}đ</strong>
-            </div>
-        `;
+                <span>Tour trẻ em (x${booking.children})</span>
+                <strong>${fmt(totalChildTour)}đ</strong>
+            </div>`;
+
+        if (childMovePrice > 0) {
+            breakdownHtml += `
+            <div class="price-breakdown-item" style="color:#64748b;">
+                <span style="padding-left:12px;"><i class="fa-solid fa-plane-departure" style="font-size:11px;margin-right:4px;"></i>Di chuyển TE (x${booking.children})</span>
+                <strong>${fmt(totalChildMove)}đ</strong>
+            </div>`;
+        }
     }
-    
+
     breakdownEl.innerHTML = breakdownHtml;
 
     const totalPriceFormatted = new Intl.NumberFormat("vi-VN").format(booking.total_price);
@@ -350,7 +373,7 @@ function renderBookingDetail(booking) {
                     
                     try {
                         const token = localStorage.getItem("token");
-                        const response = await fetch(`${API_URL}/reviews`, {
+                        const response = await fetch(`${API_URL}/reviews/create`, {
                             method: "POST",
                             body: JSON.stringify({
                                 tour_id: booking.tour_id,

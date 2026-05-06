@@ -143,44 +143,38 @@
                     <h3><i class="fa-solid fa-triangle-exclamation"></i> Xác nhận phê duyệt hủy</h3>
                     <span class="close-modal">&times;</span>
                 </div>
-                <div class="modal-body">
-                    <p>Bạn đang xử lý yêu cầu hủy cho booking này. Hãy xem xét thời điểm hủy để tính toán mức hoàn tiền hợp lý dựa theo chính sách:</p>
-                    <div class="alert-info" style="padding: 10px 12px; border-radius: 8px; margin: 10px 0; font-size: 0.85em; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
-                        <ul style="margin-bottom: 0; padding-left: 20px;">
-                            <li><strong>> 30 ngày:</strong> Hoàn 100%</li>
-                            <li><strong>15 - 29 ngày:</strong> Hoàn 50%</li>
-                            <li><strong>< 15 ngày:</strong> Không hoàn (0%)</li>
-                        </ul>
+                <div class="modal-body" style="padding: 16px 20px;">
+                    <p style="font-size: 0.88em; margin-bottom: 8px; color: #475569;">Xem xét thời điểm hủy để xác định mức hoàn tiền hợp lý:</p>
+
+                    <!-- Chính sách rút gọn dạng badge -->
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <span style="font-size: 0.75em; padding: 3px 10px; border-radius: 20px; background: #dcfce7; color: #15803d; font-weight: 600;">&gt; 30 ngày: Hoàn 100%</span>
+                        <span style="font-size: 0.75em; padding: 3px 10px; border-radius: 20px; background: #fef9c3; color: #854d0e; font-weight: 600;">15-29 ngày: Hoàn 50%</span>
+                        <span style="font-size: 0.75em; padding: 3px 10px; border-radius: 20px; background: #fee2e2; color: #b91c1c; font-weight: 600;">&lt; 15 ngày: Không hoàn</span>
                     </div>
 
-                    <!-- Admin Dynamic Calculation -->
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9em;">
-                            <span style="color: #64748b;">Ngày khách yêu cầu hủy:</span>
-                            <strong id="modal-req-date" style="color: #334155;">--/--/----</strong>
+                    <!-- Admin Dynamic Calculation - thu gọn -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-size: 0.82em;">
+                            <span style="color: #64748b;">Ngày y/c hủy:</span>
+                            <strong id="modal-req-date" style="color: #334155; text-align: right;">--/--/----</strong>
+                            <span style="color: #64748b;">Còn lại:</span>
+                            <strong id="modal-admin-days-left" style="color: #2563eb; text-align: right;">-- ngày</strong>
+                            <span style="color: #64748b;">Phí phạt:</span>
+                            <strong id="modal-admin-penalty-percent" style="color: #dc2626; text-align: right;">0%</strong>
                         </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9em;">
-                            <span style="color: #64748b;">Khoảng cách tới ngày khởi hành:</span>
-                            <strong id="modal-admin-days-left" style="color: #2563eb;">-- ngày</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9em;">
-                            <span style="color: #64748b;">Tỷ lệ phạt áp dụng:</span>
-                            <strong id="modal-admin-penalty-percent" style="color: #dc2626;">0%</strong>
-                        </div>
-                        <hr style="border-color: #e2e8f0; margin: 10px 0;">
+                        <hr style="border-color: #e2e8f0; margin: 8px 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 600; color: #334155;">Số tiền cần hoàn trả:</span>
-                            <b class="text-success" id="modal-refund-amount" style="font-size: 1.2em;">0đ</b>
+                            <span style="font-weight: 700; color: #334155; font-size: 0.88em;">Số tiền hoàn trả:</span>
+                            <b class="text-success" id="modal-refund-amount" style="font-size: 1.1em;">0đ</b>
                         </div>
                     </div>
 
-                    <div class="alert-warning" style="padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 0.9em; background: #fffbeb; color: #92400e; border: 1px solid #fde68a">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <b>Hành động:</b>
-                        <ul style="margin-top: 8px; margin-left: 20px">
-                            <li><b>Phê duyệt:</b> Chuyển thành Đã hủy, Đã hoàn tiền và cộng lại chỗ.</li>
-                            <li><b>Từ chối:</b> Giữ nguyên Đã xác nhận, Đã thanh toán và tiếp tục tour.</li>
-                        </ul>
+                    <!-- Hành động -->
+                    <div style="padding: 8px 12px; border-radius: 8px; background: #fffbeb; color: #92400e; border: 1px solid #fde68a; font-size: 0.8em;">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        <b>Phê duyệt:</b> Hủy + hoàn tiền + cộng lại chỗ &nbsp;|&nbsp;
+                        <b>Từ chối:</b> Giữ nguyên Đã xác nhận
                     </div>
                 </div>
                 <div class="modal-footer-flex">
