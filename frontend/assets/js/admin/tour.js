@@ -1,6 +1,6 @@
 (() => {
     const TOUR_API_URL = "/api/tours";
-    const DEFAULT_TOUR_IMAGE = "../../assets/images/image-default.webp";
+    const DEFAULT_TOUR_IMAGE = "/assets/images/image-default.webp";
     const ITEMS_PER_PAGE = 5;
 
     let adminTourCache = [];
@@ -8,6 +8,8 @@
     let totalPages = 1;
     let totalTours = 0;
     let currentKeyword = "";
+    let currentRegion = "";
+    let currentPriceMax = 10000000;
 
     // Hàm khởi tạo chính cho trang quản lý tour.
     async function initAdminTourPage() {
@@ -15,6 +17,7 @@
         if (!listEl) return;
 
         bindTourSearch();
+        bindTourFilters();
         bindAddTourForm();
         bindEditTourForm();
         bindDeleteTourForm();
@@ -204,9 +207,10 @@
 
         const page = Math.max(Number(options.page) || 1, 1);
         const keyword = typeof options.keyword === "string" ? options.keyword.trim() : currentKeyword;
+        const region = typeof options.region === "string" ? options.region.trim() : currentRegion;
+        const priceMax = typeof options.priceMax === "number" ? options.priceMax : currentPriceMax;
 
         try {
-            console.log("Đang tải danh sách tour...");
             listEl.innerHTML = "";
 
             const params = new URLSearchParams({
@@ -216,8 +220,14 @@
             if (keyword) {
                 params.set("keyword", keyword);
             }
+            if (region) {
+                params.set("region", region);
+            }
+            if (Number.isFinite(priceMax) && priceMax >= 0 && priceMax < 10000000) {
+                params.set("priceMax", String(priceMax));
+            }
 
-            const res = await fetch(`${TOUR_API_URL}?${params.toString()}`);
+            const res = await fetch(`${TOUR_API_URL}?${params.toString()}`, { cache: "no-store" });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const payload = await parseJsonSafe(res);
@@ -228,6 +238,8 @@
             totalPages = Number(pagination && pagination.totalPages) || 1;
             totalTours = Number(pagination && pagination.total) || 0;
             currentKeyword = keyword;
+            currentRegion = region;
+            currentPriceMax = priceMax;
 
             const totalEl = document.getElementById("tour-total-count");
             if (totalEl) totalEl.textContent = String(totalTours);
@@ -246,27 +258,83 @@
 
     function bindTourSearch() {
         const input = document.getElementById("tour-search-input");
-        const searchBtn = document.getElementById("tour-search-btn");
         if (!input || input.dataset.bound === "true") return;
 
-        const runSearch = () => {
-            const keyword = String(input.value || "")
-                .trim()
-                .toLowerCase();
-            fetchAndRenderTours({ page: 1, keyword });
-        };
+        let searchTimeout;
 
-        input.addEventListener("keydown", (event) => {
-            if (event.key !== "Enter") return;
-            event.preventDefault();
-            runSearch();
+        input.addEventListener("input", (event) => {
+            // Xóa timeout trước đó để tránh gọi API nhiều lần
+            clearTimeout(searchTimeout);
+
+            // Đặt timeout mới - chỉ gọi API sau 300ms khi user dừng gõ
+            searchTimeout = setTimeout(() => {
+                const keyword = String(input.value || "")
+                    .trim()
+                    .toLowerCase();
+                fetchAndRenderTours({ page: 1, keyword });
+            }, 300);
         });
 
-        if (searchBtn) {
-            searchBtn.addEventListener("click", runSearch);
+        input.dataset.bound = "true";
+    }
+
+    function bindTourFilters() {
+        const regionSelect = document.getElementById("tour-region-filter");
+        const priceRange = document.getElementById("tour-price-filter");
+        const priceDisplay = document.getElementById("tour-price-display");
+        const resetBtn = document.getElementById("tour-filter-reset-btn");
+
+        if ((!regionSelect && !priceRange) || document.body.dataset.tourFiltersBound === "true") return;
+
+        // region filter
+        if (regionSelect) {
+            regionSelect.addEventListener("change", () => {
+                const region = String(regionSelect.value || "").trim();
+                fetchAndRenderTours({ page: 1, region, keyword: currentKeyword });
+            });
         }
 
-        input.dataset.bound = "true";
+        // price filter
+        if (priceRange) {
+            priceRange.addEventListener("input", () => {
+                let priceMax = Number(priceRange.value);
+                if (!Number.isFinite(priceMax)) {
+                    priceMax = 10000000;
+                }
+
+                if (priceDisplay) priceDisplay.textContent = priceMax >= 10000000 ? "10M+" : `${(priceMax / 1000000).toFixed(1)}M`;
+                // call API with debounce
+                clearTimeout(window.tourPriceTimeout);
+                window.tourPriceTimeout = setTimeout(() => {
+                    fetchAndRenderTours({ page: 1, priceMax, region: currentRegion, keyword: currentKeyword });
+                }, 300);
+            });
+        }
+
+        // Xử lý nút reset
+        if (resetBtn) {
+            resetBtn.addEventListener("click", () => {
+                // Reset UI
+                const searchInput = document.getElementById("tour-search-input");
+                if (searchInput) searchInput.value = "";
+
+                if (regionSelect) regionSelect.value = "";
+                if (priceRange) {
+                    priceRange.value = 10000000;
+                    if (priceDisplay) priceDisplay.textContent = "10M+";
+                }
+
+                // Reset state
+                currentKeyword = "";
+                currentRegion = "";
+                currentPriceMax = 10000000;
+
+                // Fetch fresh data without filters
+                fetchAndRenderTours({ page: 1, keyword: "", region: "", priceMax: 10000000 });
+            });
+        }
+
+        document.body.dataset.tourFiltersBound = "true";
     }
 
     // Render danh sách tour từ template để tách UI khỏi logic lấy dữ liệu.

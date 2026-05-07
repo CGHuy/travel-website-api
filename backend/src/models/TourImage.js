@@ -1,13 +1,34 @@
 const db = require("../config/database");
 
 class TourImage {
-    // Lấy danh sách tour cho màn quản lý ảnh (chỉ trả summary)
-    static async getTourImageManagementList(keyword = "") {
+    // Lấy danh sách tour cho màn quản lý ảnh (summary) với phân trang
+    static async getTourImageManagementList(keyword = "", page = 1, limit = 5) {
         try {
+            page = Number(page) || 1;
+            limit = Number(limit) || 5;
+
             const normalizedKeyword = String(keyword || "")
                 .trim()
                 .toLowerCase();
             const likeKeyword = `%${normalizedKeyword}%`;
+
+            const whereConditions = [];
+            const whereParams = [];
+
+            if (normalizedKeyword) {
+                whereConditions.push(`(CAST(t.id AS CHAR) LIKE ? OR LOWER(CONCAT('tour', LPAD(t.id, 3, '0'))) LIKE ? OR LOWER(COALESCE(t.name, '')) LIKE ? OR LOWER(COALESCE(t.region, '')) LIKE ?)`);
+                whereParams.push(likeKeyword, likeKeyword, likeKeyword, likeKeyword);
+            }
+
+            const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
+
+            // Count total matching tours
+            const [countRows] = await db.query(`SELECT COUNT(*) AS total FROM tours t ${whereClause}`, whereParams);
+            const total = Number(countRows[0]?.total || 0);
+
+            const totalPages = Math.max(Math.ceil(total / limit), 1);
+            const currentPage = Math.min(page, totalPages);
+            const offSet = (currentPage - 1) * limit;
 
             const [rows] = await db.query(
                 `
@@ -20,20 +41,23 @@ class TourImage {
                     COUNT(ti.id) AS image_count
                 FROM tours t
                 LEFT JOIN tour_images ti ON ti.tour_id = t.id
-                WHERE (
-                    ? = ''
-                    OR CAST(t.id AS CHAR) LIKE ?
-                    OR LOWER(CONCAT('tour', LPAD(t.id, 3, '0'))) LIKE ?
-                    OR LOWER(COALESCE(t.name, '')) LIKE ?
-                    OR LOWER(COALESCE(t.region, '')) LIKE ?
-                )
+                ${whereClause}
                 GROUP BY t.id, t.name, t.region, t.cover_image
                 ORDER BY t.id DESC
+                LIMIT ? OFFSET ?
                 `,
-                [normalizedKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword],
+                [...whereParams, limit, offSet],
             );
 
-            return rows;
+            return {
+                data: rows,
+                pagination: {
+                    currentPage,
+                    totalPages,
+                    total,
+                    limit,
+                },
+            };
         } catch (error) {
             throw error;
         }

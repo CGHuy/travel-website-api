@@ -2,10 +2,15 @@
     const TOUR_IMAGE_TOURS_API_URL = "/api/tour-images/tours";
     const TOUR_IMAGE_API_URL = "/api/tour-images";
     const DEFAULT_TOUR_IMAGE = "../../assets/images/image-default.webp";
+    const ITEMS_PER_PAGE = 5;
 
     let adminTourImageCache = [];
     let currentTourImages = [];
     let activeTourForImages = null;
+    let currentPage = 1;
+    let totalPages = 1;
+    let totalTours = 0;
+    let currentKeyword = "";
 
     async function initAdminTourImagePage() {
         const listEl = document.getElementById("tour-image-list");
@@ -17,25 +22,45 @@
         bindUploadPreview();
         bindModalReset();
 
-        await fetchAndRenderTours();
+        await fetchAndRenderTours({ page: 1 });
     }
 
-    async function fetchAndRenderTours() {
+    async function fetchAndRenderTours(options = {}) {
         const listEl = document.getElementById("tour-image-list");
+        const paginationEl = document.getElementById("tour-image-pagination-container");
         if (!listEl) return;
 
         listEl.innerHTML = '<div class="text-center p-4 text-muted">Đang tải danh sách tour...</div>';
 
         try {
-            const payload = await fetchJson(TOUR_IMAGE_TOURS_API_URL, { method: "GET" }, false);
+            const page = Math.max(Number(options.page) || 1, 1);
+            const keyword = typeof options.keyword === "string" ? options.keyword.trim().toLowerCase() : currentKeyword;
+
+            const params = new URLSearchParams({
+                page: String(page),
+                limit: String(ITEMS_PER_PAGE),
+            });
+            if (keyword) params.set("q", keyword);
+
+            const payload = await fetchJson(`${TOUR_IMAGE_TOURS_API_URL}?${params.toString()}`, { method: "GET" }, false);
             const tours = payload.success && Array.isArray(payload.data) ? payload.data : [];
+            const pagination = payload && typeof payload === "object" ? payload.pagination : null;
 
             adminTourImageCache = tours;
+            currentPage = Number(pagination && pagination.currentPage) || page;
+            totalPages = Number(pagination && pagination.totalPages) || 1;
+            totalTours = Number(pagination && pagination.total) || 0;
+            currentKeyword = keyword;
+
             renderTourImageCards(adminTourImageCache);
-            updateTotalBadge(Number(payload.total || adminTourImageCache.length));
+            updateTotalBadge(totalTours);
+            if (paginationEl) {
+                renderPaginationButtons(paginationEl);
+            }
         } catch (error) {
             listEl.innerHTML = `<div class="alert alert-warning mb-0">Không thể tải danh sách tour: ${escapeHtml(error.message || "Unknown error")}</div>`;
             updateTotalBadge(0);
+            if (paginationEl) paginationEl.innerHTML = "";
         }
     }
 
@@ -44,26 +69,19 @@
         const button = document.getElementById("tour-image-search-btn");
         if (!input || input.dataset.bound === "true") return;
 
+        let searchTimeout;
+
         const runSearch = () => {
             const keyword = String(input.value || "")
                 .trim()
                 .toLowerCase();
 
-            const filtered = adminTourImageCache.filter((tour) => {
-                const idText = String(tour.id ?? "").toLowerCase();
-                const codeText = String(tour.code ?? "").toLowerCase();
-                const nameText = String(tour.name ?? "").toLowerCase();
-                const regionText = String(tour.region ?? "").toLowerCase();
-
-                return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword) || regionText.includes(keyword);
-            });
-
-            renderTourImageCards(filtered);
+            fetchAndRenderTours({ page: 1, keyword });
         };
 
         input.addEventListener("input", () => {
-            if (String(input.value || "").trim() !== "") return;
-            renderTourImageCards(adminTourImageCache);
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(runSearch, 300);
         });
 
         input.addEventListener("keydown", (event) => {
@@ -325,29 +343,7 @@
     }
 
     async function refreshSingleTourCardCount(tourId) {
-        const payload = await fetchJson(TOUR_IMAGE_TOURS_API_URL, { method: "GET" }, false);
-        const tours = payload.success && Array.isArray(payload.data) ? payload.data : [];
-        adminTourImageCache = tours;
-
-        const searchInput = document.getElementById("tour-image-search-input");
-        const keyword = String(searchInput?.value || "")
-            .trim()
-            .toLowerCase();
-
-        if (keyword) {
-            const filtered = adminTourImageCache.filter((tour) => {
-                const idText = String(tour.id ?? "").toLowerCase();
-                const codeText = String(tour.code ?? "").toLowerCase();
-                const nameText = String(tour.name ?? "").toLowerCase();
-                const regionText = String(tour.region ?? "").toLowerCase();
-                return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword) || regionText.includes(keyword);
-            });
-            renderTourImageCards(filtered);
-            return;
-        }
-
-        renderTourImageCards(adminTourImageCache);
-        updateTotalBadge(Number(payload.total || adminTourImageCache.length));
+        await fetchAndRenderTours({ page: currentPage, keyword: currentKeyword });
 
         const selectedTour = adminTourImageCache.find((tour) => Number(tour.id) === Number(tourId));
         if (selectedTour && activeTourForImages) {
@@ -403,6 +399,37 @@
         const modalCountEl = document.getElementById("tour-image-modal-count");
         if (!modalCountEl) return;
         modalCountEl.textContent = String(count);
+    }
+
+    function renderPaginationButtons(container) {
+        container.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        let html = '<div class="pagination-buttons">';
+        html += `<button class="p-btn" ${currentPage === 1 ? "disabled" : ""} data-page="${currentPage - 1}"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(totalPages, start + 4);
+        if (end - start < 4) start = Math.max(1, end - 4);
+
+        for (let i = start; i <= end; i++) {
+            html += `<button class="p-btn ${i === currentPage ? "active" : ""}" data-page="${i}">${i}</button>`;
+        }
+
+        html += `<button class="p-btn" ${currentPage === totalPages ? "disabled" : ""} data-page="${currentPage + 1}"><i class="fa-solid fa-chevron-right"></i></button>`;
+        html += "</div>";
+
+        container.innerHTML = html;
+        container.querySelectorAll(".p-btn[data-page]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const page = Number(btn.dataset.page);
+                if (!Number.isFinite(page) || page < 1 || page > totalPages || page === currentPage) return;
+
+                fetchAndRenderTours({ page, keyword: currentKeyword });
+                document.getElementById("tour-image-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+        });
     }
 
     function resetUploadPreview() {

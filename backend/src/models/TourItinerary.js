@@ -1,14 +1,36 @@
 const db = require("../config/database");
 
 class TourItinerary {
-    // Lấy danh sách tour cho màn quản lý lịch trình (chỉ trả summary)
-    static async getTourItineraryManagementList(keyword = "") {
+    // Lấy danh sách tour cho màn quản lý lịch trình (summary) với hỗ trợ phân trang
+    static async getTourItineraryManagementList(keyword = "", page = 1, limit = 5) {
         try {
+            page = Number(page) || 1;
+            limit = Number(limit) || 5;
+
             const normalizedKeyword = String(keyword || "")
                 .trim()
                 .toLowerCase();
             const likeKeyword = `%${normalizedKeyword}%`;
 
+            const whereConditions = [];
+            const whereParams = [];
+
+            if (normalizedKeyword) {
+                whereConditions.push(`(CAST(t.id AS CHAR) LIKE ? OR LOWER(CONCAT('tour', LPAD(t.id, 3, '0'))) LIKE ? OR LOWER(COALESCE(t.name, '')) LIKE ? OR LOWER(COALESCE(t.region, '')) LIKE ?)`);
+                whereParams.push(likeKeyword, likeKeyword, likeKeyword, likeKeyword);
+            }
+
+            const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
+
+            // Count total matching tours (without JOIN aggregation)
+            const [countRows] = await db.query(`SELECT COUNT(*) AS total FROM tours t ${whereClause}`, whereParams);
+            const total = Number(countRows[0]?.total || 0);
+
+            const totalPages = Math.max(Math.ceil(total / limit), 1);
+            const currentPage = Math.min(page, totalPages);
+            const offSet = (currentPage - 1) * limit;
+
+            // Fetch paginated summary with itinerary counts
             const [rows] = await db.query(
                 `
                 SELECT
@@ -18,20 +40,23 @@ class TourItinerary {
                     COUNT(ti.id) AS itinerary_count
                 FROM tours t
                 LEFT JOIN tour_itineraries ti ON ti.tour_id = t.id
-                WHERE (
-                    ? = ''
-                    OR CAST(t.id AS CHAR) LIKE ?
-                    OR LOWER(CONCAT('tour', LPAD(t.id, 3, '0'))) LIKE ?
-                    OR LOWER(COALESCE(t.name, '')) LIKE ?
-                    OR LOWER(COALESCE(t.region, '')) LIKE ?
-                )
+                ${whereClause}
                 GROUP BY t.id, t.name
                 ORDER BY t.id DESC
+                LIMIT ? OFFSET ?
                 `,
-                [normalizedKeyword, likeKeyword, likeKeyword, likeKeyword, likeKeyword],
+                [...whereParams, limit, offSet],
             );
 
-            return rows;
+            return {
+                data: rows,
+                pagination: {
+                    currentPage,
+                    totalPages,
+                    total,
+                    limit,
+                },
+            };
         } catch (error) {
             throw error;
         }

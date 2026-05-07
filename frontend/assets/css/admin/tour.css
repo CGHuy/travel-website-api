@@ -106,6 +106,128 @@
     margin-bottom: 24px;
 }
 
+/* Filter card and controls */
+.filter-card {
+    background: #fff;
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.filter-top {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.filter-search-wrap {
+    flex: 1;
+}
+
+.filter-search-input {
+    position: relative;
+}
+
+.filter-search-input .search-icon-modern {
+    left: 16px;
+}
+
+.filter-search-input .search-input-modern {
+    padding: 14px 20px 14px 48px;
+    border-radius: 10px;
+    border: 1px solid #eef2f6;
+    background-color: #fbfdff;
+}
+
+.filter-actions {
+    min-width: auto;
+    display: flex;
+}
+
+.filter-reset-btn {
+    padding: 8px 14px;
+    font-size: 0.95rem;
+    background-color: #6c757d;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.filter-reset-btn:hover {
+    background-color: #5a6268;
+}
+
+.filter-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-item {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.filter-select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.price-control {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-range {
+    flex: 1;
+    cursor: pointer;
+}
+
+.price-display {
+    font-size: 0.9rem;
+    color: #666;
+    min-width: 80px;
+    font-weight: 600;
+    padding: 6px 10px;
+    background: #f6f7f8;
+    border-radius: 6px;
+    text-align: center;
+}
+
+/* Tour item image */
+.tour-item-image {
+    width: 150px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Edit preview image */
+.edit-preview {
+    max-height: 200px;
+}
+
 .search-row {
     display: flex;
     gap: 12px;
