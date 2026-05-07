@@ -7,11 +7,15 @@ exports.getAllTours = async (req, res) => {
         const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
         const limit = Math.max(parseInt(req.query.limit, 10) || 5, 1);
         const keyword = (req.query.keyword || req.query.q || "").toString().trim();
+        const region = (req.query.region || "").toString().trim();
+        const priceMax = req.query.priceMax ? parseInt(req.query.priceMax, 10) : null;
 
         const result = await Tour.getAllPaginated({
             page,
             limit,
             keyword,
+            region,
+            priceMax,
         });
 
         const data = (Array.isArray(result.data) ? result.data : []).map((tour) => ({

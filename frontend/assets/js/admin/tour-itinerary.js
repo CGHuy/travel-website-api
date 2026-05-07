@@ -1,8 +1,13 @@
 (() => {
     const ITINERARY_TOUR_API_URL = "/api/tourItinerary/tours";
     const ITINERARY_API_URL = "/api/tourItinerary";
+    const ITEMS_PER_PAGE = 5;
 
     let adminItineraryCache = [];
+    let currentPage = 1;
+    let totalPages = 1;
+    let totalTours = 0;
+    let currentKeyword = "";
 
     async function initAdminItineraryPage() {
         const listEl = document.getElementById("tour-itinerary-list");
@@ -21,32 +26,48 @@
         await fetchAndRenderItineraryTours();
     }
 
-    async function fetchAndRenderItineraryTours() {
+    async function fetchAndRenderItineraryTours(options = {}) {
         const listEl = document.getElementById("tour-itinerary-list");
+        const paginationEl = document.getElementById("itinerary-pagination-container");
         if (!listEl) {
             return;
         }
 
+        const page = Math.max(Number(options.page) || 1, 1);
+        const keyword = typeof options.keyword === "string" ? options.keyword.trim().toLowerCase() : currentKeyword;
+
         listEl.innerHTML = '<li class="list-group-item text-center p-4 text-muted">Đang tải danh sách tour...</li>';
 
         try {
-            const tourRes = await fetch(ITINERARY_TOUR_API_URL);
-            if (!tourRes.ok) throw new Error(`HTTP ${tourRes.status}`);
+            const params = new URLSearchParams({
+                page: String(page),
+                limit: String(ITEMS_PER_PAGE),
+            });
+            if (keyword) params.set("q", keyword);
 
-            const tourPayload = await parseJsonSafe(tourRes);
-            adminItineraryCache = tourPayload.success && Array.isArray(tourPayload.data) ? tourPayload.data : [];
+            const res = await fetch(`${ITINERARY_TOUR_API_URL}?${params.toString()}`, { cache: "no-store" });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const payload = await parseJsonSafe(res);
+            const rows = payload.success && Array.isArray(payload.data) ? payload.data : [];
+            const pagination = payload && typeof payload === "object" ? payload.pagination : null;
+
+            adminItineraryCache = rows;
+            currentPage = Number(pagination && pagination.currentPage) || page;
+            totalPages = Number(pagination && pagination.totalPages) || 1;
+            totalTours = Number(pagination && pagination.total) || 0;
+            currentKeyword = keyword;
 
             const totalEl = document.getElementById("itinerary-total-count");
-            if (totalEl) {
-                totalEl.textContent = String(Number(tourPayload.total || 0));
-            }
+            if (totalEl) totalEl.textContent = String(totalTours);
 
             renderItineraryTourList(adminItineraryCache);
+            if (paginationEl) renderPaginationButtons(paginationEl);
         } catch (error) {
             listEl.innerHTML = '<li class="list-group-item text-center p-4 text-danger">Không tải được dữ liệu tour. Lỗi: ' + error.message + "</li>";
-
             const totalEl = document.getElementById("itinerary-total-count");
             if (totalEl) totalEl.textContent = "0";
+            if (paginationEl) paginationEl.innerHTML = "";
         }
     }
 
@@ -55,19 +76,14 @@
         const searchBtn = document.getElementById("itinerary-search-btn");
         if (!input || input.dataset.bound === "true") return;
 
+        let searchTimeout;
+
         const runSearch = () => {
             const keyword = String(input.value || "")
                 .trim()
                 .toLowerCase();
 
-            const filtered = adminItineraryCache.filter((tour) => {
-                const idText = String(tour.id ?? "").toLowerCase();
-                const codeText = String(tour.code ?? "").toLowerCase();
-                const nameText = String(tour.name ?? "").toLowerCase();
-                return idText.includes(keyword) || codeText.includes(keyword) || nameText.includes(keyword);
-            });
-
-            renderItineraryTourList(filtered);
+            fetchAndRenderItineraryTours({ page: 1, keyword });
         };
 
         input.addEventListener("keydown", (event) => {
@@ -77,8 +93,8 @@
         });
 
         input.addEventListener("input", () => {
-            if (String(input.value || "").trim() !== "") return;
-            renderItineraryTourList(adminItineraryCache);
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(runSearch, 300);
         });
 
         if (searchBtn) {
@@ -117,6 +133,40 @@
 
         listEl.innerHTML = "";
         listEl.appendChild(fragment);
+    }
+
+    function renderPaginationButtons(container) {
+        container.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        let html = '<div class="pagination-buttons">';
+
+        html += `<button class="p-btn" ${currentPage === 1 ? "disabled" : ""} data-page="${currentPage - 1}"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(totalPages, start + 4);
+        if (end - start < 4) start = Math.max(1, end - 4);
+
+        for (let i = start; i <= end; i++) {
+            html += `<button class="p-btn ${i === currentPage ? "active" : ""}" data-page="${i}">${i}</button>`;
+        }
+
+        html += `<button class="p-btn" ${currentPage === totalPages ? "disabled" : ""} data-page="${currentPage + 1}"><i class="fa-solid fa-chevron-right"></i></button>`;
+        html += "</div>";
+
+        container.innerHTML = html;
+        container.querySelectorAll(".p-btn[data-page]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const page = Number(btn.dataset.page);
+                if (!Number.isFinite(page) || page === currentPage || page < 1 || page > totalPages) {
+                    return;
+                }
+
+                fetchAndRenderItineraryTours({ page, keyword: currentKeyword });
+                document.getElementById("tour-itinerary-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+        });
     }
 
     function buildItineraryTourNode(template, tour) {
@@ -340,7 +390,7 @@
                 }
 
                 hideModalById("itineraryModal");
-                await fetchAndRenderItineraryTours();
+                await fetchAndRenderItineraryTours({ page: currentPage, keyword: currentKeyword, forceRefetch: true });
                 showNotification("bg-primary", "Thông báo", "Lưu lịch trình thành công");
             } catch (error) {
                 console.error("Lỗi lưu lịch trình:", error);
@@ -386,7 +436,7 @@
                 }
 
                 hideModalById("itineraryModal");
-                await fetchAndRenderItineraryTours();
+                await fetchAndRenderItineraryTours({ page: currentPage, keyword: currentKeyword, forceRefetch: true });
                 showNotification("bg-danger", "Thông báo", "Xóa toàn bộ lịch trình thành công");
             } catch (error) {
                 console.error("Lỗi xóa toàn bộ lịch trình:", error);

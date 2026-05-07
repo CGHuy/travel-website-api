@@ -7,11 +7,14 @@ exports.getToursForImageManagement = async (req, res) => {
         const q = String(req.query.q || "")
             .trim()
             .toLowerCase();
+        const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+        const limit = Math.max(parseInt(req.query.limit, 10) || 5, 1);
 
-        const tours = await TourImage.getTourImageManagementList(q);
-        const data = tours.map((tour) => ({
+        const result = await TourImage.getTourImageManagementList(q, page, limit);
+        const rows = Array.isArray(result.data) ? result.data : [];
+        const data = rows.map((tour) => ({
             id: tour.id,
-            code: `TOUR${String(tour.id).padStart(3, "0")}`,
+            code: tour.code || `TOUR${String(tour.id).padStart(3, "0")}`,
             name: tour.name || "",
             region: tour.region || "",
             cover_image: tour.cover_image || "",
@@ -21,7 +24,7 @@ exports.getToursForImageManagement = async (req, res) => {
         return res.json({
             success: true,
             data,
-            total: data.length,
+            pagination: result.pagination,
         });
     } catch (error) {
         return res.status(500).json({
