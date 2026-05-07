@@ -604,6 +604,247 @@
     gap: 12px;
 }
 
-.w-100 {
+/* Invoice Modal Specifics */
+.invoice-modal-content {
+    max-width: 800px !important;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.invoice-modal-content .modal-body {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Invoice Paper Style */
+.invoice-container {
+    background: white;
+    padding: 40px;
+    color: #1e293b;
+    font-family: "Inter", sans-serif;
+    line-height: 1.5;
+}
+
+.invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.company-name {
+    font-size: 28px;
+    font-weight: 900;
+    color: #0d6efd;
+    margin-bottom: 5px;
+    letter-spacing: -0.5px;
+}
+
+.company-info p {
+    font-size: 13px;
+    color: #64748b;
+    margin: 2px 0;
+}
+
+.invoice-title {
+    text-align: right;
+}
+
+.invoice-title h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: #1e293b;
+}
+
+.invoice-title p {
+    font-size: 14px;
+    margin: 2px 0;
+    color: #475569;
+}
+
+.invoice-divider {
+    border: none;
+    border-top: 2px solid #f1f5f9;
+    margin: 30px 0;
+}
+
+.invoice-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.client-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px 30px;
+}
+
+.client-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.client-item label {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.client-item span {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.tour-invoice-info {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.tour-invoice-info p {
+    margin: 8px 0;
+    font-size: 15px;
+}
+
+.invoice-table {
     width: 100%;
+    border-collapse: collapse;
+    margin: 30px 0;
+}
+
+.invoice-table th {
+    background: #f8fafc;
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.invoice-table td {
+    padding: 15px;
+    font-size: 14px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.invoice-table tfoot td {
+    padding: 10px 15px;
+    border: none;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.invoice-footer {
+    margin-top: 50px;
+}
+
+.signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 50px;
+}
+
+.signature-box {
+    width: 200px;
+    text-align: center;
+}
+
+.sign-space {
+    height: 80px;
+}
+
+.invoice-note {
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 20px;
+}
+
+/* ==========================================================================
+   CHỨC NĂNG IN HÓA ĐƠN (PRINT OPTIMIZATION)
+   ========================================================================== */
+@media print {
+    /* 1. Thiết lập khổ giấy A4 và lề */
+    @page {
+        size: A4;
+        margin: 10mm;
+    }
+
+    /* 2. Ẩn toàn bộ nội dung website */
+    body * {
+        visibility: hidden !important;
+    }
+
+    /* 3. Chỉ hiển thị phần hóa đơn (id="invoice") */
+    #invoice, #invoice * {
+        visibility: visible !important;
+    }
+
+    /* 4. Định vị hóa đơn ra đầu trang và bao phủ toàn bộ */
+    #invoice {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        display: block !important;
+        background: white !important;
+    }
+
+    /* 5. Ép buộc các thành phần cha của hóa đơn không được ẩn hoặc giới hạn chiều cao */
+    html, body, 
+    .premium-modal, 
+    .invoice-modal-content, 
+    .invoice-modal-content .modal-body {
+        visibility: visible !important;
+        overflow: visible !important;
+        height: auto !important;
+        display: block !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+    }
+
+    /* 6. Ẩn các nút bấm và phần header của modal khi in */
+    .no-print, .modal-header, .close-modal, #btn-do-print {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* 7. Đảm bảo ảnh (QR, Logo) in được */
+    img {
+        max-width: 100% !important;
+    }
+    
+    /* Tối ưu bảng biểu khi in */
+    .invoice-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    .invoice-table th, .invoice-table td {
+        border: 1px solid #dee2e6 !important;
+    }
 }

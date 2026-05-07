@@ -212,10 +212,8 @@ function renderBookingDetail(booking) {
         document.getElementById("booking-note").classList.remove("text-muted");
     }
 
-    // Event In hóa đơn
-    document.getElementById("print-booking").addEventListener("click", () => {
-        window.print();
-    });
+    // Setup Invoice Logic
+    setupInvoiceLogic(booking);
 
     // 7. Render Action Buttons
     const actionContainer = document.getElementById("booking-actions");
@@ -428,4 +426,143 @@ function getStatusInfo(status) {
         default:
             return { label: status, class: "pending" };
     }
+}
+
+function setupInvoiceLogic(booking) {
+    const btnPrint = document.getElementById("print-booking");
+    const modal = document.getElementById("invoice-modal");
+    if (!btnPrint || !modal) return;
+
+    const closeBtn = modal.querySelector(".close-modal");
+    const doPrintBtn = document.getElementById("btn-do-print");
+
+    btnPrint.onclick = () => {
+        // Populate data
+        document.getElementById("inv-booking-id").textContent = `#BOK${String(booking.id).padStart(3, "0")}`;
+        document.getElementById("inv-current-date").textContent = new Date().toLocaleDateString("vi-VN");
+        document.getElementById("inv-fullname").textContent = booking.contact_name;
+        document.getElementById("inv-phone").textContent = booking.contact_phone;
+        document.getElementById("inv-email").textContent = booking.contact_email;
+        document.getElementById("inv-tour-name").textContent = booking.tour_name;
+        document.getElementById("inv-dep-date").textContent = new Date(booking.departure_date).toLocaleDateString("vi-VN");
+        document.getElementById("inv-dep-loc").textContent = booking.departure_location;
+
+        // Price Breakdown
+        const priceRows = document.getElementById("inv-price-rows");
+        if (priceRows) {
+            const adultBase = parseFloat(booking.price_default || 0) + parseFloat(booking.price_moving || 0);
+            const childBase = parseFloat(booking.price_child || 0) + parseFloat(booking.price_moving_child || 0);
+            const adultTotal = booking.adults * adultBase;
+            const childTotal = booking.children * childBase;
+
+            let rowsHtml = `
+                <tr>
+                    <td>Vé người lớn</td>
+                    <td>${booking.adults}</td>
+                    <td>${formatCurrency(adultBase)}</td>
+                    <td class="text-right">${formatCurrency(adultTotal)}</td>
+                </tr>
+            `;
+
+            if (booking.children > 0) {
+                rowsHtml += `
+                    <tr>
+                        <td>Vé trẻ em</td>
+                        <td>${booking.children}</td>
+                        <td>${formatCurrency(childBase)}</td>
+                        <td class="text-right">${formatCurrency(childTotal)}</td>
+                    </tr>
+                `;
+            }
+
+            priceRows.innerHTML = rowsHtml;
+        }
+
+        const totalPrice = parseFloat(booking.total_price || 0);
+        document.getElementById("inv-total-price").textContent = formatCurrency(totalPrice);
+        document.getElementById("inv-total-text").textContent = numberToVietnameseText(totalPrice) + " đồng chẵn.";
+        
+        const paymentStatusEl = document.getElementById("inv-payment-status");
+        if (booking.payment_status === "paid") {
+            paymentStatusEl.textContent = "Đã thanh toán";
+            paymentStatusEl.className = "text-right text-success fw-bold";
+        } else {
+            paymentStatusEl.textContent = "Chưa hoàn tất";
+            paymentStatusEl.className = "text-right text-danger";
+        }
+
+        // QR Code
+        const qrImg = document.getElementById("inv-qr-code");
+        if (qrImg) {
+            const bookingRef = `BOK${String(booking.id).padStart(3, "0")}`;
+            qrImg.innerHTML = `<img src="https://quickchart.io/qr?text=${bookingRef}&size=100" alt="QR" style="border-radius: 4px;" />`;
+        }
+
+        modal.style.display = "flex";
+    };
+
+    closeBtn.onclick = () => (modal.style.display = "none");
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+    doPrintBtn.onclick = () => { printInvoice(); };
+}
+
+/**
+ * Chức năng in hóa đơn chuẩn
+ */
+function printInvoice() {
+    // Nếu đang dùng Bootstrap Modal, đôi khi cần trigger nhẹ để đảm bảo layout in
+    window.print();
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
+}
+
+function numberToVietnameseText(number) {
+    const units = ["", "nghìn", "triệu", "tỷ", "nghìn tỷ", "triệu tỷ"];
+    const digits = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+
+    if (number === 0) return "Không";
+    if (number < 0) return "Âm " + numberToVietnameseText(Math.abs(number));
+
+    let res = "";
+    let unitIdx = 0;
+
+    function readThreeDigits(n, isLast) {
+        let s = "";
+        const h = Math.floor(n / 100);
+        const t = Math.floor((n % 100) / 10);
+        const u = n % 10;
+
+        if (h > 0 || !isLast) {
+            s += digits[h] + " trăm ";
+            if (t === 0 && u !== 0) s += "lẻ ";
+        }
+
+        if (t > 0) {
+            if (t === 1) s += "mười ";
+            else s += digits[t] + " mươi ";
+        }
+
+        if (u > 0) {
+            if (t > 1 && u === 1) s += "mốt ";
+            else if (t > 0 && u === 5) s += "lăm ";
+            else s += digits[u];
+        }
+
+        return s;
+    }
+
+    let temp = number;
+    while (temp > 0) {
+        const three = temp % 1000;
+        if (three > 0) {
+            const part = readThreeDigits(three, temp < 1000);
+            res = part + " " + units[unitIdx] + " " + res;
+        }
+        temp = Math.floor(temp / 1000);
+        unitIdx++;
+    }
+
+    return res.trim().charAt(0).toUpperCase() + res.trim().slice(1);
 }

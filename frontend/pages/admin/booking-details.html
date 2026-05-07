@@ -15,7 +15,7 @@
         <div id="cancellation-action-area" style="display: none">
             <button class="btn-premium btn-danger-premium" id="btn-show-cancel-modal" style="height: 100%"><i class="fa-solid fa-hand-holding-dollar"></i> Phê duyệt hủy tour & Hoàn tiền</button>
         </div>
-        <button class="btn-premium"><i class="fa-solid fa-print"></i> In hóa đơn</button>
+        <button class="btn-premium" id="btn-print-invoice"><i class="fa-solid fa-print"></i> In hóa đơn</button>
     </div>
 </section>
 
@@ -221,4 +221,128 @@
         </div>
     </div>
 </div>
+<!-- Invoice Modal -->
+<div id="invoice-modal" class="premium-modal" style="display: none">
+    <div class="modal-content invoice-modal-content">
+        <div class="modal-header no-print">
+            <h3><i class="fa-solid fa-file-invoice"></i> Xem trước hóa đơn</h3>
+            <div class="modal-header-actions">
+                <button class="btn-premium" id="btn-do-print"><i class="fa-solid fa-print"></i> In ngay</button>
+                <span class="close-modal">&times;</span>
+            </div>
+        </div>
+        <div class="modal-body" id="invoice">
+            <div class="invoice-container">
+                <!-- Invoice Header -->
+                <div class="invoice-header">
+                    <div class="company-info">
+                        <h2 class="company-name">VIETTRAVEL</h2>
+                        <p>123 Đường du lịch, Quận 1, TP. Hồ Chí Minh</p>
+                        <p>Hotline: 1900 1234 | Email: info@viettravel.com</p>
+                    </div>
+                    <div class="invoice-title">
+                        <h1>HÓA ĐƠN</h1>
+                        <p>Mã: <span id="inv-booking-id">#BOK001</span></p>
+                        <p>Ngày: <span id="inv-current-date">07/05/2026</span></p>
+                    </div>
+                </div>
+
+                <hr class="invoice-divider" />
+
+                <!-- Invoice Client Info -->
+                <div class="invoice-section">
+                    <div class="section-title">THÔNG TIN KHÁCH HÀNG</div>
+                    <div class="client-grid">
+                        <div class="client-item">
+                            <label>Họ tên:</label>
+                            <span id="inv-fullname">Nguyễn Văn A</span>
+                        </div>
+                        <div class="client-item">
+                            <label>Số điện thoại:</label>
+                            <span id="inv-phone">0909123456</span>
+                        </div>
+                        <div class="client-item">
+                            <label>Email:</label>
+                            <span id="inv-email">customer@example.com</span>
+                        </div>
+                        <div class="client-item">
+                            <label>Địa chỉ:</label>
+                            <span>Hồ Chí Minh, Việt Nam</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Invoice Tour Info -->
+                <div class="invoice-section">
+                    <div class="section-title">THÔNG TIN DỊCH VỤ</div>
+                    <div class="tour-invoice-info">
+                        <p><strong>Tour:</strong> <span id="inv-tour-name">Tour Du Lịch Nhật Bản: Tokyo - Osaka - Kyoto</span></p>
+                        <p><strong>Khởi hành:</strong> <span id="inv-dep-date">10/05/2026</span></p>
+                        <p><strong>Điểm đón:</strong> <span id="inv-dep-loc">Sân bay Tân Sơn Nhất</span></p>
+                    </div>
+                </div>
+
+                <!-- Invoice Table -->
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>Hạng mục</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th class="text-right">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inv-price-rows">
+                        <!-- Rows will be added here -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-right"><strong>Tổng cộng:</strong></td>
+                            <td class="text-right"><strong id="inv-total-price">0đ</strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-right">
+                                <em style="font-size: 0.9em; color: #64748b;">Bằng chữ: <span id="inv-total-text">...</span></em>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-right">Trạng thái:</td>
+                            <td class="text-right" id="inv-payment-status">Đã thanh toán</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <!-- Invoice Footer -->
+                <div class="invoice-footer">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+                        <div class="qr-placeholder">
+                            <div id="inv-qr-code" style="width: 100px; height: 100px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0;">
+                                <i class="fa-solid fa-qrcode" style="font-size: 40px; color: #cbd5e1;"></i>
+                            </div>
+                            <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; text-align: center;">Mã xác thực hóa đơn</p>
+                        </div>
+                        
+                        <div class="signature-section" style="margin-bottom: 0; gap: 60px;">
+                            <div class="signature-box">
+                                <p>Khách hàng</p>
+                                <div class="sign-space"></div>
+                                <p>(Ký và ghi rõ họ tên)</p>
+                            </div>
+                            <div class="signature-box">
+                                <p>Người lập hóa đơn</p>
+                                <div class="sign-space"></div>
+                                <p><strong>Viettravel</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="invoice-note">
+                        <p>* Cảm ơn quý khách đã tin tưởng và sử dụng dịch vụ của Viettravel!</p>
+                        <p>* Hóa đơn này có giá trị xác nhận đặt chỗ thành công.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="/assets/js/admin/booking-details.js"></script>

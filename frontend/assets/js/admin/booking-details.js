@@ -328,6 +328,92 @@ function renderAdminBookingDetails(data) {
     } else if (cancelActionArea) {
         cancelActionArea.style.display = "none";
     }
+
+    // Setup Invoice Logic
+    setupInvoiceLogic(data);
+}
+
+function setupInvoiceLogic(data) {
+    const btnPrint = document.getElementById("btn-print-invoice");
+    const modal = document.getElementById("invoice-modal");
+    const closeBtn = modal.querySelector(".close-modal");
+    const doPrintBtn = document.getElementById("btn-do-print");
+
+    if (!btnPrint || !modal) return;
+
+    btnPrint.onclick = () => {
+        // Populate data
+        setElText("inv-booking-id", `#BOK${String(data.id).padStart(3, "0")}`);
+        setElText("inv-current-date", new Date().toLocaleDateString("vi-VN"));
+        setElText("inv-fullname", data.contact_name || data.user_fullname);
+        setElText("inv-phone", data.contact_phone || data.user_phone);
+        setElText("inv-email", data.contact_email || data.user_email);
+        setElText("inv-tour-name", data.tour_name);
+        setElText("inv-dep-date", formatDate(data.departure_date));
+        setElText("inv-dep-loc", data.departure_location);
+
+        // Price Breakdown
+        const priceRows = document.getElementById("inv-price-rows");
+        if (priceRows) {
+            const adultBase = parseFloat(data.price_default) + parseFloat(data.price_moving);
+            const childBase = parseFloat(data.price_child) + parseFloat(data.price_moving_child);
+            const adultTotal = data.adults * adultBase;
+            const childTotal = data.children * childBase;
+
+            let rowsHtml = `
+                <tr>
+                    <td>Vé người lớn</td>
+                    <td>${data.adults}</td>
+                    <td>${formatCurrency(adultBase)}</td>
+                    <td class="text-right">${formatCurrency(adultTotal)}</td>
+                </tr>
+            `;
+
+            if (data.children > 0) {
+                rowsHtml += `
+                    <tr>
+                        <td>Vé trẻ em</td>
+                        <td>${data.children}</td>
+                        <td>${formatCurrency(childBase)}</td>
+                        <td class="text-right">${formatCurrency(childTotal)}</td>
+                    </tr>
+                `;
+            }
+
+            priceRows.innerHTML = rowsHtml;
+        }
+
+        setElText("inv-total-price", formatCurrency(data.total_price));
+        setElText("inv-total-text", numberToVietnameseText(data.total_price) + " đồng chẵn.");
+        setElText("inv-payment-status", data.payment_status === "paid" ? "Đã thanh toán" : getPaymentStatusText(data.payment_status));
+
+        // Optional: Simple QR code generation using a public API (e.g., QuickChart or similar)
+        const qrImg = document.getElementById("inv-qr-code");
+        if (qrImg) {
+            const bookingRef = `BOK${String(data.id).padStart(3, "0")}`;
+            qrImg.innerHTML = `<img src="https://quickchart.io/qr?text=${bookingRef}&size=100" alt="QR" style="border-radius: 4px;" />`;
+        }
+
+        modal.style.display = "flex";
+    };
+
+    closeBtn.onclick = () => (modal.style.display = "none");
+    
+    // Close on click outside
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.style.display = "none";
+    };
+
+    doPrintBtn.onclick = () => {
+        printInvoice();
+    };
+}
+
+/**
+ * Chức năng in hóa đơn chuẩn
+ */
+function printInvoice() {
+    window.print();
 }
 
 function renderActivityHistory(data) {
@@ -457,4 +543,53 @@ function setLoading(btn, isLoading, defaultText = "") {
         btn.disabled = false;
         btn.innerHTML = defaultText;
     }
+}
+
+function numberToVietnameseText(number) {
+    const units = ["", "nghìn", "triệu", "tỷ", "nghìn tỷ", "triệu tỷ"];
+    const digits = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+
+    if (number === 0) return "Không";
+    if (number < 0) return "Âm " + numberToVietnameseText(Math.abs(number));
+
+    let res = "";
+    let unitIdx = 0;
+
+    function readThreeDigits(n, isLast) {
+        let s = "";
+        const h = Math.floor(n / 100);
+        const t = Math.floor((n % 100) / 10);
+        const u = n % 10;
+
+        if (h > 0 || !isLast) {
+            s += digits[h] + " trăm ";
+            if (t === 0 && u !== 0) s += "lẻ ";
+        }
+
+        if (t > 0) {
+            if (t === 1) s += "mười ";
+            else s += digits[t] + " mươi ";
+        }
+
+        if (u > 0) {
+            if (t > 1 && u === 1) s += "mốt ";
+            else if (t > 0 && u === 5) s += "lăm ";
+            else s += digits[u];
+        }
+
+        return s;
+    }
+
+    let temp = number;
+    while (temp > 0) {
+        const three = temp % 1000;
+        if (three > 0) {
+            const part = readThreeDigits(three, temp < 1000);
+            res = part + " " + units[unitIdx] + " " + res;
+        }
+        temp = Math.floor(temp / 1000);
+        unitIdx++;
+    }
+
+    return res.trim().charAt(0).toUpperCase() + res.trim().slice(1);
 }
