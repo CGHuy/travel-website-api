@@ -11,26 +11,48 @@ class Tour {
         }
     }
 
-    // Lấy danh sách tour có phân trang và tìm kiếm.
-    static async getAllPaginated({ page = 1, limit = 5, keyword = "" } = {}) {
+    // Lấy danh sách tour có phân trang, tìm kiếm, và lọc theo region và giá.
+    static async getAllPaginated({ page = 1, limit = 5, keyword = "", region = "", priceMax = null } = {}) {
         try {
-            const safePage = Number(page);
-            const safeLimit = Number(limit);
-            const offset = (safePage - 1) * safeLimit;
+            page = Number(page);
+            limit = Number(limit);
             const normalizedKeyword = String(keyword || "").trim();
+            const normalizedRegion = String(region || "").trim();
+            const safePriceMax = priceMax != null ? Number(priceMax) : null;
 
-            const whereClause = normalizedKeyword ? `WHERE CAST(id AS CHAR) LIKE ? OR CONCAT('TOUR', LPAD(id, 3, '0')) LIKE ? OR name LIKE ? OR region LIKE ?` : "";
+            // Xây dựng WHERE clause từ các điều kiện
+            const whereConditions = [];
+            const whereParams = [];
 
-            const searchPattern = `%${normalizedKeyword}%`;
-            const whereParams = normalizedKeyword ? [searchPattern, searchPattern, searchPattern, searchPattern] : [];
+            // Điều kiện tìm kiếm keyword
+            if (normalizedKeyword) {
+                whereConditions.push(`(CAST(id AS CHAR) LIKE ? OR CONCAT('TOUR', LPAD(id, 3, '0')) LIKE ? OR name LIKE ?)`);
+                const searchPattern = `%${normalizedKeyword}%`;
+                whereParams.push(searchPattern, searchPattern, searchPattern);
+            }
+
+            // Điều kiện lọc theo region
+            if (normalizedRegion) {
+                whereConditions.push(`region = ?`);
+                whereParams.push(normalizedRegion);
+            }
+
+            // Điều kiện lọc theo giá
+            // Giá = 10000000 được dùng làm giá mặc định "10M+" (không lọc)
+            if (Number.isFinite(safePriceMax) && safePriceMax >= 0 && safePriceMax < 10000000) {
+                whereConditions.push(`price_default <= ?`);
+                whereParams.push(safePriceMax);
+            }
+
+            const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
 
             const [countRows] = await db.query(`SELECT COUNT(*) AS total FROM tours ${whereClause}`, whereParams);
             const total = Number(countRows[0]?.total || 0);
-            const totalPages = Math.max(Math.ceil(total / safeLimit), 1);
-            const currentPage = Math.min(safePage, totalPages);
-            const currentOffset = (currentPage - 1) * safeLimit;
+            const totalPages = Math.max(Math.ceil(total / limit), 1);
+            const currentPage = Math.min(page, totalPages);
+            const offSet = (currentPage - 1) * limit;
 
-            const [rows] = await db.query(`SELECT * FROM tours ${whereClause} ORDER BY id DESC LIMIT ? OFFSET ?`, [...whereParams, safeLimit, currentOffset]);
+            const [rows] = await db.query(`SELECT * FROM tours ${whereClause} ORDER BY id DESC LIMIT ? OFFSET ?`, [...whereParams, limit, offSet]);
 
             return {
                 data: rows,
@@ -38,7 +60,7 @@ class Tour {
                     currentPage,
                     totalPages,
                     total,
-                    limit: safeLimit,
+                    limit,
                 },
             };
         } catch (error) {

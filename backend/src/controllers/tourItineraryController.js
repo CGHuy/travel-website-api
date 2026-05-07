@@ -7,9 +7,12 @@ exports.getToursForItineraryManagement = async (req, res) => {
         const q = String(req.query.q || "")
             .trim()
             .toLowerCase();
+        const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+        const limit = Math.max(parseInt(req.query.limit, 10) || 5, 1);
 
-        const tours = await TourItinerary.getTourItineraryManagementList(q);
-        const data = tours.map((tour) => {
+        const result = await TourItinerary.getTourItineraryManagementList(q, page, limit);
+        const rows = Array.isArray(result.data) ? result.data : [];
+        const data = rows.map((tour) => {
             const itineraryCount = Number(tour.itinerary_count || 0);
             return {
                 id: tour.id,
@@ -23,7 +26,7 @@ exports.getToursForItineraryManagement = async (req, res) => {
         return res.json({
             success: true,
             data,
-            total: data.filter((tour) => tour.hasItinerary).length,
+            pagination: result.pagination,
         });
     } catch (error) {
         console.error("Lỗi lấy danh sách tour lịch trình:", error);

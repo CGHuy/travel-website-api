@@ -90,6 +90,14 @@ exports.login = async (req, res) => {
             });
         }
 
+        // Kiểm tra xem user có bị khóa không
+        if (user.status === 0) {
+            return res.status(403).json({
+                success: false,
+                message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
+            });
+        }
+
         // Kiểm tra password
         const isPasswordValid = await User.comparePassword(password, user.password);
         if (!isPasswordValid) {
