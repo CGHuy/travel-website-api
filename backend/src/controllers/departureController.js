@@ -224,7 +224,14 @@ exports.searchDepartures = async (req, res) => {
 		if (tour_id) filters.tour_id = tour_id;
 		if (departure_location) filters.departure_location = departure_location;
 		if (departure_date) filters.departure_date = departure_date;
-		if (status) filters.status = status;
+		if (status) {
+			const normalizedStatus = String(status).trim().toLowerCase();
+			if (normalizedStatus === "close") {
+				filters.status = "closed";
+			} else if (["open", "closed", "full"].includes(normalizedStatus)) {
+				filters.status = normalizedStatus;
+			}
+		}
 
 		const departures = await Departure.searchDepartures(filters);
 		return res.json({

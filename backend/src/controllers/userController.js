@@ -230,7 +230,7 @@ exports.getAllUsers = async (req, res) => {
 // Tìm kiếm users với nhiều tiêu chí có phân trang (dành cho admin)
 exports.searchUsers = async (req, res) => {
 	try {
-		const { id, phone, role, status, fullname } = req.query;
+		const { id, phone, role, status, fullname, email } = req.query;
 		const page = parseInt(req.query.page) || 1;
 		const limit = parseInt(req.query.limit) || 10;
 		const filters = {};
@@ -238,9 +238,10 @@ exports.searchUsers = async (req, res) => {
 		if (id) filters.id = id;
 		if (phone) filters.phone = phone;
 		if (role) filters.role = role;
-		if (status !== undefined) filters.status = parseInt(status);
+		if (status !== undefined && status !== "") filters.status = parseInt(status);
 		if (fullname) filters.fullname = fullname;
-
+		if (email) filters.email = email;
+		
 		const result = await User.searchUsersPaginated(filters, page, limit);
 		return res.json({
 			success: true,

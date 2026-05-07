@@ -405,10 +405,18 @@ window.initAdminDeparturePage = async function () {
 			let apiUrl = `/api/departures/search`;
 			if (query) {
 				// Simple heuristic matching
+				const lowerQuery = query.toLowerCase();
+				let statusValue = null;
+				if (lowerQuery === "close") {
+					statusValue = "closed";
+				} else if (["open", "closed", "full"].includes(lowerQuery)) {
+					statusValue = lowerQuery;
+				}
+
 				if (!isNaN(query) && query.length < 5) {
 					apiUrl += `?id=${query}`;
-				} else if (["open", "closed", "full"].includes(query.toLowerCase())) {
-					apiUrl += `?status=${query.toLowerCase()}`;
+				} else if (statusValue) {
+					apiUrl += `?status=${statusValue}`;
 				} else {
 					apiUrl += `?departure_location=${encodeURIComponent(query)}`;
 				} // To make it robust: API searches only one condition here.
