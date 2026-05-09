@@ -53,11 +53,19 @@ exports.getBookingDetails = async (req, res) => {
 	}
 };
 
-// Admin: Lấy tất cả
+// Admin: Lấy tất cả (Hỗ trợ phân trang)
 exports.getAllBookings = async (req, res) => {
 	try {
-		const bookings = await bookingService.getAll();
-		res.json({ success: true, count: bookings.length, data: bookings });
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;
+		
+		const result = await bookingService.getAll(page, limit);
+		res.json({ 
+			success: true, 
+			count: result.data.length,
+			data: result.data,
+			pagination: result.pagination
+		});
 	} catch (error) {
 		res
 			.status(500)

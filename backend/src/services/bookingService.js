@@ -117,9 +117,16 @@ class bookingService {
 
 	//================== ADMIN ===================
 
-	// 1. Lấy tất cả bookings (Dành cho Admin) - Che
-	static async getAll() {
+	// 1. Lấy tất cả bookings (Dành cho Admin) - Hỗ trợ phân trang
+	static async getAll(page = 1, limit = 10) {
 		try {
+			const offset = (page - 1) * limit;
+
+			// Lấy tổng số lượng để tính totalPages
+			const [countResult] = await db.query("SELECT COUNT(*) as total FROM bookings");
+			const totalItems = countResult[0].total;
+			const totalPages = Math.ceil(totalItems / limit);
+
 			const [rows] = await db.query(`
                 SELECT 
                     b.*, 
@@ -128,14 +135,23 @@ class bookingService {
                     t.name as tour_name, 
                     t.price_default,
                     td.departure_date
-					
                 FROM bookings b
                 LEFT JOIN users u ON b.user_id = u.id
                 JOIN tour_departures td ON b.departure_id = td.id
                 JOIN tours t ON td.tour_id = t.id
                 ORDER BY b.id DESC
-            `);
-			return rows;
+                LIMIT ? OFFSET ?
+            `, [parseInt(limit), parseInt(offset)]);
+
+			return {
+				data: rows,
+				pagination: {
+					totalItems,
+					totalPages,
+					currentPage: parseInt(page),
+					limit: parseInt(limit)
+				}
+			};
 		} catch (error) {
 			throw error;
 		}

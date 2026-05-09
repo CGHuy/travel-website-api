@@ -5,6 +5,12 @@ window.initAdminBookingPage = async function () {
     const totalEl = document.getElementById("booking-total-count");
     const searchInput = document.getElementById("booking-search-input");
     const refreshBtn = document.getElementById("refresh-bookings");
+    const paginationEl = document.getElementById("booking-pagination");
+    const rangeEl = document.getElementById("booking-range");
+    const totalFilteredEl = document.getElementById("booking-total-filtered");
+
+    let currentPage = 1;
+    const limit = 10;
 
     if (!bodyEl) return;
 
@@ -72,7 +78,8 @@ window.initAdminBookingPage = async function () {
         }
     }
 
-    async function loadBookings() {
+    async function loadBookings(page = 1) {
+        currentPage = page;
         bodyEl.innerHTML =
             '<tr><td colspan="7" class="text-center text-muted p-4">Đang tải danh sách booking...</td></tr>';
         try {
@@ -83,19 +90,27 @@ window.initAdminBookingPage = async function () {
                 return;
             }
 
-            let res = await fetch("/api/bookings", {
+            let res = await fetch(`/api/bookings?page=${page}&limit=${limit}`, {
                 headers: { Authorization: "Bearer " + token },
             });
 
             if (!res.ok) throw new Error("HTTP " + res.status);
 
-            const data = await res.json();
-            const rows = data.data || [];
-            totalEl.textContent = rows.length;
+            const result = await res.json();
+            const rows = result.data || [];
+            const pagination = result.pagination || { totalItems: 0, totalPages: 0 };
+
+            totalEl.textContent = pagination.totalItems;
+            totalFilteredEl.textContent = pagination.totalItems;
+            
+            const start = (page - 1) * limit + 1;
+            const end = Math.min(page * limit, pagination.totalItems);
+            rangeEl.textContent = pagination.totalItems > 0 ? `${start}-${end}` : "0-0";
 
             if (rows.length === 0) {
                 bodyEl.innerHTML =
                     '<tr><td colspan="7" class="text-center text-muted p-4">Không có booking nào.</td></tr>';
+                renderPagination(0);
                 return;
             }
 
@@ -112,8 +127,6 @@ window.initAdminBookingPage = async function () {
                         history.pushState({ page: 'booking-details', id: r.id }, "", newUrl);
                         window.dispatchEvent(new Event('popstate'));
                     };
-                    
-                    // Add hover effect via CSS inline or rely on existing classes
                     trNode.classList.add("table-hover", "row-clickable");
                 }
 
@@ -152,12 +165,58 @@ window.initAdminBookingPage = async function () {
 
                 bodyEl.appendChild(tr);
             }
+
+            renderPagination(pagination.totalPages);
+
         } catch (err) {
             console.error("Lỗi load bookings", err);
             bodyEl.innerHTML =
                 '<tr><td colspan="7" class="text-center text-danger p-4">Lỗi khi tải danh sách. Kiểm tra server.</td></tr>';
             totalEl.textContent = "0";
         }
+    }
+
+    function renderPagination(totalPages) {
+        if (!paginationEl) return;
+        paginationEl.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        // Nút Previous
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>`;
+        if (currentPage > 1) {
+            prevLi.onclick = (e) => {
+                e.preventDefault();
+                loadBookings(currentPage - 1);
+            };
+        }
+        paginationEl.appendChild(prevLi);
+
+        // Các nút số trang
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = `page-item ${i === currentPage ? "active" : ""}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.onclick = (e) => {
+                e.preventDefault();
+                if (i !== currentPage) loadBookings(i);
+            };
+            paginationEl.appendChild(li);
+        }
+
+        // Nút Next
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>`;
+        if (currentPage < totalPages) {
+            nextLi.onclick = (e) => {
+                e.preventDefault();
+                loadBookings(currentPage + 1);
+            };
+        }
+        paginationEl.appendChild(nextLi);
     }
 
     searchInput.addEventListener("input", () => {
@@ -169,7 +228,7 @@ window.initAdminBookingPage = async function () {
         });
     });
 
-    refreshBtn.addEventListener("click", loadBookings);
+    refreshBtn.addEventListener("click", () => loadBookings(1));
 
     await loadBookings();
 };
