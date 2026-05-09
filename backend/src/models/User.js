@@ -214,6 +214,7 @@ class User {
 	// Tìm kiếm users với nhiều tiêu chí
 	static async searchUsers(filters = {}) {
 		try {
+			const safeText = (value) => typeof value === 'string' ? value.trim().toLowerCase() : value;
 			let query = `SELECT id, fullname, phone, email, role, status, created_at FROM users WHERE 1=1`;
 			const params = [];
 
@@ -224,22 +225,23 @@ class User {
 			if (filters.phone) {
 				query += ` AND phone LIKE ?`;
 				params.push(`%${filters.phone}%`);
+				params.push(`%${String(filters.phone).trim()}%`);
 			}
 			if (filters.role) {
-				query += ` AND role = ?`;
-				params.push(filters.role);
+				query += ` AND LOWER(role) = ?`;
+				params.push(safeText(filters.role));
 			}
-			if (filters.status !== undefined) {
+			if (filters.status !== undefined && filters.status !== null && filters.status !== '' && !Number.isNaN(Number(filters.status))) {
 				query += ` AND status = ?`;
 				params.push(filters.status);
 			}
 			if (filters.fullname) {
-				query += ` AND fullname LIKE ?`;
-				params.push(`%${filters.fullname}%`);
+				query += ` AND LOWER(fullname) LIKE ?`;
+				params.push(`%${safeText(filters.fullname)}%`);
 			}
 			if (filters.email) {
-				query += ` AND email LIKE ?`;
-				params.push(`%${filters.email}%`);
+				query += ` AND LOWER(email) LIKE ?`;
+				params.push(`%${safeText(filters.email)}%`);
 			}
 
 			query += ` ORDER BY id DESC`;

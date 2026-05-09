@@ -438,7 +438,7 @@
         <div class="search-row">
             <div class="search-group">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="searchInput" class="search-input-modern" placeholder="Tìm kiếm theo ID, tên, email, số điện thoại..." />
+                <input type="text" id="searchInput" class="search-input-modern" placeholder="Tìm kiếm theo ID, tên, số điện thoại..." />
             </div>
             <button id="searchBtn" class="btn-add-user search-button">
                 <i class="fa-solid fa-magnifying-glass" style="position: static; color: white;"></i> Tìm kiếm
@@ -876,6 +876,13 @@
                 } else {
                     filters.id = normalized;
                 }
+                return filters;
+            }
+
+            // Search by email if the input looks like an email address
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(normalized)) {
+                filters.email = normalized;
                 return filters;
             }
 

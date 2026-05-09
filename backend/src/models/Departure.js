@@ -252,7 +252,13 @@ class Departure {
     // Tìm kiếm departures theo nhiều tiêu chí
     static async searchDepartures(filters) {
         try {
-            let query = `SELECT * FROM tour_departures WHERE 1=1`;
+            const statusCase = `CASE
+                    WHEN departure_date < CURDATE() OR status = 'closed' THEN 'closed'
+                    WHEN seats_available <= 0 THEN 'full'
+                    ELSE 'open'
+                END`;
+
+            let query = `SELECT id, tour_id, departure_location, departure_date, price_moving, price_moving_child, seats_total, seats_available, created_at, updated_at, ${statusCase} AS status FROM tour_departures WHERE 1=1`;
             const params = [];
             if (filters.id) {
                 query += ` AND id = ?`;
@@ -271,7 +277,7 @@ class Departure {
                 params.push(filters.departure_date);
             }
             if (filters.status) {
-                query += ` AND status = ?`;
+                query += ` AND (${statusCase}) = ?`;
                 params.push(filters.status);
             }
             query += ` ORDER BY departure_date DESC`;

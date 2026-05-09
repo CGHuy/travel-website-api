@@ -2,6 +2,24 @@ const ListTourService = require("../services/listTourService");
 const WishList = require("../models/Wishlist");
 const path = require("path");
 
+/**
+ * Helper: Format response thống nhất cho cả 2 endpoint
+ * Đảm bảo structure giống nhau để frontend render đúng
+ */
+function formatTourResponse(result, options = {}) {
+    return {
+        success: true,
+        message: options.message || "Lấy danh sách tour thành công!",
+        data: result.tours,
+        pagination: {
+            totalCount: result.totalCount,
+            currentPage: result.currentPage,
+            totalPages: result.totalPages,
+            limit: result.currentPage && result.currentPages ? Math.ceil(result.totalCount / result.totalPages) : null
+        }
+    };
+}
+
 exports.getAllTours = async (req, res) => {
     try {
         // Lấy tất cả params gửi lên từ JS (req.query) cấu trúc lại
@@ -18,17 +36,7 @@ exports.getAllTours = async (req, res) => {
 
         const result = await ListTourService.getFilteredTours(filters);
 
-        res.json({
-            success: true,
-            message: "Lấy danh sách tour thành công!",
-            data: result.tours,
-            pagination: {
-                totalCount: result.totalCount,
-                currentPage: result.currentPage,
-                totalPages: result.totalPages,
-                limit: filters.limit
-            }
-        });
+        res.json(formatTourResponse(result));
     } catch (error) {
         console.error("Lỗi getFilteredTours:", error);
         res.status(500).json({
@@ -197,15 +205,16 @@ exports.getTourSuggestions = async (req, res) => {
     
     try {
         const result = await ListTourService.getTourSuggestions(userMessage);
-        res.json({ 
-            success: true, 
-            message: result.reply, // Lấy câu trả lời của AI làm message để hiển thị
-            data: result.tours,    // Mảng tours y hệt cấu trúc lấy từ db
+        
+        // Dùng helper để đảm bảo response structure 100% giống getAllTours
+        res.json({
+            success: true,
+            message: result.reply,
+            data: result.tours,
             pagination: {
                 totalCount: result.totalCount,
                 currentPage: result.currentPage,
-                totalPages: result.totalPages,
-                limit: 5 // Đã fix cứng limit là 5 trong hàm gợi ý
+                totalPages: result.totalPages
             }
         });
     } catch (error) {

@@ -7,15 +7,44 @@ const tourItineraryModel = require("../models/TourItinerary");
 const review = require("../models/Review");
 const departureModel = require("../models/Departure");
 
+// Config
+const MAX_QUERY_LIMIT = 1000;
+const AI_MODEL = process.env.AI_MODEL || "qwen2:7b";
+const OLLAMA_API_URL = process.env.OLLAMA_API_URL || "http://localhost:11434/api/generate";
+
+// Regex patterns cho extraction
+const PATTERNS = {
+    price: /(?:dưới|tối đa|khoảng|chỉ)?\s*(\d+)\s*(?:triệu|tr|trieu)/i,
+    short_duration: /\b([1-3])\s*(?:ngày|n)\b|\b3n2d\b|ngắn|short/i,
+    long_duration: /\b([4-9]|1[0-9]|2[0-9])\s*(?:ngày|n)\b|\b4\+\b|dài|long|tuần|week/i,
+    north: /mien bac|bac ky|north/i,
+    central: /mien trung|trung ky|central/i,
+    south: /mien nam|nam ky|south/i,
+    departure: /(?:khởi hành từ|xuất phát từ|đón tại|đi từ|departure from)\s+([^,.]+?)(?=\s+(?:và|hoặc|,|\.|$)|,|\.|$)/i,
+};
+
+// Score weights
+const SCORE_WEIGHTS = {
+    price: 2,
+    duration: 2,
+    region: 3,
+    tour_name: 5,
+    tour_location: 5,
+    departure_location: 4,
+    departure_bonus: 3,
+    price_ratio: 2,
+};
+
 class ListTourService {
     /**
      * Lấy danh sách tour dựa trên nhiều tiêu chí lọc và phân trang
      * @param {Object} filters Gồm { search, max_price, region, duration_type, service_ids, sort, page, limit }
+     * @param {number} filters.limit Số tour trên một trang (nếu null/undefined = lấy tất cả không phân trang)
      */
     static async getFilteredTours(filters) {
         const page = parseInt(filters.page) || 1;
-        const limit = parseInt(filters.limit) || 6;
-        const offset = (page - 1) * limit;
+        const limit = filters.limit === null || filters.limit === undefined ? null : Math.min(parseInt(filters.limit), MAX_QUERY_LIMIT);
+        const offset = limit ? (page - 1) * limit : 0;
 
         // Query cơ bản lấy tours kèm ngày khởi hành sắp tới
         // Thêm SQL_CALC_FOUND_ROWS để lấy tổng số hàng khớp bộ lọc mà không cần query lại lần 2 (tối ưu performance)
@@ -110,9 +139,11 @@ class ListTourService {
             baseSql += ` ORDER BY t.created_at DESC`;
         }
 
-        // 7. PHÂN TRANG
-        baseSql += ` LIMIT ? OFFSET ?`;
-        queryValues.push(limit, offset);
+        // 7. PHÂN TRANG (chỉ append LIMIT nếu có limit)
+        if (limit) {
+            baseSql += ` LIMIT ? OFFSET ?`;
+            queryValues.push(limit, offset);
+        }
 
         try {
             const [rows] = await db.query(baseSql, queryValues);
@@ -128,7 +159,7 @@ class ListTourService {
                 tours: normalizedRows,
                 totalCount: total,
                 currentPage: page,
-                totalPages: Math.ceil(total / limit),
+                totalPages: limit ? Math.ceil(total / limit) : 1,
             };
         } catch (error) {
             throw new Error(`Tour Service Filter Error: ${error.message}`);
@@ -204,237 +235,204 @@ class ListTourService {
         }
     }
 
-    /**
-     * Lấy danh sách tour cho AI: Tìm kiếm sâu (deep search) vào cả lịch trình và dịch vụ
-     * Trả về chi tiết tour bao gồm cả lịch trình để AI đọc hiểu dễ hơn
-     */
-    static async getToursForAI(filters) {
-        const page = parseInt(filters.page) || 1;
-        const limit = parseInt(filters.limit) || 5;
-        const offset = (page - 1) * limit;
+    static normalizeText(value) {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
 
-        let baseSql = `
-            SELECT SQL_CALC_FOUND_ROWS
-                t.id, t.name, t.location, t.price_default, t.duration, t.region, t.cover_image,
-                (
-                    SELECT GROUP_CONCAT(DATE_FORMAT(departure_date, '%d/%m')) 
-                    FROM tour_departures 
-                    WHERE tour_id = t.id AND departure_date >= CURDATE()
-                    ORDER BY departure_date ASC LIMIT 4
-                ) as upcoming_dates,
-                (
-                    SELECT GROUP_CONCAT(loc.departure_location SEPARATOR '||')
-                    FROM (
-                        SELECT td.departure_location, MIN(td.departure_date) AS nearest_departure
-                        FROM tour_departures td
-                        WHERE td.tour_id = t.id AND td.departure_date >= CURDATE()
-                        GROUP BY td.departure_location
-                        ORDER BY nearest_departure ASC
-                        LIMIT 3
-                    ) loc
-                ) as departure_locations
-            FROM tours t
-            WHERE 1=1
-        `;
+    static parseDurationDays(durationText) {
+        const match = String(durationText || "").match(/(\d+)/);
+        return match ? parseInt(match[1], 10) : null;
+    }
 
-        let whereClauses = [];
-        let queryValues = [];
+    static parseHybridConstraints(userMessage) {
+        const normalizedMessage = this.normalizeText(userMessage);
+        
+        return {
+            normalizedMessage,
+            max_price: (userMessage.match(PATTERNS.price)?.[1] ? parseInt(userMessage.match(PATTERNS.price)[1], 10) * 1000000 : null),
+            duration_type: PATTERNS.short_duration.test(userMessage) ? "dur_short" : PATTERNS.long_duration.test(userMessage) ? "dur_long" : "",
+            region: PATTERNS.north.test(userMessage) ? "Miền Bắc" : PATTERNS.central.test(userMessage) ? "Miền Trung" : PATTERNS.south.test(userMessage) ? "Miền Nam" : "",
+            departure_location: (userMessage.match(PATTERNS.departure)?.[1] || "").trim(),
+        };
+    }
 
-        const { search, max_price, region, duration_type, service_ids, sort } = filters;
+    static scoreTourForSuggestion(tour, constraints) {
+        const {normalizedMessage} = constraints;
+        const normalized = {
+            name: this.normalizeText(tour.name),
+            location: this.normalizeText(tour.location),
+            region: this.normalizeText(tour.region),
+            departures: String(tour.departure_locations || "").split("||").map(l => this.normalizeText(l)).filter(Boolean),
+        };
+        const price = Number(tour.price_default) || 0;
+        const duration = this.parseDurationDays(tour.duration);
 
-        // 1. TÌM KIẾM SÂU (Deep Search vào Tên, Địa điểm, Lịch trình, Dịch vụ)
-        if (search) {
-            whereClauses.push(`(
-                t.name LIKE ? 
-                OR t.location LIKE ? 
-                OR t.id IN (SELECT tour_id FROM tour_itineraries WHERE description LIKE ? OR day_number LIKE ?)
-                OR t.id IN (SELECT ts.tour_id FROM tour_services ts JOIN services s ON ts.service_id = s.id WHERE s.name LIKE ?)
-            )`);
-            const searchTerm = `%${search}%`;
-            queryValues.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+        // Hard filters (knockout conditions)
+        if (constraints.max_price && price > constraints.max_price) return -Infinity;
+        if (constraints.duration_type === "dur_short" && duration && duration > 3) return -Infinity;
+        if (constraints.duration_type === "dur_long" && duration && duration < 4) return -Infinity;
+        if (constraints.region && normalized.region !== this.normalizeText(constraints.region)) return -Infinity;
+        if (constraints.departure_location) {
+            const normDep = this.normalizeText(constraints.departure_location);
+            const matched = normalized.departures.some(d => d.includes(normDep) || normDep.includes(d));
+            if (!matched) return -Infinity;
         }
 
-        // 2. KHU VỰC
-        if (region) {
-            whereClauses.push(`t.region = ?`);
-            queryValues.push(region);
+        // Soft scoring
+        let score = 0;
+        if (constraints.max_price) score += SCORE_WEIGHTS.price;
+        if (constraints.duration_type) score += SCORE_WEIGHTS.duration;
+        if (constraints.region) score += SCORE_WEIGHTS.region;
+        if (normalizedMessage.includes(normalized.name)) score += SCORE_WEIGHTS.tour_name;
+        if (normalizedMessage.includes(normalized.location)) score += SCORE_WEIGHTS.tour_location;
+        if (normalized.departures.some(d => d && normalizedMessage.includes(d))) score += SCORE_WEIGHTS.departure_location;
+        if (constraints.departure_location) score += SCORE_WEIGHTS.departure_bonus;
+        if (price > 0 && constraints.max_price) {
+            const ratio = 1 - Math.min(price / constraints.max_price, 1);
+            score += Math.max(0, ratio * SCORE_WEIGHTS.price_ratio);
         }
+        return score;
+    }
 
-        // 3. KHOẢNG GIÁ
-        if (max_price) {
-            whereClauses.push(`t.price_default <= ?`);
-            queryValues.push(Number(max_price));
-        }
+    static buildHybridPrompt(userMessage, candidateTours) {
+        const toursContext = candidateTours
+            .map((tour) => {
+                const deps = Array.isArray(tour.departure_locations) 
+                    ? tour.departure_locations 
+                    : String(tour.departure_locations || "").split("||").filter(Boolean);
+                const dates = Array.isArray(tour.upcoming_dates) 
+                    ? tour.upcoming_dates 
+                    : String(tour.upcoming_dates || "").split(",").filter(Boolean);
+                return JSON.stringify({
+                    id: tour.id,
+                    name: tour.name,
+                    location: tour.location,
+                    region: tour.region,
+                    duration: tour.duration,
+                    price_default: Number(tour.price_default),
+                    departure_locations: deps,
+                    upcoming_dates: dates,
+                });
+            })
+            .join("\n");
 
-        // 4. THỜI LƯỢNG
-        if (duration_type) {
-            const daysSql = `CAST(t.duration AS UNSIGNED)`;
-            if (duration_type === "dur_short") {
-                whereClauses.push(`${daysSql} BETWEEN 1 AND 3`);
-            } else if (duration_type === "dur_long") {
-                whereClauses.push(`${daysSql} >= 4`);
-            }
-        }
+        return `Bạn là tư vấn viên du lịch VietTravel. Khách hàng muốn: "${userMessage}"
 
-        // 5. DỊCH VỤ ĐẶC BIỆT
-        if (service_ids && service_ids.length > 0) {
-            const placeholders = service_ids.map(() => "?").join(",");
-            whereClauses.push(`
-                t.id IN (
-                    SELECT tour_id FROM tour_services 
-                    WHERE service_id IN (${placeholders})
-                    GROUP BY tour_id
-                    HAVING COUNT(DISTINCT service_id) = ${service_ids.length}
-                )
-            `);
-            queryValues.push(...service_ids);
-        }
+DANH SÁCH TOUR ỨNG VIÊN (đã được lọc sơ bộ theo giá, miền, thời lượng, địa điểm):
+${toursContext}
 
-        if (whereClauses.length > 0) {
-            baseSql += ` AND ` + whereClauses.join(" AND ");
-        }
+NHIỆM VỤ: Chọn ĐÚNG 3 tour phù hợp nhất. Trả về JSON: {"selected_tour_ids":[id1,id2,id3],"recommendation":"text"}`;
+    }
 
-        if (sort === "price_asc") {
-            baseSql += ` ORDER BY t.price_default ASC`;
-        } else if (sort === "price_desc") {
-            baseSql += ` ORDER BY t.price_default DESC`;
-        } else {
-            baseSql += ` ORDER BY t.created_at DESC`;
-        }
-
-        baseSql += ` LIMIT ? OFFSET ?`;
-        queryValues.push(limit, offset);
-
+    static async parseAIResponse(response) {
         try {
-            const [rows] = await db.query(baseSql, queryValues);
-            const [[{ total }]] = await db.query("SELECT FOUND_ROWS() as total");
-
-            // Lấy thêm chi tiết Lịch trình & Dịch vụ cho từng tour để AI đọc
-            const detailedTours = await Promise.all(
-                rows.map(async (tour) => {
-                    const itineraries = await tourItineraryModel.getByTourId(tour.id);
-                    const services = await tourServiceModel.getServicesByTourIdForListTour(tour.id);
-                    return {
-                        ...tour,
-                        departure_locations: tour.departure_locations ? tour.departure_locations.split("||") : [],
-                        itineraries,
-                        services,
-                    };
-                }),
-            );
-
+            const text = typeof response === "string" ? response : JSON.stringify(response || {});
+            const parsed = JSON.parse(text);
             return {
-                tours: detailedTours,
-                totalCount: total,
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
+                ids: Array.isArray(parsed.selected_tour_ids) 
+                    ? parsed.selected_tour_ids.map(id => Number(id)).filter(Number.isInteger)
+                    : [],
+                recommendation: typeof parsed.recommendation === "string" && parsed.recommendation.trim()
+                    ? parsed.recommendation.trim()
+                    : "Dưới đây là những tour gợi ý dành cho bạn:",
             };
         } catch (error) {
-            throw new Error(`Tour Service Deep Filter Error: ${error.message}`);
+            console.error("[Hybrid] Lỗi parse JSON:", error);
+            return { ids: [], recommendation: "Dưới đây là những tour gợi ý dành cho bạn:" };
+        }
+    }
+
+    static async getAllToursForAI() {
+        try {
+            const sql = `
+                SELECT 
+                    t.id,
+                    t.name,
+                    t.location,
+                    t.price_default,
+                    t.duration,
+                    t.region,
+                    t.cover_image,
+                    t.description,
+                    t.created_at,
+                    (
+                        SELECT GROUP_CONCAT(DISTINCT DATE_FORMAT(td.departure_date, '%d/%m') ORDER BY td.departure_date ASC SEPARATOR ',')
+                        FROM tour_departures td
+                        WHERE td.tour_id = t.id AND td.departure_date >= CURDATE()
+                    ) as upcoming_dates,
+                    (
+                        SELECT GROUP_CONCAT(DISTINCT td.departure_location SEPARATOR '||')
+                        FROM tour_departures td
+                        WHERE td.tour_id = t.id
+                    ) as departure_locations
+                FROM tours t
+                ORDER BY t.created_at DESC
+            `;
+
+            const [rows] = await db.query(sql);
+            return rows.map((tour) => ({
+                ...tour,
+                upcoming_dates: tour.upcoming_dates || "",
+                departure_locations: tour.departure_locations || "",
+            }));
+        } catch (error) {
+            console.error("Lỗi tại getAllToursForAI:", error);
+            throw new Error(`Lấy danh sách tours cho hybrid AI thất bại: ${error.message}`);
         }
     }
 
     static async getTourSuggestions(userMessage) {
         try {
-            // Bước 1: Yêu cầu Ollama trích xuất thông tin thành JSON
-            const extractPrompt = `
-Bạn là một hệ thống AI trích xuất dữ liệu. 
-Từ câu nói của khách hàng, hãy trích xuất các thông tin sau và trả về DUY NHẤT một đối tượng JSON hợp lệ (không kèm theo bất kỳ văn bản nào khác, không dùng markdown block \`\`\`json):
-- "search": (string) Tên địa điểm, tỉnh thành hoặc quốc gia khách muốn đến. Nếu không rõ, để "".
-- "max_price": (number) Mức giá tối đa khách có thể trả. Ví dụ: "dưới 5 triệu" -> 5000000. Nếu không rõ, để null.
-- "region": (string) Vùng miền ("Trong Nước" hoặc "Quốc Tế"). Nếu không rõ, để "".
-- "duration_type": (string) Loại thời gian ("dur_short" nếu <= 3 ngày, "dur_long" nếu >= 4 ngày). Nếu không rõ, để "".
-
-Câu nói của khách: "${userMessage}"
-`;
-
-            const extractResponse = await fetch("http://localhost:11434/api/generate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    model: "qwen2:1.5b",
-                    prompt: extractPrompt,
-                    stream: false,
-                    format: "json",
-                }),
-            });
-
-            const extractData = await extractResponse.json();
-            let filters = {};
-            try {
-                filters = JSON.parse(extractData.response);
-            } catch (e) {
-                console.error("Ollama không trả về JSON hợp lệ, dùng filter mặc định.");
+            const allTours = await this.getAllToursForAI();
+            if (allTours.length === 0) {
+                return { reply: "Hiện tại hệ thống không có tour nào!", tours: [], totalCount: 0, currentPage: 1, totalPages: 0 };
             }
 
-            // Chuẩn bị params gọi DB
-            const tourFilters = {
-                search: filters.search || "",
-                max_price: filters.max_price || null,
-                region: filters.region || "",
-                duration_type: filters.duration_type || "",
-                page: 1,
-                limit: 5,
-            };
+            const constraints = this.parseHybridConstraints(userMessage);
+            
+            // Filter & score
+            const rankedTours = allTours
+                .map(tour => ({ tour, score: this.scoreTourForSuggestion(tour, constraints) }))
+                .filter(item => item.score > -Infinity)
+                .sort((a, b) => 
+                    b.score !== a.score ? b.score - a.score 
+                    : (Number(a.tour.price_default) || 0) - (Number(b.tour.price_default) || 0)
+                    || new Date(b.tour.created_at || 0) - new Date(a.tour.created_at || 0)
+                )
+                .map(item => item.tour);
 
-            // Bước 2: Gọi DB để lấy tours (dùng hàm getToursForAI mới tạo)
-            const searchResult = await this.getToursForAI(tourFilters);
-            const foundTours = searchResult.tours;
+            const candidateTours = (rankedTours.length > 0 ? rankedTours : allTours).slice(0, 10);
 
-            if (foundTours.length === 0) {
-                return {
-                    reply: "Rất tiếc, tôi không tìm thấy tour nào phù hợp với yêu cầu của bạn lúc này. Bạn có thể thay đổi yêu cầu (ví dụ: tăng mức giá hoặc chọn địa điểm khác) được không?",
-                    tours: [],
-                    totalCount: 0,
-                    currentPage: 1,
-                    totalPages: 0,
-                };
-            }
-
-            // Bước 3: Đưa dữ liệu thô cho Ollama để tạo câu trả lời
-            const toursContext = foundTours
-                .map((t) => {
-                    let ctx = `• ${t.name} — ${Number(t.price_default).toLocaleString("vi-VN")} VND — ${t.duration}`;
-                    if (t.services && t.services.length > 0) {
-                        ctx += ` (Dịch vụ: ${t.services.map((s) => s.name).join(", ")})`;
-                    }
-                    return ctx;
-                })
-                .join("\n");
-
-            const generatePrompt = `Bạn là tư vấn viên du lịch. Khách hỏi: "${userMessage}"
-Danh sách tour phù hợp:
-${toursContext}
-
-Yêu cầu: Trả lời NGẮN GỌN trong 2-4 câu bằng tiếng Việt. Chỉ giới thiệu tên tour, giá, và 1 điểm nổi bật. KHÔNG liệt kê chi tiết lịch trình.`;
-
-            const finalResponse = await fetch("http://localhost:11434/api/generate", {
+            // Call AI
+            const prompt = this.buildHybridPrompt(userMessage, candidateTours);
+            const response = await fetch(OLLAMA_API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    model: "qwen2:1.5b",
-                    prompt: generatePrompt,
-                    stream: false,
-                }),
-            });
+                body: JSON.stringify({ model: AI_MODEL, prompt, stream: false, format: "json" }),
+            }).then(r => r.json());
 
-            const finalData = await finalResponse.json();
+            const { ids: selectedIds, recommendation } = await this.parseAIResponse(response.response);
+            const candidateMap = new Map(candidateTours.map(t => [t.id, t]));
+            
+            let selectedTours = selectedIds.map(id => candidateMap.get(id)).filter(Boolean).slice(0, 3);
+            if (selectedTours.length < 3) {
+                const fallback = candidateTours.filter(t => !selectedTours.some(s => s.id === t.id));
+                selectedTours = [...selectedTours, ...fallback].slice(0, 3);
+            }
+            if (selectedTours.length === 0) {
+                selectedTours = allTours.slice(0, 3);
+                recommendation = "Dưới đây là 3 tour nổi bật dành cho bạn:";
+            }
 
-            // Loại bỏ các trường dài dòng (itineraries, services) để Frontend nhận data giống hệt getFilteredTours
-            const uiTours = searchResult.tours.map((t) => {
-                const { itineraries, services, ...cleanTour } = t;
-                return cleanTour;
-            });
-
-            return {
-                reply: finalData.response,
-                tours: uiTours,
-                totalCount: searchResult.totalCount,
-                currentPage: searchResult.currentPage,
-                totalPages: searchResult.totalPages,
-            };
+            return { reply: recommendation, tours: selectedTours, totalCount: candidateTours.length, currentPage: 1, totalPages: 1 };
         } catch (error) {
-            console.error("Lỗi tại getTourSuggestions:", error);
+            console.error("Lỗi getTourSuggestions:", error);
             throw new Error(`Lấy gợi ý AI thất bại: ${error.message}`);
         }
     }
