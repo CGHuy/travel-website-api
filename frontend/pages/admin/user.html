@@ -520,7 +520,7 @@
                         <div class="col-md-6">
                             <label for="staffFullname" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Họ và tên <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="staffFullname" placeholder="Nguyễn Văn A" style="border-radius: 10px; padding: 12px 16px;">
-                            <div class="invalid-feedback">Họ tên không được để trống</div>
+                            <div class="invalid-feedback">Họ tên không được để trống hoặc chỉ chứa số</div>
                         </div>
                         <div class="col-md-6">
                             <label for="staffPhone" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Số điện thoại</label>
@@ -584,7 +584,7 @@
                     <div class="mb-3">
                         <label for="editFullname" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Họ và tên</label>
                         <input type="text" class="form-control" id="editFullname" required style="border-radius: 10px; padding: 12px 16px;">
-                        <div class="invalid-feedback">Họ tên không được để trống</div>
+                        <div class="invalid-feedback">Họ tên không được để trống hoặc chỉ chứa số</div>
                     </div>
                     <div class="mb-3">
                         <label for="editEmail" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Email</label>
@@ -859,12 +859,12 @@
                 return filters;
             }
 
-            if (['đã khóa', 'da khoa', 'inactive', 'khóa'].includes(lower)) {
+            if (['đã khóa', 'da khoa', 'đa khoa', 'inactive', 'khóa', 'đóng', 'dong', 'closed', 'locked', 'blocked'].includes(lower)) {
                 filters.status = 0;
                 return filters;
             }
 
-            if (['đang hoạt động', 'hoạt động', 'hoat dong', 'active'].includes(lower)) {
+            if (['đang hoạt động', 'hoạt động', 'hoat dong', 'active', 'open'].includes(lower)) {
                 filters.status = 1;
                 return filters;
             }
@@ -1072,6 +1072,10 @@
 
         const validators = {
             required: (val) => val.trim().length > 0,
+            fullname: (val) => {
+                const text = val.trim();
+                return text.length > 0 && /[^\d\s]/.test(text);
+            },
             email: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
             phone: (val) => !val || /^0[0-9]{9}$/.test(val.trim()),
             password: (val) => val.length >= 6,
@@ -1086,7 +1090,7 @@
             confirm: document.getElementById('staffConfirmPassword')
         };
 
-        staffInputs.fullname.addEventListener('input', () => validateField(staffInputs.fullname, validators.required));
+        staffInputs.fullname.addEventListener('input', () => validateField(staffInputs.fullname, validators.fullname, 'Họ tên không được để trống hoặc chỉ chứa số'));
         staffInputs.email.addEventListener('input', () => validateField(staffInputs.email, validators.email));
         staffInputs.phone.addEventListener('input', () => validateField(staffInputs.phone, validators.phone));
         staffInputs.password.addEventListener('input', () => {
@@ -1105,13 +1109,13 @@
             phone: document.getElementById('editPhone')
         };
 
-        editInputs.fullname.addEventListener('input', () => validateField(editInputs.fullname, validators.required));
+        editInputs.fullname.addEventListener('input', () => validateField(editInputs.fullname, validators.fullname, 'Họ tên không được để trống hoặc chỉ chứa số'));
         editInputs.email.addEventListener('input', () => validateField(editInputs.email, validators.email));
         editInputs.phone.addEventListener('input', () => validateField(editInputs.phone, (val) => val.trim().length > 0 && validators.phone(val)));
 
         // Cập nhật logic Save Edit User
         document.getElementById('saveEditUserBtn').addEventListener('click', async () => {
-            const v1 = validateField(editInputs.fullname, validators.required);
+            const v1 = validateField(editInputs.fullname, validators.fullname, 'Họ tên không được để trống hoặc chỉ chứa số');
             const v2 = validateField(editInputs.email, validators.email);
             const v3 = validateField(editInputs.phone, (val) => val.trim().length > 0 && validators.phone(val));
 
@@ -1168,7 +1172,7 @@
 
         // Cập nhật logic Save Create Staff
         document.getElementById('saveCreateStaffBtn').addEventListener('click', async () => {
-            const v1 = validateField(staffInputs.fullname, validators.required);
+            const v1 = validateField(staffInputs.fullname, validators.fullname, 'Họ tên không được để trống hoặc chỉ chứa số');
             const v2 = validateField(staffInputs.email, validators.email);
             const v3 = validateField(staffInputs.phone, validators.phone);
             const v4 = validateField(staffInputs.password, validators.password);
