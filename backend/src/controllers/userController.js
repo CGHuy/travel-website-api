@@ -74,6 +74,32 @@ exports.changePassword = async (req, res) => {
 		// Các kiểm tra đầu vào (presence/confirm) được xử lý bởi middleware `validateChangePassword`.
 		const { currentPassword, newPassword } = req.body;
 
+		if (currentPassword === newPassword) {
+			return res.status(400).json({
+				success: false,
+				message: "Mật khẩu mới không được trùng với mật khẩu cũ!",
+			});
+		}
+
+		if (newPassword.length < 6) {
+			return res.status(400).json({
+				success: false,
+				message: "Mật khẩu mới phải có ít nhất 6 ký tự!",
+			});
+		}
+
+		if (newPassword !== confirmPassword) {
+			return res.status(400).json({
+				success: false,
+				message: "Mật khẩu mới và xác nhận không khớp!",
+			});
+		}
+
+	
+
+
+
+
 		const [rows] = await db.query("SELECT password FROM users WHERE id = ?", [
 			userId,
 		]);

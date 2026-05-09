@@ -242,6 +242,10 @@ function initChangePasswordForm() {
             window.showToast("Mật khẩu mới và xác nhận không khớp!", "danger");
             return;
         }
+        if (currentPassword === newPassword) {
+            window.showToast("Mật khẩu mới không được trùng với mật khẩu cũ!", "danger");
+            return;
+        }
         if (newPassword.length < 6) {
             window.showToast("Mật khẩu mới phải có ít nhất 6 ký tự!", "danger");
             return;
