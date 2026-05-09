@@ -121,8 +121,8 @@ class User {
 
 			const [[{ total }]] = await db.query(`SELECT COUNT(*) AS total ${baseQuery}`, params);
 			const [rows] = await db.query(
-				`SELECT id, fullname, phone, email, role, status, created_at ${baseQuery} ORDER BY id DESC LIMIT ? OFFSET ?`,
-				[...params, limit, offset]
+				`SELECT id, fullname, phone, email, role, status, created_at ${baseQuery} ORDER BY id DESC LIMIT ${limit} OFFSET ${offset}`,
+				params
 			);
 			return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
 		} catch (error) {
@@ -224,7 +224,6 @@ class User {
 			}
 			if (filters.phone) {
 				query += ` AND phone LIKE ?`;
-				params.push(`%${filters.phone}%`);
 				params.push(`%${String(filters.phone).trim()}%`);
 			}
 			if (filters.role) {
