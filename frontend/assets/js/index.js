@@ -244,7 +244,7 @@ async function loadToursByRegion(region, containerId, carouselId) {
 // Load Top Featured Tours (Vietravel style carousel)
 async function loadTopFeaturedTours() {
 	try {
-		const response = await fetch(`${API_URL}/tours`);
+		const response = await fetch(`${API_URL}/stats/tours/top`);
 		const data = await response.json();
 
 		if (data.success) {

@@ -53,13 +53,15 @@ exports.getBookingDetails = async (req, res) => {
 	}
 };
 
-// Admin: Lấy tất cả (Hỗ trợ phân trang)
+// Admin: Lấy tất cả (Hỗ trợ phân trang, lọc trạng thái và tìm kiếm)
 exports.getAllBookings = async (req, res) => {
 	try {
 		const page = parseInt(req.query.page) || 1;
 		const limit = parseInt(req.query.limit) || 10;
+		const status = req.query.status || null;
+		const search = req.query.search || "";
 		
-		const result = await bookingService.getAll(page, limit);
+		const result = await bookingService.getAll(page, limit, status, search);
 		res.json({ 
 			success: true, 
 			count: result.data.length,
@@ -204,12 +206,21 @@ exports.cancelBooking = async (req, res) => {
 	}
 };
 
-// Lấy danh sách bookings của user hiện tại
+// Lấy danh sách bookings của user hiện tại (Hỗ trợ tìm kiếm & phân trang)
 exports.getBookingsByUserId = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		const bookings = await bookingService.getBookingsByUserId(userId);
-		res.json({ success: true, count: bookings.length, data: bookings });
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;
+		const search = req.query.search || "";
+
+		const result = await bookingService.getBookingsByUserId(userId, page, limit, search);
+		res.json({ 
+			success: true, 
+			count: result.data.length, 
+			data: result.data,
+			pagination: result.pagination
+		});
 	} catch (error) {
 		res.status(500).json({
 			success: false,
@@ -237,6 +248,21 @@ exports.getBookingDetailsByUserId = async (req, res) => {
 		res.status(500).json({
 			success: false,
 			message: "Lỗi khi lấy chi tiết",
+			error: error.message,
+		});
+	}
+};
+
+// Admin: Lấy thông tin tính toán hoàn tiền (phí phạt)
+exports.getRefundInfo = async (req, res) => {
+	try {
+		const bookingId = req.params.id;
+		const info = await bookingService.calculateRefundInfo(bookingId);
+		res.json({ success: true, data: info });
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			message: "Không thể tính toán thông tin hoàn tiền",
 			error: error.message,
 		});
 	}
@@ -395,11 +421,13 @@ exports.createRefundUrl = async (req, res) => {
 		const expireDate = new Date();
 		expireDate.setMinutes(expireDate.getMinutes() + 30);
 
-		// Hiển thị số tiền và bookings_id
-		const { bookingId, amount} = req.body;
+		// Tự động tính toán số tiền hoàn lại dựa trên chính sách phí phạt (Backend Logic)
+		const { bookingId } = req.body;
+		const refundInfo = await bookingService.calculateRefundInfo(bookingId);
+		const amount = refundInfo.refundAmount;
 		
 		// VNPay có thể lỗi nếu nội dung chứa ký tự đặc biệt, nên loại bỏ dấu và ký tự lạ
-		const orderInfo = `Hoan tien ${bookingId}`.slice(0, 250);
+		const orderInfo = `Hoan tien BOK${bookingId} - Phat ${refundInfo.penaltyPercent}%`.slice(0, 250);
 		const uniqueStr = Math.random().toString(36).substring(2, 10).toUpperCase();
 		const txnRef = `VNPAY_${Date.now()}_${uniqueStr}`;
 

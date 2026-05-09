@@ -1,6 +1,8 @@
 // Logic for Booking History page
 const API_URL = "http://localhost:3000/api";
 let allBookings = [];
+let currentSearch = "";
+let searchTimeout = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
 	// Check authentication
@@ -103,7 +105,7 @@ async function fetchBookings() {
     `;
 
 	try {
-		const response = await fetch(`${API_URL}/bookings/my-bookings`, {
+		const response = await fetch(`${API_URL}/bookings/my-bookings?search=${encodeURIComponent(currentSearch)}`, {
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},
@@ -211,17 +213,17 @@ function initBookingPage() {
 		});
 	});
 
-	// Search Interaction
+	// Search Interaction (Server-side)
 	const searchInput = document.querySelector(".search-booking-input");
 	if (searchInput) {
 		searchInput.addEventListener("input", (e) => {
-			const query = e.target.value.toLowerCase().trim();
-			const filtered = allBookings.filter(
-				(b) =>
-					b.id.toString().includes(query) ||
-					b.tour_name.toLowerCase().includes(query),
-			);
-			renderBookings(filtered);
+			const query = e.target.value.trim();
+			currentSearch = query;
+
+			if (searchTimeout) clearTimeout(searchTimeout);
+			searchTimeout = setTimeout(() => {
+				fetchBookings();
+			}, 500);
 		});
 	}
 }

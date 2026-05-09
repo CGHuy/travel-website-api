@@ -13,7 +13,7 @@ router.get("/revenue", verifyToken, isAdmin, StatisticsController.getRevenue);
 router.get("/bookings/status", verifyToken, isAdmin, StatisticsController.getBookingStatus);
 
 // ═══ ANALYTICS ═══
-router.get("/tours/top", verifyToken, isAdmin, StatisticsController.getTopTours);
+router.get("/tours/top", StatisticsController.getTopTours);
 router.get("/reviews", verifyToken, isAdmin, StatisticsController.getReviewStats);
 router.get("/users", verifyToken, isAdmin, StatisticsController.getUserStats);
 router.get("/years", verifyToken, isAdmin, StatisticsController.getYears);

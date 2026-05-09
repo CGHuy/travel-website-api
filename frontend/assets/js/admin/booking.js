@@ -8,9 +8,13 @@ window.initAdminBookingPage = async function () {
     const paginationEl = document.getElementById("booking-pagination");
     const rangeEl = document.getElementById("booking-range");
     const totalFilteredEl = document.getElementById("booking-total-filtered");
+    const statusFilter = document.getElementById("booking-status-filter");
 
     let currentPage = 1;
     const limit = 10;
+    let currentStatus = "all";
+    let currentSearch = "";
+    let searchTimeout = null;
 
     if (!bodyEl) return;
 
@@ -60,26 +64,13 @@ window.initAdminBookingPage = async function () {
         }
     }
 
-    async function deleteBooking(id) {
-        const token = localStorage.getItem("token");
-        try {
-            const res = await fetch(`/api/bookings/${id}`, {
-                method: "DELETE",
-                headers: { Authorization: "Bearer " + token },
-            });
-            if (res.ok) {
-                await loadBookings();
-            } else {
-                alert("Lỗi khi xóa booking");
-            }
-        } catch (e) {
-            console.error(e);
-            alert("Lỗi kết nối server");
-        }
-    }
+   
 
-    async function loadBookings(page = 1) {
+    async function loadBookings(page = 1, status = currentStatus, search = currentSearch) {
         currentPage = page;
+        currentStatus = status;
+        currentSearch = search;
+        
         bodyEl.innerHTML =
             '<tr><td colspan="7" class="text-center text-muted p-4">Đang tải danh sách booking...</td></tr>';
         try {
@@ -90,7 +81,7 @@ window.initAdminBookingPage = async function () {
                 return;
             }
 
-            let res = await fetch(`/api/bookings?page=${page}&limit=${limit}`, {
+            let res = await fetch(`/api/bookings?page=${page}&limit=${limit}&status=${status}&search=${encodeURIComponent(search)}`, {
                 headers: { Authorization: "Bearer " + token },
             });
 
@@ -220,15 +211,22 @@ window.initAdminBookingPage = async function () {
     }
 
     searchInput.addEventListener("input", () => {
-        const q = searchInput.value.trim().toLowerCase();
-        const rows = bodyEl.querySelectorAll("tr");
-        rows.forEach((row) => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(q) ? "" : "none";
-        });
+        const q = searchInput.value.trim();
+        
+        // Clear timeout cũ nếu có
+        if (searchTimeout) clearTimeout(searchTimeout);
+        
+        // Đợi 500ms sau khi người dùng ngừng gõ mới gọi API (Debounce)
+        searchTimeout = setTimeout(() => {
+            loadBookings(1, currentStatus, q);
+        }, 500);
     });
 
-    refreshBtn.addEventListener("click", () => loadBookings(1));
+    statusFilter.addEventListener("change", () => {
+        loadBookings(1, statusFilter.value, currentSearch);
+    });
 
-    await loadBookings();
+    refreshBtn.addEventListener("click", () => loadBookings(1, currentStatus, currentSearch));
+
+    await loadBookings(1, "all", "");
 };

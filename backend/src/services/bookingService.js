@@ -6,11 +6,34 @@ const Booking = require("../models/Booking");
 class bookingService {
 	//================== USER ===================
 
-	// Lấy danh sách booking đã đặt của người dùng
-	static async getBookingsByUserId(userId) {
+	// Lấy danh sách booking đã đặt của người dùng (Hỗ trợ tìm kiếm & phân trang)
+	static async getBookingsByUserId(userId, page = 1, limit = 10, search = "") {
 		try {
-			const [rows] = await db.query(
-				`SELECT 
+			const offset = (page - 1) * limit;
+			let whereClause = " WHERE b.user_id = ?";
+			const params = [userId];
+
+			if (search) {
+				whereClause += " AND (t.name LIKE ? OR CAST(b.id AS CHAR) LIKE ?)";
+				const searchVal = `%${search}%`;
+				params.push(searchVal, searchVal);
+			}
+
+			// Lấy tổng số lượng
+			const countQuery = `
+				SELECT COUNT(*) as total 
+				FROM bookings b
+				JOIN tour_departures td ON b.departure_id = td.id
+				JOIN tours t ON td.tour_id = t.id
+				${whereClause}
+			`;
+			const [countResult] = await db.query(countQuery, params);
+			const totalItems = countResult[0].total;
+			const totalPages = Math.ceil(totalItems / limit);
+
+			// Lấy dữ liệu
+			const dataQuery = `
+				SELECT 
                     b.id,
                     t.name as tour_name,
                     t.cover_image,
@@ -25,11 +48,23 @@ class bookingService {
                 FROM bookings b
                 JOIN tour_departures td ON b.departure_id = td.id
                 JOIN tours t ON td.tour_id = t.id
-                WHERE b.user_id = ?
-                ORDER BY b.created_at DESC`,
-				[userId],
-			);
-			return rows;
+                ${whereClause}
+                ORDER BY b.created_at DESC
+				LIMIT ? OFFSET ?
+			`;
+			
+			const dataParams = [...params, parseInt(limit), parseInt(offset)];
+			const [rows] = await db.query(dataQuery, dataParams);
+
+			return {
+				data: rows,
+				pagination: {
+					totalItems,
+					totalPages,
+					currentPage: parseInt(page),
+					limit: parseInt(limit)
+				}
+			};
 		} catch (error) {
 			throw error;
 		}
@@ -117,17 +152,39 @@ class bookingService {
 
 	//================== ADMIN ===================
 
-	// 1. Lấy tất cả bookings (Dành cho Admin) - Hỗ trợ phân trang
-	static async getAll(page = 1, limit = 10) {
+	// 1. Lấy tất cả bookings (Dành cho Admin) - Hỗ trợ phân trang, lọc trạng thái và tìm kiếm
+	static async getAll(page = 1, limit = 10, status = null, search = "") {
 		try {
 			const offset = (page - 1) * limit;
+			let whereClause = " WHERE 1=1";
+			const params = [];
+
+			if (status && status !== "all") {
+				whereClause += " AND b.status = ?";
+				params.push(status);
+			}
+
+			if (search) {
+				whereClause += " AND (u.fullname LIKE ? OR u.email LIKE ? OR CAST(b.id AS CHAR) LIKE ? OR b.contact_name LIKE ? OR t.name LIKE ?)";
+				const searchVal = `%${search}%`;
+				params.push(searchVal, searchVal, searchVal, searchVal, searchVal);
+			}
 
 			// Lấy tổng số lượng để tính totalPages
-			const [countResult] = await db.query("SELECT COUNT(*) as total FROM bookings");
+			const countQuery = `
+				SELECT COUNT(*) as total 
+				FROM bookings b
+				LEFT JOIN users u ON b.user_id = u.id
+				JOIN tour_departures td ON b.departure_id = td.id
+				JOIN tours t ON td.tour_id = t.id
+				${whereClause}
+			`;
+			const [countResult] = await db.query(countQuery, params);
 			const totalItems = countResult[0].total;
 			const totalPages = Math.ceil(totalItems / limit);
 
-			const [rows] = await db.query(`
+			// Lấy dữ liệu
+			const dataQuery = `
                 SELECT 
                     b.*, 
                     u.fullname, 
@@ -139,9 +196,13 @@ class bookingService {
                 LEFT JOIN users u ON b.user_id = u.id
                 JOIN tour_departures td ON b.departure_id = td.id
                 JOIN tours t ON td.tour_id = t.id
+                ${whereClause}
                 ORDER BY b.id DESC
                 LIMIT ? OFFSET ?
-            `, [parseInt(limit), parseInt(offset)]);
+            `;
+			
+			const dataParams = [...params, parseInt(limit), parseInt(offset)];
+			const [rows] = await db.query(dataQuery, dataParams);
 
 			return {
 				data: rows,
@@ -409,6 +470,43 @@ class bookingService {
 
 			const [rows] = await db.query(query, params);
 			return rows;
+		} catch (error) {
+			throw error;
+		}
+	
+}
+// 5. Tính toán thông tin hoàn tiền dựa trên chính sách
+	static async calculateRefundInfo(bookingId) {
+		try {
+			const booking = await this.getById(bookingId);
+			if (!booking) throw new Error("Không tìm thấy booking");
+
+			// Ngày yêu cầu hủy (updated_at là lúc trạng thái chuyển sang pending)
+			const reqDate = new Date(booking.updated_at || booking.created_at);
+			const depDate = new Date(booking.departure_date);
+			
+			const timeDiff = depDate.getTime() - reqDate.getTime();
+			const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+			
+			let penaltyPercent = 0;
+			if (daysDiff >= 30) {
+				penaltyPercent = 0;
+			} else if (daysDiff >= 15 && daysDiff < 30) {
+				penaltyPercent = 50;
+			} else {
+				penaltyPercent = 100;
+			}
+			
+			const penaltyAmount = (booking.total_price * penaltyPercent) / 100;
+			const refundAmount = booking.total_price - penaltyAmount;
+			
+			return {
+				totalPrice: booking.total_price,
+				daysDiff,
+				penaltyPercent,
+				penaltyAmount,
+				refundAmount
+			};
 		} catch (error) {
 			throw error;
 		}

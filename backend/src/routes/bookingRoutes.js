@@ -68,6 +68,9 @@ router.get(
 // Tạo URL hoàn tiền qua VNPay
 router.post("/create-refund-url", verifyToken, isBookingStaff, bookingController.createRefundUrl);
 
+// Lấy thông tin tính phí phạt hoàn tiền (Admin)
+router.get("/:id/refund-info", verifyToken, isBookingStaff, bookingController.getRefundInfo);
+
 //============================== Route có tham số - Phải đặt cuối cùng =====================
 
 // Xem chi tiết booking theo ID
