@@ -44,7 +44,7 @@ class Departure {
         try {
             const [rows] = await db.query(`
                 SELECT * FROM tour_departures 
-                WHERE tour_id = ? AND departure_date >= CURDATE() AND seats_available > 0
+                WHERE tour_id = ? AND departure_date >= DATE_ADD(CURDATE(), INTERVAL 10 DAY) AND seats_available > 0
                 ORDER BY departure_date DESC
             `, [tour_id]);
             return rows;
