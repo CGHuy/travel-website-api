@@ -163,14 +163,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const renderDepartures = (departures) => {
         const select = document.getElementById("departure_id");
-        if (!departures || departures.length === 0) {
-            select.innerHTML = '<option value="">-- Hiện chưa có lịch khởi hành --</option>';
+        
+        // Lọc ra các lịch khởi hành từ hôm nay trở đi
+        const validDepartures = departures ? departures.filter((d) => {
+            const depDate = new Date(d.departure_date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return depDate >= today;
+        }) : [];
+
+        if (validDepartures.length === 0) {
+            select.innerHTML = '<option value="">-- Hiện chưa có lịch khởi hành phù hợp --</option>';
             return;
         }
 
         select.innerHTML =
             '<option value="">-- Chọn lịch khởi hành phù hợp --</option>' +
-            departures
+            validDepartures
                 .map((d) => {
                     const date = new Date(d.departure_date).toLocaleDateString("vi-VN");
                     return `<option value="${d.id}">${date} - Khởi hành từ ${d.departure_location}</option>`;
@@ -469,6 +478,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
 
                 passengers.push({ name: nameVal, gender: document.querySelector(`[name="ps_gender_${i}"]`).value, dob: dobVal, type: typeInput });
+            }
+        }
+
+        // 3. Kiểm tra ngày khởi hành không được nhỏ hơn ngày hiện tại
+        const selectedDepId = document.getElementById("departure_id").value;
+        if (selectedDepId) {
+            const dep = departuresInfo.find(d => d.id == selectedDepId);
+            if (dep) {
+                const depDate = new Date(dep.departure_date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (depDate < today) {
+                    showFieldError("departure_id", "Ngày khởi hành phải từ hôm nay trở đi.");
+                    hasErrors = true;
+                }
             }
         }
 

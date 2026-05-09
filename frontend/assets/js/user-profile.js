@@ -23,7 +23,7 @@ async function loadComponent(targetId, filePath) {
         target.innerHTML = await res.text();
         target.querySelectorAll("script").forEach((script) => {
             const newScript = document.createElement("script");
-            newScript.src ? (newScript.src = script.src) : (newScript.textContent = script.textContent);
+            script.src ? (newScript.src = script.src) : (newScript.textContent = script.textContent);
             document.body.appendChild(newScript);
             script.remove();
         });

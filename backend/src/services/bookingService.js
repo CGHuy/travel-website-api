@@ -318,6 +318,14 @@ class bookingService {
 		const dep = await Departure.getById(departure_id);
 		if (!dep) throw new Error("Lịch khởi hành không tồn tại");
 
+		// Thêm kiểm tra ngày khởi hành ở Backend (tránh lách luật từ Frontend)
+		const depDate = new Date(dep.departure_date);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		if (depDate < today) {
+			throw new Error("Lịch khởi hành này đã qua ngày, không thể đặt tour.");
+		}
+
 		const tour = await Tour.getById(dep.tour_id);
 		if (!tour) throw new Error("Không tìm thấy thông tin Tour");
 
@@ -350,6 +358,14 @@ class bookingService {
 		const dep = await Departure.getById(departure_id);
 		if (!dep) {
 			throw new Error("Lịch khởi hành không tồn tại");
+		}
+
+		// Bảo mật kép ở khâu Create Booking
+		const depDate = new Date(dep.departure_date);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		if (depDate < today) {
+			throw new Error("Lịch khởi hành này đã qua ngày, không thể đặt tour.");
 		}
 
 		if (totalPax > dep.seats_available) {

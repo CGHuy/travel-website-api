@@ -211,9 +211,10 @@
         const priceMax = typeof options.priceMax === "number" ? options.priceMax : currentPriceMax;
 
         try {
-            listEl.innerHTML = "";
+            listEl.innerHTML = ""; // Xóa nội dung cũ để chuẩn bị hiển thị mới
 
             const params = new URLSearchParams({
+                // Tạo đối tượng chứa các tham số truy vấn cho API
                 page: String(page),
                 limit: String(ITEMS_PER_PAGE),
             });
@@ -290,7 +291,7 @@
         if (regionSelect) {
             regionSelect.addEventListener("change", () => {
                 const region = String(regionSelect.value || "").trim();
-                fetchAndRenderTours({ page: 1, region, keyword: currentKeyword });
+                fetchAndRenderTours({ page: 1, region });
             });
         }
 
@@ -306,7 +307,7 @@
                 // call API with debounce
                 clearTimeout(window.tourPriceTimeout);
                 window.tourPriceTimeout = setTimeout(() => {
-                    fetchAndRenderTours({ page: 1, priceMax, region: currentRegion, keyword: currentKeyword });
+                    fetchAndRenderTours({ page: 1, priceMax });
                 }, 300);
             });
         }
@@ -396,7 +397,7 @@
             btn.addEventListener("click", () => {
                 const page = parseInt(btn.dataset.page);
                 if (page >= 1 && page <= totalPages && page !== currentPage) {
-                    fetchAndRenderTours({ page, keyword: currentKeyword });
+                    fetchAndRenderTours({ page });
                     // Scroll to top of list
                     document.getElementById("tour-list-container")?.scrollIntoView({ behavior: "smooth" });
                 }
