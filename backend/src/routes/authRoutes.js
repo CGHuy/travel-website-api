@@ -9,10 +9,6 @@ router.post("/register", validateRegister, authController.register);
 router.post("/login", validateLogin, authController.login);
 
 // Protected routes - Cần đăng nhập
-router.get("/profile", verifyToken, authController.getProfile);
-router.put("/profile", verifyToken, authController.updateProfile);
-router.post("/change-password", verifyToken, authController.changePassword);
-router.post("/logout", authController.logout);
 router.get("/verify", verifyToken, authController.verifyToken);
 
 module.exports = router;
