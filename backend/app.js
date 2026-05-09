@@ -42,7 +42,7 @@ const tourImageRoutes = require("./src/routes/tourImageRoutes");
 // Lịch trình tour dùng cả danh sách tổng hợp và thao tác theo tourId
 app.use("/api/tourItinerary", tourItineraryRoutes);
 app.use("/api/tours", searchLimiter, tourRoutes);
-app.use("/api/list-tours", searchLimiter, listTourRoutes);
+app.use("/api/list-tours", listTourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/bookings", createLimiter, bookingRoutes);
 app.use("/api/users", createLimiter, userRoutes);

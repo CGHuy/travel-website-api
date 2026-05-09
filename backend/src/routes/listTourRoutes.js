@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const listTourController = require("../controllers/listTourController");
 const { verifyToken, isUser } = require("../middlewares/auth");
+const { searchLimiter } = require("../middlewares/rateLimiter");
 
 // 1. Công khai (không cần login)
-router.get("/", listTourController.getAllTours);
+router.get("/", searchLimiter, listTourController.getAllTours);
 
 // Route để lấy danh sách dịch vụ (cho bộ lọc)
 router.get("/services", listTourController.getServices);
@@ -38,6 +39,6 @@ router.get("/wishlist/:id", verifyToken, isUser, listTourController.checkWishLis
 router.delete("/wishlist/:id", verifyToken, isUser, listTourController.removeWishList);
 
 //Nhận yêu cầu người dùng để gợi ý Tour
-router.post("/suggestions",listTourController.getTourSuggestions);
+router.post("/suggestions",searchLimiter,listTourController.getTourSuggestions);
 
 module.exports = router;
