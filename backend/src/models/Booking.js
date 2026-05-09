@@ -43,28 +43,6 @@ class Booking {
 		}
 	}
 
-	// Người dùng gửi yêu cầu hủy booking (chuyển trạng thái sang "pending")
-	static async requestCancellation(id) {
-		try {
-			const [rows] = await db.query(
-				`SELECT status FROM bookings WHERE id = ? LIMIT 1`,
-				[id],
-			);
-			const row = rows[0];
-			if (!row) return false;
-			// Chỉ cho phép chuyển sang 'pending' khi trạng thái hiện tại là 'confirmed'
-			if (row.status !== "confirmed") return false;
-
-			const [result] = await db.query(
-				`UPDATE bookings SET status = 'pending', updated_at = NOW() WHERE id = ?`,
-				[id],
-			);
-			return result.affectedRows > 0;
-		} catch (error) {
-			throw error;
-		}
-	}
-
 	// Cập nhật trường bất kỳ (ví dụ: status, payment_status)
 	static async updateStatus(id, field, value) {
 		try {

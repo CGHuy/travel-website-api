@@ -127,10 +127,7 @@ const isOwner = (paramName = "userId") => {
                 });
             }
 
-            // Admin có thể truy cập mọi resource
-            if (req.user.role === "admin") {
-                return next();
-            }
+    
 
             // User chỉ được truy cập resource của chính họ
             const resourceUserIdInt = parseInt(resourceUserId);
@@ -162,10 +159,10 @@ const isBookingStaff = (req, res, next) => {
             });
         }
 
-        if (req.user.role !== "booking-staff" && req.user.role !== "admin") {
+        if (req.user.role !== "booking-staff" ) {
             return res.status(403).json({
                 success: false,
-                message: "Quyền truy cập bị từ chối. Chỉ admin hoặc nhân viên booking mới được phép!",
+                message: "Quyền truy cập bị từ chối. Chỉ nhân viên booking mới được phép!",
             });
         }
 
@@ -189,10 +186,10 @@ const isTourStaff = (req, res, next) => {
             });
         }
 
-        if (req.user.role !== "tour-staff" && req.user.role !== "admin") {
+        if (req.user.role !== "tour-staff") {
             return res.status(403).json({
                 success: false,
-                message: "Quyền truy cập bị từ chối. Chỉ nhân viên tour hoặc admin mới được phép!",
+                message: "Quyền truy cập bị từ chối. Chỉ nhân viên tour mới được phép!",
             });
         }
 
