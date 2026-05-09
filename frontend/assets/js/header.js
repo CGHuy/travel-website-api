@@ -5,6 +5,11 @@ async function initHeader() {
     setupAvatarDropdown();
 }
 
+function clearAuthStorage() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+}
+
 // Auto init khi script load
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initHeader);
@@ -29,6 +34,9 @@ async function getCurrentRoleFromBackend(token) {
         });
 
         if (!response.ok) {
+            if (response.status === 401) {
+                clearAuthStorage();
+            }
             return null;
         }
 
@@ -62,25 +70,20 @@ async function updateAdminNavVisibility(token) {
             role = String(user.role || "").toLowerCase();
         }
 
-        // Nếu localStorage không có hoặc cần verify lại, mới gọi backend
-        if (!role) {
-            role = await getCurrentRoleFromBackend(token);
+        // Luôn verify token với backend để phát hiện token hết hạn/sai
+        const backendRole = await getCurrentRoleFromBackend(token);
+        if (backendRole) {
+            role = backendRole;
         }
     } catch (e) {
         console.error("Lỗi lấy role:", e);
     }
 
-    const canViewAdminRoles = new Set([
-        "admin",
-        "tour-staff",
-        "booking-staff",
-        "tour_staff",
-        "booking_staff",
-    ]);
+    const canViewAdminRoles = new Set(["admin", "tour-staff", "booking-staff", "tour_staff", "booking_staff"]);
 
     if (role && canViewAdminRoles.has(role)) {
         adminNavLink.classList.remove("d-none");
-        
+
         // Ẩn mục lịch sử và yêu thích đối với staff/admin
         const navHistory = document.getElementById("navHistory");
         const navFavorites = document.getElementById("navFavorites");
@@ -94,17 +97,19 @@ async function updateAuthUI() {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
 
-    await updateAdminNavVisibility(token);
+    if (token) {
+        await updateAdminNavVisibility(token);
+    }
+
+    const currentToken = localStorage.getItem("token");
+    const currentUser = localStorage.getItem("user");
 
     const loginBtn = document.getElementById("loginBtn");
     const registerBtn = document.getElementById("registerBtn");
     const userMenu = document.getElementById("userMenu");
     const userName = document.getElementById("userName");
 
-    console.log("updateAuthUI - token:", token ? "có" : "không");
-    console.log("updateAuthUI - elements:", { loginBtn, registerBtn, userMenu });
-
-    if (token && user) {
+    if (currentToken && currentUser) {
         // Đã đăng nhập: Ẩn nút login/register, hiện userMenu
         if (loginBtn) loginBtn.classList.add("d-none");
         if (registerBtn) registerBtn.classList.add("d-none");
@@ -112,7 +117,7 @@ async function updateAuthUI() {
         if (userName) userName.classList.remove("d-none");
 
         try {
-            const userData = JSON.parse(user);
+            const userData = JSON.parse(currentUser);
             const avatarImg = document.getElementById("userAvatar");
 
             if (avatarImg) {
@@ -185,50 +190,50 @@ function closeUserDropdown() {
 
 /**
  * Global Confirm Dialog
- * @param {string} message 
- * @param {function} onConfirm 
+ * @param {string} message
+ * @param {function} onConfirm
  */
-window.showConfirm = function(message, onConfirm) {
-    const modalEl = document.getElementById('globalConfirmModal');
+window.showConfirm = function (message, onConfirm) {
+    const modalEl = document.getElementById("globalConfirmModal");
     if (!modalEl) {
         if (confirm(message)) onConfirm();
         return;
     }
 
     const modal = new bootstrap.Modal(modalEl);
-    document.getElementById('globalConfirmMessage').innerHTML = message;
-    
-    const submitBtn = document.getElementById('globalConfirmSubmit');
+    document.getElementById("globalConfirmMessage").innerHTML = message;
+
+    const submitBtn = document.getElementById("globalConfirmSubmit");
     // Clear old listeners
     const newSubmitBtn = submitBtn.cloneNode(true);
     submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
-    
-    newSubmitBtn.addEventListener('click', () => {
+
+    newSubmitBtn.addEventListener("click", () => {
         onConfirm();
         modal.hide();
     });
-    
+
     modal.show();
 };
 
 /**
  * Global Toast Notification (Bootstrap version)
- * @param {string} message 
+ * @param {string} message
  * @param {string} type - success | danger | warning | info
  */
-window.showToast = function(message, type = "success") {
-    const toastEl = document.getElementById('globalToast');
-    const toastBody = document.getElementById('globalToastBody');
+window.showToast = function (message, type = "success") {
+    const toastEl = document.getElementById("globalToast");
+    const toastBody = document.getElementById("globalToastBody");
     if (!toastEl || !toastBody) {
         alert(message);
         return;
     }
 
     toastBody.textContent = message;
-    
+
     // Set color based on type
-    toastEl.className = `toast align-items-center border-0 text-white bg-${type === 'error' ? 'danger' : type}`;
-    
+    toastEl.className = `toast align-items-center border-0 text-white bg-${type === "error" ? "danger" : type}`;
+
     const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
     toast.show();
 };
@@ -236,6 +241,6 @@ window.showToast = function(message, type = "success") {
 /**
  * Alias for showToast for backward compatibility or general alerts
  */
-window.showAlert = function(message, type = "info") {
+window.showAlert = function (message, type = "info") {
     window.showToast(message, type);
 };

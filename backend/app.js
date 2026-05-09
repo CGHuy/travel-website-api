@@ -41,17 +41,17 @@ const tourImageRoutes = require("./src/routes/tourImageRoutes");
 
 // Lịch trình tour dùng cả danh sách tổng hợp và thao tác theo tourId
 app.use("/api/tourItinerary", tourItineraryRoutes);
-app.use("/api/tours", searchLimiter, tourRoutes);
-app.use("/api/list-tours", searchLimiter, listTourRoutes);
+app.use("/api/tours", tourRoutes);
+app.use("/api/list-tours", listTourRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
-app.use("/api/bookings", createLimiter, bookingRoutes);
-app.use("/api/users", createLimiter, userRoutes);
-app.use("/api/services", createLimiter, servicesRoute);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/services", servicesRoute);
 app.use("/api/tour-services", tourServiceRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/stats", statisticsRoutes);
-app.use("/api/departures", searchLimiter, departureRoutes);
-app.use("/api/reviews", createLimiter, reviewRoutes);
+app.use("/api/departures", departureRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/tour-images", tourImageRoutes);
 
 // DYNAMIC VIEW ROUTER

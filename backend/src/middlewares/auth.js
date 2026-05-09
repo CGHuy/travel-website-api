@@ -41,6 +41,7 @@ const verifyToken = (req, res, next) => {
         req.user = {
             id: decoded.id,
             email: decoded.email,
+            phone: decoded.phone,
             role: decoded.role,
         };
 
@@ -214,7 +215,7 @@ const isCustomer = (req, res, next) => {
                 message: "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại!",
             });
         }
-        if(req.user.role !== "customer") {
+        if (req.user.role !== "customer") {
             return res.status(403).json({
                 success: false,
                 message: "Quyền truy cập bị từ chối. Chỉ khách hàng mới được phép!",

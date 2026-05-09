@@ -49,9 +49,25 @@
 
             // SUCCESS
             if (response.ok && result.success) {
-                message.textContent = result.message;
-                message.className = "alert alert-success";
+                const token = result?.data?.token;
+                const user = result?.data?.user;
 
+                if (token && user) {
+                    localStorage.setItem("token", token);
+                    localStorage.setItem("user", JSON.stringify(user));
+
+                    message.textContent = "Đăng ký và đăng nhập thành công";
+                    message.className = "alert alert-success";
+
+                    setTimeout(() => {
+                        window.location.href = "../index.html";
+                    }, 800);
+                    return;
+                }
+
+                // Fallback nếu backend không trả token/user trong response đăng ký
+                message.textContent = "Đăng ký thành công, vui lòng đăng nhập";
+                message.className = "alert alert-warning";
                 setTimeout(() => {
                     window.location.href = "login.html";
                 }, 1000);
