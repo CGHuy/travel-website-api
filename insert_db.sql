@@ -1,4 +1,5 @@
 USE db_viet_tour;
+SET NAMES utf8mb4;
 
 -- Xóa dữ liệu cũ để có thể chạy lại script nhiều lần
 SET FOREIGN_KEY_CHECKS = 0;

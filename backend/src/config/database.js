@@ -8,6 +8,7 @@ const pool = mysql.createPool({
 	password: process.env.DB_PASSWORD,
 	database: process.env.DB_NAME,
 	port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+	charset: "utf8mb4",
 	// Keep DATE columns as plain strings (YYYY-MM-DD) to avoid timezone shift.
 	dateStrings: ["DATE"],
 	waitForConnections: true, // Chờ khi không có kết nối sẵn có
