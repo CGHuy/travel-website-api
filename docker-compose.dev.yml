@@ -1,0 +1,39 @@
+services:
+  app:
+    build:
+      context: .
+      target: development
+    container_name: viet-travel-api-dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app/backend
+      - /app/backend/node_modules
+      - ./frontend:/app/frontend
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: viet-travel-db-dev
+    env_file:
+      - ./backend/.env
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data_dev:/var/lib/mysql
+      - ./db.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./insert_db.sql:/docker-entrypoint-initdb.d/02-data.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mysql_data_dev:
