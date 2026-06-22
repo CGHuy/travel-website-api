@@ -24,8 +24,10 @@ const validateRegister = (req, res, next) => {
 
     if (!email || email.trim().length === 0) {
         errors.email = "Email không được để trống";
-    } else if (email.length > 50) {
-        errors.email = "Email không được vượt quá 50 ký tự";
+    } else if (email.length < 6) {
+        errors.email = "Email phải có ít nhất 6 ký tự";
+    } else if (email.length > 100) {
+        errors.email = "Email không được vượt quá 100 ký tự";
     } else {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email.trim())) {
@@ -37,8 +39,8 @@ const validateRegister = (req, res, next) => {
         errors.password = "Mật khẩu không được để trống";
     } else if (password.length < 6) {
         errors.password = "Mật khẩu phải có ít nhất 6 ký tự";
-    } else if (password.length > 50) {
-        errors.password = "Mật khẩu không được vượt quá 50 ký tự";
+    } else if (password.length > 20) {
+        errors.password = "Mật khẩu không được vượt quá 20 ký tự";
     }
 
     if (!confirmPassword || confirmPassword.trim().length === 0) {

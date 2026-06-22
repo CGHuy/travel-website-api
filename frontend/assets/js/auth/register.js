@@ -134,16 +134,25 @@
         if (!email.value.trim()) {
             setError(email, emailError, "Vui lòng nhập email");
             isValid = false;
+        } else if (email.value.trim().length < 6) {
+            setError(email, emailError, "Email phải có ít nhất 6 ký tự");
+            isValid = false;
+        } else if (email.value.trim().length > 100) {
+            setError(email, emailError, "Email không được vượt quá 100 ký tự");
+            isValid = false;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
             setError(email, emailError, "Email chưa đúng định dạng");
             isValid = false;
-        }
+        } 
 
         if (!password.value.trim()) {
             setError(password, passwordError, "Vui lòng nhập mật khẩu");
             isValid = false;
         } else if (password.value.trim().length < 6) {
             setError(password, passwordError, "Mật khẩu phải có ít nhất 6 ký tự");
+            isValid = false;
+        } else if (password.value.trim().length > 20) {
+            setError(password, passwordError, "Mật khẩu không được vượt quá 20 ký tự");
             isValid = false;
         }
 
@@ -209,6 +218,10 @@
         const value = email.value.trim();
         if (!value) {
             setError(email, emailError, "Vui lòng nhập email");
+        } else if (value.length < 6) {
+            setError(email, emailError, "Email phải có ít nhất 6 ký tự");
+        } else if (value.length > 100) {
+            setError(email, emailError, "Email không được vượt quá 100 ký tự");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
             setError(email, emailError, "Email chưa đúng định dạng");
         } else {
@@ -222,6 +235,8 @@
             setError(password, passwordError, "Vui lòng nhập mật khẩu");
         } else if (value.length < 6) {
             setError(password, passwordError, "Mật khẩu phải có ít nhất 6 ký tự");
+        } else if (value.length > 20) {
+            setError(password, passwordError, "Mật khẩu không được vượt quá 20 ký tự");
         } else {
             clearError(password, passwordError);
         }
