@@ -70,9 +70,7 @@ exports.getProfile = async (req, res) => {
 exports.changePassword = async (req, res) => {
 	try {
 		const userId = req.user.id;
-
-		// Các kiểm tra đầu vào (presence/confirm) được xử lý bởi middleware `validateChangePassword`.
-		const { currentPassword, newPassword } = req.body;
+		const { currentPassword, newPassword, confirmPassword } = req.body;
 
 		if (currentPassword === newPassword) {
 			return res.status(400).json({
@@ -88,15 +86,12 @@ exports.changePassword = async (req, res) => {
 			});
 		}
 
-		if (newPassword !== confirmPassword) {
+		if (confirmPassword && newPassword !== confirmPassword) {
 			return res.status(400).json({
 				success: false,
 				message: "Mật khẩu mới và xác nhận không khớp!",
 			});
 		}
-
-	
-
 
 
 

@@ -194,6 +194,19 @@ function renderAdminBookingDetails(data) {
 		}
 	}
 
+	// Auto-show refund invoice modal when returning from successful VNPay refund
+	const refundInProgressId = sessionStorage.getItem("refundInProgress");
+	if (
+		refundInProgressId &&
+		String(refundInProgressId) === String(data.id) &&
+		data.status === "cancelled" &&
+		data.payment_status === "refunded"
+	) {
+		sessionStorage.removeItem("refundInProgress");
+		window.showToast("Hoàn tiền thành công qua VNPay!", "success");
+		setTimeout(() => showRefundInvoiceModal(data), 500);
+	}
+
 	// Activity History
 	renderActivityHistory(data);
 
@@ -280,6 +293,7 @@ function renderAdminBookingDetails(data) {
 
 				if (refundData.success && refundData.vnpayUrl) {
 					//============================== Chuyển hướng đến VNPay hoàn tiền =====================
+					sessionStorage.setItem("refundInProgress", data.id);
 					window.showToast("Đang chuyển hướng đến VNPay hoàn tiền...", "info");
 					setTimeout(() => {
 						window.location.href = refundData.vnpayUrl;
@@ -437,6 +451,52 @@ function setupInvoiceLogic(data) {
 	doPrintBtn.onclick = () => {
 		printInvoice();
 	};
+}
+
+function showRefundInvoiceModal(data) {
+	const modal = document.getElementById("refund-invoice-modal");
+	if (!modal) return;
+
+	const refundId = `REF-BOK${String(data.id).padStart(3, "0")}`;
+	setElText("rinv-refund-id", refundId);
+	setElText("rinv-current-date", new Date().toLocaleDateString("vi-VN"));
+	setElText("rinv-fullname", data.contact_name || data.user_fullname);
+	setElText("rinv-phone", data.contact_phone || data.user_phone);
+	setElText("rinv-email", data.contact_email || data.user_email);
+	setElText("rinv-paid-amount", formatCurrency(data.total_price));
+
+	// Penalty & refund calculation
+	const reqDate = new Date(data.updated_at || data.created_at);
+	const depDate = new Date(data.departure_date);
+	const timeDiff = depDate.getTime() - reqDate.getTime();
+	const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+	let penaltyPercent = 0;
+	if (daysDiff >= 30) penaltyPercent = 0;
+	else if (daysDiff >= 15) penaltyPercent = 50;
+	else penaltyPercent = 100;
+
+	const penaltyAmount = (data.total_price * penaltyPercent) / 100;
+	const refundAmount = data.total_price - penaltyAmount;
+	setElText("rinv-penalty-amount", `-${formatCurrency(penaltyAmount)}`);
+	setElText("rinv-refund-amount", formatCurrency(refundAmount));
+
+	modal.style.display = "flex";
+
+	const closeBtn = modal.querySelector(".close-modal");
+	closeBtn.onclick = () => (modal.style.display = "none");
+	modal.onclick = (e) => {
+		if (e.target === modal) modal.style.display = "none";
+	};
+
+	const printBtn = document.getElementById("btn-do-print-refund");
+	if (printBtn) {
+		printBtn.onclick = () => {
+			const originalTitle = document.title;
+			document.title = `Phieu hoan tien ${refundId}`;
+			window.print();
+			setTimeout(() => (document.title = originalTitle), 500);
+		};
+	}
 }
 
 /**
