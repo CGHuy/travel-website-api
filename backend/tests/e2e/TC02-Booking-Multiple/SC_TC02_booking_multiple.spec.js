@@ -1,0 +1,334 @@
+const puppeteer = require("puppeteer");
+const path = require("path");
+const fs = require("fs");
+const mysql = require("mysql2/promise");
+
+const DIR = path.resolve(__dirname, "screenshots");
+const BASE_URL = "http://localhost:3000";
+const DB_CONFIG = {
+	host: "localhost",
+	user: "root",
+	password: "12345",
+	database: "db_viet_tour",
+	port: 3306,
+};
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const waitForImages = async (page) => {
+	try {
+		await page.waitForFunction(() => {
+			const imgs = document.querySelectorAll("img");
+			if (imgs.length === 0) return true;
+			const loaded = Array.from(imgs).filter((img) => img.complete && img.naturalWidth > 0);
+			const failed = Array.from(imgs).filter((img) => img.complete && img.naturalWidth === 0);
+			return loaded.length + failed.length === imgs.length;
+		}, { timeout: 45000 });
+	} catch (e) {
+		const imgCount = await page.evaluate(() => document.querySelectorAll("img").length);
+		const loadedCount = await page.evaluate(() => {
+			const imgs = document.querySelectorAll("img");
+			return Array.from(imgs).filter((img) => img.complete && img.naturalWidth > 0).length;
+		});
+		console.log(`  ⚠️ Chờ ảnh timeout (${loadedCount}/${imgCount} ảnh), vẫn chụp...`);
+	}
+};
+
+if (fs.existsSync(DIR)) {
+	fs.rmSync(DIR, { recursive: true, force: true });
+}
+fs.mkdirSync(DIR, { recursive: true });
+
+(async () => {
+	// ====================================================================
+	// RESET DB
+	// ====================================================================
+	console.log("\n========== RESET DATABASE ==========");
+	let connection;
+	try {
+		connection = await mysql.createConnection(DB_CONFIG);
+		const seedSql = fs.readFileSync(path.join(__dirname, "seed.sql"), "utf-8");
+		const statements = seedSql
+			.split(";")
+			.map((s) => s.trim())
+			.filter((s) => s && !s.startsWith("--") && !s.startsWith("/*"));
+		for (const stmt of statements) {
+			try { await connection.execute(stmt); }
+			catch (err) { console.log(`  (skip): ${err.message.substring(0, 80)}`); }
+		}
+		await connection.end();
+		connection = null;
+		console.log("  ✅ Database đã reset thành công");
+	} catch (err) {
+		console.error(`  ❌ Reset DB thất bại: ${err.message}`);
+		if (connection) await connection.end().catch(() => {});
+		process.exit(1);
+	}
+
+	// ====================================================================
+	// Khởi tạo browser
+	// ====================================================================
+	const browser = await puppeteer.launch({
+		headless: false,
+		defaultViewport: null,
+		args: ["--start-maximized"],
+	});
+	const page = await browser.newPage();
+	let step = 0;
+	const shot = async (name) => {
+		step++;
+		await waitForImages(page);
+		try {
+			await page.screenshot({
+				path: path.join(DIR, `${String(step).padStart(2, "0")}-${name}.png`),
+				fullPage: true,
+			});
+			console.log(`  >> Đã chụp: ${name}.png`);
+		} catch (e) {
+			await sleep(2000);
+			await page.screenshot({
+				path: path.join(DIR, `${String(step).padStart(2, "0")}-${name}.png`),
+				fullPage: true,
+			});
+			console.log(`  >> Đã chụp (lần 2): ${name}.png`);
+		}
+	};
+
+	try {
+		// ====================================================================
+		// BƯỚC 1: ĐĂNG NHẬP
+		// ====================================================================
+		console.log("\n========== BƯỚC 1: ĐĂNG NHẬP ==========");
+		console.log("  --- Dữ liệu: User hợp lệ ---");
+		await page.goto(`${BASE_URL}/login`, { waitUntil: "domcontentloaded", timeout: 30000 });
+		await page.waitForSelector("#loginForm", { timeout: 10000 });
+		await page.evaluate(() => {
+			document.querySelector("#username").value = "ngocanh@gmail.com";
+			document.querySelector("#password").value = "123456";
+		});
+		await sleep(500);
+		await page.evaluate(() => {
+			document.querySelector("#loginForm button[type='submit']").click();
+		});
+		await page.waitForFunction(() => localStorage.getItem("token") !== null, { timeout: 8000 });
+		await page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 15000 }).catch(() => {});
+		await shot("01-login-success");
+		console.log("  ✅ Kết quả: Đăng nhập thành công");
+
+		// ====================================================================
+		// BƯỚC 2: ĐẶT TOUR LẦN 1 - ĐÀ NẴNG
+		// ====================================================================
+		console.log("\n========== BƯỚC 2: ĐẶT TOUR LẦN 1 - ĐÀ NẴNG ==========");
+		console.log("  --- Dữ liệu: Tour Đà Nẵng (id=2) ---");
+		await page.goto(`${BASE_URL}/booking-tour?tour_id=2`, { waitUntil: "domcontentloaded", timeout: 30000 });
+		await sleep(3000);
+		await page.waitForSelector("#booking-form", { timeout: 10000 });
+		await page.waitForSelector("#tour-name-display", { timeout: 10000 });
+		await sleep(1000);
+
+		const tourName1 = await page.evaluate(() => document.querySelector("#tour-name-display")?.textContent?.trim() || "");
+		console.log(`  -> Tour: ${tourName1}`);
+
+		await sleep(3000);
+		console.log("  -> Điền thông tin form...");
+		await page.evaluate(() => {
+			document.getElementById("contact_name").value = "Đỗ Thị Ngọc Anh";
+			document.getElementById("contact_phone").value = "0987654321";
+			document.getElementById("contact_email").value = "ngocanh@gmail.com";
+			const dob = document.getElementById("contact_dob");
+			if (dob && dob._flatpickr) dob._flatpickr.setDate("1995-08-25");
+			document.getElementById("contact_gender").value = "Nữ";
+		});
+		await sleep(300);
+
+		console.log("  -> Chọn ngày khởi hành...");
+		await page.evaluate(() => {
+			const sel = document.getElementById("departure_id");
+			if (sel) {
+				const validOpt = Array.from(sel.options).find((o) => o.value);
+				if (validOpt) {
+					sel.value = validOpt.value;
+					sel.dispatchEvent(new Event("change", { bubbles: true }));
+				}
+			}
+		});
+		await sleep(2000);
+
+		const totalAmount1 = await page.$eval("#total-amount", (el) => el.textContent).catch(() => "N/A");
+		console.log(`  -> Tổng tiền: ${totalAmount1}`);
+		await shot("02-da-nang-form-filled");
+
+		console.log("  -> Gửi đặt tour...");
+		await page.evaluate(() => document.getElementById("submitBooking").click());
+		await sleep(3000);
+		let redirected1 = false;
+		for (let i = 0; i < 30; i++) {
+			const url = page.url();
+			if (url.includes("sandbox.vnpayment.vn") || url.includes("vnpay")) {
+				redirected1 = true;
+				console.log(`  -> Đã chuyển trang: ${url.substring(0, 80)}...`);
+				break;
+			}
+			await sleep(2000);
+			console.log("  -> (Vẫn đang chờ...)");
+		}
+		if (redirected1) {
+			console.log("  ✅ Kết quả: Booking Đà Nẵng thành công (redirect VNPay)");
+		} else {
+			console.log("  ⚠️ Kết quả: Booking Đà Nẵng có thể chưa được tạo");
+		}
+		await shot("03-da-nang-vnpay");
+
+		// ====================================================================
+		// BƯỚC 3: THANH TOÁN VNPay - BOOK 1
+		// ====================================================================
+		console.log("\n========== BƯỚC 3: THANH TOÁN VNPay BOOK 1 ==========");
+		console.log("\n══════════════════════════════════════════════");
+		console.log("  VUI LÒNG THANH TOÁN TRÊN TRANG VNPay");
+		console.log("  Chrome đang mở trang VNPay Sandbox");
+		console.log("  Nhập thẻ test và thanh toán");
+		console.log("  Sau đó script sẽ tự động chạy tiếp");
+		console.log("");
+		console.log("  Thẻ: 9704198526191432198");
+		console.log("  Hạn: 12/25");
+		console.log("  OTP: 123456");
+		console.log("══════════════════════════════════════════════\n");
+		await page.waitForFunction(
+			() => window.location.href.includes("payment-result") || window.location.href.includes("vnpay-return"),
+			{ timeout: 300000 },
+		).catch(() => console.log("  ⚠️ Hết thời gian chờ thanh toán (5 phút)"));
+		await sleep(2000);
+		console.log(`  => URL sau thanh toán: ${page.url().substring(0, 100)}`);
+		await shot("04-payment-result-1");
+
+		// ====================================================================
+		// BƯỚC 4: ĐẶT TOUR LẦN 2 - CÀ MAU
+		// ====================================================================
+		console.log("\n========== BƯỚC 4: ĐẶT TOUR LẦN 2 - CÀ MAU ==========");
+		console.log("  --- Dữ liệu: Tour Cà Mau (id=40) ---");
+		await page.goto(`${BASE_URL}/booking-tour?tour_id=40`, { waitUntil: "domcontentloaded", timeout: 30000 });
+		await sleep(3000);
+		await page.waitForSelector("#booking-form", { timeout: 10000 });
+		await page.waitForSelector("#tour-name-display", { timeout: 10000 });
+		await sleep(1000);
+
+		const tourName2 = await page.evaluate(() => document.querySelector("#tour-name-display")?.textContent?.trim() || "");
+		console.log(`  -> Tour: ${tourName2}`);
+
+		await sleep(3000);
+		console.log("  -> Điền thông tin form...");
+		await page.evaluate(() => {
+			document.getElementById("contact_name").value = "Đỗ Thị Ngọc Anh";
+			document.getElementById("contact_phone").value = "0987654321";
+			document.getElementById("contact_email").value = "ngocanh@gmail.com";
+			const dob2 = document.getElementById("contact_dob");
+			if (dob2 && dob2._flatpickr) dob2._flatpickr.setDate("1995-08-25");
+			document.getElementById("contact_gender").value = "Nữ";
+		});
+		await sleep(300);
+
+		console.log("  -> Chọn ngày khởi hành...");
+		await page.evaluate(() => {
+			const sel = document.getElementById("departure_id");
+			if (sel) {
+				const validOpt = Array.from(sel.options).find((o) => o.value);
+				if (validOpt) {
+					sel.value = validOpt.value;
+					sel.dispatchEvent(new Event("change", { bubbles: true }));
+				}
+			}
+		});
+		await sleep(2000);
+
+		const totalAmount2 = await page.$eval("#total-amount", (el) => el.textContent).catch(() => "N/A");
+		console.log(`  -> Tổng tiền: ${totalAmount2}`);
+		await shot("05-ca-mau-form-filled");
+
+		console.log("  -> Gửi đặt tour...");
+		await page.evaluate(() => document.getElementById("submitBooking").click());
+		await sleep(3000);
+		let redirected2 = false;
+		for (let i = 0; i < 30; i++) {
+			const url = page.url();
+			if (url.includes("sandbox.vnpayment.vn") || url.includes("vnpay")) {
+				redirected2 = true;
+				console.log(`  -> Đã chuyển trang: ${url.substring(0, 80)}...`);
+				break;
+			}
+			await sleep(2000);
+			console.log("  -> (Vẫn đang chờ...)");
+		}
+		if (redirected2) {
+			console.log("  ✅ Kết quả: Booking Cà Mau thành công (redirect VNPay)");
+		} else {
+			console.log("  ⚠️ Kết quả: Booking Cà Mau có thể chưa được tạo");
+		}
+		await shot("06-ca-mau-vnpay");
+
+		// ====================================================================
+		// BƯỚC 5: THANH TOÁN VNPay - BOOK 2
+		// ====================================================================
+		console.log("\n========== BƯỚC 5: THANH TOÁN VNPay BOOK 2 ==========");
+		console.log("\n══════════════════════════════════════════════");
+		console.log("  VUI LÒNG THANH TOÁN LẦN 2 TRÊN VNPay");
+		console.log("  Nhập thẻ test và thanh toán");
+		console.log("  Sau đó script sẽ tự động chạy tiếp");
+		console.log("══════════════════════════════════════════════\n");
+		await page.waitForFunction(
+			() => window.location.href.includes("payment-result") || window.location.href.includes("vnpay-return"),
+			{ timeout: 300000 },
+		).catch(() => console.log("  ⚠️ Hết thời gian chờ thanh toán (5 phút)"));
+		await sleep(2000);
+		console.log(`  => URL sau thanh toán: ${page.url().substring(0, 100)}`);
+		await shot("07-payment-result-2");
+
+		// ====================================================================
+		// BƯỚC 6: XEM HISTORY
+		// ====================================================================
+		console.log("\n========== BƯỚC 6: XEM HISTORY ==========");
+		console.log("  --- Dữ liệu: User hiện tại ---");
+		await page.goto(`${BASE_URL}/pages/user/bookings-history.html`, { waitUntil: "domcontentloaded", timeout: 30000 });
+		await sleep(3000);
+		await shot("08-history");
+
+		const bookingCount = await page.evaluate(() => {
+			const cards = document.querySelectorAll(".booking-card");
+			return cards ? cards.length : 0;
+		});
+		console.log(`  => Số booking trong lịch sử: ${bookingCount}`);
+
+		// ====================================================================
+		// BƯỚC 7: KIỂM TRA SỐ LƯỢNG
+		// ====================================================================
+		console.log("\n========== BƯỚC 7: KIỂM TRA SỐ LƯỢNG ==========");
+		if (bookingCount >= 2) {
+			console.log("  ✅ Kết quả: Hiển thị đầy đủ 2 booking (Đà Nẵng + Cà Mau)");
+		} else {
+			console.log(`  ⚠️ Kết quả: Chỉ hiển thị ${bookingCount} booking, mong đợi >= 2`);
+		}
+
+		if (bookingCount >= 2) {
+			console.log("  -> Kiểm tra row đầu tiên:");
+			const firstRow = await page.evaluate(() => {
+				const cards = document.querySelectorAll(".booking-card");
+				if (cards.length > 0) return cards[0].textContent.trim().substring(0, 100);
+				return "Không tìm thấy card";
+			});
+			console.log(`  => Row 1: ${firstRow}`);
+		}
+
+		await shot("09-history-verified");
+
+		console.log("\n============================================");
+		console.log("✅ TC HOÀN TẤT - 9 ảnh đã lưu");
+		console.log(`📁 Thư mục: ${DIR}`);
+		console.log("============================================");
+
+	} catch (err) {
+		console.error(`\n  ❌ Lỗi: ${err.message}`);
+		console.error(err.stack);
+	}
+
+	console.log("\nTrình duyệt sẽ đóng sau 10 giây...");
+	await sleep(10000);
+	await browser.close();
+	console.log("Đã đóng trình duyệt");
+})();

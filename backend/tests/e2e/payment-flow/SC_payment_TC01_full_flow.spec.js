@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const mysql = require("mysql2/promise");
 
-const DIR = path.resolve(__dirname, "screenshots", "TC01-payment-flow");
+const DIR = path.resolve(__dirname, "screenshots");
 const BASE_URL = "http://localhost:3000";
 const DB_CONFIG = {
 	host: "localhost",
@@ -13,6 +13,24 @@ const DB_CONFIG = {
 	port: 3306,
 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const waitForImages = async (page) => {
+	try {
+		await page.waitForFunction(() => {
+			const imgs = document.querySelectorAll("img");
+			if (imgs.length === 0) return true;
+			const loaded = Array.from(imgs).filter((img) => img.complete && img.naturalWidth > 0);
+			const failed = Array.from(imgs).filter((img) => img.complete && img.naturalWidth === 0);
+			return loaded.length + failed.length === imgs.length;
+		}, { timeout: 45000 });
+	} catch (e) {
+		const imgCount = await page.evaluate(() => document.querySelectorAll("img").length);
+		const loadedCount = await page.evaluate(() => {
+			const imgs = document.querySelectorAll("img");
+			return Array.from(imgs).filter((img) => img.complete && img.naturalWidth > 0).length;
+		});
+		console.log(`  ⚠️ Chờ ảnh timeout (${loadedCount}/${imgCount} ảnh), vẫn chụp...`);
+	}
+};
 
 if (fs.existsSync(DIR)) {
 	fs.rmSync(DIR, { recursive: true, force: true });
@@ -57,6 +75,7 @@ fs.mkdirSync(DIR, { recursive: true });
 	let step = 0;
 	const shot = async (name) => {
 		step++;
+		await waitForImages(page);
 		try {
 			await page.screenshot({
 				path: path.join(DIR, `${String(step).padStart(2, "0")}-${name}.png`),
@@ -105,7 +124,7 @@ fs.mkdirSync(DIR, { recursive: true });
 		await shot("02-tour-detail");
 
 		// Điều hướng trực tiếp đến trang booking (click #bookTourBtn không navigate được)
-		await page.goto(`${BASE_URL}/booking-tour?tour_id=30`, { waitUntil: "domcontentloaded", timeout: 30000 });
+		await page.goto(`${BASE_URL}/booking-tour?tour_id=1`, { waitUntil: "domcontentloaded", timeout: 30000 });
 		await sleep(3000);
 
 		await page.waitForSelector("#booking-form", { timeout: 10000 });
