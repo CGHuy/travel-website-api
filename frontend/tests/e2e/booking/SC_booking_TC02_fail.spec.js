@@ -1,11 +1,28 @@
 const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
+const { execSync } = require("child_process");
 
 const DIR = path.resolve(__dirname, "screenshots", "TC02-fail");
 const URL = "http://localhost:3000";
 if (!fs.existsSync(DIR)) fs.mkdirSync(DIR, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Lấy kích thước màn hình thật
+let SCREEN_W = 1366;
+let SCREEN_H = 768;
+try {
+	const raw = execSync(
+		'powershell -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width; [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height"',
+		{ encoding: "utf8", timeout: 5000 },
+	);
+	const parts = raw.trim().split(/\r?\n/).filter(Boolean);
+	if (parts.length >= 2) {
+		SCREEN_W = parseInt(parts[0]) || SCREEN_W;
+		SCREEN_H = parseInt(parts[1]) || SCREEN_H;
+	}
+} catch (e) {}
+console.log(`📐 Màn hình: ${SCREEN_W}x${SCREEN_H}`);
 
 // Xóa screenshot cũ trước khi chạy
 fs.rmSync(DIR, { recursive: true, force: true });
@@ -19,22 +36,34 @@ fs.mkdirSync(DIR, { recursive: true });
 	});
 	const page = await browser.newPage();
 	let step = 0;
-	const shot = async (name) => {
+		const shot = async (name) => {
 		step++;
-		try {
-			await page.screenshot({
-				path: path.join(DIR, `${String(step).padStart(2, "0")}-${name}.png`),
-				fullPage: true,
-			});
-			console.log(`  >> Đã chụp: ${name}.png`);
-		} catch (e) {
-			console.log(`  >> Chờ rồi chụp lại: ${name}.png`);
-			await sleep(2000);
-			await page.screenshot({
-				path: path.join(DIR, `${String(step).padStart(2, "0")}-${name}.png`),
-				fullPage: true,
-			});
-			console.log(`  >> Đã chụp (lần 2): ${name}.png`);
+		for (let attempt = 0; attempt < 3; attempt++) {
+			try {
+				await page.screenshot({
+					path: path.join(
+						DIR,
+						`${String(step).padStart(2, "0")}-${name}.png`,
+					),
+					fullPage: true,
+				});
+				console.log(`  >> Đã chụp: ${name}.png`);
+				return;
+			} catch (e) {
+				if (e.message.includes("0 width")) {
+					const size = await page
+						.evaluate(() => ({
+							w: window.screen.availWidth,
+							h: window.screen.availHeight,
+						}))
+						.catch(() => ({ w: 1366, h: 768 }));
+					await page
+						.setViewport({ width: size.w || 1366, height: size.h || 768 })
+						.catch(() => {});
+				}
+				console.log(`  >> (thử ${attempt + 1}) ${e.message.substring(0, 60)}`);
+				await sleep(2000);
+			}
 		}
 	};
 
@@ -44,7 +73,7 @@ fs.mkdirSync(DIR, { recursive: true });
 		// ====================================================================
 		console.log("\n========== BƯỚC 1: ĐĂNG NHẬP ==========");
 		await page.goto(`${URL}/pages/auth/login.html`, {
-			waitUntil: "networkidle0",
+			waitUntil: "domcontentloaded",
 		});
 		await page.waitForSelector("#loginForm");
 		await sleep(1000);
@@ -55,10 +84,10 @@ fs.mkdirSync(DIR, { recursive: true });
 		await page.click('button[type="submit"]');
 		console.log("  -> Đã click Đăng nhập, chờ xử lý...");
 		await page.waitForFunction(() => localStorage.getItem("token") !== null, {
-			timeout: 8000,
+			timeout: 5000,
 		});
 		await page
-			.waitForNavigation({ waitUntil: "networkidle0", timeout: 15000 })
+			.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 8000 })
 			.catch(() => {});
 		await sleep(1000);
 		await shot("02-login-success");
@@ -67,7 +96,7 @@ fs.mkdirSync(DIR, { recursive: true });
 		// BƯỚC 2: Tìm kiếm tour "Nha Trang"
 		// ====================================================================
 		console.log("\n========== BƯỚC 2: TÌM KIẾM TOUR NHA TRANG ==========");
-		await page.goto(`${URL}/list-tour`, { waitUntil: "networkidle0" });
+		await page.goto(`${URL}/list-tour`, { waitUntil: "domcontentloaded" });
 		await page.waitForSelector("#searchInput");
 		await sleep(1000);
 		await shot("03-list-tour");
@@ -87,7 +116,7 @@ fs.mkdirSync(DIR, { recursive: true });
 		const href = await page.evaluate((el) => el.getAttribute("href"), tourLink);
 		console.log(`  -> Đi đến: ${href}`);
 		await page.goto(href.startsWith("http") ? href : `${URL}${href}`, {
-			waitUntil: "networkidle0",
+			waitUntil: "domcontentloaded",
 		});
 		await sleep(1000);
 		await shot("05-tour-detail");
@@ -100,8 +129,8 @@ fs.mkdirSync(DIR, { recursive: true });
 		if (!bookBtn) throw new Error("Không tìm thấy nút Đặt tour");
 		console.log('  -> Click "Đặt Tour ngay"...');
 		await bookBtn.click();
-		await page.waitForSelector("#booking-form", { timeout: 10000 });
-		await page.waitForSelector("#tour-name-display", { timeout: 10000 });
+		await page.waitForSelector("#booking-form", { timeout: 5000 });
+		await page.waitForSelector("#tour-name-display", { timeout: 5000 });
 		await sleep(2500);
 		console.log("  -> Form đặt tour đã load");
 
@@ -290,7 +319,7 @@ fs.mkdirSync(DIR, { recursive: true });
 		console.log(
 			"\n========== BƯỚC 9: KIỂM TRA KHÔNG CÓ BOOKING MỚI ==========",
 		);
-		await page.goto(`${URL}/bookings-history`, { waitUntil: "networkidle0" });
+		await page.goto(`${URL}/bookings-history`, { waitUntil: "domcontentloaded" });
 		await sleep(2000);
 		await shot("09-booking-history");
 		const bookingCount = (await page.$$(".booking-item")).length;

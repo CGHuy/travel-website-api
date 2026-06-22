@@ -2,6 +2,7 @@ const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
 const mysql = require("mysql2/promise");
+const { execSync } = require("child_process");
 
 const DIR = path.resolve(__dirname, "screenshots", "TC01-cancel-flow");
 const BASE_URL = "http://localhost:3000";
@@ -14,6 +15,22 @@ const DB_CONFIG = {
 };
 if (!fs.existsSync(DIR)) fs.mkdirSync(DIR, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Lấy kích thước màn hình thật
+let SCREEN_W = 1366;
+let SCREEN_H = 768;
+try {
+	const raw = execSync(
+		'powershell -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width; [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height"',
+		{ encoding: "utf8", timeout: 5000 },
+	);
+	const parts = raw.trim().split(/\r?\n/).filter(Boolean);
+	if (parts.length >= 2) {
+		SCREEN_W = parseInt(parts[0]) || SCREEN_W;
+		SCREEN_H = parseInt(parts[1]) || SCREEN_H;
+	}
+} catch (e) {}
+console.log(`📐 Màn hình: ${SCREEN_W}x${SCREEN_H}`);
 
 // Xóa screenshot cũ trước khi chạy
 if (fs.existsSync(DIR)) {
@@ -29,14 +46,16 @@ fs.mkdirSync(DIR, { recursive: true });
 	let connection;
 	try {
 		connection = await mysql.createConnection(DB_CONFIG);
-		const seedSql = fs.readFileSync(
-			path.join(__dirname, "seed.sql"),
-			"utf-8",
-		);
-		const statements = seedSql
+		const seedSql = fs.readFileSync(path.join(__dirname, "seed.sql"), "utf-8");
+		// Xóa comment dòng (--...) và comment block (/*...*/) rồi split by ";"
+		const clean = seedSql
+			.replace(/\/\*[\s\S]*?\*\//g, "")
+			.replace(/--[^\n]*/g, "")
+			.replace(/\n\s*\n/g, "\n");
+		const statements = clean
 			.split(";")
 			.map((s) => s.trim())
-			.filter((s) => s && !s.startsWith("--") && !s.startsWith("/*"));
+			.filter(Boolean);
 		for (const stmt of statements) {
 			try {
 				await connection.execute(stmt);
@@ -58,89 +77,113 @@ fs.mkdirSync(DIR, { recursive: true });
 	// ====================================================================
 	const browser = await puppeteer.launch({
 		headless: false,
-		defaultViewport: null,
+		defaultViewport: { width: 1920, height: 1080 },
 		args: ["--start-maximized"],
 	});
 	let step = 0;
 	const shot = async (page, name) => {
 		step++;
-		try {
-			await page.screenshot({
-				path: path.join(DIR, `${String(step).padStart(2, "0")}-${name}.png`),
-				fullPage: true,
-			});
-			console.log(`  >> Đã chụp: ${name}.png`);
-		} catch (e) {
-			await sleep(2000);
-			await page.screenshot({
-				path: path.join(DIR, `${String(step).padStart(2, "0")}-${name}.png`),
-				fullPage: true,
-			});
-			console.log(`  >> Đã chụp (lần 2): ${name}.png`);
+		for (let attempt = 0; attempt < 3; attempt++) {
+			try {
+				await page
+					.setViewport({ width: SCREEN_W, height: SCREEN_H })
+					.catch(() => {});
+				await page.screenshot({
+					path: path.join(DIR, `${String(step).padStart(2, "0")}-${name}.png`),
+					fullPage: true,
+				});
+				console.log(`  >> Đã chụp: ${name}.png`);
+				return;
+			} catch (e) {
+				// Fallback: lấy từ browser nếu screen API sai
+				const size = await page
+					.evaluate(() => ({
+						w: window.screen.availWidth,
+						h: window.screen.availHeight,
+					}))
+					.catch(() => ({ w: 0, h: 0 }));
+				if (size.w > 0) {
+					SCREEN_W = size.w;
+					SCREEN_H = size.h;
+				}
+				await page
+					.setViewport({ width: SCREEN_W, height: SCREEN_H })
+					.catch(() => {});
+				console.log(`  >> (thử ${attempt + 1}) ${e.message.substring(0, 60)}`);
+				await sleep(2000);
+			}
 		}
-	};
-
-	const login = async (page, email, password, label) => {
-		console.log(`\n  --- Đăng nhập ${label} ---`);
-		await page.goto(`${BASE_URL}/pages/auth/login.html`, {
-			waitUntil: "networkidle0",
-		});
-		await page.waitForSelector("#loginForm");
-		await sleep(500);
-		await page.type("#username", email, { delay: 30 });
-		await page.type("#password", password, { delay: 30 });
-		await page.click('button[type="submit"]');
-		await page.waitForFunction(() => localStorage.getItem("token") !== null, {
-			timeout: 8000,
-		});
-		await page
-			.waitForNavigation({ waitUntil: "networkidle0", timeout: 15000 })
-			.catch(() => {});
-		await sleep(1000);
 	};
 
 	let userContext, adminContext, userPage, adminPage;
 
 	try {
-	// ====================================================================
+		// ====================================================================
 		// PHASE 1: User (nam) - Gửi yêu cầu hủy booking 88
 		// ====================================================================
 		console.log("\n========== PHASE 1: NGƯỜI DÙNG GỬI YÊU CẦU HỦY ==========");
 		userContext = await browser.createBrowserContext();
 		userPage = await userContext.newPage();
 
-		// Bước 1: Đăng nhập (nam)
-		await login(userPage, "nam@gmail.com", "123456", "nam@gmail.com");
-		await shot(userPage, "01-user-login");
+		// Bước 1: Điền thông tin đăng nhập → chụp form đã điền
+		console.log("\n========== BƯỚC 1: ĐĂNG NHẬP USER ==========");
+		await userPage.goto(`${BASE_URL}/pages/auth/login.html`, {
+			waitUntil: "domcontentloaded",
+		});
+		await userPage.waitForSelector("#loginForm");
+		await userPage.type("#username", "nam@gmail.com", { delay: 30 });
+		await userPage.type("#password", "123456", { delay: 30 });
+		await sleep(300);
+		await shot(userPage, "01-login-filled");
 
-		// Bước 2: Vào lịch sử đặt tour
-		console.log("\n========== BƯỚC 2: LỊCH SỬ ĐẶT TOUR ==========");
+		// Bước 2: Submit đăng nhập → chụp kết quả
+		console.log("\n========== BƯỚC 2: SUBMIT ĐĂNG NHẬP ==========");
+		await userPage.click('button[type="submit"]');
+		await userPage.waitForFunction(
+			() => localStorage.getItem("token") !== null,
+			{ timeout: 8000 },
+		);
+		await userPage
+			.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 15000 })
+			.catch(() => {});
+		await sleep(1500);
+		try {
+			await userPage.waitForSelector(".toast, .swal2-container", {
+				timeout: 5000,
+			});
+			await sleep(500);
+		} catch (e) {
+			await sleep(500);
+		}
+		await shot(userPage, "02-login-success");
+
+		// Bước 3: Vào lịch sử đặt tour
+		console.log("\n========== BƯỚC 3: LỊCH SỬ ĐẶT TOUR ==========");
 		await userPage.goto(`${BASE_URL}/pages/user/bookings-history.html`, {
-			waitUntil: "networkidle0",
+			waitUntil: "domcontentloaded",
 		});
 		await sleep(2000);
-		// Chờ danh sách booking render
 		try {
-			await userPage.waitForSelector("#booking-list-body", { timeout: 8000 });
+			await userPage.waitForSelector("#booking-list-body", { timeout: 5000 });
 		} catch (e) {}
 		await sleep(500);
-		await shot(userPage, "02-booking-history");
+		await shot(userPage, "03-booking-history");
 		const bookingLinks = await userPage.$$(
 			'a[href*="booking-details.html?id="]',
 		);
 		console.log(`  => Tìm thấy ${bookingLinks.length} booking`);
 
-		// Bước 3: Click vào booking 88
-		console.log("\n========== BƯỚC 3: CHI TIẾT BOOKING ==========");
+		// Bước 4: Click vào booking 88
+		console.log("\n========== BƯỚC 4: CHI TIẾT BOOKING ==========");
 		await userPage.goto(`${BASE_URL}/pages/user/booking-details.html?id=88`, {
-			waitUntil: "networkidle0",
+			waitUntil: "domcontentloaded",
 		});
 		await sleep(3000);
 		try {
-			await userPage.waitForSelector("#booking-actions", { timeout: 8000 });
+			await userPage.waitForSelector("#booking-actions", { timeout: 6000 });
 		} catch (e) {}
 		await sleep(500);
-		await shot(userPage, "03-booking-detail");
+		await shot(userPage, "04-booking-detail");
 
 		// Kiểm tra nút "Yêu cầu hủy"
 		const cancelBtn = await userPage.$("#booking-actions .btn-outline-danger");
@@ -149,17 +192,17 @@ fs.mkdirSync(DIR, { recursive: true });
 				"  => ⚠️ Không tìm thấy nút Yêu cầu hủy (có thể đã hủy trước đó)",
 			);
 		else {
-			// Bước 4: Click "Yêu cầu hủy" → modal
-			console.log("\n========== BƯỚC 4: NHẤN YÊU CẦU HỦY ==========");
+			// Bước 5: Click "Yêu cầu hủy" → modal
+			console.log("\n========== BƯỚC 5: NHẤN YÊU CẦU HỦY ==========");
 			await cancelBtn.click();
 			await sleep(1000);
 			try {
 				await userPage.waitForSelector("#cancelRequestModal", {
-					timeout: 5000,
+					timeout: 8000,
 				});
 			} catch (e) {}
 			await sleep(500);
-			await shot(userPage, "04-cancel-modal");
+			await shot(userPage, "05-cancel-modal");
 
 			// Đọc thông tin trong modal
 			const depDate = await userPage
@@ -183,15 +226,14 @@ fs.mkdirSync(DIR, { recursive: true });
 			console.log(`  => Phí hủy: ${penalty}`);
 			console.log(`  => Số tiền hoàn: ${refund}`);
 
-			// Bước 5: Click "Chắc chắn Hủy"
-			console.log("\n========== BƯỚC 5: XÁC NHẬN HỦY ==========");
+			// Bước 6: Click "Chắc chắn Hủy"
+			console.log("\n========== BƯỚC 6: XÁC NHẬN HỦY ==========");
 			const confirmBtn = await userPage.$("#confirm-cancel-btn");
 			if (confirmBtn) {
 				await confirmBtn.click();
 				console.log("  -> Đã click Chắc chắn Hủy, chờ kết quả...");
 				await sleep(2000);
 
-				// Chờ reload sau toast
 				try {
 					await userPage.waitForFunction(
 						() =>
@@ -203,7 +245,6 @@ fs.mkdirSync(DIR, { recursive: true });
 				} catch (e) {}
 				await sleep(1000);
 
-				// Kiểm tra badge "Yêu cầu hủy tour đang chờ xử lý"
 				const pendingBadge = await userPage.$("#booking-actions span.badge");
 				if (pendingBadge) {
 					const badgeText = await userPage.evaluate(
@@ -212,12 +253,11 @@ fs.mkdirSync(DIR, { recursive: true });
 					);
 					console.log(`  => Badge hiển thị: ${badgeText}`);
 				}
-				await shot(userPage, "05-after-cancel-request");
+				await shot(userPage, "06-after-cancel-request");
 
-			// Reload để đảm bảo UI đã cập nhật
-			await userPage.reload({ waitUntil: "networkidle0" });
-			await sleep(1500);
-			await shot(userPage, "05b-after-reload");
+				// Reload để đảm bảo UI đã cập nhật
+				await userPage.reload({ waitUntil: "domcontentloaded" });
+				await sleep(1500);
 			}
 		}
 
@@ -228,21 +268,44 @@ fs.mkdirSync(DIR, { recursive: true });
 		adminContext = await browser.createBrowserContext();
 		adminPage = await adminContext.newPage();
 
-		// Bước 6: Đăng nhập admin
-		await login(
-			adminPage,
-			"booking-staff@gmail.com",
-			"123456",
-			"booking-staff@gmail.com",
-		);
-		await shot(adminPage, "06-admin-login");
+		// Bước 7: Điền thông tin admin → chụp form đã điền
+		console.log("\n========== BƯỚC 7: ĐĂNG NHẬP ADMIN ==========");
+		await adminPage.goto(`${BASE_URL}/pages/auth/login.html`, {
+			waitUntil: "domcontentloaded",
+		});
+		await adminPage.waitForSelector("#loginForm");
+		await adminPage.type("#username", "booking-staff@gmail.com", { delay: 30 });
+		await adminPage.type("#password", "123456", { delay: 30 });
+		await sleep(300);
+		await shot(adminPage, "07-admin-login-filled");
 
-		// Bước 7-8: Vào admin dashboard → Quản lý booking
-		console.log("\n========== BƯỚC 7: VÀO ADMIN ==========");
+		// Bước 8: Submit admin login → chụp kết quả
+		console.log("\n========== BƯỚC 8: SUBMIT ADMIN LOGIN ==========");
+		await adminPage.click('button[type="submit"]');
+		await adminPage.waitForFunction(
+			() => localStorage.getItem("token") !== null,
+			{ timeout: 8000 },
+		);
+		await adminPage
+			.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 15000 })
+			.catch(() => {});
+		await sleep(1500);
+		try {
+			await adminPage.waitForSelector(".toast, .swal2-container", {
+				timeout: 5000,
+			});
+			await sleep(500);
+		} catch (e) {
+			await sleep(500);
+		}
+		await shot(adminPage, "08-admin-login-success");
+
+		// Bước 9: Vào admin dashboard → Quản lý booking
+		console.log("\n========== BƯỚC 9: VÀO ADMIN BOOKING LIST ==========");
 		await adminPage.goto(
 			`${BASE_URL}/pages/admin/dashboard.html?page=booking`,
 			{
-				waitUntil: "networkidle0",
+				waitUntil: "domcontentloaded",
 			},
 		);
 		console.log("  -> Đã load admin dashboard, chờ booking list...");
@@ -253,12 +316,9 @@ fs.mkdirSync(DIR, { recursive: true });
 			await adminPage.waitForSelector("#booking-list-body", {
 				timeout: 10000,
 			});
-			// Chờ ít nhất 1 dòng có BOK trong table
 			await adminPage.waitForFunction(
 				() => {
-					const rows = document.querySelectorAll(
-						"#booking-list-body tr",
-					);
+					const rows = document.querySelectorAll("#booking-list-body tr");
 					return rows.length > 0;
 				},
 				{ timeout: 10000 },
@@ -268,10 +328,10 @@ fs.mkdirSync(DIR, { recursive: true });
 			await sleep(5000);
 		}
 		await sleep(500);
-		await shot(adminPage, "07-admin-booking-list");
+		await shot(adminPage, "09-admin-booking-list");
 
-		// Bước 8: Tìm đúng booking 88 (BOK088) mà user vừa gửi yêu cầu hủy
-		console.log("\n========== BƯỚC 8: CHỌN BOOKING ==========");
+		// Bước 10: Tìm đúng booking 88 (BOK088) mà user vừa gửi yêu cầu hủy
+		console.log("\n========== BƯỚC 10: CHỌN BOOKING ==========");
 		const found = await adminPage.evaluate(() => {
 			const rows = document.querySelectorAll("#booking-list-body tr");
 			for (const row of rows) {
@@ -286,28 +346,25 @@ fs.mkdirSync(DIR, { recursive: true });
 			console.log("  => Đã click vào BOK088");
 			await sleep(2000);
 
-			// Debug: log URL và booking ID hiện tại
 			const currentUrl = adminPage.url();
 			const urlParams = new URLSearchParams(currentUrl.split("?")[1] || "");
 			const currentBookingId = urlParams.get("id") || "N/A";
 			console.log(`  => URL hiện tại: ${currentUrl}`);
 			console.log(`  => Booking ID trên URL: ${currentBookingId}`);
 
-			// Chờ SPA load booking-detail: đợi status badge render hẳn
 			try {
 				await adminPage.waitForFunction(
 					() => {
 						const el = document.getElementById("booking-status");
 						return el && el.textContent.trim() !== "";
 					},
-					{ timeout: 15000 },
+					{ timeout: 10000 },
 				);
 				await sleep(1500);
 			} catch (e) {
 				console.log("  -> Chờ thêm SPA render...");
 				await sleep(4000);
 			}
-			// Debug: đọc trạng thái booking từ giao diện
 			const debugBookingCode = await adminPage
 				.$eval("#booking-id-title", (el) => el.textContent)
 				.catch(() => "N/A");
@@ -317,9 +374,8 @@ fs.mkdirSync(DIR, { recursive: true });
 			console.log(`  => Booking title: ${debugBookingCode.trim()}`);
 			console.log(`  => Booking status: ${debugStatus.trim()}`);
 
-			await shot(adminPage, "08-admin-booking-detail");
+			await shot(adminPage, "10-admin-booking-detail");
 
-			// Kiểm tra khu vực hủy (đợi cancellation area hiện ra)
 			let cancelArea = await adminPage.$("#cancellation-action-area");
 			if (cancelArea) {
 				let display = await cancelArea.evaluate(
@@ -345,13 +401,12 @@ fs.mkdirSync(DIR, { recursive: true });
 			console.log(`  => Khu vực hủy: ${cancelAreaDisplay}`);
 
 			if (cancelArea && cancelAreaDisplay !== "none") {
-				// Bước 9: Click "Phê duyệt hủy tour & Hoàn tiền" → modal
-				console.log("\n========== BƯỚC 9: MỞ MODAL PHÊ DUYỆT ==========");
+				// Bước 11: Click "Phê duyệt hủy tour & Hoàn tiền" → modal
+				console.log("\n========== BƯỚC 11: MỞ MODAL PHÊ DUYỆT ==========");
 				const showModalBtn = await adminPage.$("#btn-show-cancel-modal");
 				if (showModalBtn) {
 					await showModalBtn.click();
 
-					// Chờ modal hiện + nội dung load đầy đủ
 					try {
 						await adminPage.waitForSelector("#cancel-confirm-modal.show", {
 							timeout: 5000,
@@ -359,17 +414,21 @@ fs.mkdirSync(DIR, { recursive: true });
 						await adminPage.waitForFunction(
 							() => {
 								const el = document.getElementById("modal-refund-amount");
-								return el && el.textContent.trim() !== "" && !el.textContent.includes("0đ");
+								return (
+									el &&
+									el.textContent.trim() !== "" &&
+									!el.textContent.includes("0đ")
+								);
 							},
-							{ timeout: 10000 },
+							{ timeout: 7000 },
 						);
-						await sleep(300);
+						await sleep(500);
 					} catch (e) {
 						await sleep(2000);
 					}
-					await shot(adminPage, "09-admin-cancel-modal");
+					await shot(adminPage, "11-admin-cancel-modal");
 
-					// Bước 10: Modal hiển thị phí hủy, số tiền hoàn
+					// Bước 12: Modal hiển thị phí hủy, số tiền hoàn
 					const adminDepDate = await adminPage
 						.$eval("#modal-req-date", (el) => el.textContent)
 						.catch(() => "N/A");
@@ -387,15 +446,14 @@ fs.mkdirSync(DIR, { recursive: true });
 					console.log(`  => Phí phạt: ${adminPenalty}`);
 					console.log(`  => Số tiền hoàn: ${adminRefund}`);
 
-					// Bước 11: Click phê duyệt → redirect VNPay sandbox
-					console.log("\n========== BƯỚC 11: PHÊ DUYỆT HỦY ==========");
+					// Bước 13: Click phê duyệt → redirect VNPay sandbox
+					console.log("\n========== BƯỚC 13: PHÊ DUYỆT HỦY ==========");
 					const approveBtn = await adminPage.$("#btn-approve-cancel");
 					if (approveBtn) {
 						await approveBtn.click();
 						console.log("  -> Đã click Phê duyệt, chờ redirect VNPay...");
 						await sleep(3000);
 
-						// Chờ redirect sang VNPay sandbox
 						let onVnpayRefund = false;
 						for (let i = 0; i < 30; i++) {
 							await sleep(1000);
@@ -403,7 +461,6 @@ fs.mkdirSync(DIR, { recursive: true });
 							if (url.includes("sandbox.vnpayment.vn")) {
 								console.log("  => Redirect sang VNPay hoàn tiền thành công!");
 								onVnpayRefund = true;
-								// Đợi VNPay page load hoàn chỉnh
 								try {
 									await adminPage.waitForSelector("body", {
 										timeout: 10000,
@@ -424,9 +481,9 @@ fs.mkdirSync(DIR, { recursive: true });
 							if (i === 15) console.log("  -> (Có thể lỗi API)");
 						}
 
-						await shot(adminPage, "10-vnpay-refund-sandbox");
+						await shot(adminPage, "12-vnpay-refund-sandbox");
 
-						// Bước 12: Chờ người dùng thao tác thủ công trên VNPay
+						// Bước 14: Chờ người dùng thao tác thủ công trên VNPay
 						if (onVnpayRefund) {
 							console.log("");
 							console.log("══════════════════════════════════════════════");
@@ -442,7 +499,6 @@ fs.mkdirSync(DIR, { recursive: true });
 							console.log("══════════════════════════════════════════════");
 							console.log("");
 
-							// Chờ redirect về app (qua VNPay callback)
 							try {
 								await adminPage.waitForFunction(
 									() => !window.location.href.includes("sandbox.vnpayment.vn"),
@@ -453,7 +509,6 @@ fs.mkdirSync(DIR, { recursive: true });
 								console.log("  => Hết thời gian chờ (5 phút)");
 							}
 
-							// Đợi VNPay callback redirect (nếu đang ở /api/bookings/vnpay-refund)
 							for (let i = 0; i < 15; i++) {
 								await sleep(1000);
 								const url = adminPage.url();
@@ -470,51 +525,50 @@ fs.mkdirSync(DIR, { recursive: true });
 							const afterUrl = adminPage.url();
 							console.log(`  => URL sau VNPay: ${afterUrl.substring(0, 100)}`);
 
-							// Nếu vẫn đang ở trang lạ, load lại admin booking detail
 							if (
 								!adminPage.url().includes("dashboard.html") &&
 								!adminPage.url().includes("admin")
 							) {
 								await adminPage.goto(
 									`${BASE_URL}/pages/admin/dashboard.html?page=booking-details&id=88`,
-									{ waitUntil: "networkidle0" },
+									{ waitUntil: "domcontentloaded" },
 								);
 							}
 
-							// Đợi booking detail render + refund card hiển thị đầy đủ
 							try {
 								await adminPage.waitForFunction(
 									() => {
 										const el = document.getElementById("booking-status");
 										return el && el.textContent.trim() !== "";
 									},
-									{ timeout: 10000 },
+									{ timeout: 7000 },
 								);
 								await adminPage.waitForFunction(
 									() => {
 										const card = document.getElementById("refund-receipt-card");
 										const amount = document.getElementById("refund-amount");
-										return card && window.getComputedStyle(card).display !== "none"
-											&& amount && amount.textContent.trim() !== "";
+										return (
+											card &&
+											window.getComputedStyle(card).display !== "none" &&
+											amount &&
+											amount.textContent.trim() !== ""
+										);
 									},
-									{ timeout: 10000 },
+									{ timeout: 8000 },
 								);
 								await sleep(500);
 							} catch (e) {
 								await sleep(3000);
 							}
 
-							// Chụp kết quả hoàn tiền thành công
-							await shot(adminPage, "11-refund-success-dialog");
+							await shot(adminPage, "13-refund-success-dialog");
 
-							// Kiểm tra dialog/card hoàn tiền
 							let refundReceiptCard = await adminPage.$("#refund-receipt-card");
 							if (refundReceiptCard) {
 								let cardDisplay = await refundReceiptCard.evaluate(
 									(el) => window.getComputedStyle(el).display,
 								);
 								if (cardDisplay === "none") {
-									// Đợi thêm nếu chưa kịp render
 									try {
 										await adminPage.waitForFunction(
 											() => {
@@ -525,12 +579,13 @@ fs.mkdirSync(DIR, { recursive: true });
 													el && window.getComputedStyle(el).display !== "none"
 												);
 											},
-											{ timeout: 5000 },
+											{ timeout: 3000 },
 										);
 									} catch (e) {}
 								}
 								refundReceiptCard = await adminPage.$("#refund-receipt-card");
 							}
+
 							if (refundReceiptCard) {
 								cardDisplay = await refundReceiptCard.evaluate(
 									(el) => window.getComputedStyle(el).display,
@@ -561,19 +616,21 @@ fs.mkdirSync(DIR, { recursive: true });
 								console.log("  => ⚠️ Không tìm thấy refund receipt card");
 							}
 
-							// Shot 12: Booking detail (ẩn refund receipt card để thấy rõ thông tin)
+							// Đóng popup modal, giữ nguyên card → chụp full page sạch
 							await adminPage.evaluate(() => {
-								const card = document.getElementById("refund-receipt-card");
-								if (card) card.style.display = "none";
+								const modal = document.getElementById("refund-invoice-modal");
+								if (modal) modal.style.display = "none";
 								window.scrollTo(0, 0);
 							});
-							// Chờ ảnh tour load xong (tránh bóng sáng/tối)
 							try {
 								await adminPage.waitForFunction(
 									() => {
 										const imgs = document.querySelectorAll(".detail-grid img");
-										return imgs.length > 0 && Array.from(imgs).every(
-											(img) => img.complete && img.naturalWidth > 0,
+										return (
+											imgs.length > 0 &&
+											Array.from(imgs).every(
+												(img) => img.complete && img.naturalWidth > 0,
+											)
 										);
 									},
 									{ timeout: 8000 },
@@ -582,12 +639,8 @@ fs.mkdirSync(DIR, { recursive: true });
 							} catch (e) {
 								await sleep(1500);
 							}
-							await shot(adminPage, "12-admin-booking-cancelled");
-							// Khôi phục lại
-							await adminPage.evaluate(() => {
-								const card = document.getElementById("refund-receipt-card");
-								if (card) card.style.display = "";
-							});
+
+							await shot(adminPage, "14-admin-booking-detail");
 						}
 					}
 				}
@@ -603,7 +656,7 @@ fs.mkdirSync(DIR, { recursive: true });
 			console.log(
 				`  => ⚠️ Không tìm thấy booking. Nội dung bảng: ${tableContent.substring(0, 200)}`,
 			);
-			await shot(adminPage, "08-no-booking-found");
+			await shot(adminPage, "10-no-booking-found");
 		}
 
 		// ====================================================================
@@ -611,12 +664,11 @@ fs.mkdirSync(DIR, { recursive: true });
 		// ====================================================================
 		console.log("\n\n========== PHASE 3: NGƯỜI DÙNG KIỂM TRA ==========");
 
-		// Bước 13: User kiểm tra
+		// Bước 15: User kiểm tra
 		await userPage.goto(`${BASE_URL}/pages/user/booking-details.html?id=88`, {
-			waitUntil: "networkidle0",
+			waitUntil: "domcontentloaded",
 		});
 
-		// Đợi booking status render hẳn
 		try {
 			await userPage.waitForFunction(
 				() => {
@@ -629,9 +681,8 @@ fs.mkdirSync(DIR, { recursive: true });
 		} catch (e) {
 			await sleep(3000);
 		}
-		await shot(userPage, "13-user-booking-cancelled");
+		await shot(userPage, "15-user-booking-cancelled");
 
-		// Kiểm tra trạng thái
 		const statusBadge = await userPage.$("#booking-actions span.badge");
 		if (statusBadge) {
 			const statusText = await userPage.evaluate(
@@ -644,7 +695,6 @@ fs.mkdirSync(DIR, { recursive: true });
 			}
 		}
 
-		// Kiểm tra không còn nút hủy
 		const hasCancelBtn = await userPage.$(
 			"#booking-actions .btn-outline-danger",
 		);
