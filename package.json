@@ -6,5 +6,7 @@
         "dev": "cd backend && npx nodemon app.js",
         "start": "cd backend && node app.js"
     },
-    "dependencies": {}
+    "dependencies": {
+        "puppeteer": "^25.1.0"
+    }
 }
