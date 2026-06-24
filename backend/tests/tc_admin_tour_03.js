@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
+const mysql = require("mysql2/promise");
 
 const BASE_URL = "http://localhost:3000";
 const TEST_CASE = "TC_ADMIN_TOUR_03";
@@ -8,6 +9,14 @@ const TEST_NAME = TEST_CASE + " - Sửa thông tin tour thành công (ID=19)";
 const LOG_DIR = path.join(__dirname, "..", "test-results", "logs");
 const SCREENSHOT_DIR = path.join(__dirname, "..", "test-results", "screenshots", TEST_CASE);
 const EDIT_TOUR_ID = 19;
+const DB_CONFIG = (() => {
+    const candidates = [path.resolve(__dirname, "../.env"), path.resolve(__dirname, "../../.env")];
+    const envPath = candidates.find(p => fs.existsSync(p));
+    if (!envPath) throw new Error("Không tìm thấy file .env");
+    const env = fs.readFileSync(envPath, "utf-8");
+    const get = k => { const m = env.match(new RegExp(`^${k}=(.*)$`, "m")); return m ? m[1].trim() : ""; };
+    return { host: get("DB_HOST") || "localhost", user: get("DB_USER") || "root", password: get("DB_PASSWORD") || "", database: get("DB_NAME") || "db_viet_tour", port: parseInt(get("DB_PORT")) || 3306 };
+})();
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -29,6 +38,21 @@ function shotPath(name) {
 }
 
 (async () => {
+    // ====================================================================
+    // RESET DB
+    // ====================================================================
+    console.log("\n========== RESET DATABASE ==========");
+    let connection;
+    try {
+        connection = await mysql.createConnection(DB_CONFIG);
+        const seedSql = fs.readFileSync(path.join(__dirname, "seed_tour_03.sql"), "utf-8");
+        const cleanedSql = seedSql.replace(/--.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+        const statements = cleanedSql.split(";").map(s => s.trim()).filter(s => s);
+        for (const stmt of statements) { try { await connection.execute(stmt); } catch (err) { console.log(`  (skip): ${err.message.substring(0, 80)}`); } }
+        await connection.end(); connection = null;
+        console.log("  \u2705 Database đã reset thành công");
+    } catch (err) { console.error(`  \u274C Reset DB thất bại: ${err.message}`); if (connection) await connection.end().catch(() => {}); process.exit(1); }
+
     const browser = await puppeteer.launch({
         headless: false,
         slowMo: 50,
