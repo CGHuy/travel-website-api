@@ -55,8 +55,8 @@ function shotPath(name) {
     const browser = await puppeteer.launch({
         headless: false,
         slowMo: 50,
-        defaultViewport: { width: 1280, height: 720 },
-        args: ["--no-sandbox", "--disable-setuid-sandbox", "--window-size=1280,720"],
+        defaultViewport: { width: 1440, height: 800 },
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--window-size=1440,800"],
     });
     const page = await browser.newPage();
 
