@@ -57,6 +57,45 @@ exports.createService = async (req, res) => {
             });
         }
 
+        if (name.length > 200) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tên dịch vụ không được vượt quá 200 ký tự',
+            });
+        }
+        if (/^\d+$/.test(name)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tên dịch vụ không được chỉ chứa số',
+            });
+        }
+        if (slug.length > 50) {
+            return res.status(400).json({
+                success: false,
+                message: 'Slug không được vượt quá 50 ký tự',
+            });
+        }
+        if (/^\d+$/.test(slug)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Slug không được chỉ chứa số',
+            });
+        }
+        if (description && description.length > 300) {
+            return res.status(400).json({
+                success: false,
+                message: 'Mô tả không được vượt quá 300 ký tự',
+            });
+        }
+
+        const existingName = await Service.getByName(name);
+        if (existingName) {
+            return res.status(409).json({
+                success: false,
+                message: 'Tên dịch vụ đã tồn tại',
+            });
+        }
+
         const serviceId = await Service.create({
             name,
             slug,
