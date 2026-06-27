@@ -174,10 +174,24 @@ exports.createStaff = async (req, res) => {
 			});
 		}
 
-		if (password.length < 6) {
+		if (typeof fullname !== "string" || fullname.trim().length < 3 || fullname.trim().length > 50 || !/^[\p{L}\s]+$/u.test(fullname.trim())) {
 			return res.status(400).json({
 				success: false,
-				message: "Mật khẩu phải có ít nhất 6 ký tự",
+				message: "Họ và tên không hợp lệ. Chỉ cho phép chữ cái và khoảng trắng, độ dài 3-50 ký tự",
+			});
+		}
+
+		if (!/^[^\s@]+@gmail\.com$/i.test(email.trim())) {
+			return res.status(400).json({
+				success: false,
+				message: "Email phải có định dạng @gmail.com",
+			});
+		}
+
+		if (password.length < 6 || password.length > 32) {
+			return res.status(400).json({
+				success: false,
+				message: "Mật khẩu phải có từ 6 đến 32 ký tự",
 			});
 		}
 

@@ -120,12 +120,16 @@ const validateCreateStaff = (req, res, next) => {
 	const f = value(fullname);
 	if (!f) errors.fullname = "Họ và tên không được để trống";
 	else if (f.length < 3) errors.fullname = "Họ và tên phải có ít nhất 3 ký tự";
+	else if (f.length > 50) errors.fullname = "Họ và tên không được vượt quá 50 ký tự";
+	else if (!/^[\p{L}\s]+$/u.test(f)) {
+		errors.fullname = "Họ và tên không được chứa ký tự đặc biệt";
+	}
 
 	const e = value(email);
 	if (!e) errors.email = "Email không được để trống";
 	else {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(e)) errors.email = "Email không hợp lệ";
+		const emailRegex = /^[^\s@]+@gmail\.com$/i;
+		if (!emailRegex.test(e)) errors.email = "Email phải có định dạng @gmail.com";
 	}
 
 	const p = value(phone);
@@ -136,6 +140,7 @@ const validateCreateStaff = (req, res, next) => {
 	const pass = value(password);
 	if (!pass) errors.password = "Mật khẩu không được để trống";
 	else if (pass.length < 6) errors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+	else if (pass.length > 32) errors.password = "Mật khẩu tối đa là 32 ký tự";
 
 	const r = value(role);
 	const allowedRoles = ["booking-staff", "tour-staff", "admin"];

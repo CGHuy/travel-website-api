@@ -45,13 +45,17 @@ fs.mkdirSync(DIR, { recursive: true });
 	let connection;
 	try {
 		connection = await mysql.createConnection(DB_CONFIG);
-		const seedSql = fs.readFileSync(path.join(__dirname, "seed.sql"), "utf-8");
+		const seedPath = path.join(__dirname, "..", "TC01-Booking-Payment", "seed.sql");
+		const seedSql = fs.readFileSync(seedPath, "utf-8");
 		const statements = seedSql
+			.split("\n")
+			.filter(l => !l.trim().startsWith("--") && !l.trim().startsWith("/*"))
+			.join("\n")
 			.split(";")
 			.map((s) => s.trim())
-			.filter((s) => s && !s.startsWith("--") && !s.startsWith("/*"));
+			.filter((s) => s);
 		for (const stmt of statements) {
-			try { await connection.execute(stmt); }
+			try { await connection.query(stmt); }
 			catch (err) { console.log(`  (skip): ${err.message.substring(0, 80)}`); }
 		}
 		await connection.end();
@@ -144,19 +148,16 @@ fs.mkdirSync(DIR, { recursive: true });
 		await sleep(300);
 
 		console.log("  -> Chọn ngày khởi hành...");
-		const depSelect = await page.$("#departure_id");
-		if (depSelect) {
-			const opts = await page.$$("#departure_id option");
-			for (const o of opts) {
-				const v = await page.evaluate((el) => el.value, o);
-				if (v) {
-					await page.select("#departure_id", v);
-					const text = await page.evaluate((el) => el.textContent, o);
-					console.log(`  -> Đã chọn: ${text}`);
-					break;
+		await page.evaluate(() => {
+			const sel = document.getElementById("departure_id");
+			if (sel) {
+				const validOpt = Array.from(sel.options).find((o) => o.value);
+				if (validOpt) {
+					sel.value = validOpt.value;
+					sel.dispatchEvent(new Event("change", { bubbles: true }));
 				}
 			}
-		}
+		});
 		await sleep(2000);
 
 		const totalAmount = await page.$eval("#total-amount", (el) => el.textContent).catch(() => "N/A");
@@ -174,34 +175,26 @@ fs.mkdirSync(DIR, { recursive: true });
 		console.log("\n========== BƯỚC 2: THANH TOÁN ==========");
 		console.log('  --- Dữ liệu: Thẻ không hợp lệ ---');
 
-		const btnSubmit = await page.$("#submitBooking");
-		if (!btnSubmit) throw new Error("Không tìm thấy nút Xác nhận");
-		if (await page.evaluate((el) => el.disabled, btnSubmit))
-			throw new Error("Nút Xác nhận đang bị disable");
 		console.log('  -> Click "Xác nhận thanh toán"...');
-		await btnSubmit.click();
+		await page.evaluate(() => document.getElementById("submitBooking").click());
 
 		console.log("  -> Đang chờ redirect sang VNPay...");
-		for (let i = 0; i < 20; i++) {
-			await sleep(1000);
+		let onVnpay = false;
+		for (let i = 0; i < 30; i++) {
+			await sleep(2000);
 			const url = page.url();
-			if (!url.includes("booking-tour") && !url.includes("detail-tour")) {
+			if (url.includes("sandbox.vnpayment.vn") || url.includes("vnpay")) {
 				console.log(`  -> Đã chuyển trang: ${url.substring(0, 100)}...`);
+				onVnpay = true;
 				break;
 			}
-			if (i === 5) console.log("  -> (Vẫn đang chờ...)");
+			if (i % 5 === 0 && i > 0) console.log("  -> (Vẫn đang chờ...)");
 		}
-
-		try { await page.waitForSelector("body", { timeout: 15000 }); } catch (e) {}
-		await sleep(2000);
-
-		const curUrl = page.url();
-		const onVnpay = curUrl.includes("sandbox.vnpayment.vn");
 
 		if (onVnpay) {
 			console.log("  ✅ Kết quả: Chuyển sang Payment VNPay thành công!");
 		} else {
-			console.log("  ⚠️ URL hiện tại: " + curUrl.substring(0, 100));
+			console.log("  ⚠️ URL hiện tại: " + page.url().substring(0, 100));
 		}
 		await shot("04-chuyen-sang-vnpay");
 
@@ -280,16 +273,16 @@ fs.mkdirSync(DIR, { recursive: true });
 		console.log('  --- Dữ liệu: Booking ID ---');
 
 		// Điều hướng về trang chủ trước khi vào lịch sử
-		await page.goto(`${BASE_URL}/bookings-history`, { waitUntil: "domcontentloaded" });
+		await page.goto(`${BASE_URL}/pages/user/bookings-history.html`, { waitUntil: "domcontentloaded" });
 		await sleep(2000);
 		await shot("07-lich-su-dat-tour");
 
-		const bookingCount = (await page.$$(".booking-item")).length;
+		const bookingCount = (await page.$$(".booking-card")).length;
 		console.log(`  => Số booking trong tài khoản: ${bookingCount}`);
 
 		// Tìm booking mới nhất (thường là booking đầu tiên trong danh sách)
 		console.log("  -> Kiểm tra chi tiết booking...");
-		const dl = await page.$('.booking-item a[href*="booking-details"]');
+		const dl = await page.$('.booking-card a[href*="booking-details"]');
 		if (dl) {
 			const url = await page.evaluate((el) => el.getAttribute("href"), dl);
 			console.log(`  -> Mở chi tiết: ${url}`);

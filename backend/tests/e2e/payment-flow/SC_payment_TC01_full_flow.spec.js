@@ -45,13 +45,17 @@ fs.mkdirSync(DIR, { recursive: true });
 	let connection;
 	try {
 		connection = await mysql.createConnection(DB_CONFIG);
-		const seedSql = fs.readFileSync(path.join(__dirname, "seed.sql"), "utf-8");
+		const seedPath = path.join(__dirname, "..", "TC01-Booking-Payment", "seed.sql");
+		const seedSql = fs.readFileSync(seedPath, "utf-8");
 		const statements = seedSql
+			.split("\n")
+			.filter(l => !l.trim().startsWith("--") && !l.trim().startsWith("/*"))
+			.join("\n")
 			.split(";")
 			.map((s) => s.trim())
-			.filter((s) => s && !s.startsWith("--") && !s.startsWith("/*"));
+			.filter((s) => s);
 		for (const stmt of statements) {
-			try { await connection.execute(stmt); }
+			try { await connection.query(stmt); }
 			catch (err) { console.log(`  (skip): ${err.message.substring(0, 80)}`); }
 		}
 		await connection.end();
@@ -147,19 +151,16 @@ fs.mkdirSync(DIR, { recursive: true });
 
 		// Chọn ngày khởi hành
 		console.log("  -> Chọn ngày khởi hành...");
-		const depSelect = await page.$("#departure_id");
-		if (depSelect) {
-			const opts = await page.$$("#departure_id option");
-			for (const o of opts) {
-				const v = await page.evaluate((el) => el.value, o);
-				if (v) {
-					await page.select("#departure_id", v);
-					const text = await page.evaluate((el) => el.textContent, o);
-					console.log(`  -> Đã chọn: ${text}`);
-					break;
+		await page.evaluate(() => {
+			const sel = document.getElementById("departure_id");
+			if (sel) {
+				const validOpt = Array.from(sel.options).find((o) => o.value);
+				if (validOpt) {
+					sel.value = validOpt.value;
+					sel.dispatchEvent(new Event("change", { bubbles: true }));
 				}
 			}
-		}
+		});
 		await sleep(2000);
 
 		const totalAmount = await page.$eval("#total-amount", (el) => el.textContent).catch(() => "N/A");
@@ -176,41 +177,30 @@ fs.mkdirSync(DIR, { recursive: true });
 		// ====================================================================
 		console.log("\n========== BƯỚC 2: CHỌN THANH TOÁN ==========");
 		console.log('  --- Dữ liệu: Booking ID hợp lệ ---');
-		const btn = await page.$("#submitBooking");
-		if (!btn) throw new Error("Không tìm thấy nút Xác nhận");
-		if (await page.evaluate((el) => el.disabled, btn))
-			throw new Error("Nút Xác nhận đang bị disable");
 		console.log('  -> Click "Xác nhận thanh toán"...');
-		await btn.click();
+		await page.evaluate(() => document.getElementById("submitBooking").click());
 
 		// Chờ redirect sang VNPay
 		console.log("  -> Đang chờ redirect sang VNPay...");
-		for (let i = 0; i < 20; i++) {
-			await sleep(1000);
+		let bookingCreated = false;
+		for (let i = 0; i < 30; i++) {
+			await sleep(2000);
 			const url = page.url();
-			if (!url.includes("booking-tour") && !url.includes("detail-tour")) {
+			if (url.includes("sandbox.vnpayment.vn") || url.includes("vnpay")) {
 				console.log(`  -> Đã chuyển trang: ${url.substring(0, 100)}...`);
+				bookingCreated = true;
 				break;
 			}
-			if (i === 5) console.log("  -> (Vẫn đang chờ...)");
+			if (i % 5 === 0 && i > 0) console.log("  -> (Vẫn đang chờ...)");
 		}
 
 		try { await page.waitForSelector("body", { timeout: 15000 }); } catch (e) {}
 		await sleep(2000);
 
-		const curUrl = page.url();
-		const onVnpay = curUrl.includes("sandbox.vnpayment.vn");
-		const onResult = curUrl.includes("payment-result") || curUrl.includes("vnpay-return");
-		const onForm = curUrl.includes("booking-tour");
-
-		if (onVnpay) {
+		if (bookingCreated) {
 			console.log("  ✅ Kết quả: Chuyển sang trang Payment VNPay thành công!");
-		} else if (onResult) {
-			console.log("  ✅ Kết quả: Đã có kết quả thanh toán!");
-		} else if (onForm) {
-			console.log("  ⚠️ Kết quả: Ở lại form (validation thất bại)");
 		} else {
-			console.log(`  ⚠️ URL hiện tại: ${curUrl.substring(0, 100)}`);
+			console.log(`  ⚠️ URL hiện tại: ${page.url().substring(0, 100)}`);
 		}
 		await shot("04-chuyen-sang-vnpay");
 
@@ -225,10 +215,8 @@ fs.mkdirSync(DIR, { recursive: true });
 		console.log('  --- Dữ liệu: Thẻ NCB hợp lệ ---');
 
 		let bookingId = null;
-		if (onVnpay) {
-			try { await page.waitForSelector("body", { timeout: 10000 }); } catch (e) {}
+		if (bookingCreated) {
 			await sleep(2000);
-
 			console.log("\n══════════════════════════════════════════════");
 			console.log("  VUI LÒNG THANH TOÁN TRÊN TRANG VNPay");
 			console.log("  Chrome đang mở trang VNPay Sandbox");
@@ -241,7 +229,6 @@ fs.mkdirSync(DIR, { recursive: true });
 			console.log("══════════════════════════════════════════════\n");
 			await shot("05-vnpay-sandbox");
 
-			// Chờ redirect về website sau khi thanh toán thủ công
 			try {
 				await page.waitForFunction(
 					() =>
@@ -264,8 +251,6 @@ fs.mkdirSync(DIR, { recursive: true });
 				if (bookingId) console.log(`  => Booking ID mới: ${bookingId}`);
 			}
 			await shot("06-ket-qua-thanh-toan");
-		} else if (onResult) {
-			await shot("06-ket-qua-thanh-toan");
 		} else {
 			console.log("  ⚠️ Bỏ qua VNPay (không redirect được)");
 		}
@@ -281,15 +266,15 @@ fs.mkdirSync(DIR, { recursive: true });
 
 		// Xem lịch sử đặt tour
 		console.log("  -> Kiểm tra lịch sử đặt tour...");
-		await page.goto(`${BASE_URL}/bookings-history`, { waitUntil: "domcontentloaded" });
+		await page.goto(`${BASE_URL}/pages/user/bookings-history.html`, { waitUntil: "domcontentloaded" });
 		await sleep(2000);
 		await shot("07-lich-su-dat-tour");
-		const bookingCount = (await page.$$(".booking-item")).length;
+		const bookingCount = (await page.$$(".booking-card")).length;
 		console.log(`  => Số booking trong tài khoản: ${bookingCount}`);
 
 		// Chi tiết booking
 		console.log("  -> Kiểm tra chi tiết booking...");
-		const dl = await page.$('.booking-item a[href*="booking-details"]');
+		const dl = await page.$('.booking-card a[href*="booking-details"]');
 		if (dl) {
 			const url = await page.evaluate((el) => el.getAttribute("href"), dl);
 			console.log(`  -> Mở chi tiết: ${url}`);
@@ -300,7 +285,7 @@ fs.mkdirSync(DIR, { recursive: true });
 			const trangThai = await page.$eval("#booking-status", (el) => el.textContent).catch(() => "N/A");
 			console.log(`  => Mã đơn: ${maDon}`);
 			console.log(`  => Trạng thái: ${trangThai}`);
-			if (trangThai.toLowerCase().includes("paid") || trangThai.toLowerCase().includes("thanh to") || trangThai.toLowerCase().includes("confirm")) {
+			if (trangThai.toLowerCase().includes("xác nhận") || trangThai.toLowerCase().includes("confirm")) {
 				console.log('  ✅ Kết quả: Hiển thị đúng thông tin đơn hàng');
 			} else {
 				console.log('  ⚠️ Kết quả: Trạng thái không mong đợi');

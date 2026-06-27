@@ -532,7 +532,7 @@
                     <!-- Email -->
                     <div class="mb-3">
                         <label for="staffEmail" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Email <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="staffEmail" placeholder="nhanvien@viettravel.com" style="border-radius: 10px; padding: 12px 16px;">
+                        <input type="email" class="form-control" id="staffEmail" placeholder="nhanvien@gmail.com" style="border-radius: 10px; padding: 12px 16px;">
                         <div class="invalid-feedback">Email không hợp lệ</div>
                     </div>
 
@@ -1074,11 +1074,11 @@
             required: (val) => val.trim().length > 0,
             fullname: (val) => {
                 const text = val.trim();
-                return text.length > 0 && /[^\d\s]/.test(text);
+                return text.length >= 3 && text.length <= 50 && /^[\p{L}\s]+$/u.test(text);
             },
-            email: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+            email: (val) => /^[^\s@]+@gmail\.com$/i.test(val.trim()),
             phone: (val) => !val || /^0[0-9]{9}$/.test(val.trim()),
-            password: (val) => val.length >= 6,
+            password: (val) => val.length >= 6 && val.length <= 32,
             confirmPassword: (val, originalPass) => val === originalPass
         };
 
@@ -1090,11 +1090,11 @@
             confirm: document.getElementById('staffConfirmPassword')
         };
 
-        staffInputs.fullname.addEventListener('input', () => validateField(staffInputs.fullname, validators.fullname, 'Họ tên không được để trống hoặc chỉ chứa số'));
-        staffInputs.email.addEventListener('input', () => validateField(staffInputs.email, validators.email));
+        staffInputs.fullname.addEventListener('input', () => validateField(staffInputs.fullname, validators.fullname, 'Họ tên phải từ 3-50 ký tự, chỉ chứa chữ cái và khoảng trắng'));
+        staffInputs.email.addEventListener('input', () => validateField(staffInputs.email, validators.email, 'Email phải có định dạng @gmail.com'));
         staffInputs.phone.addEventListener('input', () => validateField(staffInputs.phone, validators.phone));
         staffInputs.password.addEventListener('input', () => {
-            validateField(staffInputs.password, validators.password);
+            validateField(staffInputs.password, validators.password, 'Mật khẩu phải từ 6 đến 32 ký tự');
             if (staffInputs.confirm.value) {
                 validateField(staffInputs.confirm, (val) => validators.confirmPassword(val, staffInputs.password.value));
             }
@@ -1172,10 +1172,10 @@
 
         // Cập nhật logic Save Create Staff
         document.getElementById('saveCreateStaffBtn').addEventListener('click', async () => {
-            const v1 = validateField(staffInputs.fullname, validators.fullname, 'Họ tên không được để trống hoặc chỉ chứa số');
-            const v2 = validateField(staffInputs.email, validators.email);
+            const v1 = validateField(staffInputs.fullname, validators.fullname, 'Họ tên phải từ 3-50 ký tự, chỉ chứa chữ cái và khoảng trắng');
+            const v2 = validateField(staffInputs.email, validators.email, 'Email phải có định dạng @gmail.com');
             const v3 = validateField(staffInputs.phone, validators.phone);
-            const v4 = validateField(staffInputs.password, validators.password);
+            const v4 = validateField(staffInputs.password, validators.password, 'Mật khẩu phải từ 6 đến 32 ký tự');
             const v5 = validateField(staffInputs.confirm, (val) => validators.confirmPassword(val, staffInputs.password.value));
 
             if (!v1 || !v2 || !v3 || !v4 || !v5) return;
