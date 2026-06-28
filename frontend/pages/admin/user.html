@@ -329,8 +329,15 @@
     }
 
     @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .password-wrapper .invalid-feedback {
@@ -339,9 +346,11 @@
         left: 0;
     }
 
-    .mb-3, .col-md-6 {
+    .mb-3,
+    .col-md-6 {
         position: relative;
-        margin-bottom: 1.5rem !important; /* Tăng khoảng cách để hiện lỗi không bị đè */
+        margin-bottom: 1.5rem !important;
+        /* Tăng khoảng cách để hiện lỗi không bị đè */
     }
 
     /* Create Staff Modal */
@@ -410,11 +419,11 @@
         font-size: 1.3rem;
     }
 
-    .role-option input[type="radio"]:checked + label {
+    .role-option input[type="radio"]:checked+label {
         border-color: #4f46e5;
         background: #eef2ff;
         color: #4338ca;
-        box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
     }
 
     .role-option label:hover {
@@ -438,7 +447,8 @@
         <div class="search-row">
             <div class="search-group">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="searchInput" class="search-input-modern" placeholder="Tìm kiếm theo ID, tên, số điện thoại..." />
+                <input type="text" id="searchInput" class="search-input-modern"
+                    placeholder="Tìm kiếm theo ID, tên, số điện thoại..." />
             </div>
             <button id="searchBtn" class="btn-add-user search-button">
                 <i class="fa-solid fa-magnifying-glass" style="position: static; color: white;"></i> Tìm kiếm
@@ -478,10 +488,14 @@
 <div class="modal fade" id="createStaffModal" tabindex="-1" aria-labelledby="createStaffModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 12px 40px rgba(0,0,0,0.12);">
-            <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 22px 28px; background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%); border-radius: 18px 18px 0 0;">
+            <div class="modal-header"
+                style="border-bottom: 1px solid #f1f5f9; padding: 22px 28px; background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%); border-radius: 18px 18px 0 0;">
                 <div>
-                    <h5 class="modal-title mb-1" id="createStaffModalLabel" style="font-weight: 700; color: #1e293b; font-size: 1.15rem;"><i class="fa-solid fa-user-tie me-2" style="color: #4f46e5;"></i>Tạo tài khoản nhân viên</h5>
-                    <p class="mb-0" style="font-size: 0.85rem; color: #6b7280;">Tài khoản mới sẽ được kích hoạt ngay và có thể đăng nhập được liền.</p>
+                    <h5 class="modal-title mb-1" id="createStaffModalLabel"
+                        style="font-weight: 700; color: #1e293b; font-size: 1.15rem;"><i
+                            class="fa-solid fa-user-tie me-2" style="color: #4f46e5;"></i>Tạo tài khoản nhân viên</h5>
+                    <p class="mb-0" style="font-size: 0.85rem; color: #6b7280;">Tài khoản mới sẽ được kích hoạt ngay và
+                        có thể đăng nhập được liền.</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -489,7 +503,8 @@
                 <form id="createStaffForm" novalidate>
                     <!-- Role selection -->
                     <div class="mb-4">
-                        <label class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #374151;">Vị trí / Vai trò <span class="text-danger">*</span></label>
+                        <label class="form-label" style="font-weight: 600; font-size: 0.9rem; color: #374151;">Vị trí /
+                            Vai trò <span class="text-danger">*</span></label>
                         <div class="role-option-grid">
                             <div class="role-option">
                                 <input type="radio" name="staffRole" id="roleBooking" value="booking-staff" checked>
@@ -518,51 +533,69 @@
                     <!-- Fullname + Phone -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label for="staffFullname" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Họ và tên <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="staffFullname" placeholder="Nguyễn Văn A" style="border-radius: 10px; padding: 12px 16px;">
+                            <label for="staffFullname" class="form-label"
+                                style="font-weight: 500; font-size: 0.9rem;">Họ và tên <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="staffFullname" placeholder="Nguyễn Văn A"
+                                style="border-radius: 10px; padding: 12px 16px;">
                             <div class="invalid-feedback">Họ tên không được để trống hoặc chỉ chứa số</div>
                         </div>
                         <div class="col-md-6">
-                            <label for="staffPhone" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Số điện thoại</label>
-                            <input type="text" class="form-control" id="staffPhone" placeholder="09xxxxxxxx" style="border-radius: 10px; padding: 12px 16px;">
+                            <label for="staffPhone" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Số
+                                điện thoại</label>
+                            <input type="text" class="form-control" id="staffPhone" placeholder="09xxxxxxxx"
+                                style="border-radius: 10px; padding: 12px 16px;">
                             <div class="invalid-feedback">Số điện thoại không hợp lệ</div>
                         </div>
                     </div>
 
                     <!-- Email -->
                     <div class="mb-3">
-                        <label for="staffEmail" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Email <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="staffEmail" placeholder="nhanvien@viettravel.com" style="border-radius: 10px; padding: 12px 16px;">
+                        <label for="staffEmail" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Email
+                            <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="staffEmail" placeholder="nhanvien@viettravel.com"
+                            style="border-radius: 10px; padding: 12px 16px;">
                         <div class="invalid-feedback">Email không hợp lệ</div>
                     </div>
 
                     <!-- Password + Confirm -->
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="staffPassword" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Mật khẩu <span class="text-danger">*</span></label>
+                            <label for="staffPassword" class="form-label"
+                                style="font-weight: 500; font-size: 0.9rem;">Mật khẩu <span
+                                    class="text-danger">*</span></label>
                             <div class="password-wrapper">
-                                <input type="password" class="form-control" id="staffPassword" placeholder="Tối thiểu 6 ký tự" style="border-radius: 10px; padding: 12px 16px;">
-                                <button type="button" class="toggle-password" data-target="staffPassword"><i class="fa-regular fa-eye"></i></button>
+                                <input type="password" class="form-control" id="staffPassword"
+                                    placeholder="Tối thiểu 6 ký tự" style="border-radius: 10px; padding: 12px 16px;">
+                                <button type="button" class="toggle-password" data-target="staffPassword"><i
+                                        class="fa-regular fa-eye"></i></button>
                                 <div class="invalid-feedback">Mật khẩu tối thiểu 6 ký tự</div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label for="staffConfirmPassword" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                            <label for="staffConfirmPassword" class="form-label"
+                                style="font-weight: 500; font-size: 0.9rem;">Xác nhận mật khẩu <span
+                                    class="text-danger">*</span></label>
                             <div class="password-wrapper">
-                                <input type="password" class="form-control" id="staffConfirmPassword" placeholder="Nhập lại mật khẩu" style="border-radius: 10px; padding: 12px 16px;">
-                                <button type="button" class="toggle-password" data-target="staffConfirmPassword"><i class="fa-regular fa-eye"></i></button>
+                                <input type="password" class="form-control" id="staffConfirmPassword"
+                                    placeholder="Nhập lại mật khẩu" style="border-radius: 10px; padding: 12px 16px;">
+                                <button type="button" class="toggle-password" data-target="staffConfirmPassword"><i
+                                        class="fa-regular fa-eye"></i></button>
                                 <div class="invalid-feedback">Mật khẩu xác nhận không khớp</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Error message -->
-                    <div id="staffFormError" class="alert alert-danger mt-3 mb-0 py-2" style="display:none; border-radius: 10px; font-size: 0.9rem;"></div>
+                    <div id="staffFormError" class="alert alert-danger mt-3 mb-0 py-2"
+                        style="display:none; border-radius: 10px; font-size: 0.9rem;"></div>
                 </form>
             </div>
             <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 18px 28px; gap: 10px;">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500; padding: 10px 22px;">Hủy</button>
-                <button type="button" class="btn btn-primary" id="saveCreateStaffBtn" style="border-radius: 10px; font-weight: 500; padding: 10px 24px; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border: none; min-width: 140px;">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal"
+                    style="border-radius: 10px; font-weight: 500; padding: 10px 22px;">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveCreateStaffBtn"
+                    style="border-radius: 10px; font-weight: 500; padding: 10px 24px; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border: none; min-width: 140px;">
                     <i class="fa-solid fa-user-plus me-1"></i> Tạo tài khoản
                 </button>
             </div>
@@ -575,41 +608,53 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
             <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 20px 24px;">
-                <h5 class="modal-title" id="editUserModalLabel" style="font-weight: 700; color: #1e293b;">Chỉnh sửa User</h5>
+                <h5 class="modal-title" id="editUserModalLabel" style="font-weight: 700; color: #1e293b;">Chỉnh sửa User
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="padding: 24px;">
                 <form id="editUserForm">
                     <input type="hidden" id="editUserId">
                     <div class="mb-3">
-                        <label for="editFullname" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Họ và tên</label>
-                        <input type="text" class="form-control" id="editFullname" required style="border-radius: 10px; padding: 12px 16px;">
+                        <label for="editFullname" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Họ và
+                            tên</label>
+                        <input type="text" class="form-control" id="editFullname" required
+                            style="border-radius: 10px; padding: 12px 16px;">
                         <div class="invalid-feedback">Họ tên không được để trống hoặc chỉ chứa số</div>
                     </div>
                     <div class="mb-3">
-                        <label for="editEmail" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Email</label>
-                        <input type="email" class="form-control" id="editEmail" required style="border-radius: 10px; padding: 12px 16px;">
+                        <label for="editEmail" class="form-label"
+                            style="font-weight: 500; font-size: 0.9rem;">Email</label>
+                        <input type="email" class="form-control" id="editEmail" required
+                            style="border-radius: 10px; padding: 12px 16px;">
                         <div class="invalid-feedback">Email không hợp lệ</div>
                     </div>
                     <div class="mb-3">
-                        <label for="editPhone" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Số điện thoại</label>
-                        <input type="text" class="form-control" id="editPhone" required style="border-radius: 10px; padding: 12px 16px;">
+                        <label for="editPhone" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Số điện
+                            thoại</label>
+                        <input type="text" class="form-control" id="editPhone" required
+                            style="border-radius: 10px; padding: 12px 16px;">
                         <div class="invalid-feedback">Số điện thoại không hợp lệ</div>
                     </div>
                     <div class="mb-3">
-                        <label for="editStatus" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Trạng thái</label>
+                        <label for="editStatus" class="form-label" style="font-weight: 500; font-size: 0.9rem;">Trạng
+                            thái</label>
                         <select class="form-select" id="editStatus" style="border-radius: 10px; padding: 12px 16px;">
                             <option value="1">Hoạt động</option>
                             <option value="0">Đã khóa</option>
                         </select>
                     </div>
                     <!-- Error message -->
-                    <div id="editUserError" class="alert alert-danger mt-3 mb-0 py-2" style="display:none; border-radius: 10px; font-size: 0.9rem;"></div>
+                    <div id="editUserError" class="alert alert-danger mt-3 mb-0 py-2"
+                        style="display:none; border-radius: 10px; font-size: 0.9rem;"></div>
                 </form>
             </div>
             <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 16px 24px;">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500; padding: 10px 20px;">Hủy</button>
-                <button type="button" class="btn btn-primary" id="saveEditUserBtn" style="border-radius: 10px; font-weight: 500; padding: 10px 20px; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border: none;">Lưu thay đổi</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal"
+                    style="border-radius: 10px; font-weight: 500; padding: 10px 20px;">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditUserBtn"
+                    style="border-radius: 10px; font-weight: 500; padding: 10px 20px; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border: none;">Lưu
+                    thay đổi</button>
             </div>
         </div>
     </div>
@@ -620,15 +665,21 @@
     <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width: 380px;">
         <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 15px 50px rgba(0,0,0,0.15);">
             <div class="modal-body" style="padding: 30px 25px; text-align: center;">
-                <div style="width: 65px; height: 65px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 1.8rem;">
+                <div
+                    style="width: 65px; height: 65px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 1.8rem;">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
                 <h5 style="font-weight: 700; color: #1e293b; margin-bottom: 10px;">Xác nhận xóa?</h5>
-                <p id="deleteConfirmMessage" style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin-bottom: 0;">Bạn có chắc chắn muốn xóa người dùng này không? Hành động này không thể hoàn tác.</p>
+                <p id="deleteConfirmMessage"
+                    style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin-bottom: 0;">Bạn có chắc chắn muốn
+                    xóa người dùng này không? Hành động này không thể hoàn tác.</p>
             </div>
             <div class="modal-footer" style="border: none; padding: 0 25px 25px; gap: 10px;">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="flex: 1; border-radius: 12px; font-weight: 600; padding: 12px; background: #f1f5f9; border: none; color: #64748b;">Hủy</button>
-                <button type="button" id="btnConfirmDelete" class="btn btn-danger" style="flex: 1; border-radius: 12px; font-weight: 600; padding: 12px; background: #ef4444; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">Xóa ngay</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal"
+                    style="flex: 1; border-radius: 12px; font-weight: 600; padding: 12px; background: #f1f5f9; border: none; color: #64748b;">Hủy</button>
+                <button type="button" id="btnConfirmDelete" class="btn btn-danger"
+                    style="flex: 1; border-radius: 12px; font-weight: 600; padding: 12px; background: #ef4444; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">Xóa
+                    ngay</button>
             </div>
         </div>
     </div>
@@ -636,11 +687,13 @@
 
 <!-- Toast Container -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
-    <div id="actionToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div id="actionToast" class="toast align-items-center border-0" role="alert" aria-live="assertive"
+        aria-atomic="true">
         <div class="d-flex">
             <div class="toast-body" id="actionToastBody">
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
         </div>
     </div>
 </div>
@@ -657,16 +710,16 @@
 
         let actionToastEl = document.getElementById('actionToast');
         let actionToast = actionToastEl ? new bootstrap.Toast(actionToastEl, { delay: 3000 }) : null;
-        
+
         function showToast(message, type = 'success') {
             if (!actionToast) return alert(message);
             const toastBody = document.getElementById('actionToastBody');
             toastBody.textContent = message;
-            
+
             // Xóa các class bg cũ và thêm class mới
             actionToastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info', 'text-white');
             actionToastEl.classList.add(`bg-${type}`, 'text-white');
-            
+
             actionToast.show();
         }
 
@@ -927,7 +980,7 @@
         // Logic Sửa User
         const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
 
-        window.openEditUserModal = function(id) {
+        window.openEditUserModal = function (id) {
             const user = currentUsersList.find(u => u.id === id);
             if (!user) return;
 
@@ -948,7 +1001,7 @@
         const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
         let userIdToDelete = null;
 
-        window.deleteUser = function(id) {
+        window.deleteUser = function (id) {
             const user = currentUsersList.find(u => u.id === id);
             if (!user) return;
 
@@ -982,7 +1035,7 @@
                 if (result.success) {
                     showToast('Xóa người dùng thành công!', 'success');
                     confirmDeleteModal.hide();
-                    
+
                     const currentQuery = searchInput.value.trim();
                     if (currentQuery) {
                         await doSearchUser(currentQuery, currentPage);
@@ -1033,11 +1086,11 @@
 
         // Toggle Password Visibility
         document.querySelectorAll('.toggle-password').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 const targetId = this.getAttribute('data-target');
                 const targetInput = document.getElementById(targetId);
                 const icon = this.querySelector('i');
-                
+
                 if (targetInput.type === 'password') {
                     targetInput.type = 'text';
                     icon.classList.remove('fa-eye');
@@ -1051,7 +1104,7 @@
         });
 
         // --- HỆ THỐNG VALIDATE TẠI CHỖ (INLINE VALIDATION) ---
-        
+
         function validateField(input, validationFn, errorMessage) {
             const wrapper = input.closest('.mb-3') || input.closest('.col-md-6');
             const feedback = wrapper.querySelector('.invalid-feedback');
@@ -1078,7 +1131,7 @@
             },
             email: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
             phone: (val) => !val || /^0[0-9]{9}$/.test(val.trim()),
-            password: (val) => val.length >= 6,
+            password: (val) => val.length >= 6 && val.length <= 20,
             confirmPassword: (val, originalPass) => val === originalPass
         };
 
@@ -1148,7 +1201,7 @@
                 if (result.success) {
                     showToast('Cập nhật user thành công!', 'success');
                     editUserModal.hide();
-                    
+
                     const currentQuery = searchInput.value.trim();
                     if (currentQuery) {
                         await doSearchUser(currentQuery, currentPage);
@@ -1190,12 +1243,12 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ 
-                        fullname: staffInputs.fullname.value.trim(), 
-                        phone: staffInputs.phone.value.trim(), 
-                        email: staffInputs.email.value.trim(), 
-                        password: staffInputs.password.value, 
-                        role 
+                    body: JSON.stringify({
+                        fullname: staffInputs.fullname.value.trim(),
+                        phone: staffInputs.phone.value.trim(),
+                        email: staffInputs.email.value.trim(),
+                        password: staffInputs.password.value,
+                        role
                     })
                 });
 

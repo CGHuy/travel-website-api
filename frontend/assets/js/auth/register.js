@@ -129,8 +129,8 @@
         if (!password.value.trim()) {
             setError(password, passwordError, "Vui lòng nhập mật khẩu");
             isValid = false;
-        } else if (password.value.trim().length < 6) {
-            setError(password, passwordError, "Mật khẩu phải có ít nhất 6 ký tự");
+        } else if (password.value.trim().length < 6 || password.value.trim().length > 20) {
+            setError(password, passwordError, "Mật khẩu phải có từ 6 đến 20 ký tự");
             isValid = false;
         }
 
@@ -193,8 +193,8 @@
         const value = password.value.trim();
         if (!value) {
             setError(password, passwordError, "Vui lòng nhập mật khẩu");
-        } else if (value.length < 6) {
-            setError(password, passwordError, "Mật khẩu phải có ít nhất 6 ký tự");
+        } else if (value.length < 6 || value.length > 20) {
+            setError(password, passwordError, "Mật khẩu phải có từ 6 đến 20 ký tự");
         } else {
             clearError(password, passwordError);
         }

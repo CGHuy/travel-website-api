@@ -80,6 +80,9 @@
         toggleBtn.textContent = isHidden ? "Ẩn" : "Hiện";
     });
 
+    const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    const isValidPhone = (value) => /^0\d{9}$/.test(value);
+
     // Kiểm tra dữ liệu form
     const validateForm = () => {
         let isValid = true;
@@ -87,15 +90,24 @@
         clearError(username, usernameError);
         clearError(password, passwordError);
 
+        const usernameValue = username.value.trim();
+        const passwordValue = password.value.trim();
+
         // Kiểm tra username
-        if (!username.value.trim()) {
-            setError(username, usernameError, "Vui lòng nhập tên đăng nhập");
+        if (!usernameValue) {
+            setError(username, usernameError, "Vui lòng nhập email/sdt");
+            isValid = false;
+        } else if (!isValidEmail(usernameValue) && !isValidPhone(usernameValue)) {
+            setError(username, usernameError, "Vui lòng nhập đúng email hoặc số điện thoại");
             isValid = false;
         }
 
         // Kiểm tra password
-        if (!password.value.trim()) {
+        if (!passwordValue) {
             setError(password, passwordError, "Vui lòng nhập mật khẩu");
+            isValid = false;
+        } else if (passwordValue.length < 6 || passwordValue.length > 20) {
+            setError(password, passwordError, "Mật khẩu phải có từ 6 đến 20 ký tự");
             isValid = false;
         }
 
@@ -123,7 +135,9 @@
     username.addEventListener("input", () => {
         const value = username.value.trim();
         if (!value) {
-            setError(username, usernameError, "Vui lòng nhập tên đăng nhập");
+            setError(username, usernameError, "Vui lòng nhập email/sdt");
+        } else if (!isValidEmail(value) && !isValidPhone(value)) {
+            setError(username, usernameError, "Vui lòng nhập đúng email hoặc số điện thoại");
         } else {
             clearError(username, usernameError);
         }
@@ -133,6 +147,8 @@
         const value = password.value.trim();
         if (!value) {
             setError(password, passwordError, "Vui lòng nhập mật khẩu");
+        } else if (value.length < 6 || value.length > 20) {
+            setError(password, passwordError, "Mật khẩu phải có từ 6 đến 20 ký tự");
         } else {
             clearError(password, passwordError);
         }

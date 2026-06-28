@@ -30,10 +30,8 @@ const validateRegister = (req, res, next) => {
 
     if (!password || password.trim().length === 0) {
         errors.password = "Mật khẩu không được để trống";
-    } else if (password.length < 6) {
-        errors.password = "Mật khẩu phải có ít nhất 6 ký tự";
-    } else if (password.length > 128) {
-        errors.password = "Mật khẩu không được vượt quá 128 ký tự";
+    } else if (password.length < 6 || password.length > 20) {
+        errors.password = "Mật khẩu phải có từ 6 đến 20 ký tự";
     }
 
     if (Object.keys(errors).length > 0) {

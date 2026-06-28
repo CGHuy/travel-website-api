@@ -79,10 +79,10 @@ exports.changePassword = async (req, res) => {
 			});
 		}
 
-		if (newPassword.length < 6) {
+		if (newPassword.length < 6 || newPassword.length > 20) {
 			return res.status(400).json({
 				success: false,
-				message: "Mật khẩu mới phải có ít nhất 6 ký tự!",
+				message: "Mật khẩu mới phải có từ 6 đến 20 ký tự!",
 			});
 		}
 
@@ -129,12 +129,12 @@ exports.changePassword = async (req, res) => {
 		const user = await User.findById(userId);
 		const secret = process.env.JWT_SECRET || "change_pwd_secret";
 		const token = jwt.sign(
-			{ 
-				id: user.id, 
-				email: user.email, 
-				role: user.role 
-			}, 
-			secret, 
+			{
+				id: user.id,
+				email: user.email,
+				role: user.role
+			},
+			secret,
 			{ expiresIn: "7d" }
 		);
 
@@ -262,7 +262,7 @@ exports.searchUsers = async (req, res) => {
 		if (status !== undefined && status !== "") filters.status = parseInt(status);
 		if (fullname) filters.fullname = fullname;
 		if (email) filters.email = email;
-		
+
 		const result = await User.searchUsersPaginated(filters, page, limit);
 		return res.json({
 			success: true,
@@ -299,7 +299,7 @@ exports.deleteUser = async (req, res) => {
 		}
 
 		// Kiểm tra role admin : status = 1 không được phép xóa
-		if (user.role === "admin"|| user.role === "tour-staff" || user.role === "booking-staff" || user.status === 1) {
+		if (user.role === "admin" || user.role === "tour-staff" || user.role === "booking-staff" || user.status === 1) {
 			return res.status(403).json({
 				success: false,
 				message: "Không được phép xóa user có vai trò admin hoặc có trạng thái đang hoạt động",
@@ -319,11 +319,11 @@ exports.deleteUser = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			success: false,	
+			success: false,
 			message: "Lỗi khi xóa user",
 			error: error.message,
 		});
-	}	
+	}
 };
 
 // Cập nhật thông tin user (dành cho admin)
@@ -385,16 +385,16 @@ exports.updateUser = async (req, res) => {
 exports.updateStatus = async (req, res) => {
 	try {
 		const userId = req.params.id;
-		const { status } = req.body;	
+		const { status } = req.body;
 
 		// Lấy thông tin user hiện tại để kiểm tra role
 		const currentUser = await User.findById(userId);
-		if (!currentUser) {		
+		if (!currentUser) {
 			return res.status(404).json({
 				success: false,
 				message: "Không tìm thấy user để cập nhật trạng thái",
 			});
-		}			
+		}
 		// Kiểm tra xem user có phải là admin không
 		if (currentUser.role === "admin") {
 			return res.status(400).json({
@@ -413,10 +413,10 @@ exports.updateStatus = async (req, res) => {
 			success: true,
 			message: "Cập nhật trạng thái user thành công!",
 		});
-	} 
+	}
 	catch (error) {
 		return res.status(500).json({
-			success: false,	
+			success: false,
 			message: "Lỗi khi cập nhật trạng thái user",
 			error: error.message,
 		});

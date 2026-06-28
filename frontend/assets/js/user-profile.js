@@ -246,8 +246,8 @@ function initChangePasswordForm() {
             window.showToast("Mật khẩu mới không được trùng với mật khẩu cũ!", "danger");
             return;
         }
-        if (newPassword.length < 6) {
-            window.showToast("Mật khẩu mới phải có ít nhất 6 ký tự!", "danger");
+        if (newPassword.length < 6 || newPassword.length > 20) {
+            window.showToast("Mật khẩu mới phải có từ 6 đến 20 ký tự!", "danger");
             return;
         }
 
@@ -263,12 +263,12 @@ function initChangePasswordForm() {
             });
             const data = await res.json();
             if (!data.success) throw new Error(data.message || data.errors?.confirmPassword || "Lỗi khi đổi mật khẩu");
-            
+
             // Lưu token mới nếu backend trả về
             if (data.data?.token) {
                 localStorage.setItem("token", data.data.token);
             }
-            
+
             window.showToast("Đổi mật khẩu thành công!", "success");
             form.reset();
         } catch (err) {
