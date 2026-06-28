@@ -6,7 +6,8 @@
         "dev": "cd backend && npx nodemon app.js",
         "start": "cd backend && node app.js",
         "HA:decision": "node test/HA/runDecisionTable.js",
-        "HA:bva": "node test/HA/runBVA.js"
+        "HA:bva": "node test/HA/runBVA.js",
+        "Khanh:decision": "node test/Khanh/runDecisionTable.js"
     },
     "dependencies": {
         "xlsx": "^0.18.5",
