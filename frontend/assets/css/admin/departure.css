@@ -286,6 +286,61 @@
     color: #dc2626;
 }
 
+/* Error validation styles */
+.tour-dropdown .tour-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #1f2937;
+    transition: background 0.15s;
+    border-bottom: 1px solid #f3f4f6;
+}
+.tour-dropdown .tour-option:last-child {
+    border-bottom: none;
+}
+.tour-dropdown .tour-option:hover,
+.tour-dropdown .tour-option.active {
+    background: #eff6ff;
+    color: #2563eb;
+}
+.tour-dropdown .tour-option .tour-opt-id {
+    font-weight: 600;
+    margin-right: 8px;
+    color: #4f46e5;
+}
+.tour-dropdown .tour-option:hover .tour-opt-id {
+    color: #2563eb;
+}
+.tour-dropdown .tour-no-result {
+    padding: 12px 16px;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    text-align: center;
+}
+#addDepartureForm .is-invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+}
+
+#addDepartureForm .invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: #dc2626;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+#addDepartureForm .invalid-feedback::before {
+    content: "⚠ ";
+}
+
+#addDepartureForm .is-invalid:focus {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18) !important;
+}
+
 @media (max-width: 1024px) {
     .card-details {
         gap: 16px;
