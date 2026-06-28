@@ -4,7 +4,13 @@
     "version": "1.0.0",
     "scripts": {
         "dev": "cd backend && npx nodemon app.js",
-        "start": "cd backend && node app.js"
+        "start": "cd backend && node app.js",
+        "HA:decision": "node test/HA/runDecisionTable.js",
+        "HA:bva": "node test/HA/runBVA.js",
+        "Khanh:decision": "node test/Khanh/runDecisionTable.js"
     },
-    "dependencies": {}
+    "dependencies": {
+        "xlsx": "^0.18.5",
+        "puppeteer": "^25.2.1"
+    }
 }

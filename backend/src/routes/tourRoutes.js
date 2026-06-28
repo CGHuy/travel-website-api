@@ -8,6 +8,7 @@ const mediaStorage = require("../middlewares/mediaStorage");
 // Public routes - Không cần đăng nhập
 router.get("/", tourController.getAllTours);
 router.get("/region/:region", tourController.getToursByRegion);
+router.get("/list-all", tourController.getTourSimpleList);
 router.get("/:id", tourController.getTourById);
 
 // Admin routes - Cần đăng nhập và có quyền admin

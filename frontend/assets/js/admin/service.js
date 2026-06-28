@@ -103,21 +103,24 @@ window.initAdminServicePage = async function () {
     // Tạo HTML form thêm / sửa dịch vụ
     function renderServiceForm({ id = null, name = "", slug = "", description = "", status = 1, submitLabel = "Lưu", submitClass = "btn-primary" } = {}) {
         return `
-            <form id="service-form">
+            <form id="service-form" novalidate>
                 <div class="mb-3">
                     <label for="service-name" class="form-label">Tên Dịch vụ <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="service-name" name="name" value="${escapeHtml(name)}" required />
+                    <div class="invalid-feedback" id="service-name-error">Vui lòng nhập tên dịch vụ.</div>
                 </div>
 
                 <div class="mb-3">
-                    <label for="service-slug" class="form-label">Slug</label>
-                    <input type="text" class="form-control" id="service-slug" name="slug" value="${escapeHtml(slug)}" />
+                    <label for="service-slug" class="form-label">Slug <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="service-slug" name="slug" value="${escapeHtml(slug)}" required />
                     <div class="form-text">Tự sinh từ tên hoặc chỉnh tay.</div>
+                    <div class="invalid-feedback" id="service-slug-error">Vui lòng nhập slug.</div>
                 </div>
 
                 <div class="mb-3">
                     <label for="service-description" class="form-label">Mô tả</label>
                     <textarea class="form-control" id="service-description" name="description" rows="4">${escapeHtml(description)}</textarea>
+                    <div class="invalid-feedback" id="service-description-error">Vui lòng nhập tối đa 300 ký tự.</div>
                 </div>
 
                 <div class="mb-3 form-check">
@@ -146,17 +149,20 @@ window.initAdminServicePage = async function () {
             .replace(/(^-|-$)/g, "");
     }
 
-    function buildSlugCandidate(baseSlug, attempt) {
-        return attempt <= 1 ? baseSlug : `${baseSlug}-${attempt}`;
-    }
-
     function isDuplicateSlugError(message) {
         return typeof message === "string" && /duplicate entry/i.test(message);
+    }
+
+    function isDuplicateNameError(message) {
+        return typeof message === "string" && /tên dịch vụ đã tồn tại/i.test(message);
     }
 
     function getFriendlyErrorMessage(message) {
         if (isDuplicateSlugError(message)) {
             return "Slug đã tồn tại. Vui lòng dùng slug khác hoặc sửa tên dịch vụ.";
+        }
+        if (isDuplicateNameError(message)) {
+            return "Tên dịch vụ đã tồn tại. Vui lòng chọn tên khác.";
         }
         return message;
     }
@@ -168,73 +174,137 @@ window.initAdminServicePage = async function () {
 
         const form = modalBody.querySelector("#service-form");
         const nameInput = form.querySelector("#service-name");
+        const nameError = form.querySelector("#service-name-error");
         const slugInput = form.querySelector("#service-slug");
+        const slugError = form.querySelector("#service-slug-error");
         const errorEl = form.querySelector("#service-form-error");
         let slugEdited = false;
         let baseSlug = slugify(nameInput.value);
 
+        function validateField(input, errorEl, maxLen, label) {
+            const val = input.value.trim();
+            if (!val) {
+                input.classList.add("is-invalid");
+                errorEl.textContent = input.id === "service-name" ? "Vui lòng nhập tên dịch vụ." : "Vui lòng nhập slug.";
+                errorEl.classList.add("d-block");
+                errorEl.classList.remove("d-none");
+                return false;
+            }
+            if (maxLen && val.length > maxLen) {
+                input.classList.add("is-invalid");
+                errorEl.textContent = `Vui lòng nhập tối đa ${maxLen} ký tự.`;
+                errorEl.classList.add("d-block");
+                errorEl.classList.remove("d-none");
+                return false;
+            }
+            if (/^\d+$/.test(val)) {
+                input.classList.add("is-invalid");
+                errorEl.textContent = `${label} không được chỉ chứa số.`;
+                errorEl.classList.add("d-block");
+                errorEl.classList.remove("d-none");
+                return false;
+            }
+            input.classList.remove("is-invalid");
+            errorEl.classList.remove("d-block");
+            errorEl.classList.add("d-none");
+            return true;
+        }
+
+        const MAX_NAME_LEN = 200;
+        const MAX_SLUG_LEN = 50;
+        const MAX_DESC_LEN = 300;
+
         nameInput.addEventListener("input", () => {
+            validateField(nameInput, nameError, MAX_NAME_LEN, "Tên dịch vụ");
             if (!slugEdited) {
                 baseSlug = slugify(nameInput.value);
                 slugInput.value = baseSlug;
             }
         });
 
+        nameInput.addEventListener("blur", () => {
+            validateField(nameInput, nameError, MAX_NAME_LEN, "Tên dịch vụ");
+        });
+
         slugInput.addEventListener("input", () => {
             slugEdited = true;
+            validateField(slugInput, slugError, MAX_SLUG_LEN, "Slug");
         });
+
+        slugInput.addEventListener("blur", () => {
+            validateField(slugInput, slugError, MAX_SLUG_LEN, "Slug");
+        });
+
+        const descInput = form.querySelector("#service-description");
+        const descError = form.querySelector("#service-description-error");
+
+        function validateDescField() {
+            const val = descInput.value.trim();
+            if (val.length > MAX_DESC_LEN) {
+                descInput.classList.add("is-invalid");
+                descError.textContent = `Vui lòng nhập tối đa ${MAX_DESC_LEN} ký tự.`;
+                descError.classList.add("d-block");
+                descError.classList.remove("d-none");
+                return false;
+            }
+            descInput.classList.remove("is-invalid");
+            descError.classList.remove("d-block");
+            descError.classList.add("d-none");
+            return true;
+        }
+
+        descInput.addEventListener("input", validateDescField);
+        descInput.addEventListener("blur", validateDescField);
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
             errorEl.classList.add("d-none");
-            let payload = {
-                name: nameInput.value.trim(),
-                slug: slugInput.value.trim() || slugify(nameInput.value),
-                description: form.querySelector("#service-description").value.trim(),
-                status: form.querySelector("#service-status").checked ? 1 : 0,
-            };
+            const validName = validateField(nameInput, nameError, MAX_NAME_LEN, "Tên dịch vụ");
+            const validSlug = validateField(slugInput, slugError, MAX_SLUG_LEN, "Slug");
+            const validDesc = validateDescField();
 
-            if (!payload.name || !payload.slug) {
-                errorEl.textContent = "Tên và slug là bắt buộc.";
-                errorEl.classList.remove("d-none");
+            if (!validName || !validSlug || !validDesc) {
                 return;
             }
 
-            let attempt = 1;
-            while (true) {
-                try {
-                    const token = localStorage.getItem("token") || "";
-                    const res = await fetch("/api/services", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: token ? "Bearer " + token : "",
-                        },
-                        body: JSON.stringify(payload),
-                    });
+            let payload = {
+                name: nameInput.value.trim(),
+                slug: slugInput.value.trim() || slugify(nameInput.value),
+                description: descInput.value.trim(),
+                status: form.querySelector("#service-status").checked ? 1 : 0,
+            };
 
-                    const data = await res.json().catch(() => null);
-                    if (res.ok && data && data.success) {
-                        bootstrap.Modal.getInstance(addServiceModal)?.hide();
-                        await loadServices();
-                        return;
+            try {
+                const token = localStorage.getItem("token") || "";
+                const res = await fetch("/api/services", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: token ? "Bearer " + token : "",
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await res.json().catch(() => null);
+                if (res.ok && data && data.success) {
+                    bootstrap.Modal.getInstance(addServiceModal)?.hide();
+                    await loadServices();
+                    const successModal = document.getElementById("successServiceModal");
+                    const successMsg = document.getElementById("successServiceModalMessage");
+                    if (successModal && successMsg) {
+                        successMsg.textContent = `Thêm dịch vụ "${nameInput.value.trim()}" thành công!`;
+                        bootstrap.Modal.getOrCreateInstance(successModal).show();
                     }
-
-                    const message = (data && data.message) || "Tạo dịch vụ thất bại.";
-                    if (isDuplicateSlugError(message) && !slugEdited) {
-                        attempt += 1;
-                        payload.slug = buildSlugCandidate(baseSlug, attempt);
-                        slugInput.value = payload.slug;
-                        continue;
-                    }
-
-                    throw new Error(getFriendlyErrorMessage(message));
-                } catch (err) {
-                    console.error(err);
-                    errorEl.textContent = err.message || "Lỗi khi tạo dịch vụ.";
-                    errorEl.classList.remove("d-none");
                     return;
                 }
+
+                const message = (data && data.message) || "Tạo dịch vụ thất bại.";
+                throw new Error(getFriendlyErrorMessage(message));
+            } catch (err) {
+                console.error(err);
+                errorEl.textContent = err.message || "Lỗi khi tạo dịch vụ.";
+                errorEl.classList.remove("d-none");
+                return;
             }
         });
     }
@@ -330,6 +400,12 @@ window.initAdminServicePage = async function () {
 
                     bootstrap.Modal.getInstance(editServiceModal)?.hide();
                     await loadServices();
+                    const successModal = document.getElementById("successServiceModal");
+                    const successMsg = document.getElementById("successServiceModalMessage");
+                    if (successModal && successMsg) {
+                        successMsg.textContent = `Cập nhật dịch vụ thành công!`;
+                        bootstrap.Modal.getOrCreateInstance(successModal).show();
+                    }
                 } catch (err) {
                     console.error(err);
                     errorEl.textContent = err.message || "Lỗi khi cập nhật dịch vụ.";

@@ -38,6 +38,7 @@ exports.register = async (req, res) => {
             });
         }
 
+
         // Tạo user mới
         const userId = await User.create({
             fullname,

@@ -6,17 +6,19 @@
     const phone = document.getElementById("phone");
     const email = document.getElementById("email");
     const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirmPassword");
 
     const fullnameError = document.getElementById("fullnameError");
     const phoneError = document.getElementById("phoneError");
     const emailError = document.getElementById("emailError");
     const passwordError = document.getElementById("passwordError");
+    const confirmPasswordError = document.getElementById("confirmPasswordError");
 
     const toggleBtn = document.getElementById("togglePwd");
     const API_URL = "http://localhost:3000/api";
 
     // Nếu thiếu element quan trọng → thoát
-    if (!form || !message || !toggleBtn || !fullname || !phone || !email || !password || !API_URL) {
+    if (!form || !message || !toggleBtn || !fullname || !phone || !email || !password || !confirmPassword || !API_URL) {
         return;
     }
 
@@ -42,6 +44,7 @@
                     phone: phone.value.trim(),
                     email: email.value.trim(),
                     password: password.value.trim(),
+                    confirmPassword: confirmPassword.value.trim(),
                 }),
             });
 
@@ -101,9 +104,19 @@
         clearError(phone, phoneError);
         clearError(email, emailError);
         clearError(password, passwordError);
+        clearError(confirmPassword, confirmPasswordError);
 
         if (!fullname.value.trim()) {
             setError(fullname, fullnameError, "Vui lòng nhập họ và tên");
+            isValid = false;
+        } else if (fullname.value.trim().length < 3) {
+            setError(fullname, fullnameError, "Họ và tên phải có ít nhất 3 ký tự");
+            isValid = false;
+        } else if (fullname.value.trim().length > 50) {
+            setError(fullname, fullnameError, "Họ và tên không được vượt quá 50 ký tự");
+            isValid = false;
+        } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(fullname.value.trim())) {
+            setError(fullname, fullnameError, "Họ và tên chỉ được chứa chữ cái và khoảng trắng");
             isValid = false;
         }
 
@@ -121,16 +134,33 @@
         if (!email.value.trim()) {
             setError(email, emailError, "Vui lòng nhập email");
             isValid = false;
+        } else if (email.value.trim().length < 6) {
+            setError(email, emailError, "Email phải có ít nhất 6 ký tự");
+            isValid = false;
+        } else if (email.value.trim().length > 100) {
+            setError(email, emailError, "Email không được vượt quá 100 ký tự");
+            isValid = false;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
             setError(email, emailError, "Email chưa đúng định dạng");
             isValid = false;
-        }
+        } 
 
         if (!password.value.trim()) {
             setError(password, passwordError, "Vui lòng nhập mật khẩu");
             isValid = false;
         } else if (password.value.trim().length < 6) {
             setError(password, passwordError, "Mật khẩu phải có ít nhất 6 ký tự");
+            isValid = false;
+        } else if (password.value.trim().length > 20) {
+            setError(password, passwordError, "Mật khẩu không được vượt quá 20 ký tự");
+            isValid = false;
+        }
+
+        if (!confirmPassword.value.trim()) {
+            setError(confirmPassword, confirmPasswordError, "Vui lòng xác nhận mật khẩu");
+            isValid = false;
+        } else if (confirmPassword.value.trim() !== password.value.trim()) {
+            setError(confirmPassword, confirmPasswordError, "Mật khẩu xác nhận không khớp");
             isValid = false;
         }
 
@@ -160,6 +190,12 @@
         const value = fullname.value.trim();
         if (!value) {
             setError(fullname, fullnameError, "Vui lòng nhập họ và tên");
+        } else if (value.length < 3) {
+            setError(fullname, fullnameError, "Họ và tên phải có ít nhất 3 ký tự");
+        } else if (value.length > 50) {
+            setError(fullname, fullnameError, "Họ và tên không được vượt quá 50 ký tự");
+        } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(value)) {
+            setError(fullname, fullnameError, "Họ và tên chỉ được chứa chữ cái và khoảng trắng");
         } else {
             clearError(fullname, fullnameError);
         }
@@ -182,6 +218,10 @@
         const value = email.value.trim();
         if (!value) {
             setError(email, emailError, "Vui lòng nhập email");
+        } else if (value.length < 6) {
+            setError(email, emailError, "Email phải có ít nhất 6 ký tự");
+        } else if (value.length > 100) {
+            setError(email, emailError, "Email không được vượt quá 100 ký tự");
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
             setError(email, emailError, "Email chưa đúng định dạng");
         } else {
@@ -195,8 +235,29 @@
             setError(password, passwordError, "Vui lòng nhập mật khẩu");
         } else if (value.length < 6) {
             setError(password, passwordError, "Mật khẩu phải có ít nhất 6 ký tự");
+        } else if (value.length > 20) {
+            setError(password, passwordError, "Mật khẩu không được vượt quá 20 ký tự");
         } else {
             clearError(password, passwordError);
+        }
+
+        if (confirmPassword.value.trim()) {
+            if (confirmPassword.value.trim() !== value) {
+                setError(confirmPassword, confirmPasswordError, "Mật khẩu xác nhận không khớp");
+            } else {
+                clearError(confirmPassword, confirmPasswordError);
+            }
+        }
+    });
+
+    confirmPassword.addEventListener("input", () => {
+        const value = confirmPassword.value.trim();
+        if (!value) {
+            setError(confirmPassword, confirmPasswordError, "Vui lòng xác nhận mật khẩu");
+        } else if (value !== password.value.trim()) {
+            setError(confirmPassword, confirmPasswordError, "Mật khẩu xác nhận không khớp");
+        } else {
+            clearError(confirmPassword, confirmPasswordError);
         }
     });
 })();

@@ -26,6 +26,19 @@ class Service {
         }
     }
 
+    // Lấy service theo name
+    static async getByName(name) {
+        try {
+            const [rows] = await db.query(
+                `SELECT * FROM services WHERE name = ?`,
+                [name]
+            );
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
+
     // Tạo service mới
     static async create(serviceData) {
         try {
