@@ -13,8 +13,8 @@ const CONFIG = {
   TIMEOUT: 15000,
 };
 
-const SCREENSHOT_DIR = path.join(__dirname, "..", "screenshots");
-const EXCEL_DIR = path.join(__dirname, "..", "excel");
+const SCREENSHOT_DIR = path.join(__dirname, "screenshots");
+const EXCEL_DIR = path.join(__dirname, "excel");
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));

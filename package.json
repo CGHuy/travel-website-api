@@ -5,9 +5,8 @@
     "scripts": {
         "dev": "cd backend && npx nodemon app.js",
         "start": "cd backend && node app.js",
-        "test:decision": "node test/puppeteer/runDecisionTable.js",
-        "test:bva": "node test/puppeteer/runBVA.js",
-        "test:all": "node test/puppeteer/runDecisionTable.js && node test/puppeteer/runBVA.js"
+        "HA:decision": "node test/HA/runDecisionTable.js",
+        "HA:bva": "node test/HA/runBVA.js"
     },
     "dependencies": {
         "xlsx": "^0.18.5",
