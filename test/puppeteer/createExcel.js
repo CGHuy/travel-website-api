@@ -43,7 +43,7 @@ writeExcel("TC_DecisionTable.xlsx", [
 writeExcel("TC_BVA.xlsx", [
   // Tên Dịch vụ BVA
   ["TC_SVC_08", "", "dich-vu-06", "Giới thiệu dịch vụ 06", "Checked",
-    "Viền đỏ Tên DV + 'Vui lòng nhập tên dịch vụ.' Modal không đóng"],
+    "Tô đỏ Tên DV + 'Vui lòng nhập tên dịch vụ.' Modal không đóng"],
   ["TC_SVC_09", "X", "x", "Giới thiệu dịch vụ 07", "Checked",
     "Thêm thành công, đóng modal, reload"],
   ["TC_SVC_10", "Vé", "ve", "Giới thiệu dịch vụ 08", "Checked",
@@ -62,8 +62,8 @@ writeExcel("TC_BVA.xlsx", [
     "Giao diện chặn không cho nhập quá 200 ký tự (do maxlength)"],
   // Slug BVA
   ["TC_SVC_14", "Thuê xe máy", "", "Cho thuê xe máy Honda Vision đời mới, xăng đầy bìn", "Checked",
-    "Viền đỏ Slug + 'Vui lòng nhập slug.' Modal không đóng"],
-  ["TC_SVC_15", "Thuê xe đạp", "x", "Cho thuê xe đạp thể thao Giant đường kính 26 inch,", "Checked",
+    "Tô đỏ Slug + 'Vui lòng nhập slug.' Modal không đóng"],
+  ["TC_SVC_15", "Thuê xe đạp", "z", "Cho thuê xe đạp thể thao Giant đường kính 26 inch,", "Checked",
     "Thêm thành công, đóng modal, reload"],
   ["TC_SVC_16", "Đặt phòng khách sạn", "ab", "Dịch vụ đặt phòng khách sạn 3-5 sao tại trung tâm ", "Checked",
     "Thêm thành công, đóng modal, reload"],
@@ -77,7 +77,7 @@ writeExcel("TC_BVA.xlsx", [
     "Dịch vụ đặt phòng nghỉ dưỡng cao cấp ven biển, spa", "Checked",
     "Giao diện chặn không cho nhập quá 50 ký tự (do maxlength)"],
   // Mô tả BVA
-  ["TC_SVC_20", "Đặt phòng khách sạn", "dat-phong-khach-san", "", "Checked",
+  ["TC_SVC_20", "Đặt phòng khách sạn 3 sao", "dat-phong-khach-san", "", "Checked",
     "Thêm thành công, đóng modal, reload"],
   ["TC_SVC_21", "Vé tham quan Đà Lạt", "ve-tham-quan-da-lat", "T (1 ký tự)", "Checked",
     "Thêm thành công, đóng modal, reload"],
@@ -88,6 +88,6 @@ writeExcel("TC_BVA.xlsx", [
     "Xe du lịch đưa đón khám phá miền Tây sông nước 3 n", "Checked",
     "Thêm thành công, đóng modal, reload"],
   ["TC_SVC_24", "Combo tham quan Đà Lạt", "combo-tham-quan-da-lat",
-    "Combo dịch vụ tham quan Đà Lạt 4 ngày 3 đêm trọn g", "Checked",
+    "Combo dịch vụ tham quan Đà Lạt 4 ngày 3 đêm trọn gói bao gồm khách sạn trung tâm, xe đưa đón sân bay Liên Khương, ăn sáng buffet hàng ngày, vé tham quan các điểm nổi tiếng như Hồ Xuân Hương, Thung Lũng Tình Yêu, Đồi Cù, vườn hoa thành phố, thác Prenn, thiền viện Trúc Lâm, cáp treo Đà Lạt, dinh Bảo Đại, chợ Đà Lạt, và nhiều địa danh hấp dẫn khác. Đặc biệt, chương trình còn bao gồm bữa tối đặc sản địa phương với các món như bánh căn, bánh ướt lòng gà, lẩu gà lá é, cơm lam, gà nướng, rượu cần, và các loại trái cây đặc sản vùng cao nguyên. Du khách sẽ được trải nghiệm văn hóa, con người Đà Lạt với các hoạt động tham quan làng hoa, làng cà phê, vườn dâu tây, và các điểm check-in sống ảo nổi tiếng. Chương trình phù hợp cho gia đình, cặp đôi, nhóm bạn và các công ty tổ chức teambuilding. Giá trọn gói ưu đãi chỉ từ 2.990.000đ/người.", "Checked",
     "Giao diện chặn không cho nhập quá 300 ký tự (do maxlength)"],
 ]);

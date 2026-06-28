@@ -106,20 +106,20 @@ window.initAdminServicePage = async function () {
             <form id="service-form" novalidate>
                 <div class="mb-3">
                     <label for="service-name" class="form-label">Tên Dịch vụ <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="service-name" name="name" value="${escapeHtml(name)}" maxlength="200" required />
+                    <input type="text" class="form-control" id="service-name" name="name" value="${escapeHtml(name)}" required />
                     <div class="invalid-feedback" id="service-name-error">Vui lòng nhập tên dịch vụ.</div>
                 </div>
 
                 <div class="mb-3">
                     <label for="service-slug" class="form-label">Slug <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="service-slug" name="slug" value="${escapeHtml(slug)}" maxlength="50" required />
+                    <input type="text" class="form-control" id="service-slug" name="slug" value="${escapeHtml(slug)}" required />
                     <div class="form-text">Tự sinh từ tên hoặc chỉnh tay.</div>
                     <div class="invalid-feedback" id="service-slug-error">Vui lòng nhập slug.</div>
                 </div>
 
                 <div class="mb-3">
                     <label for="service-description" class="form-label">Mô tả</label>
-                    <textarea class="form-control" id="service-description" name="description" rows="4" maxlength="300">${escapeHtml(description)}</textarea>
+                    <textarea class="form-control" id="service-description" name="description" rows="4">${escapeHtml(description)}</textarea>
                     <div class="invalid-feedback" id="service-description-error">Vui lòng nhập tối đa 300 ký tự.</div>
                 </div>
 
@@ -238,25 +238,30 @@ window.initAdminServicePage = async function () {
         const descInput = form.querySelector("#service-description");
         const descError = form.querySelector("#service-description-error");
 
+        function validateDescField() {
+            const val = descInput.value.trim();
+            if (val.length > MAX_DESC_LEN) {
+                descInput.classList.add("is-invalid");
+                descError.textContent = `Vui lòng nhập tối đa ${MAX_DESC_LEN} ký tự.`;
+                descError.classList.add("d-block");
+                descError.classList.remove("d-none");
+                return false;
+            }
+            descInput.classList.remove("is-invalid");
+            descError.classList.remove("d-block");
+            descError.classList.add("d-none");
+            return true;
+        }
+
+        descInput.addEventListener("input", validateDescField);
+        descInput.addEventListener("blur", validateDescField);
+
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
             errorEl.classList.add("d-none");
             const validName = validateField(nameInput, nameError, MAX_NAME_LEN, "Tên dịch vụ");
             const validSlug = validateField(slugInput, slugError, MAX_SLUG_LEN, "Slug");
-
-            let validDesc = true;
-            const descVal = descInput.value.trim();
-            if (descVal.length > MAX_DESC_LEN) {
-                descInput.classList.add("is-invalid");
-                descError.textContent = `Vui lòng nhập tối đa ${MAX_DESC_LEN} ký tự.`;
-                descError.classList.add("d-block");
-                descError.classList.remove("d-none");
-                validDesc = false;
-            } else {
-                descInput.classList.remove("is-invalid");
-                descError.classList.remove("d-block");
-                descError.classList.add("d-none");
-            }
+            const validDesc = validateDescField();
 
             if (!validName || !validSlug || !validDesc) {
                 return;
@@ -265,7 +270,7 @@ window.initAdminServicePage = async function () {
             let payload = {
                 name: nameInput.value.trim(),
                 slug: slugInput.value.trim() || slugify(nameInput.value),
-                description: descVal,
+                description: descInput.value.trim(),
                 status: form.querySelector("#service-status").checked ? 1 : 0,
             };
 

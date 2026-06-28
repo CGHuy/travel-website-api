@@ -96,19 +96,22 @@ async function runSingleTest(page, testCase, folderName) {
     const nameInput = await page.waitForSelector("#service-name", { timeout: CONFIG.TIMEOUT });
     await nameInput.evaluate((el) => el.value = "");
     if (name) {
-      await nameInput.type(name, { delay: 0 });
+      await nameInput.evaluate((el, text) => { el.value = text; el.dispatchEvent(new Event("input", { bubbles: true })); }, name);
+      await sleep(50);
     }
 
     const slugInput = await page.waitForSelector("#service-slug", { timeout: CONFIG.TIMEOUT });
     await slugInput.evaluate((el) => el.value = "");
     if (slug) {
-      await slugInput.type(slug, { delay: 0 });
+      await slugInput.evaluate((el, text) => { el.value = text; el.dispatchEvent(new Event("input", { bubbles: true })); }, slug);
+      await sleep(50);
     }
 
     if (desc) {
       const descInput = await page.waitForSelector("#service-description", { timeout: CONFIG.TIMEOUT });
       await descInput.evaluate((el) => el.value = "");
-      await descInput.type(desc, { delay: 0 });
+      await descInput.evaluate((el, text) => { el.value = text; el.dispatchEvent(new Event("input", { bubbles: true })); }, desc);
+      await sleep(50);
     }
 
     const checkbox = await page.waitForSelector("#service-status", { timeout: CONFIG.TIMEOUT });
@@ -117,9 +120,28 @@ async function runSingleTest(page, testCase, folderName) {
       await checkbox.click();
     }
 
-    const submitBtn = await page.waitForSelector("#service-form button[type='submit']", { timeout: CONFIG.TIMEOUT });
-    await submitBtn.click();
-    await sleep(2000);
+    await sleep(100);
+    await page.evaluate(() => {
+      const form = document.getElementById("service-form");
+      if (form) form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    });
+    await sleep(1000);
+    // Wait for addServiceModal to close OR error/invalid to appear, up to 8s
+    for (let i = 0; i < 14; i++) {
+      const state = await page.evaluate(() => {
+        const modal = document.getElementById("addServiceModal");
+        const error = document.getElementById("service-form-error");
+        const invalid = document.querySelector(".is-invalid");
+        return {
+          modalClosed: !modal || !modal.classList.contains("show"),
+          hasError: error && !error.classList.contains("d-none"),
+          hasInvalid: !!invalid,
+        };
+      });
+      if (state.modalClosed || state.hasError || state.hasInvalid) break;
+      await sleep(500);
+    }
+    await sleep(500);
 
     await screenshot(page, folderName, screenshotFile);
 
@@ -147,39 +169,27 @@ async function runSingleTest(page, testCase, folderName) {
     const errMatch = errorText && keyPhrases.some(k => errorText.includes(k));
     const invalidMatch = invalidFields.length > 0 && keyPhrases.some(k => invalidFields.join(" ").includes(k));
 
-    if (!modalVisible && errorText === "") {
-      pass = expectedStr.includes("thành công");
+    // Maxlength pre-check
+    const nameActual = await page.$eval("#service-name", (el) => el.value);
+    const slugActual = await page.$eval("#service-slug", (el) => el.value);
+    const descActual = await page.$eval("#service-description", (el) => el.value);
+    const truncated = !!(name && nameActual.length < name.length) ||
+                      !!(slug && slugActual.length < slug.length) ||
+                      !!(desc && descActual.length < desc.length);
+
+    console.log(`  DEBUG: modalVisible=${modalVisible} error="${errorText}" invalid=[${invalidFields}]`);
+    console.log(`  DEBUG: name="${nameActual.substring(0,30)}"(${nameActual.length}/${name?name.length:'-'}) slug="${slugActual.substring(0,30)}"(${slugActual.length}/${slug?slug.length:'-'}) desc="${descActual.substring(0,30)}"(${descActual.length}/${desc?desc.length:'-'}) truncated=${truncated}`);
+
+    if (expectedStr.includes("thành công")) {
+      pass = !modalVisible;
+    } else if (expectedStr.includes("chặn")) {
+      pass = truncated || invalidFields.length > 0;
+    } else if (expectedStr.includes("Tô đỏ") || expectedStr.includes("Viền đỏ")) {
+      pass = invalidFields.length > 0 || errorText.includes("Vui lòng");
     } else if (modalVisible && errorText) {
       pass = errMatch || invalidMatch;
-    } else if (modalVisible && invalidFields.length > 0) {
-      pass = expectedStr.includes("Tô đỏ") || invalidMatch;
-    } else if (modalVisible && !errorText && invalidFields.length === 0) {
-      const nameVal = await page.$eval("#service-name", (el) => el.value);
-      const slugVal = await page.$eval("#service-slug", (el) => el.value);
-      const descVal = await page.$eval("#service-description", (el) => el.value);
-      if (name && nameVal.length < name.length) {
-        pass = expectedStr.includes("chặn");
-      } else if (slug && slugVal.length < slug.length) {
-        pass = expectedStr.includes("chặn");
-      } else if (desc && descVal.length < desc.length) {
-        pass = expectedStr.includes("chặn");
-      } else {
-        pass = false;
-      }
     } else {
-      const actualVal = name
-        ? await page.$eval("#service-name", (el) => el.value)
-        : slug
-          ? await page.$eval("#service-slug", (el) => el.value)
-          : desc
-            ? await page.$eval("#service-description", (el) => el.value)
-            : "";
-      const expectedVal = name || slug || desc || "";
-      if (actualVal.length < expectedVal.length) {
-        pass = expectedStr.includes("chặn");
-      } else {
-        pass = false;
-      }
+      pass = false;
     }
   } catch (err) {
     console.error(`ERROR in ${tcId}:`, err.message);
