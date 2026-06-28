@@ -37,38 +37,59 @@
             </div>
             <div class="modal-body" style="padding: 24px">
                 <form id="addDepartureForm">
+                    <div id="addFormErrorSummary" class="alert alert-danger d-none" style="border-radius: 10px; padding: 12px 16px; font-size: 0.9rem; margin-bottom: 16px">
+                        <i class="fa-solid fa-circle-exclamation"></i> <span id="addFormErrorSummaryText"></span>
+                    </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="addTourId" class="form-label" style="font-weight: 500; font-size: 0.9rem">ID Tour *</label>
-                            <input type="number" class="form-control" id="addTourId" required style="border-radius: 10px; padding: 10px 16px" />
+                            <div class="tour-combobox" style="position: relative">
+                                <input type="text" class="form-control" id="addTourId" placeholder="Tìm ID Tour..." autocomplete="off" style="border-radius: 10px; padding: 10px 16px" />
+                                <div class="tour-dropdown" id="addTourDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 220px; overflow-y: auto; background: #fff; border: 1px solid #d1d5db; border-radius: 0 0 10px 10px; z-index: 1060; box-shadow: 0 8px 24px rgba(0,0,0,0.12)"></div>
+                            </div>
+                            <div class="invalid-feedback" id="addTourIdError"></div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="addDepartureDate" class="form-label" style="font-weight: 500; font-size: 0.9rem">Ngày Khởi Hành *</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="addDepartureDate" required placeholder="dd/MM/yyyy" style="border-radius: 10px 0 0 10px; padding: 10px 16px" />
+                                <input type="text" class="form-control" id="addDepartureDate" readonly required placeholder="dd/MM/yyyy" style="border-radius: 10px 0 0 10px; padding: 10px 16px; background-color: #fff; cursor: pointer" />
                                 <button type="button" class="btn btn-outline-secondary" id="openAddDepartureDatePicker" title="Chọn ngày" style="border-radius: 0 10px 10px 0; min-width: 48px">
                                     <i class="fa-regular fa-calendar-days"></i>
                                 </button>
                             </div>
                             <input type="date" id="addDepartureDatePicker" class="visually-hidden" tabindex="-1" aria-hidden="true" />
+                            <div class="invalid-feedback" id="addDepartureDateError"></div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="addDepartureLocation" class="form-label" style="font-weight: 500; font-size: 0.9rem">Địa điểm Khởi Hành *</label>
-                        <input type="text" class="form-control" id="addDepartureLocation" placeholder="Ví dụ: Sân bay Tân Sơn Nhất, TP.HCM" required style="border-radius: 10px; padding: 10px 16px" />
+                        <select class="form-select" id="addDepartureLocation" required style="border-radius: 10px; padding: 10px 16px">
+                            <option value="">-- Chọn địa điểm --</option>
+                            <option value="Hà Nội">Hà Nội</option>
+                            <option value="TP.HCM">TP.HCM</option>
+                            <option value="Đồng Hới">Đồng Hới</option>
+                            <option value="Nha Trang">Nha Trang</option>
+                            <option value="Huế">Huế</option>
+                            <option value="Hải Phòng">Hải Phòng</option>
+                            <option value="Đà Nẵng">Đà Nẵng</option>
+                        </select>
+                        <div class="invalid-feedback" id="addDepartureLocationError"></div>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="addPriceMoving" class="form-label" style="font-weight: 500; font-size: 0.9rem">Giá di chuyển *</label>
-                            <input type="number" class="form-control" id="addPriceMoving" required style="border-radius: 10px; padding: 10px 16px" />
+                            <input type="number" class="form-control" id="addPriceMoving" step="100000" min="0" max="5000000" required placeholder="0" style="border-radius: 10px; padding: 10px 16px" />
+                            <div class="invalid-feedback" id="addPriceMovingError"></div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="addPriceMovingChild" class="form-label" style="font-weight: 500; font-size: 0.9rem">Giá di chuyển (Trẻ em) *</label>
-                            <input type="number" class="form-control" id="addPriceMovingChild" required style="border-radius: 10px; padding: 10px 16px" />
+                            <input type="number" class="form-control" id="addPriceMovingChild" step="100000" min="0" max="5000000" required placeholder="0" style="border-radius: 10px; padding: 10px 16px" />
+                            <div class="invalid-feedback" id="addPriceMovingChildError"></div>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="addSeatsTotal" class="form-label" style="font-weight: 500; font-size: 0.9rem">Tổng số lượng chỗ *</label>
-                            <input type="number" class="form-control" id="addSeatsTotal" required style="border-radius: 10px; padding: 10px 16px" />
+                            <input type="number" class="form-control" id="addSeatsTotal" step="1" min="1" max="100" required placeholder="0" style="border-radius: 10px; padding: 10px 16px" />
+                            <div class="invalid-feedback" id="addSeatsTotalError"></div>
                         </div>
                     </div>
                 </form>
@@ -95,12 +116,15 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="editDepTourId" class="form-label" style="font-weight: 500; font-size: 0.9rem">ID Tour *</label>
-                            <input type="number" class="form-control" id="editDepTourId" required style="border-radius: 10px; padding: 10px 16px" />
+                            <div class="tour-combobox" style="position: relative">
+                                <input type="text" class="form-control" id="editDepTourId" placeholder="Tìm ID Tour..." autocomplete="off" style="border-radius: 10px; padding: 10px 16px" />
+                                <div class="tour-dropdown" id="editTourDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 220px; overflow-y: auto; background: #fff; border: 1px solid #d1d5db; border-radius: 0 0 10px 10px; z-index: 1060; box-shadow: 0 8px 24px rgba(0,0,0,0.12)"></div>
+                            </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="editDepDate" class="form-label" style="font-weight: 500; font-size: 0.9rem">Ngày Khởi Hành *</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="editDepDate" required placeholder="dd/MM/yyyy" style="border-radius: 10px 0 0 10px; padding: 10px 16px" />
+                                <input type="text" class="form-control" id="editDepDate" readonly required placeholder="dd/MM/yyyy" style="border-radius: 10px 0 0 10px; padding: 10px 16px; background-color: #fff; cursor: pointer" />
                                 <button type="button" class="btn btn-outline-secondary" id="openEditDepartureDatePicker" title="Chọn ngày" style="border-radius: 0 10px 10px 0; min-width: 48px">
                                     <i class="fa-regular fa-calendar-days"></i>
                                 </button>
@@ -110,20 +134,29 @@
                     </div>
                     <div class="mb-3">
                         <label for="editDepLocation" class="form-label" style="font-weight: 500; font-size: 0.9rem">Địa điểm Khởi Hành *</label>
-                        <input type="text" class="form-control" id="editDepLocation" required style="border-radius: 10px; padding: 10px 16px" />
+                        <select class="form-select" id="editDepLocation" required style="border-radius: 10px; padding: 10px 16px">
+                            <option value="">-- Chọn địa điểm --</option>
+                            <option value="Hà Nội">Hà Nội</option>
+                            <option value="TP.HCM">TP.HCM</option>
+                            <option value="Đồng Hới">Đồng Hới</option>
+                            <option value="Nha Trang">Nha Trang</option>
+                            <option value="Huế">Huế</option>
+                            <option value="Hải Phòng">Hải Phòng</option>
+                            <option value="Đà Nẵng">Đà Nẵng</option>
+                        </select>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="editDepPrice" class="form-label" style="font-weight: 500; font-size: 0.9rem">Giá di chuyển *</label>
-                            <input type="number" class="form-control" id="editDepPrice" required style="border-radius: 10px; padding: 10px 16px" />
+                            <input type="number" class="form-control" id="editDepPrice" step="100000" min="0" max="5000000" required placeholder="0" style="border-radius: 10px; padding: 10px 16px" />
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="editDepPriceChild" class="form-label" style="font-weight: 500; font-size: 0.9rem">Giá di chuyển (Trẻ em) *</label>
-                            <input type="number" class="form-control" id="editDepPriceChild" required style="border-radius: 10px; padding: 10px 16px" />
+                            <input type="number" class="form-control" id="editDepPriceChild" step="100000" min="0" max="5000000" required placeholder="0" style="border-radius: 10px; padding: 10px 16px" />
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="editDepSeatsTotal" class="form-label" style="font-weight: 500; font-size: 0.9rem">Tổng số lượng chỗ *</label>
-                            <input type="number" class="form-control" id="editDepSeatsTotal" required style="border-radius: 10px; padding: 10px 16px" />
+                            <input type="number" class="form-control" id="editDepSeatsTotal" step="1" min="1" max="100" required placeholder="0" style="border-radius: 10px; padding: 10px 16px" />
                         </div>
                     </div>
                     <div class="mb-3">
@@ -149,11 +182,11 @@
                 <input type="hidden" id="quickPriceId" />
                 <div class="mb-3">
                     <label style="font-size: 0.85rem; font-weight: 500">Giá người lớn</label>
-                    <input type="number" id="quickPriceAdult" class="form-control" style="border-radius: 8px" />
+                    <input type="number" id="quickPriceAdult" class="form-control" step="100000" min="0" max="5000000" style="border-radius: 8px; padding: 8px 12px" />
                 </div>
                 <div class="mb-4">
                     <label style="font-size: 0.85rem; font-weight: 500">Giá trẻ em</label>
-                    <input type="number" id="quickPriceChild" class="form-control" style="border-radius: 8px" />
+                    <input type="number" id="quickPriceChild" class="form-control" step="100000" min="0" max="5000000" style="border-radius: 8px; padding: 8px 12px" />
                 </div>
                 <div class="d-flex justify-content-end gap-2">
                     <button class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-size: 0.9rem">Hủy</button>

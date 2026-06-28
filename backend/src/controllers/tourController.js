@@ -36,6 +36,17 @@ exports.getAllTours = async (req, res) => {
     }
 };
 
+// Lấy danh sách tour đơn giản (id + name) cho dropdown
+exports.getTourSimpleList = async (req, res) => {
+    try {
+        const tours = await Tour.getAll();
+        const data = tours.map(t => ({ id: t.id, name: t.name }));
+        res.json({ success: true, data });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // Lấy tours theo region
 exports.getToursByRegion = async (req, res) => {
     try {

@@ -47,40 +47,48 @@ const validateCreateDeparture = (req, res, next) => {
 	const errors = {};
 
 	if (isEmptyString(tour_id)) {
-		errors.tour_id = "Tour ID không được để trống";
-	} else if (!isPositiveInteger(tour_id)) {
-		errors.tour_id = "Tour ID phải là số nguyên dương";
+		errors.tour_id = "Vui lòng chọn Tour";
+	} else if (!isNonNegativeInteger(tour_id)) {
+		errors.tour_id = "ID Tour không hợp lệ";
 	}
 
 	if (isEmptyString(departure_location)) {
-		errors.departure_location = "Địa điểm khởi hành không được để trống";
+		errors.departure_location = "Vui lòng chọn địa điểm khởi hành";
 	}
 
 	if (isEmptyString(departure_date)) {
-		errors.departure_date = "Ngày khởi hành không được để trống";
+		errors.departure_date = "Vui lòng chọn ngày khởi hành";
 	} else {
 		const date = new Date(departure_date);
 		if (Number.isNaN(date.getTime())) {
 			errors.departure_date = "Ngày khởi hành không hợp lệ";
+		} else {
+			const dateYmd = toYmd(departure_date);
+			const todayYmd = getTodayYmd();
+			if (dateYmd && dateYmd < todayYmd) {
+				errors.departure_date = "Ngày khởi hành không được trong quá khứ";
+			}
 		}
 	}
 
 	if (isEmptyString(price_moving)) {
-		errors.price_moving = "Giá vé người lớn không được để trống";
+		errors.price_moving = "Vui lòng nhập giá vé người lớn";
 	} else if (!isNonNegativeNumber(price_moving)) {
-		errors.price_moving = "Giá vé người lớn phải là số lớn hơn hoặc bằng 0";
+		errors.price_moving = "Nhập giá vé người lớn không hợp lệ, chỉ được nhập số";
 	}
 
 	if (isEmptyString(price_moving_child)) {
-		errors.price_moving_child = "Giá vé trẻ em không được để trống";
+		errors.price_moving_child = "Vui lòng nhập giá vé trẻ em";
 	} else if (!isNonNegativeNumber(price_moving_child)) {
-		errors.price_moving_child = "Giá vé trẻ em phải là số lớn hơn hoặc bằng 0";
+		errors.price_moving_child = "Nhập giá vé trẻ em không hợp lệ, chỉ được nhập số";
 	}
 
 	if (isEmptyString(seats_total)) {
-		errors.seats_total = "Tổng số chỗ không được để trống";
+		errors.seats_total = "Vui lòng nhập tổng số chỗ";
 	} else if (!isPositiveInteger(seats_total)) {
-		errors.seats_total = "Tổng số chỗ phải là số nguyên dương";
+		errors.seats_total = "Nhập tổng số chỗ không hợp lệ, chỉ được nhập số";
+	} else if (Number(seats_total) > 100) {
+		errors.seats_total = "Nhập tổng số chỗ không được vượt quá 100";
 	}
 
 	if (Object.keys(errors).length > 0) {
