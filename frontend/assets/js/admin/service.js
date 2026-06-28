@@ -284,6 +284,12 @@ window.initAdminServicePage = async function () {
                 if (res.ok && data && data.success) {
                     bootstrap.Modal.getInstance(addServiceModal)?.hide();
                     await loadServices();
+                    const successModal = document.getElementById("successServiceModal");
+                    const successMsg = document.getElementById("successServiceModalMessage");
+                    if (successModal && successMsg) {
+                        successMsg.textContent = `Thêm dịch vụ "${nameInput.value.trim()}" thành công!`;
+                        bootstrap.Modal.getOrCreateInstance(successModal).show();
+                    }
                     return;
                 }
 
@@ -389,6 +395,12 @@ window.initAdminServicePage = async function () {
 
                     bootstrap.Modal.getInstance(editServiceModal)?.hide();
                     await loadServices();
+                    const successModal = document.getElementById("successServiceModal");
+                    const successMsg = document.getElementById("successServiceModalMessage");
+                    if (successModal && successMsg) {
+                        successMsg.textContent = `Cập nhật dịch vụ thành công!`;
+                        bootstrap.Modal.getOrCreateInstance(successModal).show();
+                    }
                 } catch (err) {
                     console.error(err);
                     errorEl.textContent = err.message || "Lỗi khi cập nhật dịch vụ.";
