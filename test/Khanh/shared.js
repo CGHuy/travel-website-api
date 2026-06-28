@@ -105,7 +105,7 @@ function restoreDB() {
   const sqlFile = path.join(__dirname, "..", "..", "db_vietravel_KTPM.sql");
   if (!fs.existsSync(sqlFile)) { console.error(`Backup not found: ${sqlFile}`); return; }
   console.log("\nRestoring database from backup...");
-  execSync(`cmd.exe /c type "${sqlFile}" | "C:\\Program Files\\MySQL\\MySQL Server 9.6\\bin\\mysql.exe" -u root -proot123 db_viet_tour`, { stdio: "inherit", timeout: 60000 });
+  execSync(`cmd.exe /c type "${sqlFile}" | "C:\\Program Files\\MySQL\\MySQL Server 9.6\\bin\\mysql.exe" -u root -p12345 -P 3307 db_viet_tour`, { stdio: "inherit", timeout: 60000 });
   console.log("Database restored.");
 }
 
