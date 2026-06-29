@@ -43,7 +43,7 @@
         const value = email.value.trim();
         if (!value) return "Vui lòng nhập email";
         if (value.length < 6) return "Email phải có ít nhất 6 ký tự";
-        if (value.length > 100) return "Email không được vượt quá 50 ký tự";
+        if (value.length > 50) return "Email không được vượt quá 50 ký tự";
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Email chưa đúng định dạng";
         return "";
     };

@@ -20,21 +20,21 @@ exports.register = async (req, res) => {
     try {
         const { fullname, phone, email, password } = req.body;
 
-        // Kiểm tra email đã tồn tại chưa
-        const existingUser = await User.findByEmail(email);
-        if (existingUser) {
-            return res.status(409).json({
-                success: false,
-                message: "Email đã được sử dụng!",
-            });
-        }
-
         // Kiểm tra phone đã tồn tại chưa
         const existingPhone = await User.findByPhone(phone);
         if (existingPhone) {
             return res.status(409).json({
                 success: false,
                 message: "Số điện thoại đã được sử dụng!",
+            });
+        }
+
+        // Kiểm tra email đã tồn tại chưa
+        const existingUser = await User.findByEmail(email);
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: "Email đã được sử dụng!",
             });
         }
 

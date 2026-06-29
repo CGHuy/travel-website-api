@@ -7,8 +7,8 @@ const validateRegister = (req, res, next) => {
         errors.fullname = "Họ và tên không được để trống";
     } else if (fullname.length < 3) {
         errors.fullname = "Họ và tên phải có ít nhất 3 ký tự";
-    } else if (fullname.length > 50) {
-        errors.fullname = "Họ và tên không được vượt quá 50 ký tự";
+    } else if (fullname.length > 20) {
+        errors.fullname = "Họ và tên không được vượt quá 20 ký tự";
     } else {
         const fullnameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
         if (!fullnameRegex.test(fullname.trim())) {
@@ -26,8 +26,8 @@ const validateRegister = (req, res, next) => {
         errors.email = "Email không được để trống";
     } else if (email.length < 6) {
         errors.email = "Email phải có ít nhất 6 ký tự";
-    } else if (email.length > 100) {
-        errors.email = "Email không được vượt quá 100 ký tự";
+    } else if (email.length > 50) {
+        errors.email = "Email không được vượt quá 50 ký tự";
     } else {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email.trim())) {

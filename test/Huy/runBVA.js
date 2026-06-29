@@ -1,3 +1,3 @@
 const { runAllTests } = require("./shared");
 
-runAllTests("TC_BVA.xlsx", "BVA");
+runAllTests("TC_Register_BVA.xlsx", "BVA");
