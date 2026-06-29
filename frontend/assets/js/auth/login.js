@@ -51,7 +51,7 @@
 
                 setTimeout(() => {
                     const urlParams = new URLSearchParams(window.location.search);
-                    const redirectUrl = urlParams.get('redirect');
+                    const redirectUrl = urlParams.get("redirect");
                     if (redirectUrl) {
                         window.location.href = redirectUrl;
                     } else {
@@ -117,24 +117,4 @@
             error.classList.remove("d-none");
         }
     };
-
-    // Check input real-time
-
-    username.addEventListener("input", () => {
-        const value = username.value.trim();
-        if (!value) {
-            setError(username, usernameError, "Vui lòng nhập tên đăng nhập");
-        } else {
-            clearError(username, usernameError);
-        }
-    });
-
-    password.addEventListener("input", () => {
-        const value = password.value.trim();
-        if (!value) {
-            setError(password, passwordError, "Vui lòng nhập mật khẩu");
-        } else {
-            clearError(password, passwordError);
-        }
-    });
 })();

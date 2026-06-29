@@ -22,6 +22,92 @@
         return;
     }
 
+    const validateFullname = () => {
+        const value = fullname.value.trim();
+        if (!value) return "Vui lòng nhập họ và tên";
+        if (value.length < 3) return "Họ và tên phải có ít nhất 3 ký tự";
+        if (value.length > 20) return "Họ và tên không được vượt quá 20 ký tự";
+        if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(value)) return "Họ và tên chỉ được chứa chữ cái và khoảng trắng";
+        return "";
+    };
+
+    const validatePhone = () => {
+        const value = phone.value.trim();
+        if (!value) return "Vui lòng nhập số điện thoại";
+        if (!/^0/.test(value)) return "Số điện thoại bắt đầu bằng 0";
+        if (!/^0\d{9}$/.test(value)) return "Số điện thoại phải có đúng 10 chữ số";
+        return "";
+    };
+
+    const validateEmail = () => {
+        const value = email.value.trim();
+        if (!value) return "Vui lòng nhập email";
+        if (value.length < 6) return "Email phải có ít nhất 6 ký tự";
+        if (value.length > 100) return "Email không được vượt quá 50 ký tự";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Email chưa đúng định dạng";
+        return "";
+    };
+
+    const validatePassword = () => {
+        const value = password.value.trim();
+        if (!value) return "Vui lòng nhập mật khẩu";
+        if (value.length < 6) return "Mật khẩu phải có ít nhất 6 ký tự";
+        if (value.length > 20) return "Mật khẩu không được vượt quá 20 ký tự";
+        return "";
+    };
+
+    const validateConfirmPassword = () => {
+        const value = confirmPassword.value.trim();
+        if (!value) return "Vui lòng xác nhận mật khẩu";
+        if (value !== password.value.trim()) return "Mật khẩu xác nhận không khớp";
+        return "";
+    };
+
+    const validateField = (field) => {
+        let errorText = "";
+        let errorEl = null;
+
+        if (field === fullname) {
+            errorText = validateFullname();
+            errorEl = fullnameError;
+        } else if (field === phone) {
+            errorText = validatePhone();
+            errorEl = phoneError;
+        } else if (field === email) {
+            errorText = validateEmail();
+            errorEl = emailError;
+        } else if (field === password) {
+            errorText = validatePassword();
+            errorEl = passwordError;
+        } else if (field === confirmPassword) {
+            errorText = validateConfirmPassword();
+            errorEl = confirmPasswordError;
+        }
+
+        if (!errorEl) return true;
+
+        if (errorText) {
+            setError(field, errorEl, errorText);
+            return false;
+        }
+
+        clearError(field, errorEl);
+        return true;
+    };
+
+    [fullname, phone, email, password, confirmPassword].forEach((field) => {
+        field.addEventListener("input", () => {
+            validateField(field);
+            if (field === password && confirmPassword.value.trim()) {
+                validateField(confirmPassword);
+            }
+        });
+
+        field.addEventListener("blur", () => {
+            validateField(field);
+        });
+    });
+
     // Xử lý submit form
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -96,75 +182,14 @@
         toggleBtn.textContent = isHidden ? "Ẩn" : "Hiện";
     });
 
-    // Kiểm tra dữ liệu form
     const validateForm = () => {
-        let isValid = true;
+        const isFullnameValid = validateField(fullname);
+        const isPhoneValid = validateField(phone);
+        const isEmailValid = validateField(email);
+        const isPasswordValid = validateField(password);
+        const isConfirmPasswordValid = validateField(confirmPassword);
 
-        clearError(fullname, fullnameError);
-        clearError(phone, phoneError);
-        clearError(email, emailError);
-        clearError(password, passwordError);
-        clearError(confirmPassword, confirmPasswordError);
-
-        if (!fullname.value.trim()) {
-            setError(fullname, fullnameError, "Vui lòng nhập họ và tên");
-            isValid = false;
-        } else if (fullname.value.trim().length < 3) {
-            setError(fullname, fullnameError, "Họ và tên phải có ít nhất 3 ký tự");
-            isValid = false;
-        } else if (fullname.value.trim().length > 50) {
-            setError(fullname, fullnameError, "Họ và tên không được vượt quá 50 ký tự");
-            isValid = false;
-        } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(fullname.value.trim())) {
-            setError(fullname, fullnameError, "Họ và tên chỉ được chứa chữ cái và khoảng trắng");
-            isValid = false;
-        }
-
-        if (!phone.value.trim()) {
-            setError(phone, phoneError, "Vui lòng nhập số điện thoại");
-            isValid = false;
-        } else if (!/^0/.test(phone.value.trim())) {
-            setError(phone, phoneError, "Số điện thoại bắt đầu bằng 0");
-            isValid = false;
-        } else if (!/^0\d{9}$/.test(phone.value.trim())) {
-            setError(phone, phoneError, "Số điện thoại phải có đúng 10 chữ số");
-            isValid = false;
-        }
-
-        if (!email.value.trim()) {
-            setError(email, emailError, "Vui lòng nhập email");
-            isValid = false;
-        } else if (email.value.trim().length < 6) {
-            setError(email, emailError, "Email phải có ít nhất 6 ký tự");
-            isValid = false;
-        } else if (email.value.trim().length > 100) {
-            setError(email, emailError, "Email không được vượt quá 100 ký tự");
-            isValid = false;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-            setError(email, emailError, "Email chưa đúng định dạng");
-            isValid = false;
-        } 
-
-        if (!password.value.trim()) {
-            setError(password, passwordError, "Vui lòng nhập mật khẩu");
-            isValid = false;
-        } else if (password.value.trim().length < 6) {
-            setError(password, passwordError, "Mật khẩu phải có ít nhất 6 ký tự");
-            isValid = false;
-        } else if (password.value.trim().length > 20) {
-            setError(password, passwordError, "Mật khẩu không được vượt quá 20 ký tự");
-            isValid = false;
-        }
-
-        if (!confirmPassword.value.trim()) {
-            setError(confirmPassword, confirmPasswordError, "Vui lòng xác nhận mật khẩu");
-            isValid = false;
-        } else if (confirmPassword.value.trim() !== password.value.trim()) {
-            setError(confirmPassword, confirmPasswordError, "Mật khẩu xác nhận không khớp");
-            isValid = false;
-        }
-
-        return isValid;
+        return isFullnameValid && isPhoneValid && isEmailValid && isPasswordValid && isConfirmPasswordValid;
     };
 
     const setError = (input, error, text) => {
@@ -178,86 +203,13 @@
     const clearError = (input, error) => {
         if (input) input.classList.remove("is-invalid");
         if (error) {
-            input.classList.add("is-valid");
+            if (input && input.value.trim()) {
+                input.classList.add("is-valid");
+            } else if (input) {
+                input.classList.remove("is-valid");
+            }
             error.textContent = "";
             error.classList.add("d-none");
         }
     };
-
-    // Check input real-time
-
-    fullname.addEventListener("input", () => {
-        const value = fullname.value.trim();
-        if (!value) {
-            setError(fullname, fullnameError, "Vui lòng nhập họ và tên");
-        } else if (value.length < 3) {
-            setError(fullname, fullnameError, "Họ và tên phải có ít nhất 3 ký tự");
-        } else if (value.length > 50) {
-            setError(fullname, fullnameError, "Họ và tên không được vượt quá 50 ký tự");
-        } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(value)) {
-            setError(fullname, fullnameError, "Họ và tên chỉ được chứa chữ cái và khoảng trắng");
-        } else {
-            clearError(fullname, fullnameError);
-        }
-    });
-
-    phone.addEventListener("input", () => {
-        const value = phone.value.trim();
-        if (!value) {
-            setError(phone, phoneError, "Vui lòng nhập số điện thoại");
-        } else if (!/^0/.test(value)) {
-            setError(phone, phoneError, "Số điện thoại phải bắt đầu bằng 0");
-        } else if (!/^0\d{9}$/.test(value)) {
-            setError(phone, phoneError, "Số điện thoại phải có đúng 10 chữ số");
-        } else {
-            clearError(phone, phoneError);
-        }
-    });
-
-    email.addEventListener("input", () => {
-        const value = email.value.trim();
-        if (!value) {
-            setError(email, emailError, "Vui lòng nhập email");
-        } else if (value.length < 6) {
-            setError(email, emailError, "Email phải có ít nhất 6 ký tự");
-        } else if (value.length > 100) {
-            setError(email, emailError, "Email không được vượt quá 100 ký tự");
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            setError(email, emailError, "Email chưa đúng định dạng");
-        } else {
-            clearError(email, emailError);
-        }
-    });
-
-    password.addEventListener("input", () => {
-        const value = password.value.trim();
-        if (!value) {
-            setError(password, passwordError, "Vui lòng nhập mật khẩu");
-        } else if (value.length < 6) {
-            setError(password, passwordError, "Mật khẩu phải có ít nhất 6 ký tự");
-        } else if (value.length > 20) {
-            setError(password, passwordError, "Mật khẩu không được vượt quá 20 ký tự");
-        } else {
-            clearError(password, passwordError);
-        }
-
-        if (confirmPassword.value.trim()) {
-            if (confirmPassword.value.trim() !== value) {
-                setError(confirmPassword, confirmPasswordError, "Mật khẩu xác nhận không khớp");
-            } else {
-                clearError(confirmPassword, confirmPasswordError);
-            }
-        }
-    });
-
-    confirmPassword.addEventListener("input", () => {
-        const value = confirmPassword.value.trim();
-        if (!value) {
-            setError(confirmPassword, confirmPasswordError, "Vui lòng xác nhận mật khẩu");
-        } else if (value !== password.value.trim()) {
-            setError(confirmPassword, confirmPasswordError, "Mật khẩu xác nhận không khớp");
-        } else {
-            clearError(confirmPassword, confirmPasswordError);
-        }
-    });
 })();
