@@ -187,7 +187,7 @@ async function runAllTests(filename, folderName) {
   console.log(`\n========== Running: ${filename} (${testCases.length} test cases) ==========`);
   restoreDB();
 
-  const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = await puppeteer.launch({ headless: false, args: ["--no-sandbox", "--disable-setuid-sandbox"] });
   const page = await browser.newPage();
   page.setDefaultTimeout(TIMEOUT);
   page.setViewport({ width: 1366, height: 768 });

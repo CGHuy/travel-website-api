@@ -35,322 +35,389 @@ window.initAdminDeparturePage = async function () {
 
 	loadTours();
 
-    function clearAddFormErrors() {
-        document.querySelectorAll("#addDepartureForm .invalid-feedback").forEach(el => { el.textContent = ""; el.style.display = "none"; });
-        document.querySelectorAll("#addDepartureForm .is-invalid").forEach(el => el.classList.remove("is-invalid"));
-        const summary = document.getElementById("addFormErrorSummary");
-        if (summary) { summary.style.display = "none"; summary.innerHTML = ""; }
-    }
+	function clearAddFormErrors() {
+		document
+			.querySelectorAll("#addDepartureForm .invalid-feedback")
+			.forEach((el) => {
+				el.textContent = "";
+				el.style.display = "none";
+			});
+		document
+			.querySelectorAll("#addDepartureForm .is-invalid")
+			.forEach((el) => el.classList.remove("is-invalid"));
+		const summary = document.getElementById("addFormErrorSummary");
+		if (summary) {
+			summary.style.display = "none";
+			summary.innerHTML = "";
+		}
+	}
 
-    function setAddFieldError(fieldId, errorMsg) {
-        const input = document.getElementById(fieldId);
-        const errorEl = document.getElementById(fieldId + "Error");
-        if (input) input.classList.add("is-invalid");
-        if (errorEl) { errorEl.textContent = errorMsg; errorEl.style.display = "block"; }
-    }
+	function setAddFieldError(fieldId, errorMsg) {
+		const input = document.getElementById(fieldId);
+		const errorEl = document.getElementById(fieldId + "Error");
+		if (input) input.classList.add("is-invalid");
+		if (errorEl) {
+			errorEl.textContent = errorMsg;
+			errorEl.style.display = "block";
+		}
+	}
 
-    // === Searchable dropdown cho ID Tour ===
-    async function loadTours() {
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) return;
-            const res = await fetch("/api/tours/list-all", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const data = await res.json();
-            toursCache = (data.data || data || []).map(t => ({ id: t.id, name: t.name }));
-            setupTourCombobox("addTourId", "addTourDropdown");
-            setupTourCombobox("editDepTourId", "editTourDropdown");
-        } catch (e) {
-            console.error("Lỗi tải danh sách tour:", e);
-        }
-    }
+	// === Searchable dropdown cho ID Tour ===
+	async function loadTours() {
+		try {
+			const token = localStorage.getItem("token");
+			if (!token) return;
+			const res = await fetch("/api/tours/list-all", {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			const data = await res.json();
+			toursCache = (data.data || data || []).map((t) => ({
+				id: t.id,
+				name: t.name,
+			}));
+			setupTourCombobox("addTourId", "addTourDropdown");
+			setupTourCombobox("editDepTourId", "editTourDropdown");
+		} catch (e) {
+			console.error("Lỗi tải danh sách tour:", e);
+		}
+	}
 
-    function setupTourCombobox(inputId, dropdownId) {
-        const input = document.getElementById(inputId);
-        const dropdown = document.getElementById(dropdownId);
-        if (!input || !dropdown) return;
+	function setupTourCombobox(inputId, dropdownId) {
+		const input = document.getElementById(inputId);
+		const dropdown = document.getElementById(dropdownId);
+		if (!input || !dropdown) return;
 
-        function render(filter) {
-            const filtered = toursCache.filter(t =>
-                !filter ||
-                String(t.id).includes(filter) ||
-                t.name.toLowerCase().includes(filter.toLowerCase())
-            );
-            dropdown.innerHTML = "";
-            if (filtered.length === 0) {
-                dropdown.innerHTML = '<div class="tour-no-result">Không tìm thấy tour</div>';
-                return;
-            }
-            filtered.forEach(t => {
-                const div = document.createElement("div");
-                div.className = "tour-option";
-                div.innerHTML = `<span class="tour-opt-id">${t.id}</span>${t.name}`;
-                div.addEventListener("mousedown", function (e) {
-                    e.preventDefault();
-                    input.dataset.tourId = t.id;
-                    input.value = t.id + " - " + t.name;
-                    dropdown.style.display = "none";
-                    input.classList.remove("is-invalid");
-                    const errorEl = document.getElementById(input.id + "Error");
-                    if (errorEl) { errorEl.textContent = ""; errorEl.style.display = "none"; }
-                    input.focus();
-                });
-                dropdown.appendChild(div);
-            });
-        }
+		function render(filter) {
+			const filtered = toursCache.filter(
+				(t) =>
+					!filter ||
+					String(t.id).includes(filter) ||
+					t.name.toLowerCase().includes(filter.toLowerCase()),
+			);
+			dropdown.innerHTML = "";
+			if (filtered.length === 0) {
+				dropdown.innerHTML =
+					'<div class="tour-no-result">Không tìm thấy tour</div>';
+				return;
+			}
+			filtered.forEach((t) => {
+				const div = document.createElement("div");
+				div.className = "tour-option";
+				div.innerHTML = `<span class="tour-opt-id">${t.id}</span>${t.name}`;
+				div.addEventListener("mousedown", function (e) {
+					e.preventDefault();
+					input.dataset.tourId = t.id;
+					input.value = t.id + " - " + t.name;
+					dropdown.style.display = "none";
+					input.classList.remove("is-invalid");
+					const errorEl = document.getElementById(input.id + "Error");
+					if (errorEl) {
+						errorEl.textContent = "";
+						errorEl.style.display = "none";
+					}
+					input.focus();
+				});
+				dropdown.appendChild(div);
+			});
+		}
 
-        input.addEventListener("focus", function () {
-            render(this.value);
-            dropdown.style.display = "block";
-        });
+		input.addEventListener("focus", function () {
+			render(this.value);
+			dropdown.style.display = "block";
+		});
 
-        input.addEventListener("input", function () {
-            if (!this.dataset.tourId || !dropdown.style.display || dropdown.style.display === "none") {
-                this.dataset.tourId = "";
-            }
-            render(this.value);
-            dropdown.style.display = "block";
-        });
+		input.addEventListener("input", function () {
+			if (
+				!this.dataset.tourId ||
+				!dropdown.style.display ||
+				dropdown.style.display === "none"
+			) {
+				this.dataset.tourId = "";
+			}
+			render(this.value);
+			dropdown.style.display = "block";
+		});
 
-        input.addEventListener("blur", function () {
-            setTimeout(() => { dropdown.style.display = "none"; }, 200);
-        });
+		input.addEventListener("blur", function () {
+			setTimeout(() => {
+				dropdown.style.display = "none";
+			}, 200);
+		});
 
-        input.addEventListener("keydown", function (e) {
-            const items = dropdown.querySelectorAll(".tour-option");
-            let active = dropdown.querySelector(".tour-option.active");
-            let idx = -1;
-            if (active) idx = Array.from(items).indexOf(active);
-            if (e.key === "ArrowDown") {
-                e.preventDefault();
-                idx = Math.min(idx + 1, items.length - 1);
-            } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                idx = Math.max(idx - 1, 0);
-            } else if (e.key === "Enter" && active) {
-                e.preventDefault();
-                active.click();
-                return;
-            }
-            if (idx >= 0 && items[idx]) {
-                items.forEach(el => el.classList.remove("active"));
-                items[idx].classList.add("active");
-                items[idx].scrollIntoView({ block: "nearest" });
-            }
-        });
+		input.addEventListener("keydown", function (e) {
+			const items = dropdown.querySelectorAll(".tour-option");
+			let active = dropdown.querySelector(".tour-option.active");
+			let idx = -1;
+			if (active) idx = Array.from(items).indexOf(active);
+			if (e.key === "ArrowDown") {
+				e.preventDefault();
+				idx = Math.min(idx + 1, items.length - 1);
+			} else if (e.key === "ArrowUp") {
+				e.preventDefault();
+				idx = Math.max(idx - 1, 0);
+			} else if (e.key === "Enter" && active) {
+				e.preventDefault();
+				active.click();
+				return;
+			}
+			if (idx >= 0 && items[idx]) {
+				items.forEach((el) => el.classList.remove("active"));
+				items[idx].classList.add("active");
+				items[idx].scrollIntoView({ block: "nearest" });
+			}
+		});
 
-        // Đóng khi click ra ngoài
-        document.addEventListener("click", function (e) {
-            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = "none";
-            }
-        });
-    }
+		// Đóng khi click ra ngoài
+		document.addEventListener("click", function (e) {
+			if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+				dropdown.style.display = "none";
+			}
+		});
+	}
 
-    const fieldLabels = {
-        tour_id: "ID Tour",
-        departure_date: "Ngày khởi hành",
-        departure_location: "Địa điểm khởi hành",
-        price_moving: "Giá vé người lớn",
-        price_moving_child: "Giá vé trẻ em",
-        seats_total: "Tổng số chỗ",
-    };
+	const fieldLabels = {
+		tour_id: "ID Tour",
+		departure_date: "Ngày khởi hành",
+		departure_location: "Địa điểm khởi hành",
+		price_moving: "Giá vé người lớn",
+		price_moving_child: "Giá vé trẻ em",
+		seats_total: "Tổng số chỗ",
+	};
 
-    const fieldIds = {
-        tour_id: "addTourId",
-        departure_date: "addDepartureDate",
-        departure_location: "addDepartureLocation",
-        price_moving: "addPriceMoving",
-        price_moving_child: "addPriceMovingChild",
-        seats_total: "addSeatsTotal",
-    };
+	const fieldIds = {
+		tour_id: "addTourId",
+		departure_date: "addDepartureDate",
+		departure_location: "addDepartureLocation",
+		price_moving: "addPriceMoving",
+		price_moving_child: "addPriceMovingChild",
+		seats_total: "addSeatsTotal",
+	};
 
-    function validateField(fieldKey) {
-        const id = fieldIds[fieldKey];
-        const input = document.getElementById(id);
-        const errorEl = document.getElementById(id + "Error");
-        let value = input.value;
-        let error = "";
+	function validateField(fieldKey) {
+		const id = fieldIds[fieldKey];
+		const input = document.getElementById(id);
+		const errorEl = document.getElementById(id + "Error");
+		let value = input.value;
+		let error = "";
 
-        // Phát hiện nhập sai ký tự: sanitized=1 khi trình duyệt/strip xoá ký tự lạ
-        const invalidInput = input.dataset.sanitized === "1";
+		// Phát hiện nhập sai ký tự: sanitized=1 khi trình duyệt/strip xoá ký tự lạ
+		const invalidInput = input.dataset.sanitized === "1";
 
-        if (fieldKey === "tour_id") {
-            if (!input.dataset.tourId && document.activeElement !== input) {
-                error = "Vui lòng chọn Tour";
-            }
-        } else if (fieldKey === "departure_date") {
-            if (!value || value.trim() === "") error = "Vui lòng chọn ngày khởi hành";
-            else if (!parseDisplayDateToYmd(value)) error = "Ngày khởi hành không hợp lệ";
-            else if (parseDisplayDateToYmd(value) < getTodayYmd()) error = "Ngày khởi hành không được trong quá khứ";
-        } else if (fieldKey === "departure_location") {
-            if (!value) error = "Vui lòng chọn địa điểm khởi hành";
-        } else if (fieldKey === "price_moving") {
-            if (!value) {
-                error = invalidInput ? "Nhập giá vé người lớn không hợp lệ, chỉ được nhập số" : "Vui lòng nhập giá vé người lớn";
-            } else if (!/^\d+$/.test(value)) {
-                error = "Nhập giá vé người lớn không hợp lệ, chỉ được nhập số";
-            } else if (Number(value) > 5000000) {
-                error = "Nhập giá vé người lớn không được vượt quá 5.000.000";
-            }
-        } else if (fieldKey === "price_moving_child") {
-            if (!value) {
-                error = invalidInput ? "Nhập giá vé trẻ em không hợp lệ, chỉ được nhập số" : "Vui lòng nhập giá vé trẻ em";
-            } else if (!/^\d+$/.test(value)) {
-                error = "Nhập giá vé trẻ em không hợp lệ, chỉ được nhập số";
-            } else if (Number(value) > 5000000) {
-                error = "Nhập giá vé trẻ em không được vượt quá 5.000.000";
-            }
-        } else if (fieldKey === "seats_total") {
-            if (!value) {
-                error = invalidInput ? "Nhập tổng số chỗ không hợp lệ, chỉ được nhập số" : "Vui lòng nhập tổng số chỗ";
-            } else if (!/^\d+$/.test(value)) {
-                error = "Nhập tổng số chỗ không hợp lệ, chỉ được nhập số";
-            } else if (Number(value) > 100) {
-                error = "Nhập tổng số chỗ không được vượt quá 100";
-            } else if (Number(value) < 1) {
-                error = "Tổng số chỗ phải lớn hơn 0";
-            }
-        }
+		if (fieldKey === "tour_id") {
+			if (!input.dataset.tourId && document.activeElement !== input) {
+				error = "Vui lòng chọn Tour";
+			}
+		} else if (fieldKey === "departure_date") {
+			if (!value || value.trim() === "") error = "Vui lòng chọn ngày khởi hành";
+			else if (!parseDisplayDateToYmd(value))
+				error = "Ngày khởi hành không hợp lệ";
+			else if (parseDisplayDateToYmd(value) < getTodayYmd())
+				error = "Ngày khởi hành không được trong quá khứ";
+		} else if (fieldKey === "departure_location") {
+			if (!value) error = "Vui lòng chọn địa điểm khởi hành";
+		} else if (fieldKey === "price_moving") {
+			if (!value) {
+				error = invalidInput
+					? "Nhập giá vé người lớn không hợp lệ, chỉ được nhập số"
+					: "Vui lòng nhập giá vé người lớn";
+			} else if (!/^\d+$/.test(value)) {
+				error = "Nhập giá vé người lớn không hợp lệ, chỉ được nhập số";
+			} else if (Number(value) > 5000000) {
+				error = "Nhập giá vé người lớn không được vượt quá 5.000.000";
+			}
+		} else if (fieldKey === "price_moving_child") {
+			if (!value) {
+				error = invalidInput
+					? "Nhập giá vé trẻ em không hợp lệ, chỉ được nhập số"
+					: "Vui lòng nhập giá vé trẻ em";
+			} else if (!/^\d+$/.test(value)) {
+				error = "Nhập giá vé trẻ em không hợp lệ, chỉ được nhập số";
+			} else if (Number(value) > 5000000) {
+				error = "Nhập giá vé trẻ em không được vượt quá 5.000.000";
+			}
+		} else if (fieldKey === "seats_total") {
+			if (!value) {
+				error = invalidInput
+					? "Nhập tổng số chỗ không hợp lệ, chỉ được nhập số"
+					: "Vui lòng nhập tổng số chỗ";
+			} else if (!/^\d+$/.test(value)) {
+				error = "Nhập tổng số chỗ không hợp lệ, chỉ được nhập số";
+			} else if (Number(value) > 100) {
+				error = "Nhập tổng số chỗ không được vượt quá 100";
+			} else if (Number(value) < 1) {
+				error = "Tổng số chỗ phải lớn hơn 0";
+			}
+		}
 
-        if (error) {
-            if (input) input.classList.add("is-invalid");
-            if (errorEl) { errorEl.textContent = error; errorEl.style.display = "block"; }
-        } else {
-            if (input) input.classList.remove("is-invalid");
-            if (errorEl) { errorEl.textContent = ""; errorEl.style.display = "none"; }
-        }
-        return error;
-    }
+		if (error) {
+			if (input) input.classList.add("is-invalid");
+			if (errorEl) {
+				errorEl.textContent = error;
+				errorEl.style.display = "block";
+			}
+		} else {
+			if (input) input.classList.remove("is-invalid");
+			if (errorEl) {
+				errorEl.textContent = "";
+				errorEl.style.display = "none";
+			}
+		}
+		return error;
+	}
 
-    // Gán validate real-time cho từng trường
-    for (const [key, id] of Object.entries(fieldIds)) {
-        const input = document.getElementById(id);
-        if (!input) continue;
-        const eventType = input.tagName === "SELECT" ? "change" : "input";
-        input.addEventListener(eventType, () => validateField(key));
-        input.addEventListener("blur", () => validateField(key));
+	// Gán validate real-time cho từng trường
+	for (const [key, id] of Object.entries(fieldIds)) {
+		const input = document.getElementById(id);
+		if (!input) continue;
+		const eventType = input.tagName === "SELECT" ? "change" : "input";
+		input.addEventListener(eventType, () => validateField(key));
+		input.addEventListener("blur", () => validateField(key));
 
-        // Phát hiện nhập ký tự lạ trên type=number
-        if (input.type === "number") {
-            input.addEventListener("input", function () {
-                if (this.validity.badInput) {
-                    this.dataset.sanitized = "1";
-                    validateField(key);
-                } else if (this.value) {
-                    this.dataset.sanitized = "";
-                }
-            });
-        }
-    }
+		// Phát hiện nhập ký tự lạ trên type=number
+		if (input.type === "number") {
+			input.addEventListener("input", function () {
+				if (this.validity.badInput) {
+					this.dataset.sanitized = "1";
+					validateField(key);
+				} else if (this.value) {
+					this.dataset.sanitized = "";
+				}
+			});
+		}
+	}
 
-    function validateAddForm() {
-        clearAddFormErrors();
-        const errors = {};
+	function validateAddForm() {
+		clearAddFormErrors();
+		const errors = {};
 
-        for (const key of Object.keys(fieldIds)) {
-            const err = validateField(key);
-            if (err) errors[key] = err;
-        }
+		for (const key of Object.keys(fieldIds)) {
+			const err = validateField(key);
+			if (err) errors[key] = err;
+		}
 
-        return { valid: Object.keys(errors).length === 0, errors };
-    }
+		return { valid: Object.keys(errors).length === 0, errors };
+	}
 
-    document.getElementById("saveAddDepartureBtn")?.addEventListener("click", async () => {
-        const validation = validateAddForm();
-        if (!validation.valid) {
-            const count = Object.keys(validation.errors).length;
-            showToast(`Có ${count} trường bị lỗi. Vui lòng kiểm tra lại!`, "warning");
-            return;
-        }
+	document
+		.getElementById("saveAddDepartureBtn")
+		?.addEventListener("click", async () => {
+			const validation = validateAddForm();
+			if (!validation.valid) {
+				const count = Object.keys(validation.errors).length;
+				showToast(
+					`Có ${count} trường bị lỗi. Vui lòng kiểm tra lại!`,
+					"warning",
+				);
+				return;
+			}
 
-        const rawDate = document.getElementById("addDepartureDate").value;
-        const departure_date = parseDisplayDateToYmd(rawDate);
-        const departure_location = document.getElementById("addDepartureLocation").value.trim();
-        const tour_id = document.getElementById("addTourId").dataset.tourId || "";
-        const price_moving = getRawNumber(document.getElementById("addPriceMoving").value);
-        const price_moving_child = getRawNumber(document.getElementById("addPriceMovingChild").value);
-        const seats_total = document.getElementById("addSeatsTotal").value;
+			const rawDate = document.getElementById("addDepartureDate").value;
+			const departure_date = parseDisplayDateToYmd(rawDate);
+			const departure_location = document
+				.getElementById("addDepartureLocation")
+				.value.trim();
+			const tour_id = document.getElementById("addTourId").dataset.tourId || "";
+			const price_moving = getRawNumber(
+				document.getElementById("addPriceMoving").value,
+			);
+			const price_moving_child = getRawNumber(
+				document.getElementById("addPriceMovingChild").value,
+			);
+			const seats_total = document.getElementById("addSeatsTotal").value;
 
-        document.getElementById("addDepartureDate").value = formatDateForDisplay(departure_date);
-        const addDatePicker = document.getElementById("addDepartureDatePicker");
-        if (addDatePicker) {
-            addDatePicker.value = departure_date;
-        }
+			document.getElementById("addDepartureDate").value =
+				formatDateForDisplay(departure_date);
+			const addDatePicker = document.getElementById("addDepartureDatePicker");
+			if (addDatePicker) {
+				addDatePicker.value = departure_date;
+			}
 
-        const payload = {
-            tour_id: Number(tour_id),
-            departure_date: departure_date,
-            departure_location: departure_location,
-            price_moving: price_moving,
-            price_moving_child: price_moving_child,
-            seats_total: Number(seats_total),
-        };
+			const payload = {
+				tour_id: Number(tour_id),
+				departure_date: departure_date,
+				departure_location: departure_location,
+				price_moving: price_moving,
+				price_moving_child: price_moving_child,
+				seats_total: Number(seats_total),
+			};
 
-        const token = localStorage.getItem("token");
-        if (!token) return;
+			const token = localStorage.getItem("token");
+			if (!token) return;
 
-        try {
-            const response = await fetch("/api/departures", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(payload),
-            });
+			try {
+				const response = await fetch("/api/departures", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify(payload),
+				});
 
-            const result = await response.json();
-            if (result.success) {
-                showToast("Thêm điểm khởi hành thành công!", "success");
-                addDepartureModal.hide();
-                document.getElementById("addDepartureForm").reset();
-                clearAddFormErrors();
+				const result = await response.json();
+				if (result.success) {
+					showToast("Thêm điểm khởi hành thành công!", "success");
+					addDepartureModal.hide();
+					document.getElementById("addDepartureForm").reset();
+					clearAddFormErrors();
 
-                const createdDeparture = normalizeDeparture(result.data);
-                const currentQuery = searchInput.value.trim();
-                if (currentQuery) {
-                    await doSearchDeparture(currentQuery);
-                } else {
-                    currentDeparturesList = [createdDeparture, ...currentDeparturesList];
-                    renderDepartures(currentDeparturesList);
-                }
-            } else {
-                const serverErrors = result.errors;
-                if (serverErrors && typeof serverErrors === "object") {
-                    for (const [key, fieldId] of Object.entries(fieldIds)) {
-                        if (serverErrors[key]) {
-                            setAddFieldError(fieldId, serverErrors[key]);
-                        }
-                    }
-                    const count = Object.keys(serverErrors).length;
-                    showToast(`Máy chủ báo ${count} lỗi. Vui lòng kiểm tra lại!`, "warning");
-                } else {
-                    showToast(result.message || "Có lỗi xảy ra khi thêm mới.", "danger");
-                }
-            }
-        } catch (error) {
-            console.error("Lỗi khi thêm mới:", error);
-            showToast("Lỗi kết nối tới máy chủ.", "danger");
-        }
-    });
+					const createdDeparture = normalizeDeparture(result.data);
+					const currentQuery = searchInput.value.trim();
+					if (currentQuery) {
+						await doSearchDeparture(currentQuery);
+					} else {
+						currentDeparturesList = [
+							createdDeparture,
+							...currentDeparturesList,
+						];
+						renderDepartures(currentDeparturesList);
+					}
+				} else {
+					const serverErrors = result.errors;
+					if (serverErrors && typeof serverErrors === "object") {
+						for (const [key, fieldId] of Object.entries(fieldIds)) {
+							if (serverErrors[key]) {
+								setAddFieldError(fieldId, serverErrors[key]);
+							}
+						}
+						const count = Object.keys(serverErrors).length;
+						showToast(
+							`Máy chủ báo ${count} lỗi. Vui lòng kiểm tra lại!`,
+							"warning",
+						);
+					} else {
+						showToast(
+							result.message || "Có lỗi xảy ra khi thêm mới.",
+							"danger",
+						);
+					}
+				}
+			} catch (error) {
+				console.error("Lỗi khi thêm mới:", error);
+				showToast("Lỗi kết nối tới máy chủ.", "danger");
+			}
+		});
 
-    // Xoá lỗi toàn bộ + reset tour combobox khi đóng modal
-    document.getElementById("addDepartureModal")?.addEventListener("hidden.bs.modal", () => {
-        clearAddFormErrors();
-        const tourInput = document.getElementById("addTourId");
-        if (tourInput) { tourInput.value = ""; tourInput.dataset.tourId = ""; }
-    });
+	// Xoá lỗi toàn bộ + reset tour combobox khi đóng modal
+	document
+		.getElementById("addDepartureModal")
+		?.addEventListener("hidden.bs.modal", () => {
+			clearAddFormErrors();
+			const tourInput = document.getElementById("addTourId");
+			if (tourInput) {
+				tourInput.value = "";
+				tourInput.dataset.tourId = "";
+			}
+		});
 
-    // === Hỗ trợ xử lý số từ input ===
-    function getRawNumber(str) {
-        return Number(String(str).replace(/\./g, ""));
-    }
+	// === Hỗ trợ xử lý số từ input ===
+	function getRawNumber(str) {
+		return Number(String(str).replace(/\./g, ""));
+	}
 
-    function formatPrice(num) {
-        return num.toLocaleString("vi-VN");
-    }
+	function formatPrice(num) {
+		return num.toLocaleString("vi-VN");
+	}
 
 	// Hàm format currency
 	function formatCurrency(amount) {
@@ -389,155 +456,172 @@ window.initAdminDeparturePage = async function () {
 		return `${y}-${m}-${d}`;
 	}
 
-    function formatDateForDisplay(dateStr) {
-        const ymd = formatDateForInput(dateStr);
-        if (!ymd) return "";
-        const [year, month, day] = ymd.split("-");
-        return `${day}/${month}/${year}`;
-    }
+	function formatDateForDisplay(dateStr) {
+		const ymd = formatDateForInput(dateStr);
+		if (!ymd) return "";
+		const [year, month, day] = ymd.split("-");
+		return `${day}/${month}/${year}`;
+	}
 
-    function parseDisplayDateToYmd(displayDate) {
-        if (!displayDate) return "";
-        const value = displayDate.trim();
+	function parseDisplayDateToYmd(displayDate) {
+		if (!displayDate) return "";
+		const value = displayDate.trim();
 
-        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            return value;
-        }
+		if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+			return value;
+		}
 
-        let day;
-        let month;
-        let year;
+		let day;
+		let month;
+		let year;
 
-        if (/^\d{8}$/.test(value)) {
-            day = value.slice(0, 2);
-            month = value.slice(2, 4);
-            year = value.slice(4, 8);
-        } else {
-            const match = value.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
-            if (!match) return "";
-            day = match[1].padStart(2, "0");
-            month = match[2].padStart(2, "0");
-            year = match[3];
-        }
+		if (/^\d{8}$/.test(value)) {
+			day = value.slice(0, 2);
+			month = value.slice(2, 4);
+			year = value.slice(4, 8);
+		} else {
+			const match = value.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+			if (!match) return "";
+			day = match[1].padStart(2, "0");
+			month = match[2].padStart(2, "0");
+			year = match[3];
+		}
 
-        const dayNum = Number(day);
-        const monthNum = Number(month);
-        const yearNum = Number(year);
-        if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) return "";
+		const dayNum = Number(day);
+		const monthNum = Number(month);
+		const yearNum = Number(year);
+		if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) return "";
 
-        const normalized = `${year}-${month}-${day}`;
-        const parsed = new Date(`${normalized}T00:00:00`);
+		const normalized = `${year}-${month}-${day}`;
+		const parsed = new Date(`${normalized}T00:00:00`);
 
-        if (Number.isNaN(parsed.getTime())) return "";
-        if (parsed.getFullYear() !== yearNum || parsed.getMonth() + 1 !== monthNum || parsed.getDate() !== dayNum) return "";
-        return normalized;
-    }
+		if (Number.isNaN(parsed.getTime())) return "";
+		if (
+			parsed.getFullYear() !== yearNum ||
+			parsed.getMonth() + 1 !== monthNum ||
+			parsed.getDate() !== dayNum
+		)
+			return "";
+		return normalized;
+	}
 
-    function normalizeDisplayDateValue(displayDate) {
-        const ymd = parseDisplayDateToYmd(displayDate);
-        return ymd ? formatDateForDisplay(ymd) : "";
-    }
+	function normalizeDisplayDateValue(displayDate) {
+		const ymd = parseDisplayDateToYmd(displayDate);
+		return ymd ? formatDateForDisplay(ymd) : "";
+	}
 
-    function bindDateField({ textInputId, pickerInputId, openButtonId }) {
-        const textInput = document.getElementById(textInputId);
-        const pickerInput = document.getElementById(pickerInputId);
-        const openButton = document.getElementById(openButtonId);
+	function bindDateField({ textInputId, pickerInputId, openButtonId }) {
+		const textInput = document.getElementById(textInputId);
+		const pickerInput = document.getElementById(pickerInputId);
+		const openButton = document.getElementById(openButtonId);
 
-        if (!textInput) return;
+		if (!textInput) return;
 
-        textInput.addEventListener("blur", () => {
-            const normalized = normalizeDisplayDateValue(textInput.value);
-            if (!normalized) return;
+		textInput.addEventListener("blur", () => {
+			const normalized = normalizeDisplayDateValue(textInput.value);
+			if (!normalized) return;
 
-            textInput.value = normalized;
-            if (pickerInput) {
-                pickerInput.value = parseDisplayDateToYmd(normalized);
-            }
-        });
+			textInput.value = normalized;
+			if (pickerInput) {
+				pickerInput.value = parseDisplayDateToYmd(normalized);
+			}
+		});
 
-        if (pickerInput) {
-            pickerInput.setAttribute("min", getTodayYmd());
+		if (pickerInput) {
+			pickerInput.setAttribute("min", getTodayYmd());
 
-            pickerInput.addEventListener("change", () => {
-                const pickerDate = pickerInput.value;
-                if (pickerDate < getTodayYmd()) {
-                    textInput.value = "";
-                    pickerInput.value = "";
-                    const fieldKey = Object.keys(fieldIds).find(k => fieldIds[k] === textInputId);
-                    if (fieldKey) validateField(fieldKey);
-                    return;
-                }
-                textInput.value = formatDateForDisplay(pickerInput.value);
-                const fieldKey = Object.keys(fieldIds).find(k => fieldIds[k] === textInputId);
-                if (fieldKey) validateField(fieldKey);
-            });
-        }
+			pickerInput.addEventListener("change", () => {
+				const pickerDate = pickerInput.value;
+				if (pickerDate < getTodayYmd()) {
+					textInput.value = "";
+					pickerInput.value = "";
+					const fieldKey = Object.keys(fieldIds).find(
+						(k) => fieldIds[k] === textInputId,
+					);
+					if (fieldKey) validateField(fieldKey);
+					return;
+				}
+				textInput.value = formatDateForDisplay(pickerInput.value);
+				const fieldKey = Object.keys(fieldIds).find(
+					(k) => fieldIds[k] === textInputId,
+				);
+				if (fieldKey) validateField(fieldKey);
+			});
+		}
 
-        if (openButton && pickerInput) {
-            openButton.addEventListener("click", () => {
-                const currentYmd = parseDisplayDateToYmd(textInput.value);
-                if (currentYmd) pickerInput.value = currentYmd;
+		if (openButton && pickerInput) {
+			openButton.addEventListener("click", () => {
+				const currentYmd = parseDisplayDateToYmd(textInput.value);
+				if (currentYmd) pickerInput.value = currentYmd;
 
-                if (typeof pickerInput.showPicker === "function") {
-                    pickerInput.showPicker();
-                } else {
-                    pickerInput.focus();
-                    pickerInput.click();
-                }
-            });
-        }
-    }
+				if (typeof pickerInput.showPicker === "function") {
+					pickerInput.showPicker();
+				} else {
+					pickerInput.focus();
+					pickerInput.click();
+				}
+			});
+		}
+	}
 
-    bindDateField({
-        textInputId: "addDepartureDate",
-        pickerInputId: "addDepartureDatePicker",
-        openButtonId: "openAddDepartureDatePicker",
-    });
+	bindDateField({
+		textInputId: "addDepartureDate",
+		pickerInputId: "addDepartureDatePicker",
+		openButtonId: "openAddDepartureDatePicker",
+	});
 
-    bindDateField({
-        textInputId: "editDepDate",
-        pickerInputId: "editDepDatePicker",
-        openButtonId: "openEditDepartureDatePicker",
-    });
+	bindDateField({
+		textInputId: "editDepDate",
+		pickerInputId: "editDepDatePicker",
+		openButtonId: "openEditDepartureDatePicker",
+	});
 
-    function getTodayYmd() {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, "0");
-        const d = String(now.getDate()).padStart(2, "0");
-        return `${y}-${m}-${d}`;
-    }
+	function getTodayYmd() {
+		const now = new Date();
+		const y = now.getFullYear();
+		const m = String(now.getMonth() + 1).padStart(2, "0");
+		const d = String(now.getDate()).padStart(2, "0");
+		return `${y}-${m}-${d}`;
+	}
 
-    function calculateDepartureStatus(departureDate, seatsAvailable, currentStatus) {
-        const depDate = formatDateForInput(departureDate);
-        const today = getTodayYmd();
-        const seats = Number(seatsAvailable);
+	function calculateDepartureStatus(
+		departureDate,
+		seatsAvailable,
+		currentStatus,
+	) {
+		const depDate = formatDateForInput(departureDate);
+		const today = getTodayYmd();
+		const seats = Number(seatsAvailable);
 
-        if (depDate && depDate < today) return "closed";
-        if (currentStatus === "closed") return "closed";
-        if (!Number.isNaN(seats) && seats <= 0) return "full";
-        return "open";
-    }
+		if (depDate && depDate < today) return "closed";
+		if (currentStatus === "closed") return "closed";
+		if (!Number.isNaN(seats) && seats <= 0) return "full";
+		return "open";
+	}
 
-    function normalizeDeparture(item) {
-        const currentStatus = String(item?.status ?? "open");
-        const depDate = item?.departure_date ?? item?.date ?? "";
-        const seatsAvail = item?.seats_available ?? item?.seatsAvailable ?? 0;
+	function normalizeDeparture(item) {
+		const currentStatus = String(item?.status ?? "open");
+		const depDate = item?.departure_date ?? item?.date ?? "";
+		const seatsAvail = item?.seats_available ?? item?.seatsAvailable ?? 0;
 
-        return {
-            id: Number(item?.id ?? item?.departure_id ?? 0),
-            tour_id: Number(item?.tour_id ?? item?.tourId ?? 0),
-            departure_location: String(item?.departure_location ?? item?.location ?? ""),
-            departure_date: depDate,
-            price_moving: Number(item?.price_moving ?? item?.priceMoving ?? 0),
-            price_moving_child: Number(item?.price_moving_child ?? item?.priceMovingChild ?? 0),
-            seats_total: Number(item?.seats_total ?? item?.seatsTotal ?? 0),
-            seats_available: Number(seatsAvail),
-            status: calculateDepartureStatus(depDate, seatsAvail, currentStatus),
-            created_at: item?.created_at,
-            updated_at: item?.updated_at,
-        };
-    }
+		return {
+			id: Number(item?.id ?? item?.departure_id ?? 0),
+			tour_id: Number(item?.tour_id ?? item?.tourId ?? 0),
+			departure_location: String(
+				item?.departure_location ?? item?.location ?? "",
+			),
+			departure_date: depDate,
+			price_moving: Number(item?.price_moving ?? item?.priceMoving ?? 0),
+			price_moving_child: Number(
+				item?.price_moving_child ?? item?.priceMovingChild ?? 0,
+			),
+			seats_total: Number(item?.seats_total ?? item?.seatsTotal ?? 0),
+			seats_available: Number(seatsAvail),
+			status: calculateDepartureStatus(depDate, seatsAvail, currentStatus),
+			created_at: item?.created_at,
+			updated_at: item?.updated_at,
+		};
+	}
 
 	function normalizeDepartureList(data) {
 		const list = Array.isArray(data) ? data : data ? [data] : [];
@@ -562,6 +646,7 @@ window.initAdminDeparturePage = async function () {
 
 			if (result.success) {
 				currentDeparturesList = normalizeDepartureList(result.data);
+				currentDeparturesList.sort((a, b) => b.id - a.id);
 				renderDepartures(currentDeparturesList);
 			} else {
 				departureList.innerHTML = `<div style="text-align: center; color: #dc2626;">Lỗi: ${result.message || "Không thể tải dữ liệu"}</div>`;
@@ -620,10 +705,10 @@ window.initAdminDeparturePage = async function () {
 					<div class="card-top">
 						<div class="card-title-area">
 							<div class="tour-name-group">
-                                <h3 class="tour-name">Tour ID: TOUR${dep.tour_id.toString().padStart(3, "0")}</h3>
+								<h3 class="departure-code-main">Mã DEP${dep.id.toString().padStart(3, "0")}</h3>
 								<span class="status-badge ${statusClass}" style="cursor:pointer;" onclick="window.quickEditStatus(${dep.id})" title="Nhấn để đổi trạng thái">${statusText}</span>
 							</div>
-							<span class="tour-code">Mã: DEP${dep.id.toString().padStart(3, "0")}</span>
+							<span class="tour-id-subtle">Tour ID: TOUR${dep.tour_id.toString().padStart(3, "0")}</span>
 						</div>
 						<div class="card-actions">
 							<button class="action-btn btn-edit" title="Sửa" onclick="window.openEditDepartureModal(${dep.id})"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -695,6 +780,7 @@ window.initAdminDeparturePage = async function () {
 
 			if (result.success) {
 				currentDeparturesList = normalizeDepartureList(result.data);
+				currentDeparturesList.sort((a, b) => b.id - a.id);
 				renderDepartures(currentDeparturesList);
 			} else {
 				departureList.innerHTML = `<div style="text-align: center; padding: 2rem; color: #6b7280;">Không tìm thấy điểm khởi hành nào khớp.</div>`;
@@ -727,7 +813,7 @@ window.initAdminDeparturePage = async function () {
 
 		document.getElementById("editDepId").value = dep.id;
 		const editTourInput = document.getElementById("editDepTourId");
-		const tour = toursCache.find(t => t.id === dep.tour_id);
+		const tour = toursCache.find((t) => t.id === dep.tour_id);
 		if (tour) {
 			editTourInput.dataset.tourId = tour.id;
 			editTourInput.value = tour.id + " - " + tour.name;
@@ -736,54 +822,77 @@ window.initAdminDeparturePage = async function () {
 			editTourInput.value = dep.tour_id;
 		}
 
-        // Hiển thị ngày theo định dạng dd/MM/yyyy trong modal sửa.
-        const formattedDate = formatDateForDisplay(dep.departure_date);
-        document.getElementById("editDepDate").value = formattedDate;
-        const editDatePicker = document.getElementById("editDepDatePicker");
-        if (editDatePicker) {
-            editDatePicker.value = formatDateForInput(dep.departure_date);
-        }
-        document.getElementById("editDepLocation").value = dep.departure_location;
-        document.getElementById("editDepPrice").value = dep.price_moving || "";
-        document.getElementById("editDepPriceChild").value = dep.price_moving_child || "";
-        document.getElementById("editDepSeatsTotal").value = dep.seats_total;
-        document.getElementById("editDepSeatsAvail").value = dep.seats_available;
+		// Hiển thị ngày theo định dạng dd/MM/yyyy trong modal sửa.
+		const formattedDate = formatDateForDisplay(dep.departure_date);
+		document.getElementById("editDepDate").value = formattedDate;
+		const editDatePicker = document.getElementById("editDepDatePicker");
+		if (editDatePicker) {
+			editDatePicker.value = formatDateForInput(dep.departure_date);
+		}
+		document.getElementById("editDepLocation").value = dep.departure_location;
+		document.getElementById("editDepPrice").value = dep.price_moving || "";
+		document.getElementById("editDepPriceChild").value =
+			dep.price_moving_child || "";
+		document.getElementById("editDepSeatsTotal").value = dep.seats_total;
+		document.getElementById("editDepSeatsAvail").value = dep.seats_available;
 
 		editDepartureModal.show();
 	};
 
-    document.getElementById("saveEditDepartureBtn")?.addEventListener("click", async () => {
-        const id = document.getElementById("editDepId").value;
-        const tourId = Number(document.getElementById("editDepTourId").dataset.tourId || 0);
-        const departureDateDisplay = document.getElementById("editDepDate").value;
-        const departureDate = parseDisplayDateToYmd(departureDateDisplay);
-        const departureLocation = document.getElementById("editDepLocation").value.trim();
-        const priceMoving = getRawNumber(document.getElementById("editDepPrice").value);
-        const priceMovingChild = getRawNumber(document.getElementById("editDepPriceChild").value);
-        const seatsTotal = Number(document.getElementById("editDepSeatsTotal").value);
-        const seatsAvailable = Number(document.getElementById("editDepSeatsAvail").value);
+	document
+		.getElementById("saveEditDepartureBtn")
+		?.addEventListener("click", async () => {
+			const id = document.getElementById("editDepId").value;
+			const tourId = Number(
+				document.getElementById("editDepTourId").dataset.tourId || 0,
+			);
+			const departureDateDisplay = document.getElementById("editDepDate").value;
+			const departureDate = parseDisplayDateToYmd(departureDateDisplay);
+			const departureLocation = document
+				.getElementById("editDepLocation")
+				.value.trim();
+			const priceMoving = getRawNumber(
+				document.getElementById("editDepPrice").value,
+			);
+			const priceMovingChild = getRawNumber(
+				document.getElementById("editDepPriceChild").value,
+			);
+			const seatsTotal = Number(
+				document.getElementById("editDepSeatsTotal").value,
+			);
+			const seatsAvailable = Number(
+				document.getElementById("editDepSeatsAvail").value,
+			);
 
-        if (!id || !tourId || !departureDateDisplay || !departureLocation) {
-            showToast("Vui lòng nhập đầy đủ thông tin bắt buộc.", "warning");
-            return;
-        }
-        if (!departureDate) {
-            showToast("Ngày khởi hành phải đúng định dạng dd/MM/yyyy.", "warning");
-            return;
-        }
-        document.getElementById("editDepDate").value = formatDateForDisplay(departureDate);
-        const editDatePicker = document.getElementById("editDepDatePicker");
-        if (editDatePicker) {
-            editDatePicker.value = departureDate;
-        }
-        if ([priceMoving, priceMovingChild, seatsTotal, seatsAvailable].some((value) => Number.isNaN(value) || value < 0)) {
-            showToast("Giá và số ghế phải là số hợp lệ, không âm.", "warning");
-            return;
-        }
-        if (seatsAvailable > seatsTotal) {
-            showToast("Số chỗ còn trống không được lớn hơn tổng số chỗ.", "warning");
-            return;
-        }
+			if (!id || !tourId || !departureDateDisplay || !departureLocation) {
+				showToast("Vui lòng nhập đầy đủ thông tin bắt buộc.", "warning");
+				return;
+			}
+			if (!departureDate) {
+				showToast("Ngày khởi hành phải đúng định dạng dd/MM/yyyy.", "warning");
+				return;
+			}
+			document.getElementById("editDepDate").value =
+				formatDateForDisplay(departureDate);
+			const editDatePicker = document.getElementById("editDepDatePicker");
+			if (editDatePicker) {
+				editDatePicker.value = departureDate;
+			}
+			if (
+				[priceMoving, priceMovingChild, seatsTotal, seatsAvailable].some(
+					(value) => Number.isNaN(value) || value < 0,
+				)
+			) {
+				showToast("Giá và số ghế phải là số hợp lệ, không âm.", "warning");
+				return;
+			}
+			if (seatsAvailable > seatsTotal) {
+				showToast(
+					"Số chỗ còn trống không được lớn hơn tổng số chỗ.",
+					"warning",
+				);
+				return;
+			}
 
 			const payload = {
 				tour_id: tourId,
@@ -878,7 +987,8 @@ window.initAdminDeparturePage = async function () {
 		if (!dep) return;
 		document.getElementById("quickPriceId").value = id;
 		document.getElementById("quickPriceAdult").value = dep.price_moving || "";
-		document.getElementById("quickPriceChild").value = dep.price_moving_child || "";
+		document.getElementById("quickPriceChild").value =
+			dep.price_moving_child || "";
 		quickPriceModal.show();
 	};
 
@@ -889,7 +999,10 @@ window.initAdminDeparturePage = async function () {
 		const depDate = formatDateForInput(dep.departure_date);
 		const today = getTodayYmd();
 		if (depDate && depDate < today) {
-			showToast("Không thể đổi trạng thái của điểm khởi hành đã qua ngày.", "warning");
+			showToast(
+				"Không thể đổi trạng thái của điểm khởi hành đã qua ngày.",
+				"warning",
+			);
 			return;
 		}
 
@@ -942,7 +1055,9 @@ window.initAdminDeparturePage = async function () {
 		?.addEventListener("click", () => {
 			const id = document.getElementById("quickPriceId").value;
 			const pm = getRawNumber(document.getElementById("quickPriceAdult").value);
-			const pmc = getRawNumber(document.getElementById("quickPriceChild").value);
+			const pmc = getRawNumber(
+				document.getElementById("quickPriceChild").value,
+			);
 			doQuickUpdate(
 				`/api/departures/${id}/price`,
 				{ price_moving: pm, price_moving_child: pmc },
