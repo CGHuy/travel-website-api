@@ -9,9 +9,9 @@
     const passwordError = document.getElementById("passwordError");
 
     const toggleBtn = document.getElementById("togglePwd");
-    const API_URL = "/api";
+    const API_URL = window.location.origin + "/api";
 
-    if (!form || !username || !password || !message || !toggleBtn || !API_URL) {
+    if (!form || !username || !password || !message || !toggleBtn) {
         return;
     }
 

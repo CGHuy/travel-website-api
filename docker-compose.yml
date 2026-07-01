@@ -1,5 +1,6 @@
 services:
   app:
+    build: .
     image: hoanganh191/viettravel:1.0
     container_name: viet-travel-api
     ports:
