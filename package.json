@@ -5,11 +5,9 @@
     "scripts": {
         "dev": "cd backend && npx nodemon app.js",
         "start": "cd backend && node app.js",
-        "HA:decision": "node test/HA/runDecisionTable.js",
-        "HA:bva": "node test/HA/runBVA.js",
-        "Khanh:decision": "node test/Khanh/runDecisionTable.js",
-        "Huy:dt": "node test/Huy/runDecisionTable.js",
-        "Huy:bva": "node test/Huy/runBVA.js"
+        "huy:dt": "node test/Huy/runDecisionTable.js",
+        "huy:bva": "node test/Huy/runBVA.js",
+        "huy:test": "node test/Huy/runTest.js"
     },
     "dependencies": {
         "puppeteer": "^25.2.1"
