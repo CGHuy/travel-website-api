@@ -72,7 +72,7 @@ exports.changePassword = async (req, res) => {
 		const userId = req.user.id;
 
 		// Các kiểm tra đầu vào (presence/confirm) được xử lý bởi middleware `validateChangePassword`.
-		const { currentPassword, newPassword } = req.body;
+		const { currentPassword, newPassword, confirmPassword } = req.body;
 
 		if (currentPassword === newPassword) {
 			return res.status(400).json({
