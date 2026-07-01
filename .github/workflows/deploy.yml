@@ -28,3 +28,10 @@ jobs:
           tags: |
             hoanganh191/viettravel:latest
             hoanganh191/viettravel:${{ github.sha }}
+
+      - name: Deploy - Restart container on Ubuntu
+        run: |
+          cd /root/vietravel
+          docker compose pull
+          docker compose up -d --force-recreate
+          docker image prune -f
