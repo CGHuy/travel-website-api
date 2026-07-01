@@ -1,5 +1,5 @@
 // Chi tiết booking của User
-const API_URL = "http://localhost:3000/api";
+const API_URL = "/api";
 
 document.addEventListener("DOMContentLoaded", async () => {
     // 1. Kiểm tra token

@@ -15,7 +15,7 @@
     const confirmPasswordError = document.getElementById("confirmPasswordError");
 
     const toggleBtn = document.getElementById("togglePwd");
-    const API_URL = "http://localhost:3000/api";
+    const API_URL = "/api";
 
     // Nếu thiếu element quan trọng → thoát
     if (!form || !message || !toggleBtn || !fullname || !phone || !email || !password || !confirmPassword || !API_URL) {

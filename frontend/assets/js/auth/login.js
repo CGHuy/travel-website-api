@@ -9,7 +9,7 @@
     const passwordError = document.getElementById("passwordError");
 
     const toggleBtn = document.getElementById("togglePwd");
-    const API_URL = "http://localhost:3000/api";
+    const API_URL = "/api";
 
     if (!form || !username || !password || !message || !toggleBtn || !API_URL) {
         return;

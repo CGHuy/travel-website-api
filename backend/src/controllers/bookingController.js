@@ -321,13 +321,12 @@ exports.createVNPayUrl = async (req, res) => {
 			vnp_TxnRef: txnRef,
 			vnp_OrderInfo: orderInfo,
 			vnp_OrderType: ProductCode.Other,
-			vnp_ReturnUrl: process.env.VNP_RETURN_URL,
+			vnp_ReturnUrl: `${process.env.APP_BASE_URL}/api/bookings/vnpay-return`,
 			vnp_Locale: VnpLocale.VN,
 			vnp_CreateDate: dateFormat(new Date()),
 			vnp_ExpireDate: dateFormat(expireDate),
 		});
 
-		// Tính tương thích: Bọc kết quả vào JSON có format chuẩn để Frontend nhận diện
 		const paymentUrl =
 			typeof vnpayResponse === "string"
 				? vnpayResponse
@@ -450,7 +449,7 @@ exports.createRefundUrl = async (req, res) => {
 			vnp_TxnRef: txnRef,
 			vnp_OrderInfo: orderInfo,
 			vnp_OrderType: ProductCode.Other,
-			vnp_ReturnUrl: process.env.VNP_RETURN_REFUND_URL,
+			vnp_ReturnUrl: `${process.env.APP_BASE_URL}/api/bookings/vnpay-refund`,
 			vnp_Locale: VnpLocale.VN,
 			vnp_CreateDate: dateFormat(new Date()),
 			vnp_ExpireDate: dateFormat(expireDate),

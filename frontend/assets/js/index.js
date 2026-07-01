@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api";
+const API_URL = "/api";
 
 // Load header và footer, sau đó load dữ liệu tour
 document.addEventListener("DOMContentLoaded", async () => {
