@@ -27,6 +27,7 @@ jobs:
           push: true
           tags: |
             hoanganh191/viettravel:latest
+            hoanganh191/viettravel:1.0
             hoanganh191/viettravel:${{ github.sha }}
 
       - name: Deploy - Restart container on Ubuntu

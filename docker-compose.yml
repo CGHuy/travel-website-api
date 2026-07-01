@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    image: hoanganh191/viettravel:1.0
+    image: hoanganh191/viettravel:latest
     container_name: viet-travel-api
     ports:
       - "3000:3000"
