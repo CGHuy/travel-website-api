@@ -7,6 +7,7 @@ const {
 	ProductCode,
 	VnpLocale,
 	dateFormat,
+	getDateInGMT7,
 } = require("vnpay");
 
 // Tạo booking mới
@@ -288,7 +289,7 @@ exports.createVNPayUrl = async (req, res) => {
 		});
 
 		// Thiết lập thời gian hết hạn thanh toán (30 phút)
-		const expireDate = new Date();
+		const expireDate = getDateInGMT7();
 		expireDate.setMinutes(expireDate.getMinutes() + 30);
 
 		// Hiển thị số tiền và Nội dung thanh toán (Tên Tour) tự động
@@ -323,7 +324,7 @@ exports.createVNPayUrl = async (req, res) => {
 			vnp_OrderType: ProductCode.Other,
 			vnp_ReturnUrl: `${process.env.APP_BASE_URL}/api/bookings/vnpay-return`,
 			vnp_Locale: VnpLocale.VN,
-			vnp_CreateDate: dateFormat(new Date()),
+			vnp_CreateDate: dateFormat(getDateInGMT7()),
 			vnp_ExpireDate: dateFormat(expireDate),
 		});
 
@@ -417,7 +418,7 @@ exports.createRefundUrl = async (req, res) => {
 		});
 
 		// Thiết lập thời gian hết hạn thanh toán (30 phút)
-		const expireDate = new Date();
+		const expireDate = getDateInGMT7();
 		expireDate.setMinutes(expireDate.getMinutes() + 30);
 
 		// Tự động tính toán số tiền hoàn lại dựa trên chính sách phí phạt (Backend Logic)
@@ -451,7 +452,7 @@ exports.createRefundUrl = async (req, res) => {
 			vnp_OrderType: ProductCode.Other,
 			vnp_ReturnUrl: `${process.env.APP_BASE_URL}/api/bookings/vnpay-refund`,
 			vnp_Locale: VnpLocale.VN,
-			vnp_CreateDate: dateFormat(new Date()),
+			vnp_CreateDate: dateFormat(getDateInGMT7()),
 			vnp_ExpireDate: dateFormat(expireDate),
 		});
 
