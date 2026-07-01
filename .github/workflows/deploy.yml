@@ -31,7 +31,7 @@ jobs:
 
       - name: Deploy - Restart container on Ubuntu
         run: |
-          cd /root/vietravel
+          cd /home/hoanganh/travel-website-api
           docker compose pull
           docker compose up -d --force-recreate
           docker image prune -f
